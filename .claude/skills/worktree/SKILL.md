@@ -40,5 +40,6 @@ git -C <main-repo-path> merge <branch-name>
 
 ```bash
 git -C <main-repo-path> worktree remove .worktrees/<name>
+rm -rf <main-repo-path>/.worktrees/<name>
 git -C <main-repo-path> branch -d <branch-name>
 ```
