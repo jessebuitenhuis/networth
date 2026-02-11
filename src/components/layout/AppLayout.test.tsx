@@ -1,8 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AccountProvider } from "@/context/AccountContext";
 import { AppLayout } from "./AppLayout";
 import type { NavGroup } from "./NavGroup";
+import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/models/Account";
 
 const testGroups: NavGroup[] = [
   {
@@ -14,12 +17,16 @@ const testGroups: NavGroup[] = [
 function renderWithProvider(navGroups: NavGroup[], children: React.ReactNode) {
   return render(
     <SidebarProvider>
-      <AppLayout navGroups={navGroups}>{children}</AppLayout>
+      <AccountProvider>
+        <AppLayout navGroups={navGroups}>{children}</AppLayout>
+      </AccountProvider>
     </SidebarProvider>
   );
 }
 
 describe("AppLayout", () => {
+  beforeEach(() => localStorage.clear());
+
   it("renders children in main content area", () => {
     renderWithProvider(testGroups, <p>Page content</p>);
 
@@ -40,5 +47,25 @@ describe("AppLayout", () => {
     expect(
       screen.getByRole("link", { name: "Dashboard" })
     ).toBeInTheDocument();
+  });
+
+  it("renders Accounts nav group when accounts exist", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
+      { id: "2", name: "Savings", type: AccountType.Asset, balance: 5000 },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    expect(await screen.findByText("Accounts")).toBeInTheDocument();
+    expect(screen.getByText("Checking")).toBeInTheDocument();
+    expect(screen.getByText("Savings")).toBeInTheDocument();
+  });
+
+  it("does not render Accounts nav group when no accounts exist", () => {
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    expect(screen.queryByText("Accounts")).not.toBeInTheDocument();
   });
 });

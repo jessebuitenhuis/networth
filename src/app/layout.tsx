@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AccountProvider } from "@/context/AccountContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup";
 import "./globals.css";
@@ -42,7 +43,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppLayout navGroups={navGroups}>{children}</AppLayout>
+          <AccountProvider>
+            <AppLayout navGroups={navGroups}>{children}</AppLayout>
+          </AccountProvider>
         </SidebarProvider>
       </body>
     </html>

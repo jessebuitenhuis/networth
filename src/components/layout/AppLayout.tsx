@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { useAccounts } from "@/context/AccountContext";
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup";
 
@@ -10,9 +12,24 @@ type AppLayoutProps = {
 };
 
 export function AppLayout({ navGroups, children }: AppLayoutProps) {
+  const { accounts } = useAccounts();
+
+  const allGroups = useMemo(() => {
+    if (accounts.length === 0) return navGroups;
+
+    const accountsGroup: NavGroup = {
+      label: "Accounts",
+      items: accounts.map((a) => ({
+        title: a.name,
+        url: `#account-${a.id}`,
+      })),
+    };
+    return [...navGroups, accountsGroup];
+  }, [navGroups, accounts]);
+
   return (
     <>
-      <AppSidebar navGroups={navGroups} />
+      <AppSidebar navGroups={allGroups} />
       <SidebarInset>
         <header className="flex h-12 items-center gap-2 border-b px-4">
           <SidebarTrigger />
