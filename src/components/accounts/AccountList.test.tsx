@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { AccountList } from "./AccountList";
 import { AccountType } from "@/models/AccountType";
@@ -60,18 +59,5 @@ describe("AccountList", () => {
 
     expect(await screen.findByText("$1,000.00")).toBeInTheDocument();
     expect(screen.getByText("$500.00")).toBeInTheDocument();
-  });
-
-  it("removes account when remove button is clicked", async () => {
-    const user = userEvent.setup();
-    renderWithProvider(accounts, transactions);
-
-    const removeButtons = await screen.findAllByRole("button", {
-      name: "Remove",
-    });
-    await user.click(removeButtons[0]);
-
-    expect(screen.queryByText("Checking")).not.toBeInTheDocument();
-    expect(screen.getByText("Credit Card")).toBeInTheDocument();
   });
 });

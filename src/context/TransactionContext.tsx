@@ -13,6 +13,7 @@ import { formatDate } from "@/lib/dateUtils";
 export type TransactionAction =
   | { type: "add"; transaction: Transaction }
   | { type: "remove"; id: string }
+  | { type: "removeByAccountId"; accountId: string }
   | { type: "set"; transactions: Transaction[] };
 
 export function transactionReducer(
@@ -24,6 +25,8 @@ export function transactionReducer(
       return [...state, action.transaction];
     case "remove":
       return state.filter((t) => t.id !== action.id);
+    case "removeByAccountId":
+      return state.filter((t) => t.accountId !== action.accountId);
     case "set":
       return action.transactions;
   }
@@ -33,6 +36,7 @@ type TransactionContextValue = {
   transactions: Transaction[];
   addTransaction: (transaction: Transaction) => void;
   removeTransaction: (id: string) => void;
+  removeTransactionsByAccountId: (accountId: string) => void;
   getBalance: (accountId: string) => number;
 };
 
@@ -63,6 +67,10 @@ export function TransactionProvider({
     dispatch({ type: "remove", id });
   }
 
+  function removeTransactionsByAccountId(accountId: string) {
+    dispatch({ type: "removeByAccountId", accountId });
+  }
+
   const getBalance = useCallback(
     (accountId: string) =>
       computeBalance(accountId, transactions, formatDate(new Date())),
@@ -70,7 +78,7 @@ export function TransactionProvider({
   );
 
   return (
-    <TransactionContext value={{ transactions, addTransaction, removeTransaction, getBalance }}>
+    <TransactionContext value={{ transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, getBalance }}>
       {children}
     </TransactionContext>
   );

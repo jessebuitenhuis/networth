@@ -7,6 +7,7 @@ import { loadAccounts, saveAccounts } from "@/services/AccountStorage";
 export type AccountAction =
   | { type: "add"; account: Account }
   | { type: "remove"; id: string }
+  | { type: "update"; account: Account }
   | { type: "set"; accounts: Account[] };
 
 export function accountReducer(
@@ -18,6 +19,10 @@ export function accountReducer(
       return [...state, action.account];
     case "remove":
       return state.filter((a) => a.id !== action.id);
+    case "update":
+      return state.map((a) =>
+        a.id === action.account.id ? action.account : a
+      );
     case "set":
       return action.accounts;
   }
@@ -27,6 +32,7 @@ type AccountContextValue = {
   accounts: Account[];
   addAccount: (account: Account) => void;
   removeAccount: (id: string) => void;
+  updateAccount: (account: Account) => void;
 };
 
 const AccountContext = createContext<AccountContextValue | null>(null);
@@ -50,8 +56,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "remove", id });
   }
 
+  function updateAccount(account: Account) {
+    dispatch({ type: "update", account });
+  }
+
   return (
-    <AccountContext value={{ accounts, addAccount, removeAccount }}>
+    <AccountContext value={{ accounts, addAccount, removeAccount, updateAccount }}>
       {children}
     </AccountContext>
   );

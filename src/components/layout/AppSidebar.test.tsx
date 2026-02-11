@@ -60,6 +60,24 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("button", { name: "+" })).toBeInTheDocument();
   });
 
+  it("renders item action when provided", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Accounts",
+        items: [
+          {
+            title: "Checking",
+            url: "/accounts/1",
+            action: <button>Edit</button>,
+          },
+        ],
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
   it("handles empty nav groups", () => {
     renderWithProvider([]);
 

@@ -36,17 +36,32 @@ describe("accountReducer", () => {
     const result = accountReducer([], { type: "set", accounts });
     expect(result).toEqual(accounts);
   });
+
+  it("updates an account by id", () => {
+    const result = accountReducer([asset, liability], {
+      type: "update",
+      account: updatedAsset,
+    });
+    expect(result).toEqual([updatedAsset, liability]);
+  });
 });
 
+const updatedAsset: Account = {
+  id: "1",
+  name: "Savings",
+  type: AccountType.Liability,
+};
+
 function TestConsumer() {
-  const { accounts, addAccount, removeAccount } = useAccounts();
+  const { accounts, addAccount, removeAccount, updateAccount } = useAccounts();
   return (
     <div>
       <span data-testid="count">{accounts.length}</span>
       <button onClick={() => addAccount(asset)}>Add</button>
       <button onClick={() => removeAccount("1")}>Remove</button>
+      <button onClick={() => updateAccount(updatedAsset)}>Update</button>
       {accounts.map((a) => (
-        <span key={a.id}>{a.name}</span>
+        <span key={a.id}>{a.name} - {a.type}</span>
       ))}
     </div>
   );
@@ -75,7 +90,7 @@ describe("AccountProvider", () => {
       </AccountProvider>
     );
 
-    expect(await screen.findByText("Checking")).toBeInTheDocument();
+    expect(await screen.findByText("Checking - Asset")).toBeInTheDocument();
   });
 
   it("adds an account", () => {
@@ -87,7 +102,7 @@ describe("AccountProvider", () => {
 
     act(() => screen.getByText("Add").click());
 
-    expect(screen.getByText("Checking")).toBeInTheDocument();
+    expect(screen.getByText("Checking - Asset")).toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("1");
   });
 
@@ -116,6 +131,22 @@ describe("AccountProvider", () => {
 
     const stored = JSON.parse(localStorage.getItem("accounts")!);
     expect(stored).toEqual([asset]);
+  });
+
+  it("updates an account", () => {
+    localStorage.setItem("accounts", JSON.stringify([asset, liability]));
+
+    render(
+      <AccountProvider>
+        <TestConsumer />
+      </AccountProvider>
+    );
+
+    act(() => screen.getByText("Update").click());
+
+    expect(screen.getByText("Savings - Liability")).toBeInTheDocument();
+    expect(screen.getByText("Credit Card - Liability")).toBeInTheDocument();
+    expect(screen.queryByText("Checking - Asset")).not.toBeInTheDocument();
   });
 
   it("throws when useAccounts is called outside provider", () => {
