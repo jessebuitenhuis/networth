@@ -5,6 +5,7 @@
   "packageManager": "npm@11.6.2",
   "scripts": {
     "dev": "next dev",
+    "dev:random-port": "next dev -p 0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
