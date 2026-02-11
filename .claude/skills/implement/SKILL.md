@@ -1,7 +1,7 @@
 ---
 name: implement
 description: Clarify requirements for a user story and create an implementation plan
-allowed-tools: Read, Grep, Glob, AskUserQuestion, EnterPlanMode, ExitPlanMode, Task
+allowed-tools: Read, Grep, Glob, AskUserQuestion, EnterPlanMode, ExitPlanMode, Task, Skill
 argument-hint: "<user story or feature description>"
 ---
 
@@ -40,9 +40,13 @@ Guidelines:
 
 Once requirements are clear, enter plan mode using `EnterPlanMode` and produce a detailed implementation plan that follows TDD:
 
-1. **Write tests first** — list the test files and test cases to create
-2. **Implement** — list the production files to create or modify, and describe what each change does
-3. **Verify** — plan ends with running `npm run dev` to confirm everything works end-to-end
+1. **Create a worktree** — use the `/worktree` skill to create an isolated worktree for this feature, then do all subsequent work inside it
+2. **Write tests first** — list the test files and test cases to create
+3. **Implement** — list the production files to create or modify, and describe what each change does
+4. **Verify** — run `npm run dev:random-port` to confirm everything works end-to-end
+5. **Commit** — use the `/commit` skill to commit the changes inside the worktree
+6. **Review** — ask the user to review the changes before proceeding
+7. **Merge & cleanup** — once approved, use the `/worktree` skill to merge the branch into main and remove the worktree
 
 The plan should:
 - Follow existing patterns and conventions in the codebase
