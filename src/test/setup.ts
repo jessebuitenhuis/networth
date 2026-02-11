@@ -9,6 +9,11 @@ Object.defineProperty(window, "innerWidth", {
   value: 1024,
 });
 
+Element.prototype.hasPointerCapture = () => false;
+Element.prototype.setPointerCapture = () => {};
+Element.prototype.releasePointerCapture = () => {};
+Element.prototype.scrollIntoView = () => {};
+
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({

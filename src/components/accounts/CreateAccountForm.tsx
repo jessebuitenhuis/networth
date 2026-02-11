@@ -6,6 +6,14 @@ import { useTransactions } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CreateAccountForm() {
   const { addAccount } = useAccounts();
@@ -44,9 +52,7 @@ export function CreateAccountForm() {
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-2">
       <div className="flex-1">
-        <label htmlFor="account-name" className="text-sm font-medium">
-          Name
-        </label>
+        <Label htmlFor="account-name">Name</Label>
         <Input
           id="account-name"
           value={name}
@@ -55,23 +61,23 @@ export function CreateAccountForm() {
         />
       </div>
       <div>
-        <label htmlFor="account-type" className="text-sm font-medium">
-          Type
-        </label>
-        <select
-          id="account-type"
+        <Label id="account-type-label">Type</Label>
+        <Select
           value={type}
-          onChange={(e) => setType(e.target.value as AccountType)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+          onValueChange={(v) => setType(v as AccountType)}
+          aria-labelledby="account-type-label"
         >
-          <option value={AccountType.Asset}>Asset</option>
-          <option value={AccountType.Liability}>Liability</option>
-        </select>
+          <SelectTrigger aria-label="Type">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={AccountType.Asset}>Asset</SelectItem>
+            <SelectItem value={AccountType.Liability}>Liability</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div>
-        <label htmlFor="account-balance" className="text-sm font-medium">
-          Balance
-        </label>
+        <Label htmlFor="account-balance">Balance</Label>
         <Input
           id="account-balance"
           type="number"

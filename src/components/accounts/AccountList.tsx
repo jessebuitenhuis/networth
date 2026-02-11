@@ -2,7 +2,7 @@
 
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
-import { Button } from "@/components/ui/button";
+import { AccountListItem } from "./AccountListItem";
 
 export function AccountList() {
   const { accounts, removeAccount } = useAccounts();
@@ -15,32 +15,13 @@ export function AccountList() {
   return (
     <ul className="space-y-2">
       {accounts.map((account) => (
-        <li
+        <AccountListItem
           key={account.id}
-          className="flex items-center justify-between rounded-lg border p-3"
-        >
-          <div>
-            <span className="font-medium">{account.name}</span>
-            <span className="ml-2 text-sm text-muted-foreground">
-              {account.type}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono">
-              {getBalance(account.id).toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              })}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => removeAccount(account.id)}
-            >
-              Remove
-            </Button>
-          </div>
-        </li>
+          name={account.name}
+          type={account.type}
+          balance={getBalance(account.id)}
+          onRemove={() => removeAccount(account.id)}
+        />
       ))}
     </ul>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTransactions } from "@/context/TransactionContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 type CreateTransactionFormProps = {
   accountId: string;
@@ -38,9 +39,7 @@ export function CreateTransactionForm({
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-2">
       <div>
-        <label htmlFor="tx-amount" className="text-sm font-medium">
-          Amount
-        </label>
+        <Label htmlFor="tx-amount">Amount</Label>
         <Input
           id="tx-amount"
           type="number"
@@ -49,9 +48,7 @@ export function CreateTransactionForm({
         />
       </div>
       <div>
-        <label htmlFor="tx-date" className="text-sm font-medium">
-          Date
-        </label>
+        <Label htmlFor="tx-date">Date</Label>
         <Input
           id="tx-date"
           type="date"
@@ -60,9 +57,7 @@ export function CreateTransactionForm({
         />
       </div>
       <div className="flex-1">
-        <label htmlFor="tx-description" className="text-sm font-medium">
-          Description
-        </label>
+        <Label htmlFor="tx-description">Description</Label>
         <Input
           id="tx-description"
           value={description}
