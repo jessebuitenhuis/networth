@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function EditRecurringTransactionDialog({
 }: EditRecurringTransactionDialogProps) {
   const { updateRecurringTransaction, removeRecurringTransaction } =
     useRecurringTransactions();
+  const { scenarios } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(recurringTransaction.amount);
   const [description, setDescription] = useState(
@@ -53,6 +55,9 @@ export function EditRecurringTransactionDialog({
   );
   const [startDate, setStartDate] = useState(recurringTransaction.startDate);
   const [endDate, setEndDate] = useState(recurringTransaction.endDate || "");
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
+    recurringTransaction.scenarioId || scenarios[0]?.id || ""
+  );
 
   function resetForm() {
     setAmount(recurringTransaction.amount);
@@ -60,6 +65,7 @@ export function EditRecurringTransactionDialog({
     setFrequency(recurringTransaction.frequency);
     setStartDate(recurringTransaction.startDate);
     setEndDate(recurringTransaction.endDate || "");
+    setSelectedScenarioId(recurringTransaction.scenarioId || scenarios[0]?.id || "");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -73,6 +79,7 @@ export function EditRecurringTransactionDialog({
       frequency,
       startDate,
       endDate: endDate || undefined,
+      scenarioId: selectedScenarioId || undefined,
     });
     setIsOpen(false);
   }
@@ -123,6 +130,27 @@ export function EditRecurringTransactionDialog({
               onChange={(e) => setDescription(e.target.value)}
               aria-label="Description"
             />
+          </div>
+          <div>
+            <Label id="edit-recurring-scenario-label" className="mb-2">
+              Scenario
+            </Label>
+            <Select
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              aria-labelledby="edit-recurring-scenario-label"
+            >
+              <SelectTrigger aria-label="Scenario">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {scenarios.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label id="edit-recurring-frequency-label" className="mb-2">

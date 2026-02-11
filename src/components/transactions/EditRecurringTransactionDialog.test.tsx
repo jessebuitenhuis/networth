@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, beforeEach } from "vitest";
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
 import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 
@@ -28,11 +29,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("opens dialog with current values pre-populated", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -49,11 +52,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("updates recurring transaction when saving with new values", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -85,11 +90,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("prevents submit when amount is 0", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -106,11 +113,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("shows confirmation dialog when clicking delete", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -125,11 +134,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("removes recurring transaction when confirming delete", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -145,11 +156,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("returns to edit dialog when canceling delete", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -165,11 +178,13 @@ describe("EditRecurringTransactionDialog", () => {
   it("resets form when reopening dialog", async () => {
     const user = userEvent.setup();
     render(
-      <RecurringTransactionProvider>
-        <EditRecurringTransactionDialog
-          recurringTransaction={mockRecurringTransaction}
-        />
-      </RecurringTransactionProvider>
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));

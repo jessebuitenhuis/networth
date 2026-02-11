@@ -34,7 +34,7 @@ export function CreateTransactionDialog({
 }: CreateTransactionDialogProps) {
   const { addTransaction } = useTransactions();
   const { addRecurringTransaction } = useRecurringTransactions();
-  const { activeScenarioId } = useScenarios();
+  const { scenarios } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(
@@ -46,6 +46,7 @@ export function CreateTransactionDialog({
     RecurrenceFrequency.Monthly
   );
   const [endDate, setEndDate] = useState("");
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(() => scenarios[0]?.id || "");
 
   function resetForm() {
     setAmount(0);
@@ -53,6 +54,7 @@ export function CreateTransactionDialog({
     setIsRecurring(false);
     setFrequency(RecurrenceFrequency.Monthly);
     setEndDate("");
+    setSelectedScenarioId(scenarios[0]?.id || "");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -68,7 +70,7 @@ export function CreateTransactionDialog({
         frequency,
         startDate: date,
         endDate: endDate || undefined,
-        scenarioId: activeScenarioId || undefined,
+        scenarioId: selectedScenarioId || undefined,
       });
     } else {
       addTransaction({
@@ -140,6 +142,27 @@ export function CreateTransactionDialog({
           </div>
           {isRecurring && (
             <>
+              <div>
+                <Label id="tx-scenario-label" className="mb-2">
+                  Scenario
+                </Label>
+                <Select
+                  value={selectedScenarioId}
+                  onValueChange={setSelectedScenarioId}
+                  aria-labelledby="tx-scenario-label"
+                >
+                  <SelectTrigger aria-label="Scenario">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scenarios.map((scenario) => (
+                      <SelectItem key={scenario.id} value={scenario.id}>
+                        {scenario.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label id="tx-frequency-label" className="mb-2">
                   Frequency
