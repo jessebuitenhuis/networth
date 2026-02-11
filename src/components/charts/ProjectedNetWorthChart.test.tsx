@@ -7,6 +7,7 @@ import type { Account } from "@/models/Account";
 import type { Transaction } from "@/models/Transaction";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -26,7 +27,9 @@ function renderWithProviders(
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <ProjectedNetWorthChart />
+        <RecurringTransactionProvider>
+          <ProjectedNetWorthChart />
+        </RecurringTransactionProvider>
       </TransactionProvider>
     </AccountProvider>
   );

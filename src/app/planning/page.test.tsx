@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import PlanningPage from "./page";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -20,7 +21,9 @@ describe("PlanningPage", () => {
     render(
       <AccountProvider>
         <TransactionProvider>
-          <PlanningPage />
+          <RecurringTransactionProvider>
+            <PlanningPage />
+          </RecurringTransactionProvider>
         </TransactionProvider>
       </AccountProvider>
     );
@@ -34,7 +37,9 @@ describe("PlanningPage", () => {
     render(
       <AccountProvider>
         <TransactionProvider>
-          <PlanningPage />
+          <RecurringTransactionProvider>
+            <PlanningPage />
+          </RecurringTransactionProvider>
         </TransactionProvider>
       </AccountProvider>
     );

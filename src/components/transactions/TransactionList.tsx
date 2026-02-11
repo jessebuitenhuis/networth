@@ -1,8 +1,21 @@
 "use client";
 
 import { useTransactions } from "@/context/TransactionContext";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { isTransactionProjected } from "@/services/isTransactionProjected";
+import { getNextOccurrence } from "@/services/getNextOccurrence";
+import { formatDate } from "@/lib/dateUtils";
 import { TransactionListItem } from "./TransactionListItem";
+
+type DisplayTransaction = {
+  id: string;
+  description: string;
+  date: string;
+  amount: number;
+  isProjected: boolean;
+  isRecurring: boolean;
+  onDelete: () => void;
+};
 
 type TransactionListProps = {
   accountId: string;
@@ -10,25 +23,59 @@ type TransactionListProps = {
 
 export function TransactionList({ accountId }: TransactionListProps) {
   const { transactions, removeTransaction } = useTransactions();
+  const { recurringTransactions, removeRecurringTransaction } =
+    useRecurringTransactions();
 
-  const filtered = transactions
+  const today = formatDate(new Date());
+
+  const regularItems: DisplayTransaction[] = transactions
     .filter((t) => t.accountId === accountId)
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .map((tx) => ({
+      id: tx.id,
+      description: tx.description,
+      date: tx.date,
+      amount: tx.amount,
+      isProjected: isTransactionProjected(tx),
+      isRecurring: false,
+      onDelete: () => removeTransaction(tx.id),
+    }));
 
-  if (filtered.length === 0) {
+  const recurringItems: DisplayTransaction[] = recurringTransactions
+    .filter((rt) => rt.accountId === accountId)
+    .map((rt) => {
+      const next = getNextOccurrence(rt, today);
+      if (!next) return null;
+      return {
+        id: next.id,
+        description: next.description,
+        date: next.date,
+        amount: next.amount,
+        isProjected: true,
+        isRecurring: true,
+        onDelete: () => removeRecurringTransaction(rt.id),
+      };
+    })
+    .filter((item): item is DisplayTransaction => item !== null);
+
+  const allItems = [...regularItems, ...recurringItems].sort(
+    (a, b) => b.date.localeCompare(a.date)
+  );
+
+  if (allItems.length === 0) {
     return <p className="text-muted-foreground">No transactions yet.</p>;
   }
 
   return (
     <ul className="space-y-2">
-      {filtered.map((tx) => (
+      {allItems.map((item) => (
         <TransactionListItem
-          key={tx.id}
-          description={tx.description}
-          date={tx.date}
-          amount={tx.amount}
-          onDelete={() => removeTransaction(tx.id)}
-          isProjected={isTransactionProjected(tx)}
+          key={item.id}
+          description={item.description}
+          date={item.date}
+          amount={item.amount}
+          onDelete={item.onDelete}
+          isProjected={item.isProjected}
+          isRecurring={item.isRecurring}
         />
       ))}
     </ul>

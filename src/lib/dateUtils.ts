@@ -14,6 +14,16 @@ export function addMonths(date: Date, months: number): Date {
   return result;
 }
 
+export function addYears(date: Date, years: number): Date {
+  const result = new Date(date);
+  const targetMonth = result.getMonth();
+  result.setFullYear(result.getFullYear() + years);
+  if (result.getMonth() !== targetMonth) {
+    result.setDate(0);
+  }
+  return result;
+}
+
 export function formatDate(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");

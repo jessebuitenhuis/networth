@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, addMonths, formatDate } from "./dateUtils";
+import { addDays, addMonths, addYears, formatDate } from "./dateUtils";
 
 function d(s: string): Date {
   return new Date(s + "T00:00:00");
@@ -44,6 +44,20 @@ describe("addMonths", () => {
 
   it("handles leap year Feb 29 back 12 months", () => {
     expect(formatDate(addMonths(d("2024-02-29"), -12))).toBe("2023-02-28");
+  });
+});
+
+describe("addYears", () => {
+  it("adds positive years", () => {
+    expect(formatDate(addYears(d("2024-06-15"), 1))).toBe("2025-06-15");
+  });
+
+  it("subtracts with negative years", () => {
+    expect(formatDate(addYears(d("2024-06-15"), -2))).toBe("2022-06-15");
+  });
+
+  it("clamps leap day to Feb 28 in non-leap year", () => {
+    expect(formatDate(addYears(d("2024-02-29"), 1))).toBe("2025-02-28");
   });
 });
 

@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { ProjectionPeriod } from "@/models/ProjectionPeriod";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
 import { formatDate } from "@/lib/dateUtils";
@@ -23,6 +24,7 @@ import { CustomDateRangePicker } from "./CustomDateRangePicker";
 export function ProjectedNetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
+  const { recurringTransactions } = useRecurringTransactions();
   const [period, setPeriod] = useState(ProjectionPeriod.ThreeMonths);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
@@ -45,7 +47,8 @@ export function ProjectedNetWorthChart() {
     transactions,
     period,
     today,
-    period === ProjectionPeriod.Custom ? customRange : undefined
+    period === ProjectionPeriod.Custom ? customRange : undefined,
+    recurringTransactions
   );
 
   return (

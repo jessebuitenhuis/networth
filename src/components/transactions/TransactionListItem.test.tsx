@@ -95,6 +95,31 @@ describe("TransactionListItem", () => {
     expect(description).toHaveClass("text-muted-foreground");
   });
 
+  it("does not show recurring indicator by default", () => {
+    render(
+      <TransactionListItem
+        description="Groceries"
+        date="2024-01-20"
+        amount={-200}
+        onDelete={() => {}}
+      />
+    );
+    expect(screen.queryByText("Recurring")).not.toBeInTheDocument();
+  });
+
+  it("shows recurring indicator when isRecurring is true", () => {
+    render(
+      <TransactionListItem
+        description="Salary"
+        date="2024-01-15"
+        amount={5000}
+        onDelete={() => {}}
+        isRecurring
+      />
+    );
+    expect(screen.getByText("Recurring")).toBeInTheDocument();
+  });
+
   it("calls onDelete when delete button is clicked", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();

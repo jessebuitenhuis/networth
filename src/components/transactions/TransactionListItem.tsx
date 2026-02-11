@@ -1,3 +1,4 @@
+import { Repeat } from "lucide-react";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ type TransactionListItemProps = {
   amount: number;
   onDelete: () => void;
   isProjected?: boolean;
+  isRecurring?: boolean;
 };
 
 export function TransactionListItem({
@@ -17,6 +19,7 @@ export function TransactionListItem({
   amount,
   onDelete,
   isProjected,
+  isRecurring,
 }: TransactionListItemProps) {
   return (
     <li>
@@ -26,6 +29,12 @@ export function TransactionListItem({
           <span className="ml-2 text-sm text-muted-foreground">
             {new Date(date + "T00:00:00").toLocaleDateString("en-US")}
           </span>
+          {isRecurring && (
+            <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <Repeat className="h-3 w-3" />
+              Recurring
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span

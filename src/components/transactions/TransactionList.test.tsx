@@ -1,10 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TransactionList } from "./TransactionList";
 import type { Transaction } from "@/models/Transaction";
+import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 
 const transactions: Transaction[] = [
   { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-15", description: "Opening balance" },
@@ -14,13 +17,20 @@ const transactions: Transaction[] = [
 
 function renderWithProvider(
   accountId: string,
-  initialTransactions: Transaction[] = []
+  initialTransactions: Transaction[] = [],
+  initialRecurring: RecurringTransaction[] = []
 ) {
   localStorage.setItem("transactions", JSON.stringify(initialTransactions));
+  localStorage.setItem(
+    "recurringTransactions",
+    JSON.stringify(initialRecurring)
+  );
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <TransactionList accountId={accountId} />
+        <RecurringTransactionProvider>
+          <TransactionList accountId={accountId} />
+        </RecurringTransactionProvider>
       </TransactionProvider>
     </AccountProvider>
   );
@@ -97,5 +107,99 @@ describe("TransactionList", () => {
     const items = await screen.findAllByRole("listitem");
     expect(items).toHaveLength(3);
     expect(screen.queryByText("Other account")).not.toBeInTheDocument();
+  });
+
+  it("shows next recurring occurrence in the list", async () => {
+    const recurring: RecurringTransaction[] = [
+      {
+        id: "r1",
+        accountId: "a1",
+        amount: 5000,
+        description: "Monthly Salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-15",
+      },
+    ];
+    renderWithProvider("a1", [], recurring);
+
+    expect(await screen.findByText("Monthly Salary")).toBeInTheDocument();
+    expect(screen.getByText("Recurring")).toBeInTheDocument();
+  });
+
+  it("sorts recurring occurrence among regular transactions by date", async () => {
+    // Use a date far in the future so the next occurrence is predictable
+    const recurring: RecurringTransaction[] = [
+      {
+        id: "r1",
+        accountId: "a1",
+        amount: 5000,
+        description: "Monthly Salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2099-06-15",
+      },
+    ];
+    const txs: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 100, date: "2099-07-01", description: "Future tx" },
+    ];
+    renderWithProvider("a1", txs, recurring);
+
+    const items = await screen.findAllByRole("listitem");
+    expect(items).toHaveLength(2);
+    // Future tx (2099-07-01) is newer, so appears first
+    expect(items[0]).toHaveTextContent("Future tx");
+    expect(items[1]).toHaveTextContent("Monthly Salary");
+  });
+
+  it("removes recurring transaction when its delete button is clicked", async () => {
+    const user = userEvent.setup();
+    const recurring: RecurringTransaction[] = [
+      {
+        id: "r1",
+        accountId: "a1",
+        amount: 5000,
+        description: "Monthly Salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-15",
+      },
+    ];
+    renderWithProvider("a1", [], recurring);
+
+    const deleteButton = await screen.findByRole("button", { name: "Delete" });
+    await user.click(deleteButton);
+
+    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+  });
+
+  it("does not show ended recurring transaction", async () => {
+    const recurring: RecurringTransaction[] = [
+      {
+        id: "r1",
+        accountId: "a1",
+        amount: 5000,
+        description: "Expired Salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2020-01-15",
+        endDate: "2020-06-01",
+      },
+    ];
+    renderWithProvider("a1", [], recurring);
+
+    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+  });
+
+  it("does not show recurring transaction for a different account", async () => {
+    const recurring: RecurringTransaction[] = [
+      {
+        id: "r1",
+        accountId: "a2",
+        amount: 5000,
+        description: "Other Account Salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-15",
+      },
+    ];
+    renderWithProvider("a1", [], recurring);
+
+    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
   });
 });

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup";
 import "./globals.css";
@@ -49,7 +50,9 @@ export default async function RootLayout({
         <SidebarProvider defaultOpen={defaultOpen}>
           <AccountProvider>
             <TransactionProvider>
-              <AppLayout navGroups={navGroups}>{children}</AppLayout>
+              <RecurringTransactionProvider>
+                <AppLayout navGroups={navGroups}>{children}</AppLayout>
+              </RecurringTransactionProvider>
             </TransactionProvider>
           </AccountProvider>
         </SidebarProvider>

@@ -2,8 +2,10 @@ import type { Account } from "@/models/Account";
 import { AccountType } from "@/models/AccountType";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
 import { ProjectionPeriod } from "@/models/ProjectionPeriod";
+import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import type { Transaction } from "@/models/Transaction";
 import { addDays, addMonths, formatDate } from "@/lib/dateUtils";
+import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
   period: ProjectionPeriod,
@@ -46,7 +48,8 @@ export function computeProjectedSeries(
   transactions: Transaction[],
   period: ProjectionPeriod,
   today: string = formatDate(new Date()),
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
+  recurringTransactions: RecurringTransaction[] = []
 ): NetWorthDataPoint[] {
   const todayDate = new Date(today + "T00:00:00");
   const datePoints = generateProjectedDatePoints(period, todayDate, customRange);
@@ -65,6 +68,18 @@ export function computeProjectedSeries(
       netWorth += type === AccountType.Asset ? tx.amount : -tx.amount;
     } else {
       futureTx.push(tx);
+    }
+  }
+
+  // Generate recurring transaction occurrences within the projection range
+  const rangeEnd = datePoints[datePoints.length - 1];
+  for (const rt of recurringTransactions) {
+    if (!accountTypes.has(rt.accountId)) continue;
+    const occurrences = generateOccurrences(rt, today, rangeEnd);
+    for (const occ of occurrences) {
+      if (occ.date > today) {
+        futureTx.push(occ);
+      }
     }
   }
 

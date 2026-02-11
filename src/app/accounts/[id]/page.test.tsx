@@ -6,6 +6,16 @@ import type { Account } from "@/models/Account";
 import type { Transaction } from "@/models/Transaction";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+
+vi.stubGlobal(
+  "ResizeObserver",
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+);
 
 const accounts: Account[] = [
   { id: "a1", name: "Checking", type: AccountType.Asset },
@@ -20,7 +30,9 @@ function renderPage(id: string) {
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <AccountDetailPage params={{ id }} />
+        <RecurringTransactionProvider>
+          <AccountDetailPage params={{ id }} />
+        </RecurringTransactionProvider>
       </TransactionProvider>
     </AccountProvider>
   );
@@ -57,13 +69,12 @@ describe("AccountDetailPage", () => {
     expect(screen.getByText("Groceries")).toBeInTheDocument();
   });
 
-  it("renders add transaction form", async () => {
+  it("renders add transaction dialog trigger", async () => {
     localStorage.setItem("accounts", JSON.stringify(accounts));
     localStorage.setItem("transactions", JSON.stringify([]));
     renderPage("a1");
 
-    expect(await screen.findByLabelText("Amount")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add Transaction" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Add Transaction" })).toBeInTheDocument();
   });
 
   it("shows 'Account not found' for invalid ID", () => {

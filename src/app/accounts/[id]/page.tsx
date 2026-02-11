@@ -4,7 +4,7 @@ import { use } from "react";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { TransactionList } from "@/components/transactions/TransactionList";
-import { CreateTransactionForm } from "@/components/transactions/CreateTransactionForm";
+import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
 
 type AccountDetailPageProps = {
   params: Promise<{ id: string }> | { id: string };
@@ -38,7 +38,7 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
           })}
         </p>
       </div>
-      <CreateTransactionForm accountId={account.id} />
+      <CreateTransactionDialog accountId={account.id} />
       <TransactionList accountId={account.id} />
     </div>
   );
