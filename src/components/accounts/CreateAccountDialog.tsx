@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
+import { SidebarGroupAction } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -66,9 +67,9 @@ export function CreateAccountDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Add Account">
+        <SidebarGroupAction aria-label="Add Account">
           <Plus />
-        </Button>
+        </SidebarGroupAction>
       </DialogTrigger>
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
@@ -76,7 +77,7 @@ export function CreateAccountDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="account-name">Name</Label>
+            <Label htmlFor="account-name" className="mb-2">Name</Label>
             <Input
               id="account-name"
               value={name}
@@ -85,7 +86,7 @@ export function CreateAccountDialog() {
             />
           </div>
           <div>
-            <Label id="account-type-label">Type</Label>
+            <Label id="account-type-label" className="mb-2">Type</Label>
             <Select
               value={type}
               onValueChange={(v) => setType(v as AccountType)}
@@ -101,7 +102,7 @@ export function CreateAccountDialog() {
             </Select>
           </div>
           <div>
-            <Label htmlFor="account-balance">Balance</Label>
+            <Label htmlFor="account-balance" className="mb-2">Balance</Label>
             <Input
               id="account-balance"
               type="number"
