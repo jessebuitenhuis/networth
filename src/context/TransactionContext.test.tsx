@@ -139,6 +139,27 @@ describe("TransactionProvider", () => {
     expect(stored).toEqual([tx1]);
   });
 
+  it("excludes future transactions from getBalance", () => {
+    const futureTx: Transaction = {
+      id: "t-future",
+      accountId: "a1",
+      amount: 9999,
+      date: "2099-01-01",
+      description: "Future",
+    };
+    localStorage.setItem("transactions", JSON.stringify([tx1, futureTx]));
+
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => {});
+
+    expect(screen.getByTestId("balance")).toHaveTextContent("1000");
+  });
+
   it("throws when useTransactions is called outside provider", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<TestConsumer />)).toThrow(

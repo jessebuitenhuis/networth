@@ -1,12 +1,14 @@
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type TransactionListItemProps = {
   description: string;
   date: string;
   amount: number;
   onDelete: () => void;
+  isProjected?: boolean;
 };
 
 export function TransactionListItem({
@@ -14,12 +16,13 @@ export function TransactionListItem({
   date,
   amount,
   onDelete,
+  isProjected,
 }: TransactionListItemProps) {
   return (
     <li>
-      <Card className="flex items-center justify-between p-3">
+      <Card className={cn("flex items-center justify-between p-3", isProjected && "border-dashed")}>
         <div>
-          <span className="font-medium">{description}</span>
+          <span className={cn("font-medium", isProjected && "text-muted-foreground")}>{description}</span>
           <span className="ml-2 text-sm text-muted-foreground">
             {new Date(date + "T00:00:00").toLocaleDateString("en-US")}
           </span>

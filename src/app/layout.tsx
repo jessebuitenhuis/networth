@@ -26,7 +26,10 @@ export const metadata: Metadata = {
 const navGroups: NavGroup[] = [
   {
     label: "Main",
-    items: [{ title: "Dashboard", url: "/" }],
+    items: [
+      { title: "Dashboard", url: "/" },
+      { title: "Planning", url: "/planning" },
+    ],
   },
 ];
 

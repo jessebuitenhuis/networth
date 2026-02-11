@@ -76,6 +76,17 @@ describe("TransactionList", () => {
     expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
   });
 
+  it("renders future-dated transaction with dashed border", async () => {
+    const futureTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 1000, date: "2099-01-01", description: "Future tx" },
+    ];
+    renderWithProvider("a1", futureTransactions);
+
+    const item = await screen.findByRole("listitem");
+    const card = item.querySelector("[data-slot='card']");
+    expect(card).toHaveClass("border-dashed");
+  });
+
   it("only shows transactions for the given account", async () => {
     const mixedTransactions = [
       ...transactions,

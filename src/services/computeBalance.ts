@@ -2,9 +2,10 @@ import type { Transaction } from "@/models/Transaction";
 
 export function computeBalance(
   accountId: string,
-  transactions: Transaction[]
+  transactions: Transaction[],
+  asOfDate?: string
 ): number {
   return transactions
-    .filter((t) => t.accountId === accountId)
+    .filter((t) => t.accountId === accountId && (!asOfDate || t.date <= asOfDate))
     .reduce((sum, t) => sum + t.amount, 0);
 }

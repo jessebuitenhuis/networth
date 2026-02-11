@@ -8,6 +8,7 @@ import {
 } from "@/services/TransactionStorage";
 import { migrateAccountBalances } from "@/services/AccountStorage";
 import { computeBalance } from "@/services/computeBalance";
+import { formatDate } from "@/lib/dateUtils";
 
 export type TransactionAction =
   | { type: "add"; transaction: Transaction }
@@ -63,7 +64,8 @@ export function TransactionProvider({
   }
 
   const getBalance = useCallback(
-    (accountId: string) => computeBalance(accountId, transactions),
+    (accountId: string) =>
+      computeBalance(accountId, transactions, formatDate(new Date())),
     [transactions]
   );
 

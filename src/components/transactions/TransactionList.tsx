@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransactions } from "@/context/TransactionContext";
+import { isTransactionProjected } from "@/services/isTransactionProjected";
 import { TransactionListItem } from "./TransactionListItem";
 
 type TransactionListProps = {
@@ -27,6 +28,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
           date={tx.date}
           amount={tx.amount}
           onDelete={() => removeTransaction(tx.id)}
+          isProjected={isTransactionProjected(tx)}
         />
       ))}
     </ul>

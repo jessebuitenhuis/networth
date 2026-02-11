@@ -54,6 +54,47 @@ describe("TransactionListItem", () => {
     expect(amount).toHaveClass("text-red-600");
   });
 
+  it("renders solid border by default", () => {
+    const { container } = render(
+      <TransactionListItem
+        description="Groceries"
+        date="2024-01-20"
+        amount={-200}
+        onDelete={() => {}}
+      />
+    );
+    const card = container.querySelector("[data-slot='card']");
+    expect(card).not.toHaveClass("border-dashed");
+  });
+
+  it("renders dashed border when projected", () => {
+    const { container } = render(
+      <TransactionListItem
+        description="Groceries"
+        date="2024-01-20"
+        amount={-200}
+        onDelete={() => {}}
+        isProjected
+      />
+    );
+    const card = container.querySelector("[data-slot='card']");
+    expect(card).toHaveClass("border-dashed");
+  });
+
+  it("renders muted description when projected", () => {
+    render(
+      <TransactionListItem
+        description="Groceries"
+        date="2024-01-20"
+        amount={-200}
+        onDelete={() => {}}
+        isProjected
+      />
+    );
+    const description = screen.getByText("Groceries");
+    expect(description).toHaveClass("text-muted-foreground");
+  });
+
   it("calls onDelete when delete button is clicked", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();
