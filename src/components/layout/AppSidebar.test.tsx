@@ -47,6 +47,19 @@ describe("AppSidebar", () => {
     expect(profile).toHaveAttribute("href", "/profile");
   });
 
+  it("renders group action when provided", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Accounts",
+        items: [],
+        action: <button>+</button>,
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByRole("button", { name: "+" })).toBeInTheDocument();
+  });
+
   it("handles empty nav groups", () => {
     renderWithProvider([]);
 

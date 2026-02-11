@@ -4,6 +4,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
@@ -24,6 +25,9 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
         {navGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            {group.action && (
+              <SidebarGroupAction asChild>{group.action}</SidebarGroupAction>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (

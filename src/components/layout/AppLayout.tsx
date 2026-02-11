@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAccounts } from "@/context/AccountContext";
+import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup";
 
@@ -15,14 +16,13 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
   const { accounts } = useAccounts();
 
   const allGroups = useMemo(() => {
-    if (accounts.length === 0) return navGroups;
-
     const accountsGroup: NavGroup = {
       label: "Accounts",
       items: accounts.map((a) => ({
         title: a.name,
         url: `/accounts/${a.id}`,
       })),
+      action: <CreateAccountDialog />,
     };
     return [...navGroups, accountsGroup];
   }, [navGroups, accounts]);

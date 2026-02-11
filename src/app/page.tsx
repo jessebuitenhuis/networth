@@ -2,7 +2,6 @@
 
 import { NetWorthSummary } from "@/components/accounts/NetWorthSummary";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
-import { CreateAccountForm } from "@/components/accounts/CreateAccountForm";
 import { AccountList } from "@/components/accounts/AccountList";
 
 export default function Home() {
@@ -11,7 +10,6 @@ export default function Home() {
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <NetWorthSummary />
       <NetWorthChart />
-      <CreateAccountForm />
       <AccountList />
     </div>
   );
