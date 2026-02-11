@@ -13,17 +13,10 @@ Create a verified, well-formatted git commit following the Conventional Commits 
 
 ### 1. Pre-commit verification
 
-Run all checks **sequentially** — stop immediately on first failure:
+Run all checks with caching via Turborepo — stop immediately on failure:
 
 ```
-npm run lint
-npm run build
-```
-
-If tests are configured (`test` script exists in package.json and is not the default placeholder), also run:
-
-```
-npm test
+npm run verify
 ```
 
 If **any** check fails, report the failure clearly and **do not commit**. Help fix the issue instead.
