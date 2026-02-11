@@ -9,27 +9,52 @@ argument-hint: "[optional commit message override]"
 
 Create a verified, well-formatted git commit following the Conventional Commits specification.
 
+## Current state
+
+### Verification
+!`npm run verify 2>&1`
+
+### Git status
+!`git status`
+
+### Changed files (stat)
+!`git diff --stat`
+
+### Full diff
+!`git diff`
+
+### Recent commits
+!`git log --oneline -5`
+
 ## Steps
 
-### 1. Pre-commit verification
+### 1. Check verification
 
-Run all checks with caching via Turborepo — stop immediately on failure:
+If `npm run verify` above shows any failures, stop — report the failure and help fix the issue. **Do not commit.**
 
+### 2. Stage and commit
+
+Based on the status and diff above:
+
+- **Never** stage secrets (`.env`, credentials, tokens).
+- **Never** use `git add -A` or `git add .`. Stage files individually.
+- Use the **Conventional Commits** format with a HEREDOC.
+- Confirm with `git log --oneline -1` after committing.
+
+Run staging, commit, and confirmation in a **single** Bash call:
+
+```bash
+git add <file1> <file2> ... && git commit -m "$(cat <<'EOF'
+<type>(<optional scope>): <short summary>
+
+<optional body>
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" && git log --oneline -1
 ```
-npm run verify
-```
 
-If **any** check fails, report the failure clearly and **do not commit**. Help fix the issue instead.
-
-### 2. Stage changes
-
-- Run `git status` and `git diff --stat` to understand what changed.
-- Stage relevant files individually (`git add <file>`). Never use `git add -A` or `git add .`.
-- Do not stage files that contain secrets (`.env`, credentials, tokens).
-
-### 3. Write the commit message
-
-Use the **Conventional Commits** format:
+## Commit Message Format
 
 ```
 <type>(<optional scope>): <short summary>
@@ -46,20 +71,3 @@ Rules:
 - Body wraps at 72 chars and explains *why*, not *what*.
 - If `$ARGUMENTS` is provided, use it as the summary (still apply formatting rules).
 - Pick the most specific type that applies.
-
-### 4. Create the commit
-
-Use a HEREDOC to pass the message:
-
-```bash
-git commit -m "$(cat <<'EOF'
-<message here>
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-EOF
-)"
-```
-
-### 5. Confirm
-
-Run `git log --oneline -1` and report success.
