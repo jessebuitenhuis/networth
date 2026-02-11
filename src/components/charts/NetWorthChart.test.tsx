@@ -100,4 +100,52 @@ describe("NetWorthChart", () => {
 
     expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
   });
+
+  it("renders legend with account names as buttons", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts);
+
+    expect(screen.getByRole("button", { name: "Checking" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Savings" })).toBeInTheDocument();
+  });
+
+  it("has all accounts enabled by default", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts);
+
+    expect(screen.getByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("toggles an account off when clicked", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts);
+
+    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+
+    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("toggles an account back on when clicked again", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts);
+
+    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+
+    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
+  });
 });

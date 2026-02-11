@@ -6,6 +6,7 @@ import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
+import { ChartLegend } from "./ChartLegend";
 import { PeriodPicker } from "./PeriodPicker";
 
 export function formatCurrency(value: number): string {
@@ -16,8 +17,19 @@ export function NetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
   const [period, setPeriod] = useState(ChartPeriod.Month);
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
-  const data = computeNetWorthSeries(accounts, transactions, period);
+  function handleToggle(id: string) {
+    setExcludedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const filteredAccounts = accounts.filter((a) => !excludedIds.has(a.id));
+  const data = computeNetWorthSeries(filteredAccounts, transactions, period);
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
@@ -41,6 +53,7 @@ export function NetWorthChart() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <ChartLegend accounts={accounts} excludedIds={excludedIds} onToggle={handleToggle} />
     </div>
   );
 }
