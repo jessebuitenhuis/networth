@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { TransactionList } from "./TransactionList";
 import type { Transaction } from "@/models/Transaction";
 import type { RecurringTransaction } from "@/models/RecurringTransaction";
@@ -76,14 +75,11 @@ describe("TransactionList", () => {
     expect(amount).toHaveClass("text-red-600");
   });
 
-  it("removes transaction when delete button is clicked", async () => {
-    const user = userEvent.setup();
+  it("shows edit button for each transaction", async () => {
     renderWithProvider("a1", [transactions[0]]);
 
-    const deleteButton = await screen.findByRole("button", { name: "Delete" });
-    await user.click(deleteButton);
-
-    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+    const editButton = await screen.findByLabelText("Edit Transaction");
+    expect(editButton).toBeInTheDocument();
   });
 
   it("renders future-dated transaction with dashed border", async () => {
@@ -150,8 +146,7 @@ describe("TransactionList", () => {
     expect(items[1]).toHaveTextContent("Monthly Salary");
   });
 
-  it("removes recurring transaction when its delete button is clicked", async () => {
-    const user = userEvent.setup();
+  it("shows edit button for recurring transaction", async () => {
     const recurring: RecurringTransaction[] = [
       {
         id: "r1",
@@ -164,10 +159,8 @@ describe("TransactionList", () => {
     ];
     renderWithProvider("a1", [], recurring);
 
-    const deleteButton = await screen.findByRole("button", { name: "Delete" });
-    await user.click(deleteButton);
-
-    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+    const editButton = await screen.findByLabelText("Edit Transaction");
+    expect(editButton).toBeInTheDocument();
   });
 
   it("does not show ended recurring transaction", async () => {

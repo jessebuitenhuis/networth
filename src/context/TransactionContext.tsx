@@ -14,7 +14,8 @@ export type TransactionAction =
   | { type: "add"; transaction: Transaction }
   | { type: "remove"; id: string }
   | { type: "removeByAccountId"; accountId: string }
-  | { type: "set"; transactions: Transaction[] };
+  | { type: "set"; transactions: Transaction[] }
+  | { type: "update"; transaction: Transaction };
 
 export function transactionReducer(
   state: Transaction[],
@@ -29,6 +30,8 @@ export function transactionReducer(
       return state.filter((t) => t.accountId !== action.accountId);
     case "set":
       return action.transactions;
+    case "update":
+      return state.map((t) => (t.id === action.transaction.id ? action.transaction : t));
   }
 }
 
@@ -37,6 +40,7 @@ type TransactionContextValue = {
   addTransaction: (transaction: Transaction) => void;
   removeTransaction: (id: string) => void;
   removeTransactionsByAccountId: (accountId: string) => void;
+  updateTransaction: (transaction: Transaction) => void;
   getBalance: (accountId: string) => number;
 };
 
@@ -71,6 +75,10 @@ export function TransactionProvider({
     dispatch({ type: "removeByAccountId", accountId });
   }
 
+  function updateTransaction(transaction: Transaction) {
+    dispatch({ type: "update", transaction });
+  }
+
   const getBalance = useCallback(
     (accountId: string) =>
       computeBalance(accountId, transactions, formatDate(new Date())),
@@ -78,7 +86,7 @@ export function TransactionProvider({
   );
 
   return (
-    <TransactionContext value={{ transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, getBalance }}>
+    <TransactionContext value={{ transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, updateTransaction, getBalance }}>
       {children}
     </TransactionContext>
   );

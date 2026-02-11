@@ -57,10 +57,23 @@ describe("transactionReducer", () => {
     });
     expect(result).toEqual([tx3]);
   });
+
+  it("updates a transaction", () => {
+    const updated: Transaction = {
+      ...tx1,
+      amount: 1500,
+      description: "Updated opening balance",
+    };
+    const result = transactionReducer([tx1, tx2], {
+      type: "update",
+      transaction: updated,
+    });
+    expect(result).toEqual([updated, tx2]);
+  });
 });
 
 function TestConsumer() {
-  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, getBalance } =
+  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, updateTransaction, getBalance } =
     useTransactions();
   return (
     <div>
@@ -69,6 +82,7 @@ function TestConsumer() {
       <button onClick={() => addTransaction(tx1)}>Add</button>
       <button onClick={() => removeTransaction("t1")}>Remove</button>
       <button onClick={() => removeTransactionsByAccountId("a1")}>Remove By Account</button>
+      <button onClick={() => updateTransaction({ ...tx1, amount: 1500, description: "Updated" })}>Update</button>
       {transactions.map((t) => (
         <span key={t.id}>{t.description}</span>
       ))}
@@ -192,6 +206,22 @@ describe("TransactionProvider", () => {
     expect(screen.getByText("Other account")).toBeInTheDocument();
     expect(screen.queryByText("Opening balance")).not.toBeInTheDocument();
     expect(screen.queryByText("Groceries")).not.toBeInTheDocument();
+  });
+
+  it("updates a transaction", () => {
+    localStorage.setItem("transactions", JSON.stringify([tx1, tx2]));
+
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => screen.getByText("Update").click());
+
+    expect(screen.getByText("Updated")).toBeInTheDocument();
+    expect(screen.queryByText("Opening balance")).not.toBeInTheDocument();
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
   });
 
   it("throws when useTransactions is called outside provider", () => {

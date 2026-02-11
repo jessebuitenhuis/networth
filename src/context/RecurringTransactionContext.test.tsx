@@ -50,6 +50,19 @@ describe("recurringTransactionReducer", () => {
     });
     expect(result).toEqual([rt1, rt2]);
   });
+
+  it("updates a recurring transaction", () => {
+    const updated: RecurringTransaction = {
+      ...rt1,
+      amount: 6000,
+      description: "Updated salary",
+    };
+    const result = recurringTransactionReducer([rt1, rt2], {
+      type: "update",
+      recurringTransaction: updated,
+    });
+    expect(result).toEqual([updated, rt2]);
+  });
 });
 
 function TestConsumer() {
@@ -57,12 +70,14 @@ function TestConsumer() {
     recurringTransactions,
     addRecurringTransaction,
     removeRecurringTransaction,
+    updateRecurringTransaction,
   } = useRecurringTransactions();
   return (
     <div>
       <span data-testid="count">{recurringTransactions.length}</span>
       <button onClick={() => addRecurringTransaction(rt1)}>Add</button>
       <button onClick={() => removeRecurringTransaction("r1")}>Remove</button>
+      <button onClick={() => updateRecurringTransaction({ ...rt1, amount: 6000, description: "Updated" })}>Update</button>
       {recurringTransactions.map((rt) => (
         <span key={rt.id}>{rt.description}</span>
       ))}
@@ -142,6 +157,22 @@ describe("RecurringTransactionProvider", () => {
       localStorage.getItem("recurringTransactions")!
     );
     expect(stored).toEqual([rt1]);
+  });
+
+  it("updates a recurring transaction", () => {
+    localStorage.setItem("recurringTransactions", JSON.stringify([rt1, rt2]));
+
+    render(
+      <RecurringTransactionProvider>
+        <TestConsumer />
+      </RecurringTransactionProvider>
+    );
+
+    act(() => screen.getByText("Update").click());
+
+    expect(screen.getByText("Updated")).toBeInTheDocument();
+    expect(screen.queryByText("Salary")).not.toBeInTheDocument();
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
   });
 
   it("throws when useRecurringTransactions is called outside provider", () => {

@@ -10,7 +10,8 @@ import {
 export type RecurringTransactionAction =
   | { type: "add"; recurringTransaction: RecurringTransaction }
   | { type: "remove"; id: string }
-  | { type: "set"; recurringTransactions: RecurringTransaction[] };
+  | { type: "set"; recurringTransactions: RecurringTransaction[] }
+  | { type: "update"; recurringTransaction: RecurringTransaction };
 
 export function recurringTransactionReducer(
   state: RecurringTransaction[],
@@ -23,6 +24,8 @@ export function recurringTransactionReducer(
       return state.filter((rt) => rt.id !== action.id);
     case "set":
       return action.recurringTransactions;
+    case "update":
+      return state.map((rt) => (rt.id === action.recurringTransaction.id ? action.recurringTransaction : rt));
   }
 }
 
@@ -30,6 +33,7 @@ type RecurringTransactionContextValue = {
   recurringTransactions: RecurringTransaction[];
   addRecurringTransaction: (rt: RecurringTransaction) => void;
   removeRecurringTransaction: (id: string) => void;
+  updateRecurringTransaction: (rt: RecurringTransaction) => void;
 };
 
 const RecurringTransactionContext =
@@ -62,12 +66,17 @@ export function RecurringTransactionProvider({
     dispatch({ type: "remove", id });
   }
 
+  function updateRecurringTransaction(rt: RecurringTransaction) {
+    dispatch({ type: "update", recurringTransaction: rt });
+  }
+
   return (
     <RecurringTransactionContext
       value={{
         recurringTransactions,
         addRecurringTransaction,
         removeRecurringTransaction,
+        updateRecurringTransaction,
       }}
     >
       {children}

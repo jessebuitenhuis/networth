@@ -6,6 +6,8 @@ import { isTransactionProjected } from "@/services/isTransactionProjected";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { formatDate } from "@/lib/dateUtils";
 import { TransactionListItem } from "./TransactionListItem";
+import { EditTransactionDialog } from "./EditTransactionDialog";
+import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 
 type DisplayTransaction = {
   id: string;
@@ -14,7 +16,7 @@ type DisplayTransaction = {
   amount: number;
   isProjected: boolean;
   isRecurring: boolean;
-  onDelete: () => void;
+  editAction: React.ReactNode;
 };
 
 type TransactionListProps = {
@@ -22,9 +24,8 @@ type TransactionListProps = {
 };
 
 export function TransactionList({ accountId }: TransactionListProps) {
-  const { transactions, removeTransaction } = useTransactions();
-  const { recurringTransactions, removeRecurringTransaction } =
-    useRecurringTransactions();
+  const { transactions } = useTransactions();
+  const { recurringTransactions } = useRecurringTransactions();
 
   const today = formatDate(new Date());
 
@@ -37,23 +38,24 @@ export function TransactionList({ accountId }: TransactionListProps) {
       amount: tx.amount,
       isProjected: isTransactionProjected(tx),
       isRecurring: false,
-      onDelete: () => removeTransaction(tx.id),
+      editAction: <EditTransactionDialog transaction={tx} />,
     }));
 
-  const recurringItems: DisplayTransaction[] = recurringTransactions
+  const recurringItems = recurringTransactions
     .filter((rt) => rt.accountId === accountId)
     .map((rt) => {
       const next = getNextOccurrence(rt, today);
       if (!next) return null;
-      return {
+      const item: DisplayTransaction = {
         id: next.id,
         description: next.description,
         date: next.date,
         amount: next.amount,
         isProjected: true,
         isRecurring: true,
-        onDelete: () => removeRecurringTransaction(rt.id),
+        editAction: <EditRecurringTransactionDialog recurringTransaction={rt} />,
       };
+      return item;
     })
     .filter((item): item is DisplayTransaction => item !== null);
 
@@ -73,7 +75,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
           description={item.description}
           date={item.date}
           amount={item.amount}
-          onDelete={item.onDelete}
+          editAction={item.editAction}
           isProjected={item.isProjected}
           isRecurring={item.isRecurring}
         />

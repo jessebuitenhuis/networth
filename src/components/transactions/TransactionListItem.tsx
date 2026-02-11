@@ -1,25 +1,24 @@
 import { Repeat } from "lucide-react";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type TransactionListItemProps = {
   description: string;
   date: string;
   amount: number;
-  onDelete: () => void;
   isProjected?: boolean;
   isRecurring?: boolean;
+  editAction?: React.ReactNode;
 };
 
 export function TransactionListItem({
   description,
   date,
   amount,
-  onDelete,
   isProjected,
   isRecurring,
+  editAction,
 }: TransactionListItemProps) {
   return (
     <li>
@@ -42,9 +41,7 @@ export function TransactionListItem({
           >
             {formatSignedCurrency(amount)}
           </span>
-          <Button variant="ghost" size="sm" onClick={onDelete}>
-            Delete
-          </Button>
+          {editAction}
         </div>
       </Card>
     </li>

@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { TransactionListItem } from "./TransactionListItem";
 
 describe("TransactionListItem", () => {
@@ -10,7 +9,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
       />
     );
     expect(screen.getByText("Groceries")).toBeInTheDocument();
@@ -22,7 +20,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
       />
     );
     expect(screen.getByText("1/20/2024")).toBeInTheDocument();
@@ -34,7 +31,6 @@ describe("TransactionListItem", () => {
         description="Salary"
         date="2024-01-15"
         amount={1000}
-        onDelete={() => {}}
       />
     );
     const amount = screen.getByText("+$1,000.00");
@@ -47,7 +43,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
       />
     );
     const amount = screen.getByText("-$200.00");
@@ -60,7 +55,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
       />
     );
     const card = container.querySelector("[data-slot='card']");
@@ -73,7 +67,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
         isProjected
       />
     );
@@ -87,7 +80,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
         isProjected
       />
     );
@@ -101,7 +93,6 @@ describe("TransactionListItem", () => {
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={() => {}}
       />
     );
     expect(screen.queryByText("Recurring")).not.toBeInTheDocument();
@@ -113,26 +104,21 @@ describe("TransactionListItem", () => {
         description="Salary"
         date="2024-01-15"
         amount={5000}
-        onDelete={() => {}}
         isRecurring
       />
     );
     expect(screen.getByText("Recurring")).toBeInTheDocument();
   });
 
-  it("calls onDelete when delete button is clicked", async () => {
-    const onDelete = vi.fn();
-    const user = userEvent.setup();
+  it("renders editAction when provided", () => {
     render(
       <TransactionListItem
         description="Groceries"
         date="2024-01-20"
         amount={-200}
-        onDelete={onDelete}
+        editAction={<button aria-label="Edit">Edit</button>}
       />
     );
-
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    expect(onDelete).toHaveBeenCalledOnce();
+    expect(screen.getByLabelText("Edit")).toBeInTheDocument();
   });
 });
