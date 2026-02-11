@@ -45,8 +45,8 @@ Once requirements are clear, enter plan mode using `EnterPlanMode` and produce a
 3. **Implement** — list the production files to create or modify, and describe what each change does
 4. **Verify** — run `npm run dev:random-port` to confirm everything works end-to-end
 5. **Commit** — use the `/commit` skill to commit the changes inside the worktree
-6. **Review** — ask the user to review the changes before proceeding
-7. **Merge & cleanup** — once approved, use the `/worktree` skill to merge the branch into main and remove the worktree
+6. **Review** — start a dev server with `npm run dev:random-port` **in the background** so the user can interact with the app. Share the URL with the user and ask them to review the changes. Keep the server running until the user confirms they are done reviewing.
+7. **Merge & cleanup** — once approved, stop the dev server, then use the `/worktree` skill to merge the branch into main and remove the worktree
 
 The plan should:
 - Follow existing patterns and conventions in the codebase
