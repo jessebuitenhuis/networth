@@ -32,6 +32,7 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
                     <SidebarMenuButton asChild isActive={item.isActive}>
                       <a href={item.url}>{item.title}</a>
                     </SidebarMenuButton>
+                    {item.action}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

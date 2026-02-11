@@ -5,7 +5,7 @@ import { useTransactions } from "@/context/TransactionContext";
 import { AccountListItem } from "./AccountListItem";
 
 export function AccountList() {
-  const { accounts, removeAccount } = useAccounts();
+  const { accounts } = useAccounts();
   const { getBalance } = useTransactions();
 
   if (accounts.length === 0) {
@@ -20,7 +20,6 @@ export function AccountList() {
           name={account.name}
           type={account.type}
           balance={getBalance(account.id)}
-          onRemove={() => removeAccount(account.id)}
         />
       ))}
     </ul>

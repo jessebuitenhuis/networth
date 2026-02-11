@@ -23,6 +23,14 @@ const tx2: Transaction = {
   description: "Groceries",
 };
 
+const tx3: Transaction = {
+  id: "t3",
+  accountId: "a2",
+  amount: 500,
+  date: "2024-01-01",
+  description: "Other account",
+};
+
 describe("transactionReducer", () => {
   it("adds a transaction", () => {
     const result = transactionReducer([], { type: "add", transaction: tx1 });
@@ -41,10 +49,18 @@ describe("transactionReducer", () => {
     });
     expect(result).toEqual([tx1, tx2]);
   });
+
+  it("removes all transactions by accountId", () => {
+    const result = transactionReducer([tx1, tx2, tx3], {
+      type: "removeByAccountId",
+      accountId: "a1",
+    });
+    expect(result).toEqual([tx3]);
+  });
 });
 
 function TestConsumer() {
-  const { transactions, addTransaction, removeTransaction, getBalance } =
+  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, getBalance } =
     useTransactions();
   return (
     <div>
@@ -52,6 +68,7 @@ function TestConsumer() {
       <span data-testid="balance">{getBalance("a1")}</span>
       <button onClick={() => addTransaction(tx1)}>Add</button>
       <button onClick={() => removeTransaction("t1")}>Remove</button>
+      <button onClick={() => removeTransactionsByAccountId("a1")}>Remove By Account</button>
       {transactions.map((t) => (
         <span key={t.id}>{t.description}</span>
       ))}
@@ -158,6 +175,23 @@ describe("TransactionProvider", () => {
     act(() => {});
 
     expect(screen.getByTestId("balance")).toHaveTextContent("1000");
+  });
+
+  it("removes all transactions for an account", () => {
+    localStorage.setItem("transactions", JSON.stringify([tx1, tx2, tx3]));
+
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => screen.getByText("Remove By Account").click());
+
+    expect(screen.getByTestId("count")).toHaveTextContent("1");
+    expect(screen.getByText("Other account")).toBeInTheDocument();
+    expect(screen.queryByText("Opening balance")).not.toBeInTheDocument();
+    expect(screen.queryByText("Groceries")).not.toBeInTheDocument();
   });
 
   it("throws when useTransactions is called outside provider", () => {

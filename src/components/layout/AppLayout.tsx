@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAccounts } from "@/context/AccountContext";
 import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
+import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup";
 
@@ -21,6 +22,7 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
       items: accounts.map((a) => ({
         title: a.name,
         url: `/accounts/${a.id}`,
+        action: <EditAccountDialog account={a} />,
       })),
       action: <CreateAccountDialog />,
     };
