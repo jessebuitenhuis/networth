@@ -1,8 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import Home from "./page";
+
+vi.stubGlobal(
+  "ResizeObserver",
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+);
 
 function renderPage() {
   return render(
@@ -39,5 +48,10 @@ describe("Dashboard", () => {
   it("renders account list", () => {
     renderPage();
     expect(screen.getByText("No accounts yet.")).toBeInTheDocument();
+  });
+
+  it("renders the net worth chart", () => {
+    renderPage();
+    expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
   });
 });
