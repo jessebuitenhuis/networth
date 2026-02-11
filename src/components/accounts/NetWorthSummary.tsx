@@ -1,6 +1,7 @@
 "use client";
 
 import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
 
 function formatCurrency(amount: number): string {
@@ -13,9 +14,11 @@ function formatCurrency(amount: number): string {
 
 export function NetWorthSummary() {
   const { accounts } = useAccounts();
+  const { getBalance } = useTransactions();
 
   const netWorth = accounts.reduce((sum, a) => {
-    return a.type === AccountType.Asset ? sum + a.balance : sum - a.balance;
+    const balance = getBalance(a.id);
+    return a.type === AccountType.Asset ? sum + balance : sum - balance;
   }, 0);
 
   return (

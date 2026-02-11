@@ -3,13 +3,21 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { NetWorthSummary } from "./NetWorthSummary";
 import { AccountType } from "@/models/AccountType";
 import type { Account } from "@/models/Account";
+import type { Transaction } from "@/models/Transaction";
 import { AccountProvider } from "@/context/AccountContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 
-function renderWithProvider(accounts: Account[] = []) {
+function renderWithProvider(
+  accounts: Account[] = [],
+  transactions: Transaction[] = []
+) {
   localStorage.setItem("accounts", JSON.stringify(accounts));
+  localStorage.setItem("transactions", JSON.stringify(transactions));
   return render(
     <AccountProvider>
-      <NetWorthSummary />
+      <TransactionProvider>
+        <NetWorthSummary />
+      </TransactionProvider>
     </AccountProvider>
   );
 }
@@ -23,20 +31,33 @@ describe("NetWorthSummary", () => {
   });
 
   it("displays sum of assets minus liabilities", async () => {
-    renderWithProvider([
-      { id: "1", name: "Checking", type: AccountType.Asset, balance: 5000 },
-      { id: "2", name: "Savings", type: AccountType.Asset, balance: 3000 },
-      { id: "3", name: "Credit Card", type: AccountType.Liability, balance: 1500 },
-    ]);
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+      { id: "3", name: "Credit Card", type: AccountType.Liability },
+    ];
+    const transactions: Transaction[] = [
+      { id: "t1", accountId: "1", amount: 5000, date: "2024-01-01", description: "Opening" },
+      { id: "t2", accountId: "2", amount: 3000, date: "2024-01-01", description: "Opening" },
+      { id: "t3", accountId: "3", amount: 1500, date: "2024-01-01", description: "Opening" },
+    ];
+
+    renderWithProvider(accounts, transactions);
 
     expect(await screen.findByText("$6,500.00")).toBeInTheDocument();
   });
 
   it("displays negative net worth", async () => {
-    renderWithProvider([
-      { id: "1", name: "Checking", type: AccountType.Asset, balance: 500 },
-      { id: "2", name: "Loan", type: AccountType.Liability, balance: 2000 },
-    ]);
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Loan", type: AccountType.Liability },
+    ];
+    const transactions: Transaction[] = [
+      { id: "t1", accountId: "1", amount: 500, date: "2024-01-01", description: "Opening" },
+      { id: "t2", accountId: "2", amount: 2000, date: "2024-01-01", description: "Opening" },
+    ];
+
+    renderWithProvider(accounts, transactions);
 
     expect(await screen.findByText("-$1,500.00")).toBeInTheDocument();
   });

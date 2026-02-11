@@ -1,12 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, beforeEach } from "vitest";
 import { AccountProvider } from "@/context/AccountContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 import Home from "./page";
 
 function renderPage() {
   return render(
     <AccountProvider>
-      <Home />
+      <TransactionProvider>
+        <Home />
+      </TransactionProvider>
     </AccountProvider>
   );
 }

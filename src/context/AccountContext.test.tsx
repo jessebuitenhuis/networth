@@ -9,14 +9,12 @@ const asset: Account = {
   id: "1",
   name: "Checking",
   type: AccountType.Asset,
-  balance: 1000,
 };
 
 const liability: Account = {
   id: "2",
   name: "Credit Card",
   type: AccountType.Liability,
-  balance: 500,
 };
 
 describe("accountReducer", () => {

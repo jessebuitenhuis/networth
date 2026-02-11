@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export function CreateAccountForm() {
   const { addAccount } = useAccounts();
+  const { addTransaction } = useTransactions();
   const [name, setName] = useState("");
   const [type, setType] = useState<AccountType>(AccountType.Asset);
   const [balance, setBalance] = useState(0);
@@ -16,12 +18,23 @@ export function CreateAccountForm() {
     e.preventDefault();
     if (!name.trim()) return;
 
+    const accountId = crypto.randomUUID();
+
     addAccount({
-      id: crypto.randomUUID(),
+      id: accountId,
       name: name.trim(),
       type,
-      balance,
     });
+
+    if (balance !== 0) {
+      addTransaction({
+        id: crypto.randomUUID(),
+        accountId,
+        amount: balance,
+        date: new Date().toISOString().split("T")[0],
+        description: "Opening balance",
+      });
+    }
 
     setName("");
     setBalance(0);

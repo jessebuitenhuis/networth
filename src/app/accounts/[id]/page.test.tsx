@@ -1,0 +1,74 @@
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import AccountDetailPage from "./page";
+import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/models/Account";
+import type { Transaction } from "@/models/Transaction";
+import { AccountProvider } from "@/context/AccountContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+
+const accounts: Account[] = [
+  { id: "a1", name: "Checking", type: AccountType.Asset },
+];
+
+const transactions: Transaction[] = [
+  { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Opening balance" },
+  { id: "t2", accountId: "a1", amount: -200, date: "2024-01-02", description: "Groceries" },
+];
+
+function renderPage(id: string) {
+  return render(
+    <AccountProvider>
+      <TransactionProvider>
+        <AccountDetailPage params={{ id }} />
+      </TransactionProvider>
+    </AccountProvider>
+  );
+}
+
+describe("AccountDetailPage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal("crypto", { randomUUID: () => "test-uuid" });
+  });
+
+  it("shows account name as heading", async () => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    renderPage("a1");
+
+    expect(await screen.findByRole("heading", { name: "Checking" })).toBeInTheDocument();
+  });
+
+  it("shows current balance computed from transactions", async () => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    renderPage("a1");
+
+    expect(await screen.findByText("$800.00")).toBeInTheDocument();
+  });
+
+  it("renders transaction list", async () => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    renderPage("a1");
+
+    expect(await screen.findByText("Opening balance")).toBeInTheDocument();
+    expect(screen.getByText("Groceries")).toBeInTheDocument();
+  });
+
+  it("renders add transaction form", async () => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify([]));
+    renderPage("a1");
+
+    expect(await screen.findByLabelText("Amount")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Transaction" })).toBeInTheDocument();
+  });
+
+  it("shows 'Account not found' for invalid ID", () => {
+    renderPage("nonexistent");
+
+    expect(screen.getByText("Account not found")).toBeInTheDocument();
+  });
+});

@@ -1,5 +1,9 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { loadAccounts, saveAccounts } from "./AccountStorage";
+import {
+  loadAccounts,
+  saveAccounts,
+  migrateAccountBalances,
+} from "./AccountStorage";
 import { AccountType } from "@/models/AccountType";
 import type { Account } from "@/models/Account";
 
@@ -15,7 +19,7 @@ describe("AccountStorage", () => {
 
     it("returns stored accounts", () => {
       const accounts: Account[] = [
-        { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
+        { id: "1", name: "Checking", type: AccountType.Asset },
       ];
       localStorage.setItem("accounts", JSON.stringify(accounts));
 
@@ -32,7 +36,7 @@ describe("AccountStorage", () => {
   describe("saveAccounts", () => {
     it("persists accounts to localStorage", () => {
       const accounts: Account[] = [
-        { id: "1", name: "Savings", type: AccountType.Asset, balance: 5000 },
+        { id: "1", name: "Savings", type: AccountType.Asset },
       ];
 
       saveAccounts(accounts);
@@ -42,16 +46,92 @@ describe("AccountStorage", () => {
 
     it("overwrites previously stored accounts", () => {
       const first: Account[] = [
-        { id: "1", name: "Old", type: AccountType.Asset, balance: 100 },
+        { id: "1", name: "Old", type: AccountType.Asset },
       ];
       const second: Account[] = [
-        { id: "2", name: "New", type: AccountType.Liability, balance: 200 },
+        { id: "2", name: "New", type: AccountType.Liability },
       ];
 
       saveAccounts(first);
       saveAccounts(second);
 
       expect(JSON.parse(localStorage.getItem("accounts")!)).toEqual(second);
+    });
+  });
+
+  describe("migrateAccountBalances", () => {
+    it("returns empty array when no accounts stored", () => {
+      expect(migrateAccountBalances()).toEqual([]);
+    });
+
+    it("skips migration when transactions already exist", () => {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify([
+          { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
+        ])
+      );
+      localStorage.setItem("transactions", JSON.stringify([]));
+
+      expect(migrateAccountBalances()).toEqual([]);
+
+      const accounts = JSON.parse(localStorage.getItem("accounts")!);
+      expect(accounts[0].balance).toBe(1000);
+    });
+
+    it("creates opening balance transactions for accounts with non-zero balance", () => {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify([
+          { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
+          { id: "2", name: "Credit Card", type: AccountType.Liability, balance: 500 },
+        ])
+      );
+
+      const transactions = migrateAccountBalances();
+
+      expect(transactions).toHaveLength(2);
+      expect(transactions[0]).toMatchObject({
+        accountId: "1",
+        amount: 1000,
+        description: "Opening balance",
+      });
+      expect(transactions[1]).toMatchObject({
+        accountId: "2",
+        amount: 500,
+        description: "Opening balance",
+      });
+    });
+
+    it("skips accounts with zero balance", () => {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify([
+          { id: "1", name: "Empty", type: AccountType.Asset, balance: 0 },
+        ])
+      );
+
+      const transactions = migrateAccountBalances();
+
+      expect(transactions).toHaveLength(0);
+    });
+
+    it("removes balance field from stored accounts after migration", () => {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify([
+          { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
+        ])
+      );
+
+      migrateAccountBalances();
+
+      const accounts = JSON.parse(localStorage.getItem("accounts")!);
+      expect(accounts[0]).toEqual({
+        id: "1",
+        name: "Checking",
+        type: AccountType.Asset,
+      });
     });
   });
 });

@@ -1,10 +1,12 @@
 "use client";
 
 import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
 import { Button } from "@/components/ui/button";
 
 export function AccountList() {
   const { accounts, removeAccount } = useAccounts();
+  const { getBalance } = useTransactions();
 
   if (accounts.length === 0) {
     return <p className="text-muted-foreground">No accounts yet.</p>;
@@ -25,7 +27,7 @@ export function AccountList() {
           </div>
           <div className="flex items-center gap-2">
             <span className="font-mono">
-              {account.balance.toLocaleString("en-US", {
+              {getBalance(account.id).toLocaleString("en-US", {
                 style: "currency",
                 currency: "USD",
               })}

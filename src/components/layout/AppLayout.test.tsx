@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 import { AppLayout } from "./AppLayout";
 import type { NavGroup } from "./NavGroup";
 import { AccountType } from "@/models/AccountType";
@@ -18,7 +19,9 @@ function renderWithProvider(navGroups: NavGroup[], children: React.ReactNode) {
   return render(
     <SidebarProvider>
       <AccountProvider>
-        <AppLayout navGroups={navGroups}>{children}</AppLayout>
+        <TransactionProvider>
+          <AppLayout navGroups={navGroups}>{children}</AppLayout>
+        </TransactionProvider>
       </AccountProvider>
     </SidebarProvider>
   );
@@ -51,8 +54,8 @@ describe("AppLayout", () => {
 
   it("renders Accounts nav group when accounts exist", async () => {
     const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset, balance: 1000 },
-      { id: "2", name: "Savings", type: AccountType.Asset, balance: 5000 },
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
     ];
     localStorage.setItem("accounts", JSON.stringify(accounts));
 
@@ -61,6 +64,18 @@ describe("AppLayout", () => {
     expect(await screen.findByText("Accounts")).toBeInTheDocument();
     expect(screen.getByText("Checking")).toBeInTheDocument();
     expect(screen.getByText("Savings")).toBeInTheDocument();
+  });
+
+  it("links accounts to /accounts/:id", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    const link = await screen.findByRole("link", { name: "Checking" });
+    expect(link).toHaveAttribute("href", "/accounts/1");
   });
 
   it("does not render Accounts nav group when no accounts exist", () => {

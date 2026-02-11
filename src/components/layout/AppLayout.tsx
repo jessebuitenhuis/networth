@@ -21,7 +21,7 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
       label: "Accounts",
       items: accounts.map((a) => ({
         title: a.name,
-        url: `#account-${a.id}`,
+        url: `/accounts/${a.id}`,
       })),
     };
     return [...navGroups, accountsGroup];

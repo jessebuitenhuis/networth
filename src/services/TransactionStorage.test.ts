@@ -1,0 +1,62 @@
+import { describe, expect, it, beforeEach } from "vitest";
+import { loadTransactions, saveTransactions } from "./TransactionStorage";
+import type { Transaction } from "@/models/Transaction";
+
+const transaction: Transaction = {
+  id: "t1",
+  accountId: "a1",
+  amount: 500,
+  date: "2024-01-15",
+  description: "Opening balance",
+};
+
+describe("TransactionStorage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  describe("loadTransactions", () => {
+    it("returns empty array when nothing is stored", () => {
+      expect(loadTransactions()).toEqual([]);
+    });
+
+    it("returns stored transactions", () => {
+      localStorage.setItem("transactions", JSON.stringify([transaction]));
+
+      expect(loadTransactions()).toEqual([transaction]);
+    });
+
+    it("returns empty array when stored data is invalid JSON", () => {
+      localStorage.setItem("transactions", "not-json");
+
+      expect(loadTransactions()).toEqual([]);
+    });
+  });
+
+  describe("saveTransactions", () => {
+    it("persists transactions to localStorage", () => {
+      saveTransactions([transaction]);
+
+      expect(JSON.parse(localStorage.getItem("transactions")!)).toEqual([
+        transaction,
+      ]);
+    });
+
+    it("overwrites previously stored transactions", () => {
+      const second: Transaction = {
+        id: "t2",
+        accountId: "a1",
+        amount: -100,
+        date: "2024-01-16",
+        description: "Groceries",
+      };
+
+      saveTransactions([transaction]);
+      saveTransactions([second]);
+
+      expect(JSON.parse(localStorage.getItem("transactions")!)).toEqual([
+        second,
+      ]);
+    });
+  });
+});
