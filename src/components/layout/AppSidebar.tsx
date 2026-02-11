@@ -24,6 +24,7 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
         {navGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            {group.action}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (

@@ -12,7 +12,7 @@ Account management UI for the dashboard page.
 |---|---|---|
 | `AccountList` | Smart | Reads from `useAccounts` + `useTransactions`, renders list of `AccountListItem` |
 | `AccountListItem` | Dumb | Displays single account (name, type, balance, remove button) |
-| `CreateAccountForm` | Smart | Form to add a new account with optional opening balance. Uses `useAccounts` + `useTransactions` |
+| `CreateAccountDialog` | Smart | Dialog with form to add a new account with optional opening balance. Triggered from sidebar via "+" button. Uses `useAccounts` + `useTransactions` |
 | `NetWorthSummary` | Smart | Computes net worth from contexts, passes to `NetWorthCard` |
 | `NetWorthCard` | Dumb | Displays formatted net worth number in a card |
 
@@ -43,12 +43,12 @@ App shell components.
 | Component | Type | Description |
 |---|---|---|
 | `AppLayout` | Smart | Wraps page content with sidebar. Reads accounts to build sidebar nav groups. |
-| `AppSidebar` | Dumb | Renders sidebar with nav groups using shadcn `Sidebar*` components |
-| `NavGroup` | Type | `{ label, items: NavItem[] }` |
+| `AppSidebar` | Dumb | Renders sidebar with nav groups using shadcn `Sidebar*` components. Supports optional `action` per group. |
+| `NavGroup` | Type | `{ label, items: NavItem[], action?: ReactNode }` |
 | `NavItem` | Type | `{ title, url, isActive? }` |
 
 ### `ui/`
 
 Auto-generated shadcn/ui primitives. **Do not edit directly** — these are managed by `npx shadcn add`.
 
-Available: button, card, input, label, select, separator, sheet, sidebar, skeleton, tooltip.
+Available: button, card, dialog, input, label, select, separator, sheet, sidebar, skeleton, tooltip.

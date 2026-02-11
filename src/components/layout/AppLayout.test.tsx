@@ -78,9 +78,17 @@ describe("AppLayout", () => {
     expect(link).toHaveAttribute("href", "/accounts/1");
   });
 
-  it("does not render Accounts nav group when no accounts exist", () => {
+  it("renders Accounts nav group even when no accounts exist", () => {
     renderWithProvider(testGroups, <p>Content</p>);
 
-    expect(screen.queryByText("Accounts")).not.toBeInTheDocument();
+    expect(screen.getByText("Accounts")).toBeInTheDocument();
+  });
+
+  it("renders add account button in Accounts group", () => {
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    expect(
+      screen.getByRole("button", { name: "Add Account" })
+    ).toBeInTheDocument();
   });
 });
