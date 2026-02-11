@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, beforeEach } from "vitest";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
 import type { Transaction } from "@/models/Transaction";
 
 const mockTransaction: Transaction = {
@@ -21,9 +22,11 @@ describe("EditTransactionDialog", () => {
 
   it("opens dialog with current values pre-populated", () => {
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -36,9 +39,11 @@ describe("EditTransactionDialog", () => {
   it("updates transaction when saving with new values", async () => {
     const user = userEvent.setup();
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -68,9 +73,11 @@ describe("EditTransactionDialog", () => {
   it("prevents submit when amount is 0", async () => {
     const user = userEvent.setup();
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -87,9 +94,11 @@ describe("EditTransactionDialog", () => {
 
   it("shows confirmation dialog when clicking delete", () => {
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -101,9 +110,11 @@ describe("EditTransactionDialog", () => {
 
   it("removes transaction when confirming delete", () => {
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -116,9 +127,11 @@ describe("EditTransactionDialog", () => {
 
   it("returns to edit dialog when canceling delete", () => {
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -131,9 +144,11 @@ describe("EditTransactionDialog", () => {
 
   it("resets form when reopening dialog", () => {
     render(
-      <TransactionProvider>
-        <EditTransactionDialog transaction={mockTransaction} />
-      </TransactionProvider>
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());

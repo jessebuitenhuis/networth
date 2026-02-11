@@ -45,18 +45,13 @@ export function ProjectedNetWorthChart() {
 
   const filteredAccounts = accounts.filter((a) => !excludedIds.has(a.id));
 
-  const defaultScenarioId = scenarios[0]?.id;
+  // Baseline (no scenarioId) + active scenario
   const filteredRecurringTransactions = recurringTransactions.filter(
-    (rt) =>
-      rt.scenarioId === activeScenarioId ||
-      (!rt.scenarioId && activeScenarioId === defaultScenarioId)
+    (rt) => !rt.scenarioId || rt.scenarioId === activeScenarioId
   );
 
   const filteredProjectedTransactions = transactions.filter(
-    (t) =>
-      !t.isProjected ||
-      t.scenarioId === activeScenarioId ||
-      (!t.scenarioId && activeScenarioId === defaultScenarioId)
+    (t) => !t.isProjected || !t.scenarioId || t.scenarioId === activeScenarioId
   );
 
   const data = computeProjectedSeries(

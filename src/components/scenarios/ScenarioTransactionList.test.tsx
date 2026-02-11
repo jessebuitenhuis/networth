@@ -292,7 +292,7 @@ describe("ScenarioTransactionList", () => {
     ).toBeInTheDocument();
   });
 
-  it("excludes projected transactions with no scenarioId when active scenario is not default", () => {
+  it("includes baseline transactions (no scenarioId) in all scenarios", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -306,18 +306,16 @@ describe("ScenarioTransactionList", () => {
         accountId: "1",
         amount: 100,
         date: "2024-06-15",
-        description: "Untagged transaction",
+        description: "Baseline transaction",
         isProjected: true,
-        // No scenarioId - belongs to default (scenario-1)
+        // No scenarioId - baseline, should appear in all scenarios
       },
     ];
 
-    // Render with scenario-2 active (not the default)
+    // Render with scenario-2 active (not the first scenario)
     renderWithProviders(accounts, transactions, [], scenarios, "scenario-2");
 
-    // Should show empty state since the transaction belongs to default scenario
-    expect(
-      screen.getByText(/no transactions in this scenario/i)
-    ).toBeInTheDocument();
+    // Should show the baseline transaction since baseline appears in all scenarios
+    expect(screen.getByText(/Baseline transaction.*Checking/)).toBeInTheDocument();
   });
 });

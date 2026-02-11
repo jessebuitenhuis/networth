@@ -56,7 +56,7 @@ export function EditRecurringTransactionDialog({
   const [startDate, setStartDate] = useState(recurringTransaction.startDate);
   const [endDate, setEndDate] = useState(recurringTransaction.endDate || "");
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
-    recurringTransaction.scenarioId || scenarios[0]?.id || ""
+    recurringTransaction.scenarioId || "none"
   );
 
   function resetForm() {
@@ -65,7 +65,7 @@ export function EditRecurringTransactionDialog({
     setFrequency(recurringTransaction.frequency);
     setStartDate(recurringTransaction.startDate);
     setEndDate(recurringTransaction.endDate || "");
-    setSelectedScenarioId(recurringTransaction.scenarioId || scenarios[0]?.id || "");
+    setSelectedScenarioId(recurringTransaction.scenarioId || "none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -79,7 +79,7 @@ export function EditRecurringTransactionDialog({
       frequency,
       startDate,
       endDate: endDate || undefined,
-      scenarioId: selectedScenarioId || undefined,
+      scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
     });
     setIsOpen(false);
   }
@@ -144,6 +144,7 @@ export function EditRecurringTransactionDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None (Baseline)</SelectItem>
                 {scenarios.map((scenario) => (
                   <SelectItem key={scenario.id} value={scenario.id}>
                     {scenario.name}

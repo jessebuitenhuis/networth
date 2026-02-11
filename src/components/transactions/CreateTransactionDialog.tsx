@@ -46,7 +46,7 @@ export function CreateTransactionDialog({
     RecurrenceFrequency.Monthly
   );
   const [endDate, setEndDate] = useState("");
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(() => scenarios[0]?.id || "");
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>("none");
 
   function resetForm() {
     setAmount(0);
@@ -54,7 +54,7 @@ export function CreateTransactionDialog({
     setIsRecurring(false);
     setFrequency(RecurrenceFrequency.Monthly);
     setEndDate("");
-    setSelectedScenarioId(scenarios[0]?.id || "");
+    setSelectedScenarioId("none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -70,7 +70,7 @@ export function CreateTransactionDialog({
         frequency,
         startDate: date,
         endDate: endDate || undefined,
-        scenarioId: selectedScenarioId || undefined,
+        scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
       });
     } else {
       addTransaction({
@@ -79,6 +79,7 @@ export function CreateTransactionDialog({
         amount,
         date,
         description: description.trim(),
+        scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
       });
     }
 
@@ -132,6 +133,28 @@ export function CreateTransactionDialog({
               placeholder="e.g. Groceries"
             />
           </div>
+          <div>
+            <Label id="tx-scenario-label" className="mb-2">
+              Scenario
+            </Label>
+            <Select
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              aria-labelledby="tx-scenario-label"
+            >
+              <SelectTrigger aria-label="Scenario">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Baseline)</SelectItem>
+                {scenarios.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex items-center gap-2">
             <Checkbox
               id="tx-recurring"
@@ -142,27 +165,6 @@ export function CreateTransactionDialog({
           </div>
           {isRecurring && (
             <>
-              <div>
-                <Label id="tx-scenario-label" className="mb-2">
-                  Scenario
-                </Label>
-                <Select
-                  value={selectedScenarioId}
-                  onValueChange={setSelectedScenarioId}
-                  aria-labelledby="tx-scenario-label"
-                >
-                  <SelectTrigger aria-label="Scenario">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scenarios.map((scenario) => (
-                      <SelectItem key={scenario.id} value={scenario.id}>
-                        {scenario.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div>
                 <Label id="tx-frequency-label" className="mb-2">
                   Frequency

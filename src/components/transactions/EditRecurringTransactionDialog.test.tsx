@@ -198,4 +198,33 @@ describe("EditRecurringTransactionDialog", () => {
 
     expect(screen.getByLabelText("Amount")).toHaveValue(5000);
   });
+
+  it("updates end date when provided", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+
+    const endDateInput = screen.getByLabelText("End Date (optional)");
+    await user.clear(endDateInput);
+    await user.type(endDateInput, "2025-06-30");
+
+    await user.click(screen.getByText("Save"));
+
+    const stored = JSON.parse(
+      localStorage.getItem("recurringTransactions")!
+    );
+    expect(stored[0]).toMatchObject({
+      id: "r1",
+      endDate: "2025-06-30",
+    });
+  });
 });

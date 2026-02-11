@@ -145,4 +145,27 @@ describe("CreateScenarioDialog", () => {
     // Verify no new scenario was created
     expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
+
+  it("closes dialog via Escape key without creating scenario", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "Test Scenario");
+
+    // Close with Escape instead of submitting
+    await user.keyboard("{Escape}");
+
+    // Dialog should be closed
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    // No scenario should have been created
+    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+  });
 });

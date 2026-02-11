@@ -3,10 +3,18 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useTransactions } from "@/context/TransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import type { Transaction } from "@/models/Transaction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -34,15 +42,20 @@ export function EditTransactionDialog({
   transaction,
 }: EditTransactionDialogProps) {
   const { updateTransaction, removeTransaction } = useTransactions();
+  const { scenarios } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(transaction.amount);
   const [date, setDate] = useState(transaction.date);
   const [description, setDescription] = useState(transaction.description);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
+    transaction.scenarioId || "none"
+  );
 
   function resetForm() {
     setAmount(transaction.amount);
     setDate(transaction.date);
     setDescription(transaction.description);
+    setSelectedScenarioId(transaction.scenarioId || "none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -54,6 +67,7 @@ export function EditTransactionDialog({
       amount,
       date,
       description: description.trim(),
+      scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
     });
     setIsOpen(false);
   }
@@ -116,6 +130,28 @@ export function EditTransactionDialog({
               onChange={(e) => setDescription(e.target.value)}
               aria-label="Description"
             />
+          </div>
+          <div>
+            <Label id="edit-transaction-scenario-label" className="mb-2">
+              Scenario
+            </Label>
+            <Select
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              aria-labelledby="edit-transaction-scenario-label"
+            >
+              <SelectTrigger aria-label="Scenario">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Baseline)</SelectItem>
+                {scenarios.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex justify-between">
             <AlertDialog>

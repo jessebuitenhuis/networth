@@ -28,14 +28,11 @@ export function ScenarioTransactionList() {
   const { accounts } = useAccounts();
 
   const today = formatDate(new Date());
-  const defaultScenarioId = scenarios[0]?.id;
 
+  // Baseline (no scenarioId) + active scenario
   const projectedItems: DisplayTransaction[] = transactions
     .filter(
-      (t) =>
-        t.isProjected &&
-        (t.scenarioId === activeScenarioId ||
-          (!t.scenarioId && activeScenarioId === defaultScenarioId))
+      (t) => t.isProjected && (!t.scenarioId || t.scenarioId === activeScenarioId)
     )
     .map((tx) => {
       const account = accounts.find((a) => a.id === tx.accountId);
@@ -52,11 +49,7 @@ export function ScenarioTransactionList() {
     });
 
   const recurringItems = recurringTransactions
-    .filter(
-      (rt) =>
-        rt.scenarioId === activeScenarioId ||
-        (!rt.scenarioId && activeScenarioId === defaultScenarioId)
-    )
+    .filter((rt) => !rt.scenarioId || rt.scenarioId === activeScenarioId)
     .map((rt) => {
       const next = getNextOccurrence(rt, today);
       if (!next) return null;

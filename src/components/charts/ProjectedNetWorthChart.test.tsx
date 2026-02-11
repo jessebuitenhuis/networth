@@ -193,4 +193,38 @@ describe("ProjectedNetWorthChart", () => {
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
+
+  it("includes projected transactions for active scenario", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+      { id: "scenario-2", name: "Optimistic" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: 500,
+        date: "2024-06-01",
+        description: "Projected bonus",
+        isProjected: true,
+        scenarioId: "scenario-1",
+      },
+      {
+        id: "t-2",
+        accountId: "1",
+        amount: 1000,
+        date: "2024-07-01",
+        description: "Optimistic bonus",
+        isProjected: true,
+        scenarioId: "scenario-2",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
 });
