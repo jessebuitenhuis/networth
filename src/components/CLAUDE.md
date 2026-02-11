@@ -1,0 +1,54 @@
+# Components
+
+Follows a **smart/dumb** separation pattern. Each feature subdirectory contains smart (container) components that use React context and dumb (presentational) components that receive all data via props.
+
+## Subdirectories
+
+### `accounts/`
+
+Account management UI for the dashboard page.
+
+| Component | Type | Description |
+|---|---|---|
+| `AccountList` | Smart | Reads from `useAccounts` + `useTransactions`, renders list of `AccountListItem` |
+| `AccountListItem` | Dumb | Displays single account (name, type, balance, remove button) |
+| `CreateAccountForm` | Smart | Form to add a new account with optional opening balance. Uses `useAccounts` + `useTransactions` |
+| `NetWorthSummary` | Smart | Computes net worth from contexts, passes to `NetWorthCard` |
+| `NetWorthCard` | Dumb | Displays formatted net worth number in a card |
+
+### `charts/`
+
+Net worth visualization on the dashboard.
+
+| Component | Type | Description |
+|---|---|---|
+| `NetWorthChart` | Smart | Main chart component. Uses Recharts `LineChart`. Manages period state and account exclusion toggles. |
+| `PeriodPicker` | Dumb | Row of buttons for selecting `ChartPeriod` (Week/Month/Quarter/Year) |
+| `ChartLegend` | Dumb | Toggleable account buttons to include/exclude accounts from the chart |
+
+### `transactions/`
+
+Transaction management for the account detail page (`/accounts/[id]`).
+
+| Component | Type | Description |
+|---|---|---|
+| `TransactionList` | Smart | Reads from `useTransactions`, filters by `accountId`, renders sorted list |
+| `TransactionListItem` | Dumb | Displays single transaction (description, date, signed amount, delete button) |
+| `CreateTransactionForm` | Smart | Form to add a transaction to a specific account |
+
+### `layout/`
+
+App shell components.
+
+| Component | Type | Description |
+|---|---|---|
+| `AppLayout` | Smart | Wraps page content with sidebar. Reads accounts to build sidebar nav groups. |
+| `AppSidebar` | Dumb | Renders sidebar with nav groups using shadcn `Sidebar*` components |
+| `NavGroup` | Type | `{ label, items: NavItem[] }` |
+| `NavItem` | Type | `{ title, url, isActive? }` |
+
+### `ui/`
+
+Auto-generated shadcn/ui primitives. **Do not edit directly** — these are managed by `npx shadcn add`.
+
+Available: button, card, input, label, select, separator, sheet, sidebar, skeleton, tooltip.
