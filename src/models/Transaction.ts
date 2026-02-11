@@ -5,4 +5,5 @@ export type Transaction = {
   date: string;
   description: string;
   isProjected?: boolean;
+  scenarioId?: string;
 };

@@ -14,6 +14,7 @@ vi.stubGlobal(
 import { CreateTransactionDialog } from "./CreateTransactionDialog";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
@@ -50,9 +51,11 @@ function renderDialog(accountId = "a1") {
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <RecurringTransactionProvider>
-          <TestHarness accountId={accountId} />
-        </RecurringTransactionProvider>
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <TestHarness accountId={accountId} />
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
       </TransactionProvider>
     </AccountProvider>
   );

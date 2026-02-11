@@ -8,6 +8,10 @@ import type { Transaction } from "@/models/Transaction";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import type { Scenario } from "@/models/Scenario";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -20,16 +24,28 @@ vi.stubGlobal(
 
 function renderWithProviders(
   accounts: Account[] = [],
-  transactions: Transaction[] = []
+  transactions: Transaction[] = [],
+  recurringTransactions: RecurringTransaction[] = [],
+  scenarios: Scenario[] = [],
+  activeScenarioId: string | null = null
 ) {
   localStorage.setItem("accounts", JSON.stringify(accounts));
   localStorage.setItem("transactions", JSON.stringify(transactions));
+  localStorage.setItem("recurringTransactions", JSON.stringify(recurringTransactions));
+  if (scenarios.length > 0) {
+    localStorage.setItem("scenarios", JSON.stringify(scenarios));
+  }
+  if (activeScenarioId) {
+    localStorage.setItem("activeScenarioId", activeScenarioId);
+  }
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <RecurringTransactionProvider>
-          <ProjectedNetWorthChart />
-        </RecurringTransactionProvider>
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <ProjectedNetWorthChart />
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
       </TransactionProvider>
     </AccountProvider>
   );
@@ -107,5 +123,74 @@ describe("ProjectedNetWorthChart", () => {
       "aria-pressed",
       "false"
     );
+  });
+
+  it("only includes recurring transactions for active scenario", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+      { id: "scenario-2", name: "Optimistic" },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "1",
+        amount: 100,
+        description: "Base salary",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-1",
+      },
+      {
+        id: "rt-2",
+        accountId: "1",
+        amount: 200,
+        description: "Bonus income",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-2",
+      },
+    ];
+
+    renderWithProviders(
+      accounts,
+      [],
+      recurringTransactions,
+      scenarios,
+      "scenario-1"
+    );
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
+
+  it("treats undefined scenarioId as default scenario", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "1",
+        amount: 100,
+        description: "Legacy transaction",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+      },
+    ];
+
+    renderWithProviders(
+      accounts,
+      [],
+      recurringTransactions,
+      scenarios,
+      "scenario-1"
+    );
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 });

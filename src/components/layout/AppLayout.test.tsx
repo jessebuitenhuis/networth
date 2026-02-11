@@ -7,6 +7,8 @@ vi.mock("next/navigation", () => ({
 }));
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { AppLayout } from "./AppLayout";
 import type { NavGroup } from "./NavGroup";
 import { AccountType } from "@/models/AccountType";
@@ -24,7 +26,11 @@ function renderWithProvider(navGroups: NavGroup[], children: React.ReactNode) {
     <SidebarProvider>
       <AccountProvider>
         <TransactionProvider>
-          <AppLayout navGroups={navGroups}>{children}</AppLayout>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <AppLayout navGroups={navGroups}>{children}</AppLayout>
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
         </TransactionProvider>
       </AccountProvider>
     </SidebarProvider>

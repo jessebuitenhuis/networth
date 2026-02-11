@@ -65,6 +65,20 @@ describe("computeProjectedSeries", () => {
       expect(result[result.length - 1].date).toBe("2024-06-25");
       expect(result).toHaveLength(6);
     });
+
+    it("returns single point for Custom period without range", () => {
+      const result = computeProjectedSeries([], [], ProjectionPeriod.Custom, TODAY);
+      expect(result).toHaveLength(1);
+      expect(result[0].date).toBe(TODAY);
+    });
+
+    it("ensures SixMonths includes exact end date", () => {
+      // Test that the end date is included even if it doesn't align with weekly intervals
+      const result = computeProjectedSeries([], [], ProjectionPeriod.SixMonths, "2024-01-01");
+      const lastDate = result[result.length - 1].date;
+      // 6 months from 2024-01-01 is 2024-07-01
+      expect(lastDate).toBe("2024-07-01");
+    });
   });
 
   it("computes starting net worth from past transactions", () => {
@@ -309,6 +323,36 @@ describe("computeProjectedSeries", () => {
       );
 
       result.forEach((p) => expect(p.netWorth).toBe(5000));
+    });
+
+    it("excludes recurring transaction occurrences on or before today", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const recurring: RecurringTransaction[] = [
+        {
+          id: "r1",
+          accountId: "1",
+          amount: 1000,
+          description: "Salary with occurrence on today",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: TODAY, // Has occurrence exactly on TODAY
+        },
+      ];
+      const result = computeProjectedSeries(
+        accounts,
+        [],
+        ProjectionPeriod.OneMonth,
+        TODAY,
+        undefined,
+        recurring
+      );
+
+      // Occurrence on TODAY should be excluded (only future > today)
+      const onToday = result.find((p) => p.date === TODAY);
+      expect(onToday!.netWorth).toBe(0);
+
+      // But future occurrences should be included
+      const future = result.filter((p) => p.date > TODAY && p.netWorth > 0);
+      expect(future.length).toBeGreaterThan(0);
     });
   });
 });

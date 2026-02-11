@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function CreateTransactionDialog({
 }: CreateTransactionDialogProps) {
   const { addTransaction } = useTransactions();
   const { addRecurringTransaction } = useRecurringTransactions();
+  const { activeScenarioId } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(
@@ -66,6 +68,7 @@ export function CreateTransactionDialog({
         frequency,
         startDate: date,
         endDate: endDate || undefined,
+        scenarioId: activeScenarioId || undefined,
       });
     } else {
       addTransaction({

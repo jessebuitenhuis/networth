@@ -6,6 +6,7 @@ import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 
 const transactions: Transaction[] = [
@@ -27,9 +28,11 @@ function renderWithProvider(
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <RecurringTransactionProvider>
-          <TransactionList accountId={accountId} />
-        </RecurringTransactionProvider>
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <TransactionList accountId={accountId} />
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
       </TransactionProvider>
     </AccountProvider>
   );

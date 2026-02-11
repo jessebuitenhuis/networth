@@ -47,6 +47,7 @@ export function migrateAccountBalances(): Transaction[] {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const migrated = legacy.map(({ balance: _, ...rest }) => rest);
   saveAccounts(migrated);
 

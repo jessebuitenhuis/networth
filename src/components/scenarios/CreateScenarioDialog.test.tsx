@@ -1,0 +1,148 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { CreateScenarioDialog } from "./CreateScenarioDialog";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioStorage } from "@/services/ScenarioStorage";
+
+vi.mock("@/services/ScenarioStorage");
+
+describe("CreateScenarioDialog", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
+      { id: "1", name: "Base Plan" },
+    ]);
+    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue("1");
+  });
+
+  it("renders trigger button", () => {
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: /new scenario/i })
+    ).toBeInTheDocument();
+  });
+
+  it("opens dialog when trigger is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /create scenario/i })
+    ).toBeInTheDocument();
+  });
+
+  it("creates scenario with entered name", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
+    await user.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    const lastCall = calls[calls.length - 1][0];
+    expect(lastCall).toContainEqual(
+      expect.objectContaining({ name: "Optimistic Plan" })
+    );
+  });
+
+  it("sets new scenario as active", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "New Scenario");
+    await user.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(ScenarioStorage.saveActiveScenarioId).toHaveBeenCalled();
+  });
+
+  it("closes dialog after creating scenario", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "Test");
+    await user.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("clears input when dialog is closed", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    const input = screen.getByLabelText(/name/i);
+    await user.type(input, "Test");
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    expect(screen.getByLabelText(/name/i)).toHaveValue("");
+  });
+
+  it("disables create button when name is empty", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+
+    expect(screen.getByRole("button", { name: /create$/i })).toBeDisabled();
+  });
+
+  it("does not create scenario when name is only whitespace", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "   "); // Only spaces
+
+    // Try to submit (button should still be disabled due to trim)
+    const createButton = screen.getByRole("button", { name: /create$/i });
+    expect(createButton).toBeDisabled();
+
+    // Verify no new scenario was created
+    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+  });
+});

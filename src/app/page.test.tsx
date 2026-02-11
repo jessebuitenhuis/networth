@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import Home from "./page";
 
 vi.stubGlobal(
@@ -17,7 +19,11 @@ function renderPage() {
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <Home />
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <Home />
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
       </TransactionProvider>
     </AccountProvider>
   );

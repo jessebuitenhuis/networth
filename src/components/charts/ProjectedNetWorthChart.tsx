@@ -12,6 +12,7 @@ import {
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import { ProjectionPeriod } from "@/models/ProjectionPeriod";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
 import { formatDate } from "@/lib/dateUtils";
@@ -25,6 +26,7 @@ export function ProjectedNetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
+  const { scenarios, activeScenarioId } = useScenarios();
   const [period, setPeriod] = useState(ProjectionPeriod.ThreeMonths);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
@@ -42,13 +44,28 @@ export function ProjectedNetWorthChart() {
   }
 
   const filteredAccounts = accounts.filter((a) => !excludedIds.has(a.id));
+
+  const defaultScenarioId = scenarios[0]?.id;
+  const filteredRecurringTransactions = recurringTransactions.filter(
+    (rt) =>
+      rt.scenarioId === activeScenarioId ||
+      (!rt.scenarioId && activeScenarioId === defaultScenarioId)
+  );
+
+  const filteredProjectedTransactions = transactions.filter(
+    (t) =>
+      !t.isProjected ||
+      t.scenarioId === activeScenarioId ||
+      (!t.scenarioId && activeScenarioId === defaultScenarioId)
+  );
+
   const data = computeProjectedSeries(
     filteredAccounts,
-    transactions,
+    filteredProjectedTransactions,
     period,
     today,
     period === ProjectionPeriod.Custom ? customRange : undefined,
-    recurringTransactions
+    filteredRecurringTransactions
   );
 
   return (

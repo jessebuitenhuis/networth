@@ -54,6 +54,21 @@ describe("computeNetWorthSeries", () => {
       expect(result).toHaveLength(14);
     });
 
+    it("ensures Quarter includes exact today date when not aligned", () => {
+      // Use a date that won't align with weekly intervals to test the edge case
+      const result = computeNetWorthSeries([], [], ChartPeriod.Quarter, "2024-06-18");
+      const lastDate = result[result.length - 1].date;
+      expect(lastDate).toBe("2024-06-18");
+    });
+
+    it("handles Quarter when today aligns with weekly interval", () => {
+      // Use a date that aligns perfectly with weekly intervals (90 days / 7 = no remainder)
+      // Starting from a date where 90 days ago was exactly a week boundary
+      const result = computeNetWorthSeries([], [], ChartPeriod.Quarter, "2024-03-17");
+      const lastDate = result[result.length - 1].date;
+      expect(lastDate).toBe("2024-03-17");
+    });
+
     it("generates monthly points for Year", () => {
       const result = computeNetWorthSeries([], [], ChartPeriod.Year, TODAY);
       expect(result[result.length - 1].date).toBe("2024-06-15");

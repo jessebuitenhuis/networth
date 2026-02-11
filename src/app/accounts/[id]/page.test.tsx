@@ -6,6 +6,7 @@ import type { Account } from "@/models/Account";
 import type { Transaction } from "@/models/Transaction";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 
 vi.stubGlobal(
@@ -30,9 +31,11 @@ function renderPage(id: string) {
   return render(
     <AccountProvider>
       <TransactionProvider>
-        <RecurringTransactionProvider>
-          <AccountDetailPage params={{ id }} />
-        </RecurringTransactionProvider>
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <AccountDetailPage params={{ id }} />
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
       </TransactionProvider>
     </AccountProvider>
   );

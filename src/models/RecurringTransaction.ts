@@ -8,4 +8,5 @@ export type RecurringTransaction = {
   frequency: RecurrenceFrequency;
   startDate: string;
   endDate?: string;
+  scenarioId?: string;
 };
