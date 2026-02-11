@@ -44,11 +44,6 @@ describe("Dashboard", () => {
     expect(screen.getByText("Net Worth")).toBeInTheDocument();
   });
 
-  it("renders account list", () => {
-    renderPage();
-    expect(screen.getByText("No accounts yet.")).toBeInTheDocument();
-  });
-
   it("renders the net worth chart", () => {
     renderPage();
     expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();

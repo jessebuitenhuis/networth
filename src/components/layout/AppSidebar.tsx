@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -29,8 +30,16 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.isActive}
+                      tooltip={item.title}
+                      className={item.isActive ? "font-bold" : ""}
+                    >
+                      <Link href={item.url}>
+                        {item.icon}
+                        <span>{item.title}</span>
+                      </Link>
                     </SidebarMenuButton>
                     {item.action}
                   </SidebarMenuItem>

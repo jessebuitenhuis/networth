@@ -230,4 +230,19 @@ describe("CreateTransactionDialog", () => {
     ).not.toBeChecked();
     expect(screen.queryByLabelText("Frequency")).not.toBeInTheDocument();
   });
+
+  it("trims whitespace from description", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "100");
+    await user.type(screen.getByLabelText("Description"), "  Padded  ");
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(screen.getByText("Padded - 100")).toBeInTheDocument();
+  });
 });

@@ -6,20 +6,10 @@ import { useScenarios } from "@/context/ScenarioContext";
 import { useAccounts } from "@/context/AccountContext";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { formatDate } from "@/lib/dateUtils";
-import { TransactionListItem } from "@/components/transactions/TransactionListItem";
+import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { EditTransactionDialog } from "@/components/transactions/EditTransactionDialog";
 import { EditRecurringTransactionDialog } from "@/components/transactions/EditRecurringTransactionDialog";
-
-type DisplayTransaction = {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  isProjected: boolean;
-  isRecurring: boolean;
-  editAction: React.ReactNode;
-  accountName: string;
-};
+import type { DisplayTransaction } from "@/models/DisplayTransaction";
 
 export function ScenarioTransactionList() {
   const { transactions } = useTransactions();
@@ -36,15 +26,15 @@ export function ScenarioTransactionList() {
     )
     .map((tx) => {
       const account = accounts.find((a) => a.id === tx.accountId);
+      const accountName = account?.name || "Unknown";
       return {
         id: tx.id,
-        description: tx.description,
+        description: `${tx.description} (${accountName})`,
         date: tx.date,
         amount: tx.amount,
         isProjected: true,
         isRecurring: false,
         editAction: <EditTransactionDialog transaction={tx} />,
-        accountName: account?.name || "Unknown",
       };
     });
 
@@ -54,15 +44,15 @@ export function ScenarioTransactionList() {
       const next = getNextOccurrence(rt, today);
       if (!next) return null;
       const account = accounts.find((a) => a.id === rt.accountId);
+      const accountName = account?.name || "Unknown";
       const item: DisplayTransaction = {
         id: next.id,
-        description: next.description,
+        description: `${next.description} (${accountName})`,
         date: next.date,
         amount: next.amount,
         isProjected: true,
         isRecurring: true,
         editAction: <EditRecurringTransactionDialog recurringTransaction={rt} />,
-        accountName: account?.name || "Unknown",
       };
       return item;
     })
@@ -83,19 +73,7 @@ export function ScenarioTransactionList() {
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Scenario Transactions</h3>
-      <ul className="space-y-2">
-        {allItems.map((item) => (
-          <TransactionListItem
-            key={item.id}
-            description={`${item.description} (${item.accountName})`}
-            date={item.date}
-            amount={item.amount}
-            editAction={item.editAction}
-            isProjected={item.isProjected}
-            isRecurring={item.isRecurring}
-          />
-        ))}
-      </ul>
+      <TransactionTable items={allItems} />
     </div>
   );
 }

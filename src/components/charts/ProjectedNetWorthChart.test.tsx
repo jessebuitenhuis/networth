@@ -227,4 +227,41 @@ describe("ProjectedNetWorthChart", () => {
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
+
+  it("toggles an account back on when clicked twice", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts);
+
+    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("updates custom range when date inputs change", async () => {
+    renderWithProviders();
+
+    await userEvent.click(screen.getByRole("button", { name: "Custom" }));
+
+    const startInput = screen.getByLabelText("Start");
+    const endInput = screen.getByLabelText("End");
+
+    await userEvent.clear(startInput);
+    await userEvent.type(startInput, "2024-01-01");
+    await userEvent.clear(endInput);
+    await userEvent.type(endInput, "2024-12-31");
+
+    expect(startInput).toHaveValue("2024-01-01");
+    expect(endInput).toHaveValue("2024-12-31");
+  });
 });

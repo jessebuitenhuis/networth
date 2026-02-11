@@ -148,4 +148,22 @@ describe("NetWorthChart", () => {
 
     expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
   });
+
+  it("switches to Week period", async () => {
+    renderWithProviders();
+
+    await userEvent.click(screen.getByRole("button", { name: "Week" }));
+
+    expect(screen.getByRole("button", { name: "Week" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("switches to Quarter period", async () => {
+    renderWithProviders();
+
+    await userEvent.click(screen.getByRole("button", { name: "Quarter" }));
+
+    expect(screen.getByRole("button", { name: "Quarter" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "false");
+  });
 });

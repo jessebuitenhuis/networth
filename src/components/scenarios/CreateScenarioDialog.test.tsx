@@ -168,4 +168,24 @@ describe("CreateScenarioDialog", () => {
     // No scenario should have been created
     expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
+
+  it("trims whitespace from scenario name", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "  Padded Name  ");
+    await user.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    const lastCall = calls[calls.length - 1][0];
+    expect(lastCall).toContainEqual(
+      expect.objectContaining({ name: "Padded Name" })
+    );
+  });
 });

@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
 }));
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
@@ -84,7 +85,7 @@ describe("AppLayout", () => {
 
     renderWithProvider(testGroups, <p>Content</p>);
 
-    const link = await screen.findByRole("link", { name: "Checking" });
+    const link = await screen.findByRole("link", { name: /Checking/ });
     expect(link).toHaveAttribute("href", "/accounts/1");
   });
 
@@ -100,5 +101,23 @@ describe("AppLayout", () => {
     expect(
       screen.getByRole("button", { name: "Add Account" })
     ).toBeInTheDocument();
+  });
+
+  it("renders AccountIcon for each account nav item", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Credit Card", type: AccountType.Liability },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    const checkingIcon = await screen.findByText("CH");
+    expect(checkingIcon).toBeInTheDocument();
+    expect(checkingIcon).toHaveClass("bg-zinc-800");
+
+    const creditIcon = screen.getByText("CR");
+    expect(creditIcon).toBeInTheDocument();
+    expect(creditIcon).toHaveClass("bg-zinc-800");
   });
 });

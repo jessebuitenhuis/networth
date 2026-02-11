@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
+import { LayoutDashboard, TrendingUp } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
@@ -29,8 +30,8 @@ const navGroups: NavGroup[] = [
   {
     label: "Main",
     items: [
-      { title: "Dashboard", url: "/" },
-      { title: "Planning", url: "/planning" },
+      { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
+      { title: "Planning", url: "/planning", icon: <TrendingUp /> },
     ],
   },
 ];

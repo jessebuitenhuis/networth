@@ -168,4 +168,26 @@ describe("EditTransactionDialog", () => {
 
     expect(screen.getByLabelText("Amount")).toHaveValue(1000);
   });
+
+  it("trims whitespace from description when saving", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+
+    const descInput = screen.getByLabelText("Description");
+    await user.clear(descInput);
+    await user.type(descInput, "  Padded Description  ");
+
+    await user.click(screen.getByText("Save"));
+
+    const stored = JSON.parse(localStorage.getItem("transactions")!);
+    expect(stored[0].description).toBe("Padded Description");
+  });
 });

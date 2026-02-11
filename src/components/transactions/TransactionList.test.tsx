@@ -49,11 +49,12 @@ describe("TransactionList", () => {
   it("lists transactions sorted by date newest first", async () => {
     renderWithProvider("a1", transactions);
 
-    const items = await screen.findAllByRole("listitem");
-    expect(items).toHaveLength(3);
-    expect(items[0]).toHaveTextContent("Groceries");
-    expect(items[1]).toHaveTextContent("Salary");
-    expect(items[2]).toHaveTextContent("Opening balance");
+    const rows = await screen.findAllByRole("row");
+    const dataRows = rows.slice(1); // Skip header row
+    expect(dataRows).toHaveLength(3);
+    expect(dataRows[0]).toHaveTextContent("Groceries");
+    expect(dataRows[1]).toHaveTextContent("Salary");
+    expect(dataRows[2]).toHaveTextContent("Opening balance");
   });
 
   it("displays date, description, and formatted amount", async () => {
@@ -89,11 +90,12 @@ describe("TransactionList", () => {
     const futureTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: 1000, date: "2099-01-01", description: "Future tx" },
     ];
-    renderWithProvider("a1", futureTransactions);
+    const { container } = renderWithProvider("a1", futureTransactions);
 
-    const item = await screen.findByRole("listitem");
-    const card = item.querySelector("[data-slot='card']");
-    expect(card).toHaveClass("border-dashed");
+    await screen.findByText("Future tx");
+    const rows = container.querySelectorAll("[data-slot='table-row']");
+    const dataRow = rows[1]; // Skip header row
+    expect(dataRow).toHaveClass("border-dashed");
   });
 
   it("only shows transactions for the given account", async () => {
@@ -103,8 +105,9 @@ describe("TransactionList", () => {
     ];
     renderWithProvider("a1", mixedTransactions);
 
-    const items = await screen.findAllByRole("listitem");
-    expect(items).toHaveLength(3);
+    const rows = await screen.findAllByRole("row");
+    const dataRows = rows.slice(1); // Skip header row
+    expect(dataRows).toHaveLength(3);
     expect(screen.queryByText("Other account")).not.toBeInTheDocument();
   });
 
@@ -142,11 +145,12 @@ describe("TransactionList", () => {
     ];
     renderWithProvider("a1", txs, recurring);
 
-    const items = await screen.findAllByRole("listitem");
-    expect(items).toHaveLength(2);
+    const rows = await screen.findAllByRole("row");
+    const dataRows = rows.slice(1); // Skip header row
+    expect(dataRows).toHaveLength(2);
     // Future tx (2099-07-01) is newer, so appears first
-    expect(items[0]).toHaveTextContent("Future tx");
-    expect(items[1]).toHaveTextContent("Monthly Salary");
+    expect(dataRows[0]).toHaveTextContent("Future tx");
+    expect(dataRows[1]).toHaveTextContent("Monthly Salary");
   });
 
   it("shows edit button for recurring transaction", async () => {

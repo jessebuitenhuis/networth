@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import {
   loadRecurringTransactions,
   saveRecurringTransactions,
@@ -39,6 +39,15 @@ describe("RecurringTransactionStorage", () => {
 
       expect(loadRecurringTransactions()).toEqual([]);
     });
+
+    it("returns empty array on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      expect(loadRecurringTransactions()).toEqual([]);
+
+      vi.stubGlobal("window", originalWindow);
+    });
   });
 
   describe("saveRecurringTransactions", () => {
@@ -66,6 +75,17 @@ describe("RecurringTransactionStorage", () => {
       expect(
         JSON.parse(localStorage.getItem("recurringTransactions")!)
       ).toEqual([second]);
+    });
+
+    it("does nothing on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      saveRecurringTransactions([recurring]);
+
+      expect(localStorage.getItem("recurringTransactions")).toBeNull();
+
+      vi.stubGlobal("window", originalWindow);
     });
   });
 });

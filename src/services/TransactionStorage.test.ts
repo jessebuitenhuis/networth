@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { loadTransactions, saveTransactions } from "./TransactionStorage";
 import type { Transaction } from "@/models/Transaction";
 
@@ -31,6 +31,15 @@ describe("TransactionStorage", () => {
 
       expect(loadTransactions()).toEqual([]);
     });
+
+    it("returns empty array on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      expect(loadTransactions()).toEqual([]);
+
+      vi.stubGlobal("window", originalWindow);
+    });
   });
 
   describe("saveTransactions", () => {
@@ -57,6 +66,17 @@ describe("TransactionStorage", () => {
       expect(JSON.parse(localStorage.getItem("transactions")!)).toEqual([
         second,
       ]);
+    });
+
+    it("does nothing on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      saveTransactions([transaction]);
+
+      expect(localStorage.getItem("transactions")).toBeNull();
+
+      vi.stubGlobal("window", originalWindow);
     });
   });
 });

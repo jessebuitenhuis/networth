@@ -3,6 +3,7 @@ import type { RecurringTransaction } from "@/models/RecurringTransaction";
 const STORAGE_KEY = "recurringTransactions";
 
 export function loadRecurringTransactions(): RecurringTransaction[] {
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -15,5 +16,6 @@ export function loadRecurringTransactions(): RecurringTransaction[] {
 export function saveRecurringTransactions(
   transactions: RecurringTransaction[]
 ): void {
+  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
 }

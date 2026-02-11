@@ -83,4 +83,22 @@ describe("AppSidebar", () => {
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
+
+  it("renders item icon when provided", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Main",
+        items: [
+          {
+            title: "Dashboard",
+            url: "/",
+            icon: <span data-testid="dashboard-icon">📊</span>,
+          },
+        ],
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByTestId("dashboard-icon")).toBeInTheDocument();
+  });
 });

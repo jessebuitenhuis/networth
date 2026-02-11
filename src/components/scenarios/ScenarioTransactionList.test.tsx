@@ -318,4 +318,26 @@ describe("ScenarioTransactionList", () => {
     // Should show the baseline transaction since baseline appears in all scenarios
     expect(screen.getByText(/Baseline transaction.*Checking/)).toBeInTheDocument();
   });
+
+  it("shows Unknown for recurring transactions with unknown account", () => {
+    const accounts: Account[] = [];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "unknown-account",
+        amount: 100,
+        description: "Orphan recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, [], recurringTransactions, scenarios, "scenario-1");
+
+    expect(screen.getByText(/Orphan recurring.*Unknown/)).toBeInTheDocument();
+  });
 });

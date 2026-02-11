@@ -10,8 +10,6 @@ Account management UI for the dashboard page.
 
 | Component | Type | Description |
 |---|---|---|
-| `AccountList` | Smart | Reads from `useAccounts` + `useTransactions`, renders list of `AccountListItem` |
-| `AccountListItem` | Dumb | Displays single account (name, type, balance, remove button) |
 | `CreateAccountDialog` | Smart | Dialog with form to add a new account with optional opening balance. Triggered from sidebar via "+" button. Uses `useAccounts` + `useTransactions` |
 | `NetWorthSummary` | Smart | Computes net worth from contexts, passes to `NetWorthCard` |
 | `NetWorthCard` | Dumb | Displays formatted net worth number in a card |

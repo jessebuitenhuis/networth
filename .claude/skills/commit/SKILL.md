@@ -30,7 +30,19 @@ Create a verified, well-formatted git commit following the Conventional Commits 
 
 ### 1. Check verification
 
-If `npm run verify` above shows any failures, stop — report the failure and help fix the issue. **Do not commit.**
+If `npm run verify` above shows **any failures**, you MUST fix them before committing:
+
+1. **Identify the failure type** (lint, build, or test)
+2. **Fix the issue**:
+   - **Lint errors**: Read the file(s) with errors, fix the linting issues
+   - **Build errors**: Read the relevant files, fix type errors or import issues
+   - **Test failures**: Read the failing test and implementation, fix the code to make tests pass
+   - **Coverage failures**: Read the uncovered files, add missing tests to reach 95% threshold
+3. **Re-run verification**: Use Bash to run `npm run verify` again
+4. **Repeat until passing**: Continue fixing and verifying until all checks pass
+5. **Then proceed to step 2** to create the commit
+
+**CRITICAL**: Do NOT just report failures and stop. You MUST actively fix the issues and verify they're resolved before committing.
 
 ### 2. Stage and commit
 

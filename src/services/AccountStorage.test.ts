@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import {
   loadAccounts,
   saveAccounts,
@@ -31,6 +31,15 @@ describe("AccountStorage", () => {
 
       expect(loadAccounts()).toEqual([]);
     });
+
+    it("returns empty array on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      expect(loadAccounts()).toEqual([]);
+
+      vi.stubGlobal("window", originalWindow);
+    });
   });
 
   describe("saveAccounts", () => {
@@ -56,6 +65,20 @@ describe("AccountStorage", () => {
       saveAccounts(second);
 
       expect(JSON.parse(localStorage.getItem("accounts")!)).toEqual(second);
+    });
+
+    it("does nothing on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      const accounts: Account[] = [
+        { id: "1", name: "Test", type: AccountType.Asset },
+      ];
+      saveAccounts(accounts);
+
+      expect(localStorage.getItem("accounts")).toBeNull();
+
+      vi.stubGlobal("window", originalWindow);
     });
   });
 
@@ -132,6 +155,34 @@ describe("AccountStorage", () => {
         name: "Checking",
         type: AccountType.Asset,
       });
+    });
+
+    it("skips accounts without balance field", () => {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify([
+          { id: "1", name: "No Balance", type: AccountType.Asset },
+        ])
+      );
+
+      const transactions = migrateAccountBalances();
+
+      expect(transactions).toHaveLength(0);
+    });
+
+    it("returns empty array when stored data is invalid JSON", () => {
+      localStorage.setItem("accounts", "not-json");
+
+      expect(migrateAccountBalances()).toEqual([]);
+    });
+
+    it("returns empty array on server side (window undefined)", () => {
+      const originalWindow = global.window;
+      vi.stubGlobal("window", undefined);
+
+      expect(migrateAccountBalances()).toEqual([]);
+
+      vi.stubGlobal("window", originalWindow);
     });
   });
 });

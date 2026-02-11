@@ -4,6 +4,7 @@ import type { Transaction } from "@/models/Transaction";
 const STORAGE_KEY = "accounts";
 
 export function loadAccounts(): Account[] {
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -14,12 +15,14 @@ export function loadAccounts(): Account[] {
 }
 
 export function saveAccounts(accounts: Account[]): void {
+  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
 type LegacyAccount = Account & { balance?: number };
 
 export function migrateAccountBalances(): Transaction[] {
+  if (typeof window === "undefined") return [];
   if (localStorage.getItem("transactions") !== null) return [];
 
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -48,7 +51,7 @@ export function migrateAccountBalances(): Transaction[] {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const migrated = legacy.map(({ balance: _, ...rest }) => rest);
+  const migrated = legacy.map(({ balance: _balance, ...rest }) => rest);
   saveAccounts(migrated);
 
   return transactions;

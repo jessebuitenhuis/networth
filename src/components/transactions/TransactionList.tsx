@@ -5,19 +5,10 @@ import { useRecurringTransactions } from "@/context/RecurringTransactionContext"
 import { isTransactionProjected } from "@/services/isTransactionProjected";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { formatDate } from "@/lib/dateUtils";
-import { TransactionListItem } from "./TransactionListItem";
+import { TransactionTable } from "./TransactionTable";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
-
-type DisplayTransaction = {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  isProjected: boolean;
-  isRecurring: boolean;
-  editAction: React.ReactNode;
-};
+import type { DisplayTransaction } from "@/models/DisplayTransaction";
 
 type TransactionListProps = {
   accountId: string;
@@ -67,19 +58,5 @@ export function TransactionList({ accountId }: TransactionListProps) {
     return <p className="text-muted-foreground">No transactions yet.</p>;
   }
 
-  return (
-    <ul className="space-y-2">
-      {allItems.map((item) => (
-        <TransactionListItem
-          key={item.id}
-          description={item.description}
-          date={item.date}
-          amount={item.amount}
-          editAction={item.editAction}
-          isProjected={item.isProjected}
-          isRecurring={item.isRecurring}
-        />
-      ))}
-    </ul>
-  );
+  return <TransactionTable items={allItems} />;
 }
