@@ -14,7 +14,7 @@ import type { DisplayTransaction } from "@/models/DisplayTransaction";
 export function ScenarioTransactionList() {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
-  const { scenarios, activeScenarioId } = useScenarios();
+  const { activeScenarioId } = useScenarios();
   const { accounts } = useAccounts();
 
   const today = formatDate(new Date());

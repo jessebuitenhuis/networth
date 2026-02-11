@@ -26,7 +26,7 @@ export function ProjectedNetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
-  const { scenarios, activeScenarioId } = useScenarios();
+  const { activeScenarioId } = useScenarios();
   const [period, setPeriod] = useState(ProjectionPeriod.ThreeMonths);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
@@ -78,8 +78,8 @@ export function ProjectedNetWorthChart() {
           onChange={setCustomRange}
         />
       )}
-      <div data-testid="projected-chart" className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+      <div data-testid="projected-chart">
+        <ResponsiveContainer width="100%" height={256}>
           <LineChart data={data}>
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis

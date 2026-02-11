@@ -37,8 +37,8 @@ export function NetWorthChart() {
         <h2 className="text-sm font-medium text-muted-foreground">Net Worth Over Time</h2>
         <PeriodPicker selected={period} onSelect={setPeriod} />
       </div>
-      <div data-testid="net-worth-chart" className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+      <div data-testid="net-worth-chart">
+        <ResponsiveContainer width="100%" height={256}>
           <LineChart data={data}>
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} width={80} />
