@@ -31,7 +31,7 @@ describe("EditTransactionDialog", () => {
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
-    expect(screen.getByLabelText("Amount")).toHaveValue(1000);
+    expect(screen.getByLabelText("Amount")).toHaveValue("1,000");
     expect(screen.getByLabelText("Date")).toHaveValue("2024-01-15");
     expect(screen.getByLabelText("Description")).toHaveValue("Test transaction");
   });
@@ -191,7 +191,7 @@ describe("EditTransactionDialog", () => {
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
-    expect(screen.getByLabelText("Amount")).toHaveValue(1000);
+    expect(screen.getByLabelText("Amount")).toHaveValue("1,000");
   });
 
   it("trims whitespace from description when saving", async () => {

@@ -8,9 +8,10 @@ import { ChartPeriod } from "@/models/ChartPeriod";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
 import { ChartLegend } from "./ChartLegend";
 import { PeriodPicker } from "./PeriodPicker";
+import { getDefaultCurrency } from "@/lib/getLocale";
 
 export function formatCurrency(value: number): string {
-  return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  return value.toLocaleString(undefined, { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
 }
 
 export function NetWorthChart() {

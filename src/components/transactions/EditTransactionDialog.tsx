@@ -8,6 +8,7 @@ import type { Transaction } from "@/models/Transaction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 type EditTransactionDialogProps = {
@@ -43,7 +45,6 @@ export function EditTransactionDialog({
   const { updateTransaction, removeTransaction } = useTransactions();
   const { scenarios } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [amount, setAmount] = useState(transaction.amount);
   const [date, setDate] = useState(transaction.date);
   const [description, setDescription] = useState(transaction.description);
@@ -72,136 +73,112 @@ export function EditTransactionDialog({
     setIsOpen(false);
   }
 
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteConfirmOpen(true);
-  }
-
-  function handleCancelDelete() {
-    setIsDeleteConfirmOpen(false);
-    setIsOpen(true);
-  }
-
   function handleDelete() {
     removeTransaction(transaction.id);
-    setIsDeleteConfirmOpen(false);
+    setIsOpen(false);
   }
 
   return (
-    <>
-      <Dialog
-        open={isOpen}
-        onOpenChange={(open) => {
-          setIsOpen(open);
-          if (open) resetForm();
-        }}
-      >
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="sm" aria-label="Edit Transaction">
-            <Pencil className="h-4 w-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent aria-describedby={undefined}>
-          <DialogHeader>
-            <DialogTitle>Edit Transaction</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="edit-transaction-amount" className="mb-2">
-                Amount
-              </Label>
-              <Input
-                id="edit-transaction-amount"
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
-                aria-label="Amount"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-transaction-date" className="mb-2">
-                Date
-              </Label>
-              <Input
-                id="edit-transaction-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                aria-label="Date"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-transaction-description" className="mb-2">
-                Description
-              </Label>
-              <Input
-                id="edit-transaction-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                aria-label="Description"
-              />
-            </div>
-            <div>
-              <Label id="edit-transaction-scenario-label" className="mb-2">
-                Scenario
-              </Label>
-              <Select
-                value={selectedScenarioId}
-                onValueChange={setSelectedScenarioId}
-                aria-labelledby="edit-transaction-scenario-label"
-              >
-                <SelectTrigger aria-label="Scenario">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None (Baseline)</SelectItem>
-                  {scenarios.map((scenario) => (
-                    <SelectItem key={scenario.id} value={scenario.id}>
-                      {scenario.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-              <Button type="submit">Save</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog
-        open={isDeleteConfirmOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this transaction? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (open) resetForm();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" aria-label="Edit Transaction">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent aria-describedby={undefined}>
+        <DialogHeader>
+          <DialogTitle>Edit Transaction</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="edit-transaction-amount" className="mb-2">
+              Amount
+            </Label>
+            <CurrencyInput
+              id="edit-transaction-amount"
+              aria-label="Amount"
+              value={amount}
+              onChange={setAmount}
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-transaction-date" className="mb-2">
+              Date
+            </Label>
+            <Input
+              id="edit-transaction-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              aria-label="Date"
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-transaction-description" className="mb-2">
+              Description
+            </Label>
+            <Input
+              id="edit-transaction-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              aria-label="Description"
+            />
+          </div>
+          <div>
+            <Label id="edit-transaction-scenario-label" className="mb-2">
+              Scenario
+            </Label>
+            <Select
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              aria-labelledby="edit-transaction-scenario-label"
+            >
+              <SelectTrigger aria-label="Scenario">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Baseline)</SelectItem>
+                {scenarios.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex justify-between">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="destructive">
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this transaction? This
+                    action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Button type="submit">Save</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

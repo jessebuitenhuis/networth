@@ -40,7 +40,7 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
-    expect(screen.getByLabelText("Amount")).toHaveValue(5000);
+    expect(screen.getByLabelText("Amount")).toHaveValue("5,000");
     expect(screen.getByLabelText("Description")).toHaveValue("Salary");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2024-01-15");
     expect(screen.getByLabelText("End Date (optional)")).toHaveValue(
@@ -224,7 +224,7 @@ describe("EditRecurringTransactionDialog", () => {
     await user.keyboard("{Escape}");
     await user.click(screen.getByLabelText("Edit Transaction"));
 
-    expect(screen.getByLabelText("Amount")).toHaveValue(5000);
+    expect(screen.getByLabelText("Amount")).toHaveValue("5,000");
   });
 
   it("updates end date when provided", async () => {

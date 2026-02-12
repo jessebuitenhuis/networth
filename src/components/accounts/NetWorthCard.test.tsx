@@ -10,16 +10,16 @@ describe("NetWorthCard", () => {
 
   it("formats positive net worth", () => {
     render(<NetWorthCard netWorth={6500} />);
-    expect(screen.getByText("$6,500.00")).toBeInTheDocument();
+    expect(screen.getByText("US$6,500.00")).toBeInTheDocument();
   });
 
   it("formats negative net worth", () => {
     render(<NetWorthCard netWorth={-1500} />);
-    expect(screen.getByText("-$1,500.00")).toBeInTheDocument();
+    expect(screen.getByText("-US$1,500.00")).toBeInTheDocument();
   });
 
   it("formats zero", () => {
     render(<NetWorthCard netWorth={0} />);
-    expect(screen.getByText("$0.00")).toBeInTheDocument();
+    expect(screen.getByText("US$0.00")).toBeInTheDocument();
   });
 });

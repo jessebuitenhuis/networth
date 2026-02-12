@@ -223,7 +223,7 @@ describe("CreateTransactionDialog", () => {
       screen.getByRole("button", { name: "Add Transaction" })
     );
 
-    expect(screen.getByLabelText("Amount")).toHaveValue(0);
+    expect(screen.getByLabelText("Amount")).toHaveValue("0");
     expect(screen.getByLabelText("Description")).toHaveValue("");
     expect(
       screen.getByRole("checkbox", { name: "Recurring" })

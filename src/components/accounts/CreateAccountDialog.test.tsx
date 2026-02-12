@@ -136,7 +136,7 @@ describe("CreateAccountDialog", () => {
     await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByLabelText("Name")).toHaveValue("");
-    expect(screen.getByLabelText("Balance")).toHaveValue(0);
+    expect(screen.getByLabelText("Balance")).toHaveValue("0");
   });
 
   it("does not submit with empty name", async () => {
