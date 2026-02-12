@@ -54,7 +54,7 @@ Once requirements are clear, enter plan mode using `EnterPlanMode` and produce a
 3. **Implement** — list the production files to create or modify, and describe what each change does
 4. **Verify** — run `npm run dev:random-port` to confirm everything works end-to-end
 5. **Commit** — use the `/commit` skill to commit the changes inside the worktree
-6. **Review** — start a dev server with `npm run dev:random-port` **in the background** so the user can interact with the app. Share the URL with the user and ask them to review the changes. **CRITICAL: Keep the server running and WAIT for explicit user approval before proceeding. DO NOT merge without approval.**
+6. **Review** — you MUST start the dev server yourself with `npm run dev:random-port` **in the background**, then read the output to find the URL (e.g., `http://localhost:<port>`). Share the exact URL with the user along with step-by-step instructions for what to test (e.g., "1. Open http://localhost:4523 2. Click Accounts in the sidebar 3. Click 'Add Account'..."). **CRITICAL: YOU start the server — do NOT tell the user to run it. Keep the server running and WAIT for explicit user approval before proceeding. DO NOT merge without approval.**
 7. **Merge & cleanup** — **ONLY after the user explicitly approves**, stop the dev server, then use the `/worktree` skill to merge the branch into main and remove the worktree
 
 The plan should:
@@ -68,11 +68,12 @@ The plan should:
 **DO NOT MERGE WITHOUT EXPLICIT USER APPROVAL**
 
 After completing step 6 (Review), you MUST:
-1. Keep the dev server running in the background
-2. Share the URL with the user
-3. Wait for the user to review the changes
-4. **STOP and wait for explicit approval** (e.g., "looks good", "approved", "merge it")
-5. Only proceed to step 7 (Merge & cleanup) after receiving approval
+1. Start the dev server yourself using `npm run dev:random-port` in the background (using Bash with `run_in_background`)
+2. Read the server output to extract the actual URL
+3. Share the exact URL (e.g., `http://localhost:4523`) with step-by-step manual testing instructions specific to the feature you implemented
+4. Keep the dev server running in the background
+5. **STOP and wait for explicit approval** (e.g., "looks good", "approved", "merge it")
+6. Only proceed to step 7 (Merge & cleanup) after receiving approval
 
 If the user requests changes during review:
 - Stop the dev server
