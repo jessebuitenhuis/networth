@@ -315,4 +315,98 @@ describe("ProjectedNetWorthChart", () => {
     expect(startInput).toHaveValue("2024-01-01");
     expect(endInput).toHaveValue("2024-12-31");
   });
+
+  it("renders ScenarioChartPicker in the chart header", () => {
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+      { id: "scenario-2", name: "Pessimistic" },
+    ];
+    renderWithProviders([], [], [], scenarios, null);
+
+    expect(screen.getByRole("button", { name: /Scenarios/ })).toBeInTheDocument();
+  });
+
+  it("shows 'Scenarios (0)' by default", () => {
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+    ];
+    renderWithProviders([], [], [], scenarios, null);
+
+    expect(
+      screen.getByRole("button", { name: "Scenarios (0)" })
+    ).toBeInTheDocument();
+  });
+
+  it("allows toggling scenarios on and off", async () => {
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+      { id: "scenario-2", name: "Pessimistic" },
+    ];
+    renderWithProviders([], [], [], scenarios, null);
+
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+
+    expect(
+      screen.getByRole("button", { name: "Scenarios (1)" })
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+
+    expect(
+      screen.getByRole("button", { name: "Scenarios (0)" })
+    ).toBeInTheDocument();
+  });
+
+  it("renders chart with scenario data when scenario is selected", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: 1000,
+        date: "2024-06-01",
+        description: "Baseline transaction",
+      },
+      {
+        id: "t-2",
+        accountId: "1",
+        amount: 2000,
+        date: "2024-07-01",
+        description: "Scenario transaction",
+        scenarioId: "scenario-1",
+      },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "1",
+        amount: 100,
+        description: "Baseline recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+      },
+      {
+        id: "rt-2",
+        accountId: "1",
+        amount: 200,
+        description: "Scenario recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, recurringTransactions, scenarios, null);
+
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
 });

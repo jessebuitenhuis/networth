@@ -14,3 +14,7 @@ export const CHART_COLORS = [
 export function getAccountColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
+
+export function getScenarioColor(index: number): string {
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
