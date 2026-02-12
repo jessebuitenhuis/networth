@@ -110,7 +110,7 @@ export function CreateAccountDialog() {
               onChange={(e) => setBalance(Number(e.target.value))}
             />
           </div>
-          <Button type="submit">Submit</Button>
+          <Button type="submit">Add Account</Button>
         </form>
       </DialogContent>
     </Dialog>

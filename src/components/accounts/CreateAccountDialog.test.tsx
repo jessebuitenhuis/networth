@@ -90,7 +90,7 @@ describe("CreateAccountDialog", () => {
     await user.type(screen.getByLabelText("Name"), "Checking");
     await user.clear(screen.getByLabelText("Balance"));
     await user.type(screen.getByLabelText("Balance"), "1500");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByText("Checking - Asset")).toBeInTheDocument();
   });
@@ -101,7 +101,7 @@ describe("CreateAccountDialog", () => {
     await user.type(screen.getByLabelText("Name"), "Checking");
     await user.clear(screen.getByLabelText("Balance"));
     await user.type(screen.getByLabelText("Balance"), "1500");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByText("Opening balance - 1500")).toBeInTheDocument();
   });
@@ -110,7 +110,7 @@ describe("CreateAccountDialog", () => {
     const user = await openDialog();
 
     await user.type(screen.getByLabelText("Name"), "Empty");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByTestId("transactions")).toBeEmptyDOMElement();
   });
@@ -119,7 +119,7 @@ describe("CreateAccountDialog", () => {
     const user = await openDialog();
 
     await user.type(screen.getByLabelText("Name"), "Checking");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -130,7 +130,7 @@ describe("CreateAccountDialog", () => {
     await user.type(screen.getByLabelText("Name"), "Checking");
     await user.clear(screen.getByLabelText("Balance"));
     await user.type(screen.getByLabelText("Balance"), "500");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     // Re-open dialog to check form is reset
     await user.click(screen.getByRole("button", { name: "Add Account" }));
@@ -142,7 +142,7 @@ describe("CreateAccountDialog", () => {
   it("does not submit with empty name", async () => {
     const user = await openDialog();
 
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByTestId("accounts")).toBeEmptyDOMElement();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("CreateAccountDialog", () => {
     await user.type(screen.getByLabelText("Name"), "Credit Card");
     await user.clear(screen.getByLabelText("Balance"));
     await user.type(screen.getByLabelText("Balance"), "800");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Add Account" }));
 
     expect(screen.getByText("Credit Card - Liability")).toBeInTheDocument();
   });
