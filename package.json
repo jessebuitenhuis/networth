@@ -9,9 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "verify": "turbo run lint build test"
+    "verify": "turbo run lint build test:coverage"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

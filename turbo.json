@@ -23,6 +23,10 @@
     "test": {
       "inputs": ["src/**", "vitest.config.ts"],
       "outputs": []
+    },
+    "test:coverage": {
+      "inputs": ["src/**", "vitest.config.ts"],
+      "outputs": ["coverage/**"]
     }
   }
 }
