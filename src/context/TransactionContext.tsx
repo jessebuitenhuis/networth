@@ -14,6 +14,7 @@ export type TransactionAction =
   | { type: "add"; transaction: Transaction }
   | { type: "remove"; id: string }
   | { type: "removeByAccountId"; accountId: string }
+  | { type: "removeByScenarioId"; scenarioId: string }
   | { type: "set"; transactions: Transaction[] }
   | { type: "update"; transaction: Transaction };
 
@@ -28,6 +29,8 @@ export function transactionReducer(
       return state.filter((t) => t.id !== action.id);
     case "removeByAccountId":
       return state.filter((t) => t.accountId !== action.accountId);
+    case "removeByScenarioId":
+      return state.filter((t) => t.scenarioId !== action.scenarioId);
     case "set":
       return action.transactions;
     case "update":
@@ -40,6 +43,7 @@ type TransactionContextValue = {
   addTransaction: (transaction: Transaction) => void;
   removeTransaction: (id: string) => void;
   removeTransactionsByAccountId: (accountId: string) => void;
+  removeTransactionsByScenarioId: (scenarioId: string) => void;
   updateTransaction: (transaction: Transaction) => void;
   getBalance: (accountId: string) => number;
 };
@@ -75,6 +79,10 @@ export function TransactionProvider({
     dispatch({ type: "removeByAccountId", accountId });
   }
 
+  function removeTransactionsByScenarioId(scenarioId: string) {
+    dispatch({ type: "removeByScenarioId", scenarioId });
+  }
+
   function updateTransaction(transaction: Transaction) {
     dispatch({ type: "update", transaction });
   }
@@ -86,7 +94,7 @@ export function TransactionProvider({
   );
 
   return (
-    <TransactionContext value={{ transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, updateTransaction, getBalance }}>
+    <TransactionContext value={{ transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, removeTransactionsByScenarioId, updateTransaction, getBalance }}>
       {children}
     </TransactionContext>
   );

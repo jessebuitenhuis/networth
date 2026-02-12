@@ -10,6 +10,7 @@ import {
 export type RecurringTransactionAction =
   | { type: "add"; recurringTransaction: RecurringTransaction }
   | { type: "remove"; id: string }
+  | { type: "removeByScenarioId"; scenarioId: string }
   | { type: "set"; recurringTransactions: RecurringTransaction[] }
   | { type: "update"; recurringTransaction: RecurringTransaction };
 
@@ -22,6 +23,8 @@ export function recurringTransactionReducer(
       return [...state, action.recurringTransaction];
     case "remove":
       return state.filter((rt) => rt.id !== action.id);
+    case "removeByScenarioId":
+      return state.filter((rt) => rt.scenarioId !== action.scenarioId);
     case "set":
       return action.recurringTransactions;
     case "update":
@@ -33,6 +36,7 @@ type RecurringTransactionContextValue = {
   recurringTransactions: RecurringTransaction[];
   addRecurringTransaction: (rt: RecurringTransaction) => void;
   removeRecurringTransaction: (id: string) => void;
+  removeRecurringTransactionsByScenarioId: (scenarioId: string) => void;
   updateRecurringTransaction: (rt: RecurringTransaction) => void;
 };
 
@@ -66,6 +70,10 @@ export function RecurringTransactionProvider({
     dispatch({ type: "remove", id });
   }
 
+  function removeRecurringTransactionsByScenarioId(scenarioId: string) {
+    dispatch({ type: "removeByScenarioId", scenarioId });
+  }
+
   function updateRecurringTransaction(rt: RecurringTransaction) {
     dispatch({ type: "update", recurringTransaction: rt });
   }
@@ -76,6 +84,7 @@ export function RecurringTransactionProvider({
         recurringTransactions,
         addRecurringTransaction,
         removeRecurringTransaction,
+        removeRecurringTransactionsByScenarioId,
         updateRecurringTransaction,
       }}
     >

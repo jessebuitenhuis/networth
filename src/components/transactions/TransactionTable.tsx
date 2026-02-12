@@ -18,7 +18,7 @@ type TransactionTableProps = {
   items: DisplayTransaction[];
 };
 
-type SortColumn = "date" | "description" | "amount" | null;
+type SortColumn = "date" | "description" | "account" | "amount" | null;
 type SortDirection = "asc" | "desc";
 
 function SortIcon({
@@ -67,6 +67,10 @@ export function TransactionTable({ items }: TransactionTableProps) {
           aVal = a.description.toLowerCase();
           bVal = b.description.toLowerCase();
           break;
+        case "account":
+          aVal = a.accountName.toLowerCase();
+          bVal = b.accountName.toLowerCase();
+          break;
         case "amount":
           aVal = a.amount;
           bVal = b.amount;
@@ -114,6 +118,19 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </div>
           </TableHead>
           <TableHead
+            className="text-left cursor-pointer select-none"
+            onClick={() => handleSort("account")}
+          >
+            <div className="flex items-center gap-1">
+              Account
+              <SortIcon
+                column="account"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+              />
+            </div>
+          </TableHead>
+          <TableHead
             className="text-right cursor-pointer select-none"
             onClick={() => handleSort("amount")}
           >
@@ -150,6 +167,9 @@ export function TransactionTable({ items }: TransactionTableProps) {
                   Recurring
                 </span>
               )}
+            </TableCell>
+            <TableCell className="text-left text-muted-foreground">
+              {item.accountName}
             </TableCell>
             <TableCell className="text-right">
               <span

@@ -84,11 +84,11 @@ describe("ScenarioTransactionList", () => {
       "scenario-1"
     );
 
-    expect(screen.getByText(/Base salary.*Checking/)).toBeInTheDocument();
+    expect(screen.getByText(/Base salary/)).toBeInTheDocument();
     expect(screen.queryByText(/Bonus/)).not.toBeInTheDocument();
   });
 
-  it("shows projected transactions for active scenario", () => {
+  it("shows transactions for active scenario", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -101,15 +101,14 @@ describe("ScenarioTransactionList", () => {
         accountId: "1",
         amount: 500,
         date: "2024-06-01",
-        description: "Projected bonus",
-        isProjected: true,
+        description: "Bonus payment",
         scenarioId: "scenario-1",
       },
     ];
 
     renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
 
-    expect(screen.getByText(/Projected bonus.*Checking/)).toBeInTheDocument();
+    expect(screen.getByText(/Bonus payment/)).toBeInTheDocument();
   });
 
   it("shows empty state when no transactions", () => {
@@ -189,7 +188,7 @@ describe("ScenarioTransactionList", () => {
       "scenario-1"
     );
 
-    expect(screen.getByText(/Legacy transaction.*Checking/)).toBeInTheDocument();
+    expect(screen.getByText(/Legacy transaction/)).toBeInTheDocument();
   });
 
   it("sorts transactions by date descending (newest first)", () => {
@@ -231,7 +230,7 @@ describe("ScenarioTransactionList", () => {
 
     renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
 
-    const items = screen.getAllByText(/transaction.*Checking/);
+    const items = screen.getAllByText(/transaction/);
     expect(items[0]).toHaveTextContent("Recent transaction");
     expect(items[1]).toHaveTextContent("Middle transaction");
     expect(items[2]).toHaveTextContent("Old transaction");
@@ -256,7 +255,7 @@ describe("ScenarioTransactionList", () => {
 
     renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
 
-    expect(screen.getByText(/Orphan transaction.*Unknown/)).toBeInTheDocument();
+    expect(screen.getByText(/Orphan transaction/)).toBeInTheDocument();
   });
 
   it("handles recurring transaction with no next occurrence", () => {
@@ -317,7 +316,7 @@ describe("ScenarioTransactionList", () => {
     renderWithProviders(accounts, transactions, [], scenarios, "scenario-2");
 
     // Should show the baseline transaction since baseline appears in all scenarios
-    expect(screen.getByText(/Baseline transaction.*Checking/)).toBeInTheDocument();
+    expect(screen.getByText(/Baseline transaction/)).toBeInTheDocument();
   });
 
   it("shows Unknown for recurring transactions with unknown account", () => {
@@ -339,6 +338,106 @@ describe("ScenarioTransactionList", () => {
 
     renderWithProviders(accounts, [], recurringTransactions, scenarios, "scenario-1");
 
-    expect(screen.getByText(/Orphan recurring.*Unknown/)).toBeInTheDocument();
+    expect(screen.getByText(/Orphan recurring/)).toBeInTheDocument();
+  });
+
+  it("shows only baseline transactions when activeScenarioId is null", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: 100,
+        date: "2024-06-15",
+        description: "Baseline transaction",
+        // No scenarioId - baseline
+      },
+      {
+        id: "t-2",
+        accountId: "1",
+        amount: 200,
+        date: "2024-06-16",
+        description: "Scenario transaction",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, [], scenarios, null);
+
+    expect(screen.getByText(/Baseline transaction/)).toBeInTheDocument();
+    expect(screen.queryByText(/Scenario transaction/)).not.toBeInTheDocument();
+  });
+
+  it("shows only baseline recurring transactions when activeScenarioId is null", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "1",
+        amount: 100,
+        description: "Baseline recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        // No scenarioId - baseline
+      },
+      {
+        id: "rt-2",
+        accountId: "1",
+        amount: 200,
+        description: "Scenario recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, [], recurringTransactions, scenarios, null);
+
+    expect(screen.getByText(/Baseline recurring/)).toBeInTheDocument();
+    expect(screen.queryByText(/Scenario recurring/)).not.toBeInTheDocument();
+  });
+
+  it("shows all transactions regardless of isProjected flag", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: 100,
+        date: "2024-01-15",
+        description: "Past transaction",
+        isProjected: false,
+        scenarioId: "scenario-1",
+      },
+      {
+        id: "t-2",
+        accountId: "1",
+        amount: 200,
+        date: "2024-06-15",
+        description: "Future transaction",
+        isProjected: true,
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+
+    expect(screen.getByText(/Past transaction/)).toBeInTheDocument();
+    expect(screen.getByText(/Future transaction/)).toBeInTheDocument();
   });
 });

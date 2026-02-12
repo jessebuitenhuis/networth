@@ -13,7 +13,7 @@ export type ScenarioAction =
   | { type: "add"; scenario: Scenario }
   | { type: "remove"; id: string }
   | { type: "update"; id: string; name: string }
-  | { type: "setActive"; id: string }
+  | { type: "setActive"; id: string | null }
   | { type: "set"; scenarios: Scenario[]; activeScenarioId: string | null };
 
 export function scenarioReducer(
@@ -57,7 +57,7 @@ type ScenarioContextValue = {
   addScenario: (scenario: Scenario) => void;
   removeScenario: (id: string) => void;
   updateScenario: (id: string, name: string) => void;
-  setActiveScenario: (id: string) => void;
+  setActiveScenario: (id: string | null) => void;
   setScenarios: (scenarios: Scenario[]) => void;
 };
 
@@ -101,9 +101,7 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
   }, [state.scenarios]);
 
   useEffect(() => {
-    if (state.activeScenarioId) {
-      ScenarioStorage.saveActiveScenarioId(state.activeScenarioId);
-    }
+    ScenarioStorage.saveActiveScenarioId(state.activeScenarioId);
   }, [state.activeScenarioId]);
 
   function addScenario(scenario: Scenario) {
@@ -118,7 +116,7 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "update", id, name });
   }
 
-  function setActiveScenario(id: string) {
+  function setActiveScenario(id: string | null) {
     dispatch({ type: "setActive", id });
   }
 

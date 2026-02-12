@@ -27,7 +27,11 @@ export class ScenarioStorage {
     return id && id.length > 0 ? id : null;
   }
 
-  static saveActiveScenarioId(id: string): void {
-    localStorage.setItem(ACTIVE_SCENARIO_ID_KEY, id);
+  static saveActiveScenarioId(id: string | null): void {
+    if (id === null) {
+      localStorage.removeItem(ACTIVE_SCENARIO_ID_KEY);
+    } else {
+      localStorage.setItem(ACTIVE_SCENARIO_ID_KEY, id);
+    }
   }
 }

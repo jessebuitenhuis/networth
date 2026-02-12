@@ -26,6 +26,26 @@ const rt2: RecurringTransaction = {
   startDate: "2024-01-01",
 };
 
+const rt3: RecurringTransaction = {
+  id: "r3",
+  accountId: "a2",
+  amount: 300,
+  description: "Scenario income",
+  frequency: RecurrenceFrequency.Monthly,
+  startDate: "2024-01-01",
+  scenarioId: "s1",
+};
+
+const rt4: RecurringTransaction = {
+  id: "r4",
+  accountId: "a1",
+  amount: -500,
+  description: "Scenario expense",
+  frequency: RecurrenceFrequency.Monthly,
+  startDate: "2024-01-01",
+  scenarioId: "s1",
+};
+
 describe("recurringTransactionReducer", () => {
   it("adds a recurring transaction", () => {
     const result = recurringTransactionReducer([], {
@@ -63,6 +83,14 @@ describe("recurringTransactionReducer", () => {
     });
     expect(result).toEqual([updated, rt2]);
   });
+
+  it("removes all recurring transactions by scenarioId", () => {
+    const result = recurringTransactionReducer([rt1, rt2, rt3, rt4], {
+      type: "removeByScenarioId",
+      scenarioId: "s1",
+    });
+    expect(result).toEqual([rt1, rt2]);
+  });
 });
 
 function TestConsumer() {
@@ -70,6 +98,7 @@ function TestConsumer() {
     recurringTransactions,
     addRecurringTransaction,
     removeRecurringTransaction,
+    removeRecurringTransactionsByScenarioId,
     updateRecurringTransaction,
   } = useRecurringTransactions();
   return (
@@ -77,6 +106,7 @@ function TestConsumer() {
       <span data-testid="count">{recurringTransactions.length}</span>
       <button onClick={() => addRecurringTransaction(rt1)}>Add</button>
       <button onClick={() => removeRecurringTransaction("r1")}>Remove</button>
+      <button onClick={() => removeRecurringTransactionsByScenarioId("s1")}>Remove By Scenario</button>
       <button onClick={() => updateRecurringTransaction({ ...rt1, amount: 6000, description: "Updated" })}>Update</button>
       {recurringTransactions.map((rt) => (
         <span key={rt.id}>{rt.description}</span>
@@ -173,6 +203,24 @@ describe("RecurringTransactionProvider", () => {
     expect(screen.getByText("Updated")).toBeInTheDocument();
     expect(screen.queryByText("Salary")).not.toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("2");
+  });
+
+  it("removes all recurring transactions for a scenario", () => {
+    localStorage.setItem("recurringTransactions", JSON.stringify([rt1, rt2, rt3, rt4]));
+
+    render(
+      <RecurringTransactionProvider>
+        <TestConsumer />
+      </RecurringTransactionProvider>
+    );
+
+    act(() => screen.getByText("Remove By Scenario").click());
+
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
+    expect(screen.getByText("Salary")).toBeInTheDocument();
+    expect(screen.getByText("Rent")).toBeInTheDocument();
+    expect(screen.queryByText("Scenario income")).not.toBeInTheDocument();
+    expect(screen.queryByText("Scenario expense")).not.toBeInTheDocument();
   });
 
   it("throws when useRecurringTransactions is called outside provider", () => {

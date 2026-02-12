@@ -31,6 +31,24 @@ const tx3: Transaction = {
   description: "Other account",
 };
 
+const tx4: Transaction = {
+  id: "t4",
+  accountId: "a1",
+  amount: 300,
+  date: "2024-01-03",
+  description: "Scenario transaction",
+  scenarioId: "s1",
+};
+
+const tx5: Transaction = {
+  id: "t5",
+  accountId: "a2",
+  amount: 200,
+  date: "2024-01-03",
+  description: "Another scenario transaction",
+  scenarioId: "s1",
+};
+
 describe("transactionReducer", () => {
   it("adds a transaction", () => {
     const result = transactionReducer([], { type: "add", transaction: tx1 });
@@ -58,6 +76,14 @@ describe("transactionReducer", () => {
     expect(result).toEqual([tx3]);
   });
 
+  it("removes all transactions by scenarioId", () => {
+    const result = transactionReducer([tx1, tx2, tx4, tx5], {
+      type: "removeByScenarioId",
+      scenarioId: "s1",
+    });
+    expect(result).toEqual([tx1, tx2]);
+  });
+
   it("updates a transaction", () => {
     const updated: Transaction = {
       ...tx1,
@@ -73,7 +99,7 @@ describe("transactionReducer", () => {
 });
 
 function TestConsumer() {
-  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, updateTransaction, getBalance } =
+  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, removeTransactionsByScenarioId, updateTransaction, getBalance } =
     useTransactions();
   return (
     <div>
@@ -82,6 +108,7 @@ function TestConsumer() {
       <button onClick={() => addTransaction(tx1)}>Add</button>
       <button onClick={() => removeTransaction("t1")}>Remove</button>
       <button onClick={() => removeTransactionsByAccountId("a1")}>Remove By Account</button>
+      <button onClick={() => removeTransactionsByScenarioId("s1")}>Remove By Scenario</button>
       <button onClick={() => updateTransaction({ ...tx1, amount: 1500, description: "Updated" })}>Update</button>
       {transactions.map((t) => (
         <span key={t.id}>{t.description}</span>
@@ -206,6 +233,24 @@ describe("TransactionProvider", () => {
     expect(screen.getByText("Other account")).toBeInTheDocument();
     expect(screen.queryByText("Opening balance")).not.toBeInTheDocument();
     expect(screen.queryByText("Groceries")).not.toBeInTheDocument();
+  });
+
+  it("removes all transactions for a scenario", () => {
+    localStorage.setItem("transactions", JSON.stringify([tx1, tx2, tx4, tx5]));
+
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => screen.getByText("Remove By Scenario").click());
+
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
+    expect(screen.getByText("Opening balance")).toBeInTheDocument();
+    expect(screen.getByText("Groceries")).toBeInTheDocument();
+    expect(screen.queryByText("Scenario transaction")).not.toBeInTheDocument();
+    expect(screen.queryByText("Another scenario transaction")).not.toBeInTheDocument();
   });
 
   it("updates a transaction", () => {

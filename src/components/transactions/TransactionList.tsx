@@ -2,6 +2,7 @@
 
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useAccounts } from "@/context/AccountContext";
 import { isTransactionProjected } from "@/services/isTransactionProjected";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { formatDate } from "@/lib/dateUtils";
@@ -17,14 +18,18 @@ type TransactionListProps = {
 export function TransactionList({ accountId }: TransactionListProps) {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
+  const { accounts } = useAccounts();
 
   const today = formatDate(new Date());
+  const account = accounts.find((a) => a.id === accountId);
+  const accountName = account?.name || "Unknown";
 
   const regularItems: DisplayTransaction[] = transactions
     .filter((t) => t.accountId === accountId)
     .map((tx) => ({
       id: tx.id,
       description: tx.description,
+      accountName,
       date: tx.date,
       amount: tx.amount,
       isProjected: isTransactionProjected(tx),
@@ -40,6 +45,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
       const item: DisplayTransaction = {
         id: next.id,
         description: next.description,
+        accountName,
         date: next.date,
         amount: next.amount,
         isProjected: true,
