@@ -92,7 +92,7 @@ describe("EditTransactionDialog", () => {
     expect(screen.getByLabelText("Amount")).toBeInTheDocument();
   });
 
-  it("shows confirmation dialog when clicking delete", () => {
+  it("closes edit dialog before showing delete confirmation", () => {
     render(
       <ScenarioProvider>
         <TransactionProvider>
@@ -104,8 +104,26 @@ describe("EditTransactionDialog", () => {
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
 
+    expect(screen.queryByLabelText("Amount")).not.toBeInTheDocument();
     expect(screen.getByText("Delete Transaction")).toBeInTheDocument();
     expect(screen.getByText(/Are you sure you want to delete this transaction/)).toBeInTheDocument();
+  });
+
+  it("delete confirmation button uses destructive variant", () => {
+    render(
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
+    );
+
+    act(() => screen.getByLabelText("Edit Transaction").click());
+    act(() => screen.getByText("Delete").click());
+
+    const deleteButtons = screen.getAllByText("Delete");
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    expect(confirmButton).toHaveClass("bg-destructive");
   });
 
   it("removes transaction when confirming delete", () => {
@@ -119,7 +137,10 @@ describe("EditTransactionDialog", () => {
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
-    act(() => screen.getByText("Continue").click());
+
+    const deleteButtons = screen.getAllByText("Delete");
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    act(() => confirmButton.click());
 
     const stored = JSON.parse(localStorage.getItem("transactions")!);
     expect(stored).toEqual([]);
@@ -136,9 +157,13 @@ describe("EditTransactionDialog", () => {
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
+
+    expect(screen.queryByText("Edit Transaction")).not.toBeInTheDocument();
+
     act(() => screen.getByText("Cancel").click());
 
     expect(screen.queryByText("Delete Transaction")).not.toBeInTheDocument();
+    expect(screen.getByText("Edit Transaction")).toBeInTheDocument();
     expect(screen.getByLabelText("Amount")).toBeInTheDocument();
   });
 
@@ -189,5 +214,33 @@ describe("EditTransactionDialog", () => {
 
     const stored = JSON.parse(localStorage.getItem("transactions")!);
     expect(stored[0].description).toBe("Padded Description");
+  });
+
+  it("updates scenario when selecting a specific scenario", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("scenarios", JSON.stringify([
+      { id: "s1", name: "Test Scenario" }
+    ]));
+
+    render(
+      <ScenarioProvider>
+        <TransactionProvider>
+          <EditTransactionDialog transaction={mockTransaction} />
+        </TransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+
+    const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
+    await user.click(scenarioTrigger);
+
+    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
+    await user.click(scenarioOption);
+
+    await user.click(screen.getByText("Save"));
+
+    const stored = JSON.parse(localStorage.getItem("transactions")!);
+    expect(stored[0].scenarioId).toBe("s1");
   });
 });

@@ -156,8 +156,9 @@ describe("ScenarioTransactionList", () => {
     const deleteButton = screen.getByRole("button", { name: /delete/i });
     await user.click(deleteButton);
 
-    const continueButton = screen.getByRole("button", { name: /continue/i });
-    await user.click(continueButton);
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    await user.click(confirmButton);
 
     expect(screen.queryByText(/Salary/)).not.toBeInTheDocument();
   });

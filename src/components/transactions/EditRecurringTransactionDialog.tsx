@@ -32,7 +32,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 type EditRecurringTransactionDialogProps = {
@@ -46,6 +45,7 @@ export function EditRecurringTransactionDialog({
     useRecurringTransactions();
   const { scenarios } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [amount, setAmount] = useState(recurringTransaction.amount);
   const [description, setDescription] = useState(
     recurringTransaction.description
@@ -84,111 +84,122 @@ export function EditRecurringTransactionDialog({
     setIsOpen(false);
   }
 
+  function handleDeleteClick() {
+    setIsOpen(false);
+    setIsDeleteConfirmOpen(true);
+  }
+
+  function handleCancelDelete() {
+    setIsDeleteConfirmOpen(false);
+    setIsOpen(true);
+  }
+
   function handleDelete() {
     removeRecurringTransaction(recurringTransaction.id);
-    setIsOpen(false);
+    setIsDeleteConfirmOpen(false);
   }
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (open) resetForm();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label="Edit Transaction">
-          <Pencil className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent aria-describedby={undefined}>
-        <DialogHeader>
-          <DialogTitle>Edit Recurring Transaction</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="edit-recurring-amount" className="mb-2">
-              Amount
-            </Label>
-            <Input
-              id="edit-recurring-amount"
-              type="number"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              aria-label="Amount"
-            />
-          </div>
-          <div>
-            <Label htmlFor="edit-recurring-description" className="mb-2">
-              Description
-            </Label>
-            <Input
-              id="edit-recurring-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              aria-label="Description"
-            />
-          </div>
-          <div>
-            <Label id="edit-recurring-scenario-label" className="mb-2">
-              Scenario
-            </Label>
-            <Select
-              value={selectedScenarioId}
-              onValueChange={setSelectedScenarioId}
-              aria-labelledby="edit-recurring-scenario-label"
-            >
-              <SelectTrigger aria-label="Scenario">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None (Baseline)</SelectItem>
-                {scenarios.map((scenario) => (
-                  <SelectItem key={scenario.id} value={scenario.id}>
-                    {scenario.name}
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          setIsOpen(open);
+          if (open) resetForm();
+        }}
+      >
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" aria-label="Edit Transaction">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle>Edit Recurring Transaction</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="edit-recurring-amount" className="mb-2">
+                Amount
+              </Label>
+              <Input
+                id="edit-recurring-amount"
+                type="number"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+                aria-label="Amount"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-recurring-description" className="mb-2">
+                Description
+              </Label>
+              <Input
+                id="edit-recurring-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                aria-label="Description"
+              />
+            </div>
+            <div>
+              <Label id="edit-recurring-scenario-label" className="mb-2">
+                Scenario
+              </Label>
+              <Select
+                value={selectedScenarioId}
+                onValueChange={setSelectedScenarioId}
+                aria-labelledby="edit-recurring-scenario-label"
+              >
+                <SelectTrigger aria-label="Scenario">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (Baseline)</SelectItem>
+                  {scenarios.map((scenario) => (
+                    <SelectItem key={scenario.id} value={scenario.id}>
+                      {scenario.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label id="edit-recurring-frequency-label" className="mb-2">
+                Frequency
+              </Label>
+              <Select
+                value={frequency}
+                onValueChange={(v) => setFrequency(v as RecurrenceFrequency)}
+                aria-labelledby="edit-recurring-frequency-label"
+              >
+                <SelectTrigger aria-label="Frequency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={RecurrenceFrequency.Monthly}>
+                    Monthly
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label id="edit-recurring-frequency-label" className="mb-2">
-              Frequency
-            </Label>
-            <Select
-              value={frequency}
-              onValueChange={(v) => setFrequency(v as RecurrenceFrequency)}
-              aria-labelledby="edit-recurring-frequency-label"
-            >
-              <SelectTrigger aria-label="Frequency">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={RecurrenceFrequency.Monthly}>
-                  Monthly
-                </SelectItem>
-                <SelectItem value={RecurrenceFrequency.Yearly}>
-                  Yearly
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="edit-recurring-start-date" className="mb-2">
-              Start Date
-            </Label>
-            <Input
-              id="edit-recurring-start-date"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              aria-label="Start Date"
-            />
-          </div>
-          <div>
-            <Label htmlFor="edit-recurring-end-date" className="mb-2">
+                  <SelectItem value={RecurrenceFrequency.Yearly}>
+                    Yearly
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-recurring-start-date" className="mb-2">
+                Start Date
+              </Label>
+              <Input
+                id="edit-recurring-start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                aria-label="Start Date"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-recurring-end-date" className="mb-2">
               End Date (optional)
             </Label>
             <Input
@@ -200,34 +211,43 @@ export function EditRecurringTransactionDialog({
             />
           </div>
           <div className="flex justify-between">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button type="button" variant="destructive">
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete Recurring Transaction
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete this recurring transaction?
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
-                    Continue
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteClick}
+            >
+              Delete
+            </Button>
             <Button type="submit">Save</Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+
+    <AlertDialog
+      open={isDeleteConfirmOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleCancelDelete();
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Recurring Transaction</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this recurring transaction? This
+            action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+);
 }

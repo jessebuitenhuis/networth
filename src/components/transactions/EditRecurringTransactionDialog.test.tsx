@@ -110,7 +110,7 @@ describe("EditRecurringTransactionDialog", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("shows confirmation dialog when clicking delete", async () => {
+  it("closes edit dialog before showing delete confirmation", async () => {
     const user = userEvent.setup();
     render(
       <ScenarioProvider>
@@ -125,10 +125,31 @@ describe("EditRecurringTransactionDialog", () => {
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
 
+    expect(screen.queryByLabelText("Amount")).not.toBeInTheDocument();
     expect(screen.getByText("Delete Recurring Transaction")).toBeInTheDocument();
     expect(
       screen.getByText(/Are you sure you want to delete this recurring transaction/)
     ).toBeInTheDocument();
+  });
+
+  it("delete confirmation button uses destructive variant", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+    await user.click(screen.getByText("Delete"));
+
+    const deleteButtons = screen.getAllByText("Delete");
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    expect(confirmButton).toHaveClass("bg-destructive");
   });
 
   it("removes recurring transaction when confirming delete", async () => {
@@ -145,7 +166,10 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
-    await user.click(screen.getByText("Continue"));
+
+    const deleteButtons = screen.getAllByText("Delete");
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    await user.click(confirmButton);
 
     const stored = JSON.parse(
       localStorage.getItem("recurringTransactions")!
@@ -167,11 +191,15 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
+
+    expect(screen.queryByText("Edit Recurring Transaction")).not.toBeInTheDocument();
+
     await user.click(screen.getByText("Cancel"));
 
     expect(
       screen.queryByText("Delete Recurring Transaction")
     ).not.toBeInTheDocument();
+    expect(screen.getByText("Edit Recurring Transaction")).toBeInTheDocument();
     expect(screen.getByLabelText("Amount")).toBeInTheDocument();
   });
 
@@ -226,5 +254,37 @@ describe("EditRecurringTransactionDialog", () => {
       id: "r1",
       endDate: "2025-06-30",
     });
+  });
+
+  it("updates scenario when selecting a specific scenario", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("scenarios", JSON.stringify([
+      { id: "s1", name: "Test Scenario" }
+    ]));
+
+    render(
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+
+    const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
+    await user.click(scenarioTrigger);
+
+    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
+    await user.click(scenarioOption);
+
+    await user.click(screen.getByText("Save"));
+
+    const stored = JSON.parse(
+      localStorage.getItem("recurringTransactions")!
+    );
+    expect(stored[0].scenarioId).toBe("s1");
   });
 });
