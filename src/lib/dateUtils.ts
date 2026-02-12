@@ -30,3 +30,11 @@ export function formatDate(date: Date): string {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+export function toSunday(date: Date): Date {
+  return addDays(date, -date.getDay());
+}
+
+export function endOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}

@@ -13,26 +13,38 @@ import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
-import { ProjectionPeriod } from "@/models/ProjectionPeriod";
+import { ChartPeriod } from "@/models/ChartPeriod";
+import type { DateRange } from "@/models/DateRange";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
-import { formatDate } from "@/lib/dateUtils";
-import { addMonths } from "@/lib/dateUtils";
+import { addMonths, formatDate } from "@/lib/dateUtils";
+import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { formatCurrency } from "./NetWorthChart";
 import { ChartLegend } from "./ChartLegend";
-import { ProjectionPeriodPicker } from "./ProjectionPeriodPicker";
+import { PeriodPicker } from "./PeriodPicker";
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
+
+const PROJECTED_PERIODS = [
+  ChartPeriod.OneWeek,
+  ChartPeriod.OneMonth,
+  ChartPeriod.ThreeMonths,
+  ChartPeriod.SixMonths,
+  ChartPeriod.OneYear,
+  ChartPeriod.All,
+  ChartPeriod.Custom,
+];
 
 export function ProjectedNetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
   const { activeScenarioId } = useScenarios();
-  const [period, setPeriod] = useState(ProjectionPeriod.ThreeMonths);
+  const [period, setPeriod] = useState(ChartPeriod.OneMonth);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
 
   const today = formatDate(new Date());
   const defaultEnd = formatDate(addMonths(new Date(), 3));
-  const [customRange, setCustomRange] = useState({ start: today, end: defaultEnd });
+  const [customRange, setCustomRange] = useState<DateRange>({ start: today, end: defaultEnd });
+  const chartKey = `${period}-${customRange.start}-${customRange.end}`;
 
   function handleToggle(id: string) {
     setExcludedIds((prev) => {
@@ -59,9 +71,10 @@ export function ProjectedNetWorthChart() {
     filteredProjectedTransactions,
     period,
     today,
-    period === ProjectionPeriod.Custom ? customRange : undefined,
+    period === ChartPeriod.Custom ? customRange : undefined,
     filteredRecurringTransactions
   );
+  const tickFormat = getTickFormat(period, data);
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
@@ -69,9 +82,9 @@ export function ProjectedNetWorthChart() {
         <h2 className="text-sm font-medium text-muted-foreground">
           Projected Net Worth
         </h2>
-        <ProjectionPeriodPicker selected={period} onSelect={setPeriod} />
+        <PeriodPicker periods={PROJECTED_PERIODS} selected={period} onSelect={setPeriod} />
       </div>
-      {period === ProjectionPeriod.Custom && (
+      {period === ChartPeriod.Custom && (
         <CustomDateRangePicker
           start={customRange.start}
           end={customRange.end}
@@ -80,14 +93,15 @@ export function ProjectedNetWorthChart() {
       )}
       <div data-testid="projected-chart">
         <ResponsiveContainer width="100%" height={256}>
-          <LineChart data={data}>
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <LineChart key={chartKey} data={data}>
+            <XAxis dataKey="date" tickFormatter={(v) => formatTick(v, tickFormat)} tick={{ fontSize: 12 }} />
             <YAxis
               tickFormatter={formatCurrency}
               tick={{ fontSize: 12 }}
               width={80}
             />
             <Tooltip
+              labelFormatter={(v) => formatTick(v as string, tickFormat)}
               formatter={(value) => formatCurrency(value as number)}
             />
             <Line
@@ -97,6 +111,8 @@ export function ProjectedNetWorthChart() {
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
+              isAnimationActive={true}
+              animationDuration={300}
             />
           </LineChart>
         </ResponsiveContainer>

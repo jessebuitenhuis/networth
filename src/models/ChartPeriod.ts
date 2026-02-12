@@ -1,6 +1,11 @@
 export enum ChartPeriod {
-  Week = "Week",
-  Month = "Month",
-  Quarter = "Quarter",
-  Year = "Year",
+  OneWeek = "1W",
+  MTD = "MTD",
+  OneMonth = "1M",
+  ThreeMonths = "3M",
+  SixMonths = "6M",
+  YTD = "YTD",
+  OneYear = "1Y",
+  All = "All",
+  Custom = "Custom",
 }

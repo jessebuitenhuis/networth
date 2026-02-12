@@ -54,10 +54,10 @@ function renderWithProviders(
 describe("ProjectedNetWorthChart", () => {
   beforeEach(() => localStorage.clear());
 
-  it("renders with 3M selected by default", () => {
+  it("renders with 1M selected by default", () => {
     renderWithProviders();
 
-    expect(screen.getByRole("button", { name: "3M" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
@@ -72,7 +72,7 @@ describe("ProjectedNetWorthChart", () => {
       "aria-pressed",
       "true"
     );
-    expect(screen.getByRole("button", { name: "3M" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
       "aria-pressed",
       "false"
     );

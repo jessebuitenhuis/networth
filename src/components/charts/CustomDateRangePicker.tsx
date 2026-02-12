@@ -1,10 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-type DateRange = {
-  start: string;
-  end: string;
-};
+import type { DateRange } from "@/models/DateRange";
 
 type CustomDateRangePickerProps = {
   start: string;

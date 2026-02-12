@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { getAccountColor } from "@/lib/chartColors";
 import type { Account } from "@/models/Account";
 
 type ChartLegendProps = {
@@ -11,19 +11,23 @@ export function ChartLegend({ accounts, excludedIds, onToggle }: ChartLegendProp
   if (accounts.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {accounts.map((account) => {
+    <div className="flex flex-wrap justify-center gap-3">
+      {accounts.map((account, index) => {
         const isIncluded = !excludedIds.has(account.id);
         return (
-          <Button
+          <button
             key={account.id}
-            variant={isIncluded ? "default" : "outline"}
-            size="sm"
+            className={`flex items-center gap-1.5 text-sm ${isIncluded ? "" : "opacity-40"}`}
             aria-pressed={isIncluded}
             onClick={() => onToggle(account.id)}
           >
+            <span
+              data-testid="legend-dot"
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: getAccountColor(index) }}
+            />
             {account.name}
-          </Button>
+          </button>
         );
       })}
     </div>
