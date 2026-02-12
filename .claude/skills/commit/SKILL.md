@@ -61,7 +61,7 @@ git add <file1> <file2> ... && git commit -m "$(cat <<'EOF'
 
 <optional body>
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Co-Authored-By: MODEL_NAME <MODEL_EMAIL>
 EOF
 )" && git log --oneline -1
 ```
@@ -73,7 +73,7 @@ EOF
 
 <optional body>
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Co-Authored-By: MODEL_NAME <MODEL_EMAIL>
 ```
 
 **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
