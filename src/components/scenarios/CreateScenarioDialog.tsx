@@ -55,7 +55,7 @@ export function CreateScenarioDialog() {
           New Scenario
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Create Scenario</DialogTitle>
         </DialogHeader>

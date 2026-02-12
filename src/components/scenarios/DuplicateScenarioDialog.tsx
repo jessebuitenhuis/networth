@@ -80,7 +80,7 @@ export function DuplicateScenarioDialog() {
           Duplicate
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Duplicate Scenario</DialogTitle>
         </DialogHeader>

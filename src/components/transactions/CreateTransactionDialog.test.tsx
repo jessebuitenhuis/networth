@@ -68,10 +68,13 @@ function renderDialog(accountId = "a1") {
 }
 
 describe("CreateTransactionDialog", () => {
+  let uuidCounter = 0;
+
   beforeEach(() => {
     localStorage.clear();
+    uuidCounter = 0;
     vi.stubGlobal("crypto", {
-      randomUUID: () => "tx-uuid",
+      randomUUID: () => `tx-uuid-${++uuidCounter}`,
     });
   });
 
@@ -283,12 +286,18 @@ describe("CreateTransactionDialog", () => {
     await user.type(screen.getByLabelText("Amount"), "300");
     await user.type(screen.getByLabelText("Description"), "Scenario TX");
 
-    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
-    await user.click(screen.getByRole("option", { name: "Test Scenario" }));
+    const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
+    await user.click(scenarioTrigger);
+
+    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
+    await user.click(scenarioOption);
 
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
-    expect(screen.getByText("Scenario TX - 300")).toBeInTheDocument();
+    const stored = JSON.parse(localStorage.getItem("transactions")!);
+    expect(stored[0].scenarioId).toBe("scenario-1");
+    expect(stored[0].description).toBe("Scenario TX");
+    expect(stored[0].amount).toBe(300);
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {

@@ -73,6 +73,10 @@ export function TransactionTable({ items }: TransactionTableProps) {
           aVal = a.amount;
           bVal = b.amount;
           break;
+        default:
+          aVal = a.date;
+          bVal = b.date;
+          break;
       }
 
       if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
