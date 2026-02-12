@@ -287,4 +287,58 @@ describe("EditRecurringTransactionDialog", () => {
     );
     expect(stored[0].scenarioId).toBe("s1");
   });
+
+  it('shows "Create new scenario..." option in scenario dropdown', async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+
+    expect(screen.getByRole("option", { name: "Create new scenario..." })).toBeInTheDocument();
+  });
+
+  it("creates scenario inline and auto-selects it", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ScenarioProvider>
+        <RecurringTransactionProvider>
+          <EditRecurringTransactionDialog
+            recurringTransaction={mockRecurringTransaction}
+          />
+        </RecurringTransactionProvider>
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByLabelText("Edit Transaction"));
+
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+    await user.click(screen.getByRole("option", { name: "Create new scenario..." }));
+
+    const input = screen.getByLabelText(/scenario name/i);
+    await user.type(input, "Early Retirement");
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    // Verify scenario was created in storage
+    const scenarios = JSON.parse(localStorage.getItem("scenarios")!);
+    const createdScenario = scenarios.find((s: { name: string }) => s.name === "Early Retirement");
+    expect(createdScenario).toBeDefined();
+
+    // Save recurring transaction and verify scenario ID was set
+    await user.click(screen.getByText("Save"));
+
+    const stored = JSON.parse(
+      localStorage.getItem("recurringTransactions")!
+    );
+    expect(stored[0].scenarioId).toBe(createdScenario.id);
+  });
 });

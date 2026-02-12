@@ -9,13 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ScenarioSelect } from "./ScenarioSelect";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +36,7 @@ export function EditTransactionDialog({
   transaction,
 }: EditTransactionDialogProps) {
   const { updateTransaction, removeTransaction } = useTransactions();
-  const { scenarios } = useScenarios();
+  const { scenarios, addScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(transaction.amount);
@@ -81,6 +75,12 @@ export function EditTransactionDialog({
   function handleDelete() {
     removeTransaction(transaction.id);
     setIsDeleteOpen(false);
+  }
+
+  function handleCreateScenario(name: string): string {
+    const id = crypto.randomUUID();
+    addScenario({ id, name });
+    return id;
   }
 
   return (
@@ -136,28 +136,12 @@ export function EditTransactionDialog({
                 aria-label="Description"
               />
             </div>
-            <div>
-              <Label id="edit-transaction-scenario-label" className="mb-2">
-                Scenario
-              </Label>
-              <Select
-                value={selectedScenarioId}
-                onValueChange={setSelectedScenarioId}
-                aria-labelledby="edit-transaction-scenario-label"
-              >
-                <SelectTrigger aria-label="Scenario">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None (Baseline)</SelectItem>
-                  {scenarios.map((scenario) => (
-                    <SelectItem key={scenario.id} value={scenario.id}>
-                      {scenario.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ScenarioSelect
+              scenarios={scenarios}
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              onCreateScenario={handleCreateScenario}
+            />
             <div className="flex justify-between">
               <Button
                 type="button"

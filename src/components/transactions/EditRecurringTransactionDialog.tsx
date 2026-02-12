@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
+import { ScenarioSelect } from "./ScenarioSelect";
 import {
   Select,
   SelectContent,
@@ -44,7 +45,7 @@ export function EditRecurringTransactionDialog({
 }: EditRecurringTransactionDialogProps) {
   const { updateRecurringTransaction, removeRecurringTransaction } =
     useRecurringTransactions();
-  const { scenarios } = useScenarios();
+  const { scenarios, addScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(recurringTransaction.amount);
@@ -95,6 +96,12 @@ export function EditRecurringTransactionDialog({
     setIsDeleteOpen(false);
   }
 
+  function handleCreateScenario(name: string): string {
+    const id = crypto.randomUUID();
+    addScenario({ id, name });
+    return id;
+  }
+
   return (
     <>
       <Dialog
@@ -136,28 +143,12 @@ export function EditRecurringTransactionDialog({
                 aria-label="Description"
               />
             </div>
-            <div>
-              <Label id="edit-recurring-scenario-label" className="mb-2">
-                Scenario
-              </Label>
-              <Select
-                value={selectedScenarioId}
-                onValueChange={setSelectedScenarioId}
-                aria-labelledby="edit-recurring-scenario-label"
-              >
-                <SelectTrigger aria-label="Scenario">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None (Baseline)</SelectItem>
-                  {scenarios.map((scenario) => (
-                    <SelectItem key={scenario.id} value={scenario.id}>
-                      {scenario.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ScenarioSelect
+              scenarios={scenarios}
+              value={selectedScenarioId}
+              onValueChange={setSelectedScenarioId}
+              onCreateScenario={handleCreateScenario}
+            />
             <div>
               <Label id="edit-recurring-frequency-label" className="mb-2">
                 Frequency

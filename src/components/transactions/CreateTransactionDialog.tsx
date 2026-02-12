@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
+import { ScenarioSelect } from "./ScenarioSelect";
 import {
   Select,
   SelectContent,
@@ -35,7 +36,7 @@ export function CreateTransactionDialog({
 }: CreateTransactionDialogProps) {
   const { addTransaction } = useTransactions();
   const { addRecurringTransaction } = useRecurringTransactions();
-  const { scenarios } = useScenarios();
+  const { scenarios, addScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(
@@ -88,6 +89,12 @@ export function CreateTransactionDialog({
     setIsOpen(false);
   }
 
+  function handleCreateScenario(name: string): string {
+    const id = crypto.randomUUID();
+    addScenario({ id, name });
+    return id;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -134,28 +141,12 @@ export function CreateTransactionDialog({
               placeholder="e.g. Groceries"
             />
           </div>
-          <div>
-            <Label id="tx-scenario-label" className="mb-2">
-              Scenario
-            </Label>
-            <Select
-              value={selectedScenarioId}
-              onValueChange={setSelectedScenarioId}
-              aria-labelledby="tx-scenario-label"
-            >
-              <SelectTrigger aria-label="Scenario">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None (Baseline)</SelectItem>
-                {scenarios.map((scenario) => (
-                  <SelectItem key={scenario.id} value={scenario.id}>
-                    {scenario.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <ScenarioSelect
+            scenarios={scenarios}
+            value={selectedScenarioId}
+            onValueChange={setSelectedScenarioId}
+            onCreateScenario={handleCreateScenario}
+          />
           <div className="flex items-center gap-2">
             <Checkbox
               id="tx-recurring"

@@ -14,7 +14,7 @@ vi.stubGlobal(
 import { CreateTransactionDialog } from "./CreateTransactionDialog";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
@@ -23,6 +23,7 @@ import {
 function TestHarness({ accountId }: { accountId: string }) {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
+  const { scenarios } = useScenarios();
   const filtered = transactions.filter((t) => t.accountId === accountId);
   return (
     <div>
@@ -42,6 +43,11 @@ function TestHarness({ accountId }: { accountId: string }) {
               {rt.description} - {rt.amount} - {rt.frequency}
             </li>
           ))}
+      </ul>
+      <ul data-testid="scenarios">
+        {scenarios.map((s) => (
+          <li key={s.id}>{s.name}</li>
+        ))}
       </ul>
     </div>
   );
@@ -283,5 +289,45 @@ describe("CreateTransactionDialog", () => {
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
     expect(screen.getByText("Scenario TX - 300")).toBeInTheDocument();
+  });
+
+  it('shows "Create new scenario..." option in scenario dropdown', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+
+    expect(screen.getByRole("option", { name: "Create new scenario..." })).toBeInTheDocument();
+  });
+
+  it("creates scenario inline and auto-selects it", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+    await user.click(screen.getByRole("option", { name: "Create new scenario..." }));
+
+    const input = screen.getByLabelText(/scenario name/i);
+    await user.type(input, "New Planning");
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    // Verify scenario was created
+    expect(screen.getByTestId("scenarios")).toHaveTextContent("New Planning");
+
+    // Add transaction to verify the scenario ID was selected
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "500");
+    await user.type(screen.getByLabelText("Description"), "Planning TX");
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(screen.getByText("Planning TX - 500")).toBeInTheDocument();
   });
 });
