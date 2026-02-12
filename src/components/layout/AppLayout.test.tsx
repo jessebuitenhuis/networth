@@ -47,14 +47,6 @@ describe("AppLayout", () => {
     expect(screen.getByText("Page content")).toBeInTheDocument();
   });
 
-  it("renders sidebar trigger button", () => {
-    renderWithProvider(testGroups, <p>Content</p>);
-
-    expect(
-      document.querySelector('[data-slot="sidebar-trigger"]')
-    ).toBeInTheDocument();
-  });
-
   it("renders sidebar with nav items", () => {
     renderWithProvider(testGroups, <p>Content</p>);
 

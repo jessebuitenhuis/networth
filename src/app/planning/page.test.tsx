@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PlanningPage from "./page";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
@@ -15,11 +16,9 @@ vi.stubGlobal(
   }
 );
 
-describe("PlanningPage", () => {
-  beforeEach(() => localStorage.clear());
-
-  it("renders the Planning heading", () => {
-    render(
+function renderPage() {
+  return render(
+    <SidebarProvider>
       <AccountProvider>
         <TransactionProvider>
           <ScenarioProvider>
@@ -29,7 +28,15 @@ describe("PlanningPage", () => {
           </ScenarioProvider>
         </TransactionProvider>
       </AccountProvider>
-    );
+    </SidebarProvider>
+  );
+}
+
+describe("PlanningPage", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("renders the Planning heading", () => {
+    renderPage();
 
     expect(
       screen.getByRole("heading", { name: "Planning" })
@@ -37,33 +44,13 @@ describe("PlanningPage", () => {
   });
 
   it("renders the projected net worth chart", () => {
-    render(
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <PlanningPage />
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    );
+    renderPage();
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 
   it("renders the duplicate scenario button", () => {
-    render(
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <PlanningPage />
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    );
+    renderPage();
 
     expect(
       screen.getByRole("button", { name: /duplicate/i })
@@ -74,17 +61,7 @@ describe("PlanningPage", () => {
     localStorage.setItem("scenarios", JSON.stringify([{ id: "1", name: "Test" }]));
     localStorage.setItem("activeScenarioId", "1");
 
-    render(
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <PlanningPage />
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    );
+    renderPage();
 
     expect(screen.getByRole("button", { name: "Edit Scenario" })).toBeInTheDocument();
   });
@@ -93,17 +70,7 @@ describe("PlanningPage", () => {
     localStorage.setItem("scenarios", JSON.stringify([{ id: "1", name: "Test" }]));
     localStorage.setItem("activeScenarioId", "");
 
-    render(
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <PlanningPage />
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    );
+    renderPage();
 
     expect(screen.queryByRole("button", { name: "Edit Scenario" })).not.toBeInTheDocument();
   });
