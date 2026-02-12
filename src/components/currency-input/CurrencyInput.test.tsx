@@ -198,4 +198,70 @@ describe("CurrencyInput", () => {
     // Should show decimal point
     expect(input.value).toContain(".");
   });
+
+  it("handles cursor positioning when typing integers without decimal", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CurrencyInput value={0} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    await user.clear(input);
+
+    // Type integers one by one to exercise cursor positioning logic
+    await user.type(input, "5");
+    expect(input).toHaveValue("5");
+
+    await user.type(input, "0");
+    expect(input).toHaveValue("50");
+
+    await user.type(input, "0");
+    expect(input).toHaveValue("500");
+
+    // Verify onChange was called with correct values
+    expect(onChange).toHaveBeenLastCalledWith(500);
+  });
+
+  it("handles typing large numbers to test cursor positioning without decimals", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CurrencyInput value={0} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+
+    // Type a large number that will trigger thousand separators
+    // This exercises the cursor positioning logic in the else-if branch
+    await user.type(input, "123456");
+
+    expect(input).toHaveValue("123,456");
+    expect(onChange).toHaveBeenLastCalledWith(123456);
+  });
+
+  it("handles typing just a decimal point", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CurrencyInput value={0} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+    await user.type(input, ".");
+
+    // Should handle decimal point entry
+    expect(input.value).toBe(".");
+    expect(onChange).toHaveBeenLastCalledWith(0);
+  });
+
+  it("handles typing decimal after removing integer part", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CurrencyInput value={123} onChange={onChange} />);
+
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+    await user.type(input, ".5");
+
+    // Should format correctly
+    expect(input.value).toBe(".5");
+    expect(onChange).toHaveBeenLastCalledWith(0.5);
+  });
 });

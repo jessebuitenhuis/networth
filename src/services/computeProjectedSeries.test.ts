@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { computeProjectedSeries } from "./computeProjectedSeries";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import { AccountType } from "@/models/AccountType";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { Account } from "@/models/Account";
-import type { Transaction } from "@/models/Transaction";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { Account } from "@/models/Account.type";
+import type { Transaction } from "@/models/Transaction.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 const TODAY = "2024-06-15";
 
@@ -137,6 +137,34 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, TODAY);
       expect(result[result.length - 1].date >= "2025-12-01").toBe(true);
     });
+
+    it("handles All period when latest transaction is exactly on end of month", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      // Transaction on end of month - should not duplicate the date
+      const transactions = [makeTx("1", 100, "2024-12-31")];
+      const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, TODAY);
+      expect(result[0].date).toBe(TODAY);
+      // Should include 2024-12-31 as the last point without duplication
+      expect(result[result.length - 1].date).toBe("2024-12-31");
+      // Check no duplicate dates in the result
+      const dates = result.map(p => p.date);
+      const uniqueDates = [...new Set(dates)];
+      expect(dates.length).toBe(uniqueDates.length);
+    });
+
+    it("handles All period when today is end of month", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      // When today is 2024-06-30 (end of month), should not duplicate when adding monthly points
+      const transactions = [makeTx("1", 100, "2025-01-15")];
+      const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, "2024-06-30");
+      expect(result[0].date).toBe("2024-06-30");
+      // Next month should be 2024-07-31, not another 2024-06-30
+      expect(result[1].date).not.toBe("2024-06-30");
+      // Check no duplicate dates
+      const dates = result.map(p => p.date);
+      const uniqueDates = [...new Set(dates)];
+      expect(dates.length).toBe(uniqueDates.length);
+    });
   });
 
   it("computes starting net worth from past transactions", () => {
@@ -213,6 +241,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries([], [], ChartPeriod.OneMonth, TODAY);
     result.forEach((p) => expect(p.netWorth).toBe(0));
   });
+
 
   it("ignores transactions for unknown accounts", () => {
     const accounts = [makeAccount("1", AccountType.Asset)];

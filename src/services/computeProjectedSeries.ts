@@ -1,18 +1,18 @@
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import type { DateRange } from "@/models/DateRange";
-import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
-import type { Transaction } from "@/models/Transaction";
+import type { DateRange } from "@/models/DateRange.type";
+import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { addDays, addMonths, endOfMonth, formatDate } from "@/lib/dateUtils";
 import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
   period: ChartPeriod,
   today: Date,
-  customRange?: DateRange,
-  transactions?: Transaction[]
+  transactions: Transaction[],
+  customRange?: DateRange
 ): string[] {
   const dates: string[] = [];
 
@@ -48,7 +48,7 @@ function generateProjectedDatePoints(
       break;
     }
     case ChartPeriod.All: {
-      const futureDates = (transactions ?? [])
+      const futureDates = transactions
         .map((t) => t.date)
         .filter((d) => d > formatDate(today))
         .sort((a, b) => a.localeCompare(b));
@@ -89,7 +89,7 @@ export function computeProjectedSeries(
   recurringTransactions: RecurringTransaction[] = []
 ): NetWorthDataPoint[] {
   const todayDate = new Date(today + "T00:00:00");
-  const datePoints = generateProjectedDatePoints(period, todayDate, customRange, transactions);
+  const datePoints = generateProjectedDatePoints(period, todayDate, transactions, customRange);
 
   const accountTypes = new Map<string, AccountType>();
   for (const a of accounts) accountTypes.set(a.id, a.type);

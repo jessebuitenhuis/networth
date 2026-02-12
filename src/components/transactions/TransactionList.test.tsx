@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TransactionList } from "./TransactionList";
-import type { Transaction } from "@/models/Transaction";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import type { Transaction } from "@/models/Transaction.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";

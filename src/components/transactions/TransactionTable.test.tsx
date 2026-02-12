@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { TransactionTable } from "./TransactionTable";
-import type { DisplayTransaction } from "@/models/DisplayTransaction";
+import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 
 describe("TransactionTable", () => {
   const mockEditAction = <button aria-label="Edit">Edit</button>;
@@ -406,9 +406,16 @@ describe("TransactionTable", () => {
     // Click to toggle to ascending
     await user.click(dateHeader);
 
-    const rows = screen.getAllByRole("row");
+    let rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("Groceries"); // Earliest first
     expect(rows[2]).toHaveTextContent("Salary");
+
+    // Click again to toggle back to descending
+    await user.click(dateHeader);
+
+    rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("Salary"); // Latest first
+    expect(rows[2]).toHaveTextContent("Groceries");
   });
 
   it("sorts by description when clicking description header", async () => {

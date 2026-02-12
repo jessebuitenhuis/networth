@@ -1,4 +1,4 @@
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 
 export function computeBalance(
   accountId: string,

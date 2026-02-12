@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import type { DateRange } from "@/models/DateRange";
+import type { DateRange } from "@/models/DateRange.type";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
@@ -28,6 +28,22 @@ const HISTORICAL_PERIODS = [
 
 export function formatCurrency(value: number): string {
   return value.toLocaleString(undefined, { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
+}
+
+export function formatXAxisTick(value: string, tickFormat: ReturnType<typeof getTickFormat>): string {
+  return formatTick(value, tickFormat);
+}
+
+export function formatYAxisValue(value: number): string {
+  return formatCurrency(value);
+}
+
+export function formatTooltipLabel(value: string, tickFormat: ReturnType<typeof getTickFormat>): string {
+  return formatTick(value, tickFormat);
+}
+
+export function formatTooltipValue(value: number): string {
+  return formatCurrency(value);
 }
 
 export function NetWorthChart() {
@@ -59,6 +75,10 @@ export function NetWorthChart() {
   );
   const tickFormat = getTickFormat(period, data);
 
+  const xAxisFormatter = useCallback((v: string) => formatXAxisTick(v, tickFormat), [tickFormat]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => formatTooltipLabel(String(label), tickFormat), [tickFormat]);
+  const tooltipValueFormatter = useCallback((value: unknown) => formatTooltipValue(Number(value)), []);
+
   return (
     <div className="rounded-lg border p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -75,11 +95,11 @@ export function NetWorthChart() {
       <div data-testid="net-worth-chart">
         <ResponsiveContainer width="100%" height={256}>
           <LineChart key={chartKey} data={data}>
-            <XAxis dataKey="date" tickFormatter={(v) => formatTick(v, tickFormat)} tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} width={80} />
+            <XAxis dataKey="date" tickFormatter={xAxisFormatter} tick={{ fontSize: 12 }} />
+            <YAxis tickFormatter={formatYAxisValue} tick={{ fontSize: 12 }} width={80} />
             <Tooltip
-              labelFormatter={(v) => formatTick(v as string, tickFormat)}
-              formatter={(value) => formatCurrency(value as number)}
+              labelFormatter={tooltipLabelFormatter}
+              formatter={tooltipValueFormatter}
             />
             <Line
               type="monotone"

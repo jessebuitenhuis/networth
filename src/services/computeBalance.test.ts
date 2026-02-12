@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computeBalance } from "./computeBalance";
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 
 describe("computeBalance", () => {
   it("returns 0 when no transactions for account", () => {

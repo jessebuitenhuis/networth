@@ -8,7 +8,7 @@ import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-import type { NavGroup } from "@/components/layout/NavGroup";
+import type { NavGroup } from "@/components/layout/NavGroup.type";
 import "./globals.css";
 
 const geistSans = Geist({

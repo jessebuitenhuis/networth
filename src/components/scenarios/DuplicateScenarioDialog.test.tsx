@@ -10,8 +10,8 @@ import { ScenarioStorage } from "@/services/ScenarioStorage";
 import * as TransactionStorage from "@/services/TransactionStorage";
 import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
 import * as AccountStorage from "@/services/AccountStorage";
-import type { Transaction } from "@/models/Transaction";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import type { Transaction } from "@/models/Transaction.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 vi.mock("@/services/ScenarioStorage");
 vi.mock("@/services/TransactionStorage");
@@ -458,5 +458,50 @@ describe("DuplicateScenarioDialog", () => {
       frequency: "monthly",
       startDate: "2026-01-01",
     });
+  });
+
+  it("does not pre-fill name when active scenario is not found", async () => {
+    vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
+      { id: "scenario-1", name: "Base Plan" },
+    ]);
+    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(
+      "non-existent-scenario"
+    );
+
+    const user = userEvent.setup();
+    render(
+      <Wrapper>
+        <DuplicateScenarioDialog />
+      </Wrapper>
+    );
+
+    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+
+    expect(screen.getByLabelText(/name/i)).toHaveValue("");
+  });
+
+  it("does not submit when form is submitted with whitespace-only name programmatically", async () => {
+    const user = userEvent.setup();
+    render(
+      <Wrapper>
+        <DuplicateScenarioDialog />
+      </Wrapper>
+    );
+
+    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+
+    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+
+    const input = screen.getByLabelText(/name/i);
+    await user.clear(input);
+
+    Object.defineProperty(input, "value", { value: "   ", writable: true });
+
+    const form = screen.getByRole("dialog").querySelector("form");
+    expect(form).toBeInTheDocument();
+
+    form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+
+    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 });

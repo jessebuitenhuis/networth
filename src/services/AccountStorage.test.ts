@@ -5,7 +5,7 @@ import {
   migrateAccountBalances,
 } from "./AccountStorage";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 
 describe("AccountStorage", () => {
   beforeEach(() => {

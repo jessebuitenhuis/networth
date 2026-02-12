@@ -8,7 +8,7 @@ import {
   useTransactions,
 } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 
 const account: Account = {
   id: "1",

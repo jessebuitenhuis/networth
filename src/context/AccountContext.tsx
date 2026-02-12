@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useReducer } from "react";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 import { loadAccounts, saveAccounts } from "@/services/AccountStorage";
 
 export type AccountAction =

@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
 import { SidebarMenuAction } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";

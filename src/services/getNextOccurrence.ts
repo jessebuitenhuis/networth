@@ -1,6 +1,6 @@
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { Transaction } from "@/models/Transaction";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { addMonths, addYears, formatDate } from "@/lib/dateUtils";
 
 export function getNextOccurrence(

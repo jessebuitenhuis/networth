@@ -330,4 +330,24 @@ describe("CreateTransactionDialog", () => {
 
     expect(screen.getByText("Planning TX - 500")).toBeInTheDocument();
   });
+
+  it("changes date when date input is modified", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+
+    const dateInput = screen.getByLabelText("Date");
+    await user.clear(dateInput);
+    await user.type(dateInput, "2024-06-15");
+
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "100");
+    await user.type(screen.getByLabelText("Description"), "Test");
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(screen.getByText("Test - 100")).toBeInTheDocument();
+  });
 });

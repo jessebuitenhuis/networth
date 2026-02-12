@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { NavItem } from "./NavItem";
+import type { NavItem } from "./NavItem.type";
 
 export type NavGroup = {
   label: string;

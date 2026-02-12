@@ -1,9 +1,9 @@
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import type { DateRange } from "@/models/DateRange";
-import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
-import type { Transaction } from "@/models/Transaction";
+import type { DateRange } from "@/models/DateRange.type";
+import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { addDays, addMonths, endOfMonth, formatDate, toSunday } from "@/lib/dateUtils";
 
 function generateDatePoints(

@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import type { NavGroup } from "./NavGroup";
+import type { NavGroup } from "./NavGroup.type";
 
 type AppSidebarProps = {
   navGroups: NavGroup[];

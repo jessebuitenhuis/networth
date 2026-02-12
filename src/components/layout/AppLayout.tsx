@@ -8,7 +8,7 @@ import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { AccountIcon } from "@/components/accounts/AccountIcon";
 import { AppSidebar } from "./AppSidebar";
-import type { NavGroup } from "./NavGroup";
+import type { NavGroup } from "./NavGroup.type";
 
 type AppLayoutProps = {
   navGroups: NavGroup[];

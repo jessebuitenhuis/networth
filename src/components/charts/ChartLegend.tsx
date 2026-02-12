@@ -1,5 +1,5 @@
 import { getAccountColor } from "@/lib/chartColors";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 
 type ChartLegendProps = {
   accounts: Account[];

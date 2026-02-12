@@ -11,9 +11,9 @@ import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { AppLayout } from "./AppLayout";
-import type { NavGroup } from "./NavGroup";
+import type { NavGroup } from "./NavGroup.type";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
+import type { Account } from "@/models/Account.type";
 
 const testGroups: NavGroup[] = [
   {

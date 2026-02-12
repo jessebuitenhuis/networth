@@ -5,7 +5,7 @@ import {
   useTransactions,
   transactionReducer,
 } from "./TransactionContext";
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 
 const tx1: Transaction = {
   id: "t1",

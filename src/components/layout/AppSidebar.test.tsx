@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import type { NavGroup } from "./NavGroup";
+import type { NavGroup } from "./NavGroup.type";
 
 function renderWithProvider(navGroups: NavGroup[]) {
   return render(

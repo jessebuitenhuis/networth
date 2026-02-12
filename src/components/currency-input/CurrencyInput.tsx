@@ -56,7 +56,7 @@ export function CurrencyInput({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const cursorPos = e.target.selectionStart ?? 0;
+    const cursorPos = e.target.selectionStart;
     const decimalSep = getDecimalSeparator();
 
     const digitPattern = new RegExp(
@@ -90,7 +90,7 @@ export function CurrencyInput({
         ? formattedInteger + decimalSep + decimalPart
         : formattedInteger || cleaned;
 
-    const beforeCursor = input.slice(0, cursorPos);
+    const beforeCursor = input.slice(0, cursorPos || 0);
     const decimalPosInInput = beforeCursor.indexOf(decimalSep);
     const decimalPosInFormatted = formatted.indexOf(decimalSep);
 

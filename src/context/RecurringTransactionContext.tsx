@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useReducer } from "react";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import {
   loadRecurringTransactions,
   saveRecurringTransactions,

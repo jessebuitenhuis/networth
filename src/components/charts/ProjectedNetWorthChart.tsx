@@ -14,7 +14,7 @@ import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import type { DateRange } from "@/models/DateRange";
+import type { DateRange } from "@/models/DateRange.type";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";

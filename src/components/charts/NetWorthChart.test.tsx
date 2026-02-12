@@ -1,10 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NetWorthChart, formatCurrency } from "./NetWorthChart";
+import {
+  NetWorthChart,
+  formatCurrency,
+  formatXAxisTick,
+  formatYAxisValue,
+  formatTooltipLabel,
+  formatTooltipValue,
+} from "./NetWorthChart";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
-import type { Transaction } from "@/models/Transaction";
+import type { Account } from "@/models/Account.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 
@@ -44,6 +51,60 @@ describe("formatCurrency", () => {
 
   it("formats negative amounts", () => {
     expect(formatCurrency(-5000)).toBe("-US$5,000");
+  });
+});
+
+describe("formatXAxisTick", () => {
+  it("formats date with weekday format", () => {
+    const result = formatXAxisTick("2024-01-15", "weekday");
+    expect(result).toBeTruthy();
+  });
+
+  it("formats date with dayMonth format", () => {
+    const result = formatXAxisTick("2024-01-15", "dayMonth");
+    expect(result).toBeTruthy();
+  });
+
+  it("formats date with monthYear format", () => {
+    const result = formatXAxisTick("2024-01-15", "monthYear");
+    expect(result).toBeTruthy();
+  });
+});
+
+describe("formatYAxisValue", () => {
+  it("formats positive values as currency", () => {
+    expect(formatYAxisValue(1000)).toBe("US$1,000");
+  });
+
+  it("formats negative values as currency", () => {
+    expect(formatYAxisValue(-500)).toBe("-US$500");
+  });
+});
+
+describe("formatTooltipLabel", () => {
+  it("formats date label with weekday format", () => {
+    const result = formatTooltipLabel("2024-01-15", "weekday");
+    expect(result).toBeTruthy();
+  });
+
+  it("formats date label with dayMonth format", () => {
+    const result = formatTooltipLabel("2024-01-15", "dayMonth");
+    expect(result).toBeTruthy();
+  });
+
+  it("formats date label with monthYear format", () => {
+    const result = formatTooltipLabel("2024-01-15", "monthYear");
+    expect(result).toBeTruthy();
+  });
+});
+
+describe("formatTooltipValue", () => {
+  it("formats tooltip value as currency", () => {
+    expect(formatTooltipValue(2500)).toBe("US$2,500");
+  });
+
+  it("formats negative tooltip value as currency", () => {
+    expect(formatTooltipValue(-1500)).toBe("-US$1,500");
   });
 });
 

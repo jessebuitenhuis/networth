@@ -149,5 +149,23 @@ describe("getLocale", () => {
       const symbol = getCurrencySymbol();
       expect(symbol).toBeTruthy();
     });
+
+    it("returns currency code when formatToParts has no currency type", () => {
+      const originalFormatToParts = Intl.NumberFormat.prototype.formatToParts;
+      Intl.NumberFormat.prototype.formatToParts = vi.fn(() => [
+        { type: "integer", value: "0" },
+      ]);
+
+      Object.defineProperty(global, "navigator", {
+        value: { language: "en-US" },
+        writable: true,
+        configurable: true,
+      });
+
+      const symbol = getCurrencySymbol();
+      expect(symbol).toBe("USD");
+
+      Intl.NumberFormat.prototype.formatToParts = originalFormatToParts;
+    });
   });
 });

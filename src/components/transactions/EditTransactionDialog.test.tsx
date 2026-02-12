@@ -4,7 +4,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 
 const mockTransaction: Transaction = {
   id: "t1",

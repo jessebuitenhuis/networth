@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { EditTransactionDialog } from "@/components/transactions/EditTransactionDialog";
 import { EditRecurringTransactionDialog } from "@/components/transactions/EditRecurringTransactionDialog";
-import type { DisplayTransaction } from "@/models/DisplayTransaction";
+import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 
 export function ScenarioTransactionList() {
   const { transactions } = useTransactions();

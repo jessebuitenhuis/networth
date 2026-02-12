@@ -5,8 +5,8 @@ import {
   useRecurringTransactions,
   recurringTransactionReducer,
 } from "./RecurringTransactionContext";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 const rt1: RecurringTransaction = {
   id: "r1",

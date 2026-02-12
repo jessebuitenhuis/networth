@@ -12,13 +12,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import type { DisplayTransaction } from "@/models/DisplayTransaction";
+import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 
 type TransactionTableProps = {
   items: DisplayTransaction[];
 };
 
-type SortColumn = "date" | "description" | "amount" | null;
+type SortColumn = "date" | "description" | "amount";
 type SortDirection = "asc" | "desc";
 
 function SortIcon({
@@ -52,8 +52,6 @@ export function TransactionTable({ items }: TransactionTableProps) {
   };
 
   const sortedItems = useMemo(() => {
-    if (!sortColumn) return items;
-
     const sorted = [...items].sort((a, b) => {
       let aVal: string | number;
       let bVal: string | number;
@@ -71,8 +69,6 @@ export function TransactionTable({ items }: TransactionTableProps) {
           aVal = a.amount;
           bVal = b.amount;
           break;
-        default:
-          return 0;
       }
 
       if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;

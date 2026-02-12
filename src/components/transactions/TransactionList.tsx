@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { TransactionTable } from "./TransactionTable";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
-import type { DisplayTransaction } from "@/models/DisplayTransaction";
+import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 
 type TransactionListProps = {
   accountId: string;

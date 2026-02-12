@@ -12,6 +12,18 @@ describe("localeNumber", () => {
       const separator = getDecimalSeparator();
       expect(separator).toMatch(/^[.,]$/);
     });
+
+    it("returns fallback when formatToParts has no decimal type", () => {
+      const originalFormatToParts = Intl.NumberFormat.prototype.formatToParts;
+      Intl.NumberFormat.prototype.formatToParts = vi.fn(() => [
+        { type: "integer", value: "1" },
+      ]);
+
+      const separator = getDecimalSeparator();
+      expect(separator).toBe(".");
+
+      Intl.NumberFormat.prototype.formatToParts = originalFormatToParts;
+    });
   });
 
   describe("getGroupingSeparator", () => {
@@ -115,6 +127,27 @@ describe("localeNumber", () => {
     it("handles whitespace", () => {
       expect(parseLocaleNumber("  ")).toBe(0);
       expect(parseLocaleNumber(" 123 ")).toBe(123);
+    });
+
+    it("handles parsing when grouping separator is empty", () => {
+      const originalFormatToParts = Intl.NumberFormat.prototype.formatToParts;
+      Intl.NumberFormat.prototype.formatToParts = vi.fn(function(this: Intl.NumberFormat, num?: number): Intl.NumberFormatPart[] {
+        if (num === 1000) {
+          return [{ type: "integer", value: "1000" }];
+        }
+        if (num === 1.1) {
+          return [
+            { type: "integer", value: "1" },
+            { type: "decimal", value: "." },
+            { type: "fraction", value: "1" }
+          ];
+        }
+        return originalFormatToParts.call(this, num);
+      });
+
+      expect(parseLocaleNumber("1234")).toBe(1234);
+
+      Intl.NumberFormat.prototype.formatToParts = originalFormatToParts;
     });
   });
 

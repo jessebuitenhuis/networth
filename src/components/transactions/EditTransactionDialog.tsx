@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useTransactions } from "@/context/TransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,6 +83,13 @@ export function EditTransactionDialog({
     return id;
   }
 
+  function handleAlertDialogOpenChange(open: boolean) {
+    if (!open) {
+      setIsDeleteOpen(false);
+      setIsOpen(true);
+    }
+  }
+
   return (
     <>
       <Dialog
@@ -155,16 +162,7 @@ export function EditTransactionDialog({
           </form>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog
-        open={isDeleteOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsDeleteOpen(false);
-            setIsOpen(true);
-          }
-        }}
-      >
+      <AlertDialog open={isDeleteOpen} onOpenChange={handleAlertDialogOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Transaction</AlertDialogTitle>

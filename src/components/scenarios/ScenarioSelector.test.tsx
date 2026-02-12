@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScenarioSelector } from "./ScenarioSelector";
-import type { Scenario } from "@/models/Scenario";
+import type { Scenario } from "@/models/Scenario.type";
 
 describe("ScenarioSelector", () => {
   const scenarios: Scenario[] = [

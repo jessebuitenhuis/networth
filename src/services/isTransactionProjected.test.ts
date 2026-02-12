@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isTransactionProjected } from "./isTransactionProjected";
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 
 function makeTx(overrides: Partial<Transaction> = {}): Transaction {
   return {

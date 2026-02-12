@@ -1,4 +1,4 @@
-import type { Transaction } from "@/models/Transaction";
+import type { Transaction } from "@/models/Transaction.type";
 import { formatDate } from "@/lib/dateUtils";
 
 export function isTransactionProjected(

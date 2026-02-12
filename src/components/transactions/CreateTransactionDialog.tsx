@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

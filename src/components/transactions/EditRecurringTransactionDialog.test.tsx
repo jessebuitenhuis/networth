@@ -4,8 +4,8 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 
 const mockRecurringTransaction: RecurringTransaction = {
   id: "r1",

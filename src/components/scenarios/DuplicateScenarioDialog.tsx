@@ -36,8 +36,6 @@ export function DuplicateScenarioDialog() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!activeScenarioId) return;
-
     const trimmedName = name.trim();
     if (!trimmedName) return;
 

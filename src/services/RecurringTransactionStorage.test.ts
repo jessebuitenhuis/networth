@@ -3,8 +3,8 @@ import {
   loadRecurringTransactions,
   saveRecurringTransactions,
 } from "./RecurringTransactionStorage";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 const recurring: RecurringTransaction = {
   id: "r1",

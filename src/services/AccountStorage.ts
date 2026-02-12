@@ -1,5 +1,5 @@
-import type { Account } from "@/models/Account";
-import type { Transaction } from "@/models/Transaction";
+import type { Account } from "@/models/Account.type";
+import type { Transaction } from "@/models/Transaction.type";
 
 const STORAGE_KEY = "accounts";
 

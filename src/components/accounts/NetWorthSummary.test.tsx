@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { NetWorthSummary } from "./NetWorthSummary";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
-import type { Transaction } from "@/models/Transaction";
+import type { Account } from "@/models/Account.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 

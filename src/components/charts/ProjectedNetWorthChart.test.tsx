@@ -3,15 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProjectedNetWorthChart } from "./ProjectedNetWorthChart";
 import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account";
-import type { Transaction } from "@/models/Transaction";
+import type { Account } from "@/models/Account.type";
+import type { Transaction } from "@/models/Transaction.type";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
-import type { Scenario } from "@/models/Scenario";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { Scenario } from "@/models/Scenario.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 
 vi.stubGlobal(
   "ResizeObserver",

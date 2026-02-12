@@ -188,4 +188,24 @@ describe("CreateScenarioDialog", () => {
       expect.objectContaining({ name: "Padded Name" })
     );
   });
+
+  it("does not submit when form is submitted with empty name programmatically", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog />
+      </ScenarioProvider>
+    );
+
+    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+
+    const form = screen.getByRole("dialog").querySelector("form");
+    expect(form).toBeInTheDocument();
+
+    form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+
+    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+  });
 });

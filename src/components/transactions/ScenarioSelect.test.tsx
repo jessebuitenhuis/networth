@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScenarioSelect } from "./ScenarioSelect";
-import type { Scenario } from "@/models/Scenario";
+import type { Scenario } from "@/models/Scenario.type";
 
 const mockScenarios: Scenario[] = [
   { id: "scenario-1", name: "Retirement" },
@@ -296,6 +296,54 @@ describe("ScenarioSelect", () => {
 
       const createButton = screen.getByRole("button", { name: /create/i });
       expect(createButton).toBeDisabled();
+    });
+
+    it("does not call onCreateScenario when Enter is pressed with empty name", async () => {
+      const user = userEvent.setup();
+      const mockOnValueChange = vi.fn();
+      const mockOnCreateScenario = vi.fn();
+
+      render(
+        <ScenarioSelect
+          scenarios={mockScenarios}
+          value="none"
+          onValueChange={mockOnValueChange}
+          onCreateScenario={mockOnCreateScenario}
+        />
+      );
+
+      await user.click(screen.getByRole("combobox", { name: /scenario/i }));
+      await user.click(screen.getByRole("option", { name: "Create new scenario..." }));
+
+      await user.keyboard("{Enter}");
+
+      expect(mockOnCreateScenario).not.toHaveBeenCalled();
+      expect(mockOnValueChange).not.toHaveBeenCalled();
+    });
+
+    it("does not call onCreateScenario when Enter is pressed with whitespace-only name", async () => {
+      const user = userEvent.setup();
+      const mockOnValueChange = vi.fn();
+      const mockOnCreateScenario = vi.fn();
+
+      render(
+        <ScenarioSelect
+          scenarios={mockScenarios}
+          value="none"
+          onValueChange={mockOnValueChange}
+          onCreateScenario={mockOnCreateScenario}
+        />
+      );
+
+      await user.click(screen.getByRole("combobox", { name: /scenario/i }));
+      await user.click(screen.getByRole("option", { name: "Create new scenario..." }));
+
+      const input = screen.getByLabelText(/scenario name/i);
+      await user.type(input, "   ");
+      await user.keyboard("{Enter}");
+
+      expect(mockOnCreateScenario).not.toHaveBeenCalled();
+      expect(mockOnValueChange).not.toHaveBeenCalled();
     });
   });
 

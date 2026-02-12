@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { ScenarioProvider, useScenarios } from "./ScenarioContext";
 import { ScenarioStorage } from "@/services/ScenarioStorage";
-import type { Scenario } from "@/models/Scenario";
+import type { Scenario } from "@/models/Scenario.type";
 
 vi.mock("@/services/ScenarioStorage");
 
@@ -48,7 +48,10 @@ describe("ScenarioContext", () => {
     });
 
     it("updates a scenario name", () => {
-      const initial: Scenario[] = [{ id: "1", name: "Original" }];
+      const initial: Scenario[] = [
+        { id: "1", name: "Original" },
+        { id: "2", name: "Unchanged" },
+      ];
       vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue(initial);
       vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue("1");
 
@@ -60,7 +63,10 @@ describe("ScenarioContext", () => {
         result.current.updateScenario("1", "Updated");
       });
 
-      expect(result.current.scenarios).toEqual([{ id: "1", name: "Updated" }]);
+      expect(result.current.scenarios).toEqual([
+        { id: "1", name: "Updated" },
+        { id: "2", name: "Unchanged" },
+      ]);
     });
 
     it("sets active scenario", () => {

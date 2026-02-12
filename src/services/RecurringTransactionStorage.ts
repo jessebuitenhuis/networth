@@ -1,4 +1,4 @@
-import type { RecurringTransaction } from "@/models/RecurringTransaction";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 const STORAGE_KEY = "recurringTransactions";
 
