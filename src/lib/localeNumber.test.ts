@@ -118,6 +118,32 @@ describe("localeNumber", () => {
     });
   });
 
+  describe("SSR and missing navigator", () => {
+    it("handles missing navigator gracefully", () => {
+      const originalNavigator = global.navigator;
+      // @ts-expect-error - testing undefined navigator
+      delete global.navigator;
+
+      // Should still work with fallback locale
+      const separator = getDecimalSeparator();
+      expect(separator).toMatch(/^[.,]$/);
+
+      global.navigator = originalNavigator;
+    });
+
+    it("handles navigator without language property", () => {
+      const originalNavigator = global.navigator;
+      // @ts-expect-error - testing navigator without language
+      global.navigator = {};
+
+      // Should still work with fallback locale
+      const separator = getDecimalSeparator();
+      expect(separator).toMatch(/^[.,]$/);
+
+      global.navigator = originalNavigator;
+    });
+  });
+
   describe("non-English locale support", () => {
     let originalFormatToParts: typeof Intl.NumberFormat.prototype.formatToParts;
 
