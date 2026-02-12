@@ -11,12 +11,15 @@ Git worktrees let you work on multiple branches simultaneously without stashing 
 
 ## Create
 
+When creating a worktree, ALWAYS run these commands in sequence:
+
 ```bash
 git branch <branch-name>
 git worktree add .worktrees/<name> <branch-name>
-cd .worktrees/<name>
-npm install
+cd .worktrees/<name> && npm install
 ```
+
+**CRITICAL**: The `npm install` step is MANDATORY after creating a worktree to ensure dependencies are properly installed in the new working directory. Use `&&` to chain the commands so npm install runs automatically after changing to the worktree directory.
 
 ## Work
 
