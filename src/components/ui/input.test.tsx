@@ -30,4 +30,11 @@ describe("Input", () => {
     const input = screen.getByTestId("test-input");
     expect(input).toHaveAttribute("placeholder", "Enter text");
   });
+
+  it("includes data-1p-ignore to prevent password manager suggestions", () => {
+    render(<Input data-testid="test-input" />);
+
+    const input = screen.getByTestId("test-input");
+    expect(input).toHaveAttribute("data-1p-ignore");
+  });
 });
