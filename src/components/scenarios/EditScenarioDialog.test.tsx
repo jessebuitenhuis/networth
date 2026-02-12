@@ -11,7 +11,7 @@ import {
   RecurringTransactionProvider,
   useRecurringTransactions,
 } from "@/context/RecurringTransactionContext";
-import type { Scenario } from "@/models/Scenario";
+import type { Scenario } from "@/models/Scenario.type";
 
 const scenario: Scenario = {
   id: "1",

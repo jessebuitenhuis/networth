@@ -3,6 +3,7 @@
 import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useAccounts } from "@/context/AccountContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import { isTransactionProjected } from "@/services/isTransactionProjected";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { formatDate } from "@/lib/dateUtils";
@@ -19,6 +20,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
   const { accounts } = useAccounts();
+  const { scenarios } = useScenarios();
 
   const today = formatDate(new Date());
   const account = accounts.find((a) => a.id === accountId);
@@ -34,6 +36,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
       amount: tx.amount,
       isProjected: isTransactionProjected(tx),
       isRecurring: false,
+      scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
       editAction: <EditTransactionDialog transaction={tx} />,
     }));
 
@@ -50,6 +53,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
         amount: next.amount,
         isProjected: true,
         isRecurring: true,
+        scenarioName: rt.scenarioId ? scenarios.find(s => s.id === rt.scenarioId)?.name : undefined,
         editAction: <EditRecurringTransactionDialog recurringTransaction={rt} />,
       };
       return item;
