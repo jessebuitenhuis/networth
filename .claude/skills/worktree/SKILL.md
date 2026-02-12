@@ -38,8 +38,15 @@ git -C <main-repo-path> merge <branch-name>
 
 ## Remove
 
+**CRITICAL**: Always remove a specific worktree by name. NEVER use `rm -rf .worktrees` without a specific name, as this deletes ALL worktrees and loses any uncommitted work.
+
+```bash
+git worktree remove .worktrees/<name>
+git branch -d <branch-name>
+```
+
+If not in the main repo directory:
 ```bash
 git -C <main-repo-path> worktree remove .worktrees/<name>
-rm -rf <main-repo-path>/.worktrees/<name>
 git -C <main-repo-path> branch -d <branch-name>
 ```

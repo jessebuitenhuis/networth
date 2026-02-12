@@ -5,6 +5,7 @@ import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
+import { getDefaultCurrency } from "@/lib/getLocale";
 
 type AccountDetailPageProps = {
   params: Promise<{ id: string }> | { id: string };
@@ -32,9 +33,9 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
           {account.type} Balance
         </p>
         <p className="text-3xl font-bold">
-          {balance.toLocaleString("en-US", {
+          {balance.toLocaleString(undefined, {
             style: "currency",
-            currency: "USD",
+            currency: getDefaultCurrency(),
           })}
         </p>
       </div>

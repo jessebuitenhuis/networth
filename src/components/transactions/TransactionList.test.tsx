@@ -62,20 +62,20 @@ describe("TransactionList", () => {
 
     expect(await screen.findByText("Opening balance")).toBeInTheDocument();
     expect(screen.getByText("1/15/2024")).toBeInTheDocument();
-    expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
+    expect(screen.getByText("+US$1,000.00")).toBeInTheDocument();
   });
 
   it("shows positive amounts in green", async () => {
     renderWithProvider("a1", [transactions[0]]);
 
-    const amount = await screen.findByText("+$1,000.00");
+    const amount = await screen.findByText("+US$1,000.00");
     expect(amount).toHaveClass("text-green-600");
   });
 
   it("shows negative amounts in red", async () => {
     renderWithProvider("a1", [transactions[1]]);
 
-    const amount = await screen.findByText("-$200.00");
+    const amount = await screen.findByText("-US$200.00");
     expect(amount).toHaveClass("text-red-600");
   });
 

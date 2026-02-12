@@ -8,6 +8,7 @@ import type { Transaction } from "@/models/Transaction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
 import {
   Select,
   SelectContent,
@@ -99,13 +100,11 @@ export function EditTransactionDialog({
             <Label htmlFor="edit-transaction-amount" className="mb-2">
               Amount
             </Label>
-            <Input
+            <CurrencyInput
               id="edit-transaction-amount"
-              type="number"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
               aria-label="Amount"
+              value={amount}
+              onChange={setAmount}
             />
           </div>
           <div>

@@ -9,6 +9,7 @@ import { SidebarGroupAction } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
 import {
   Select,
   SelectContent,
@@ -103,11 +104,11 @@ export function CreateAccountDialog() {
           </div>
           <div>
             <Label htmlFor="account-balance" className="mb-2">Balance</Label>
-            <Input
+            <CurrencyInput
               id="account-balance"
-              type="number"
+              aria-label="Balance"
               value={balance}
-              onChange={(e) => setBalance(Number(e.target.value))}
+              onChange={setBalance}
             />
           </div>
           <Button type="submit">Add Account</Button>

@@ -60,7 +60,7 @@ describe("AccountDetailPage", () => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
     renderPage("a1");
 
-    expect(await screen.findByText("$800.00")).toBeInTheDocument();
+    expect(await screen.findByText("US$800.00")).toBeInTheDocument();
   });
 
   it("renders transaction list", async () => {

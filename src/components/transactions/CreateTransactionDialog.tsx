@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
 import {
   Select,
   SelectContent,
@@ -104,11 +105,11 @@ export function CreateTransactionDialog({
             <Label htmlFor="tx-amount" className="mb-2">
               Amount
             </Label>
-            <Input
+            <CurrencyInput
               id="tx-amount"
-              type="number"
+              aria-label="Amount"
               value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
+              onChange={setAmount}
             />
           </div>
           <div>

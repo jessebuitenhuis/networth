@@ -35,15 +35,15 @@ function renderWithProviders(
 
 describe("formatCurrency", () => {
   it("formats positive amounts", () => {
-    expect(formatCurrency(1234)).toBe("$1,234");
+    expect(formatCurrency(1234)).toBe("US$1,234");
   });
 
   it("formats zero", () => {
-    expect(formatCurrency(0)).toBe("$0");
+    expect(formatCurrency(0)).toBe("US$0");
   });
 
   it("formats negative amounts", () => {
-    expect(formatCurrency(-5000)).toBe("-$5,000");
+    expect(formatCurrency(-5000)).toBe("-US$5,000");
   });
 });
 
