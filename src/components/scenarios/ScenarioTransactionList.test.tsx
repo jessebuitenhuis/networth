@@ -6,6 +6,7 @@ import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Account } from "@/models/Account.type";
 import type { Transaction } from "@/models/Transaction.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
@@ -30,15 +31,17 @@ function renderWithProviders(
     localStorage.setItem("activeScenarioId", activeScenarioId);
   }
   return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <ScenarioProvider>
-          <RecurringTransactionProvider>
-            <ScenarioTransactionList />
-          </RecurringTransactionProvider>
-        </ScenarioProvider>
-      </TransactionProvider>
-    </AccountProvider>
+    <TooltipProvider>
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <ScenarioTransactionList />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    </TooltipProvider>
   );
 }
 
@@ -439,5 +442,79 @@ describe("ScenarioTransactionList", () => {
 
     expect(screen.getByText(/Past transaction/)).toBeInTheDocument();
     expect(screen.getByText(/Future transaction/)).toBeInTheDocument();
+  });
+
+  it("shows scenario icon for scenario transactions", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Early Retirement" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: -30000,
+        date: "2024-06-15",
+        description: "New Car",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+
+    expect(screen.getByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
+  });
+
+  it("does not show scenario icon for baseline transactions", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Early Retirement" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: -200,
+        date: "2024-06-15",
+        description: "Groceries",
+        // No scenarioId - baseline
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+
+    expect(screen.getByText(/Groceries/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+  });
+
+  it("does not show scenario icon for deleted scenario", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Early Retirement" },
+      // scenario-2 was deleted from the list but transaction still references it
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: -30000,
+        date: "2024-06-15",
+        description: "New Car",
+        scenarioId: "deleted-scenario-id", // References a deleted scenario
+      },
+    ];
+
+    // Viewing scenario-1, but transaction with deleted scenario ID will still show
+    // because the filter only checks activeScenarioId match, not scenario existence
+    renderWithProviders(accounts, transactions, [], scenarios, "deleted-scenario-id");
+
+    expect(screen.getByText(/New Car/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
   });
 });
