@@ -1,7 +1,7 @@
 ---
 name: implement
 description: Clarify requirements for a user story and create an implementation plan
-allowed-tools: Read, Grep, Glob, AskUserQuestion, EnterPlanMode, ExitPlanMode, Task, Skill
+allowed-tools: Read, Grep, Glob, AskUserQuestion, EnterPlanMode, ExitPlanMode, Task, Skill, Bash
 argument-hint: "<user story or feature description>"
 ---
 
@@ -9,16 +9,25 @@ argument-hint: "<user story or feature description>"
 
 Take a user story (`$ARGUMENTS`) through requirements clarification and implementation planning.
 
+## Current State
+
+### Verification
+!`npm run verify 2>&1`
+
 ## Steps
 
-### 1. Understand the user story
+### 1. Check verification and understand the user story
 
-Read `$ARGUMENTS` and identify:
+**First**, check the verification output above:
+- If `npm run verify` shows **any failures** (lint, build, or test), **STOP** and notify the user that the codebase is not in a clean state. Do not proceed with planning until the user confirms they want to continue despite failures, or fixes the issues first.
+- If verification passes, proceed with understanding the user story.
+
+**Then**, read `$ARGUMENTS` and identify:
 - The core goal of the story
 - Which parts of the codebase are likely affected
 - What is ambiguous or underspecified
 
-Explore the codebase to understand the current state of relevant code before asking questions.
+**Finally**, explore the codebase to understand the current state of relevant code before asking questions.
 
 ### 2. Clarify requirements
 

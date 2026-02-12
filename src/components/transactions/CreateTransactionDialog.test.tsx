@@ -245,4 +245,43 @@ describe("CreateTransactionDialog", () => {
 
     expect(screen.getByText("Padded - 100")).toBeInTheDocument();
   });
+
+  it("creates recurring transaction without end date", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "500");
+    await user.type(screen.getByLabelText("Description"), "Subscription");
+    await user.click(screen.getByRole("checkbox", { name: "Recurring" }));
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(screen.getByText("Subscription - 500 - Monthly")).toBeInTheDocument();
+  });
+
+  it("creates transaction with scenario selected", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(
+      "scenarios",
+      JSON.stringify([{ id: "scenario-1", name: "Test Scenario" }])
+    );
+    renderDialog();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add Transaction" })
+    );
+    await user.clear(screen.getByLabelText("Amount"));
+    await user.type(screen.getByLabelText("Amount"), "300");
+    await user.type(screen.getByLabelText("Description"), "Scenario TX");
+
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+    await user.click(screen.getByRole("option", { name: "Test Scenario" }));
+
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(screen.getByText("Scenario TX - 300")).toBeInTheDocument();
+  });
 });
