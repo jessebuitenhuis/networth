@@ -121,6 +121,9 @@ describe("EditAccountDialog", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(
+      screen.queryByRole("dialog", { name: "Edit Account" })
+    ).not.toBeInTheDocument();
+    expect(
       screen.getByText(/are you sure you want to delete this account/i)
     ).toBeInTheDocument();
   });
@@ -142,7 +145,8 @@ describe("EditAccountDialog", () => {
     const user = await openDialog();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    await user.click(deleteButtons[deleteButtons.length - 1]);
 
     expect(screen.getByTestId("accounts")).toBeEmptyDOMElement();
     expect(screen.getByTestId("tx-count")).toHaveTextContent("0");
@@ -170,6 +174,18 @@ describe("EditAccountDialog", () => {
     expect(
       screen.queryByText(/are you sure you want to delete this account/i)
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("dialog", { name: "Edit Account" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Edit Account" })
+    ).toBeInTheDocument();
+  });
+
+  it("delete confirmation button uses destructive variant", async () => {
+    const user = await openDialog();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    const confirmButton = deleteButtons[deleteButtons.length - 1];
+    expect(confirmButton).toHaveClass("bg-destructive");
   });
 });
