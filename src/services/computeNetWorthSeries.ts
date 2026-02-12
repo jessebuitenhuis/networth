@@ -4,7 +4,7 @@ import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
 import type { Transaction } from "@/models/Transaction";
-import { addDays, addMonths, formatDate } from "@/lib/dateUtils";
+import { addDays, addMonths, endOfMonth, formatDate, toSunday } from "@/lib/dateUtils";
 
 function generateDatePoints(
   period: ChartPeriod,
@@ -28,7 +28,7 @@ function generateDatePoints(
       for (let i = 30; i >= 0; i--) dates.push(formatDate(addDays(today, -i)));
       break;
     case ChartPeriod.ThreeMonths: {
-      const start = addDays(today, -90);
+      const start = toSunday(addDays(today, -90));
       for (let d = start; d <= today; d = addDays(d, 7))
         dates.push(formatDate(d));
       if (dates[dates.length - 1] !== formatDate(today))
@@ -36,7 +36,7 @@ function generateDatePoints(
       break;
     }
     case ChartPeriod.SixMonths: {
-      const start = addDays(today, -180);
+      const start = toSunday(addDays(today, -180));
       for (let d = start; d <= today; d = addDays(d, 7))
         dates.push(formatDate(d));
       if (dates[dates.length - 1] !== formatDate(today))
@@ -44,7 +44,9 @@ function generateDatePoints(
       break;
     }
     case ChartPeriod.YTD: {
-      const start = new Date(today.getFullYear(), 0, 1);
+      const jan1 = new Date(today.getFullYear(), 0, 1);
+      const day = jan1.getDay();
+      const start = day === 0 ? jan1 : addDays(jan1, 7 - day);
       for (let d = start; d <= today; d = addDays(d, 7))
         dates.push(formatDate(d));
       if (dates[dates.length - 1] !== formatDate(today))
@@ -52,11 +54,11 @@ function generateDatePoints(
       break;
     }
     case ChartPeriod.OneYear: {
-      const start = addMonths(today, -12);
-      for (let d = start; d <= today; d = addMonths(d, 1))
-        dates.push(formatDate(d));
-      if (dates[dates.length - 1] !== formatDate(today))
-        dates.push(formatDate(today));
+      for (let m = -12; m < 0; m++) {
+        const eom = endOfMonth(new Date(today.getFullYear(), today.getMonth() + m, 1));
+        dates.push(formatDate(eom));
+      }
+      dates.push(formatDate(today));
       break;
     }
     case ChartPeriod.All: {
@@ -70,11 +72,13 @@ function generateDatePoints(
         (today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)
       );
       if (totalDays <= 180) {
-        for (let d = earliest; d <= today; d = addDays(d, 7))
+        const start = toSunday(earliest);
+        for (let d = start; d <= today; d = addDays(d, 7))
           dates.push(formatDate(d));
       } else {
-        for (let d = earliest; d <= today; d = addMonths(d, 1))
-          dates.push(formatDate(d));
+        const startMonth = new Date(earliest.getFullYear(), earliest.getMonth(), 1);
+        for (let m = startMonth; m < today; m = new Date(m.getFullYear(), m.getMonth() + 1, 1))
+          dates.push(formatDate(endOfMonth(m)));
       }
       if (dates[dates.length - 1] !== formatDate(today))
         dates.push(formatDate(today));

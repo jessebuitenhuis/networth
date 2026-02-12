@@ -16,8 +16,8 @@ import { useScenarios } from "@/context/ScenarioContext";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
-import { formatDate } from "@/lib/dateUtils";
-import { addMonths } from "@/lib/dateUtils";
+import { addMonths, formatDate } from "@/lib/dateUtils";
+import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { formatCurrency } from "./NetWorthChart";
 import { ChartLegend } from "./ChartLegend";
 import { PeriodPicker } from "./PeriodPicker";
@@ -74,6 +74,7 @@ export function ProjectedNetWorthChart() {
     period === ChartPeriod.Custom ? customRange : undefined,
     filteredRecurringTransactions
   );
+  const tickFormat = getTickFormat(period, data);
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
@@ -93,13 +94,14 @@ export function ProjectedNetWorthChart() {
       <div data-testid="projected-chart">
         <ResponsiveContainer width="100%" height={256}>
           <LineChart key={chartKey} data={data}>
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+            <XAxis dataKey="date" tickFormatter={(v) => formatTick(v, tickFormat)} tick={{ fontSize: 12 }} />
             <YAxis
               tickFormatter={formatCurrency}
               tick={{ fontSize: 12 }}
               width={80}
             />
             <Tooltip
+              labelFormatter={(v) => formatTick(v as string, tickFormat)}
               formatter={(value) => formatCurrency(value as number)}
             />
             <Line

@@ -5,7 +5,7 @@ import type { DateRange } from "@/models/DateRange";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
 import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import type { Transaction } from "@/models/Transaction";
-import { addDays, addMonths, formatDate } from "@/lib/dateUtils";
+import { addDays, addMonths, endOfMonth, formatDate } from "@/lib/dateUtils";
 import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
@@ -28,12 +28,23 @@ function generateProjectedDatePoints(
       break;
     case ChartPeriod.SixMonths: {
       const end = addMonths(today, 6);
-      for (let d = today; d <= end; d = addDays(d, 7)) dates.push(formatDate(d));
-      if (dates[dates.length - 1] !== formatDate(end)) dates.push(formatDate(end));
+      dates.push(formatDate(today));
+      const dayOfWeek = today.getDay();
+      const firstSunday = dayOfWeek === 0 ? addDays(today, 7) : addDays(today, 7 - dayOfWeek);
+      for (let d = firstSunday; d <= end; d = addDays(d, 7))
+        dates.push(formatDate(d));
+      if (dates[dates.length - 1] !== formatDate(end))
+        dates.push(formatDate(end));
       break;
     }
     case ChartPeriod.OneYear: {
-      for (let i = 0; i <= 12; i++) dates.push(formatDate(addMonths(today, i)));
+      dates.push(formatDate(today));
+      for (let m = 0; m < 12; m++) {
+        const eom = endOfMonth(new Date(today.getFullYear(), today.getMonth() + m, 1));
+        const eomStr = formatDate(eom);
+        if (eomStr !== dates[dates.length - 1])
+          dates.push(eomStr);
+      }
       break;
     }
     case ChartPeriod.All: {
@@ -45,8 +56,14 @@ function generateProjectedDatePoints(
         futureDates.length > 0
           ? new Date(futureDates[futureDates.length - 1] + "T00:00:00")
           : addMonths(today, 12);
-      for (let d = today; d <= end; d = addMonths(d, 1))
-        dates.push(formatDate(d));
+      dates.push(formatDate(today));
+      for (let m = 0; ; m++) {
+        const eom = endOfMonth(new Date(today.getFullYear(), today.getMonth() + m, 1));
+        if (eom > end) break;
+        const eomStr = formatDate(eom);
+        if (eomStr !== dates[dates.length - 1])
+          dates.push(eomStr);
+      }
       if (dates[dates.length - 1] !== formatDate(end))
         dates.push(formatDate(end));
       break;

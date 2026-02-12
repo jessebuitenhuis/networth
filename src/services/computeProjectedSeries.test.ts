@@ -76,8 +76,8 @@ describe("computeProjectedSeries", () => {
     it("falls back to 1 year for All period with no future transactions", () => {
       const result = computeProjectedSeries([], [], ChartPeriod.All, TODAY);
       expect(result[0].date).toBe(TODAY);
-      // Should be approximately 12 monthly points
-      expect(result).toHaveLength(13);
+      // Today + 12 end-of-month points + end date = 14 points
+      expect(result).toHaveLength(14);
     });
 
     it("includes exact end date for All when not aligned with monthly points", () => {
@@ -111,6 +111,31 @@ describe("computeProjectedSeries", () => {
       const lastDate = result[result.length - 1].date;
       // 6 months from 2024-01-01 is 2024-07-01
       expect(lastDate).toBe("2024-07-01");
+    });
+
+    it("handles SixMonths when today is a Sunday", () => {
+      // 2024-06-16 is Sunday → firstSunday = today + 7
+      const result = computeProjectedSeries([], [], ChartPeriod.SixMonths, "2024-06-16");
+      expect(result[0].date).toBe("2024-06-16");
+      // Second point should be the following Sunday
+      expect(result[1].date).toBe("2024-06-23");
+    });
+
+    it("handles OneYear when today is end of month", () => {
+      // 2024-06-30 is last day of June → dedup skips duplicate Jun 30
+      const result = computeProjectedSeries([], [], ChartPeriod.OneYear, "2024-06-30");
+      expect(result[0].date).toBe("2024-06-30");
+      expect(result[1].date).toBe("2024-07-31");
+    });
+
+    it("handles All with multiple unsorted future transactions", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [
+        makeTx("1", 100, "2025-12-01"),
+        makeTx("1", 200, "2025-06-01"),
+      ];
+      const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, TODAY);
+      expect(result[result.length - 1].date >= "2025-12-01").toBe(true);
     });
   });
 

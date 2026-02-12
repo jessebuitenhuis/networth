@@ -72,29 +72,28 @@ describe("computeNetWorthSeries", () => {
       expect(lastDate).toBe("2024-03-17");
     });
 
-    it("generates weekly points for SixMonths (180 days)", () => {
+    it("generates weekly points for SixMonths (180 days), snapped to Sunday", () => {
       const result = computeNetWorthSeries([], [], ChartPeriod.SixMonths, TODAY);
-      expect(result[0].date).toBe("2023-12-18");
+      expect(result[0].date).toBe("2023-12-17");
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      // 180 days / 7 ≈ ~26 intervals → 26-27 points
-      expect(result.length).toBeGreaterThanOrEqual(26);
-      expect(result.length).toBeLessThanOrEqual(27);
+      // Sunday-aligned: Dec 17 to Jun 9 = 26 weekly + today = 27 points
+      expect(result).toHaveLength(27);
     });
 
-    it("generates YTD points from Jan 1 to today", () => {
+    it("generates YTD points from next Sunday after Jan 1 to today", () => {
       const result = computeNetWorthSeries([], [], ChartPeriod.YTD, TODAY);
-      expect(result[0].date).toBe("2024-01-01");
+      // Jan 1 2024 is Monday, next Sunday = Jan 7
+      expect(result[0].date).toBe("2024-01-07");
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      // Jan 1 to June 15 = ~167 days, weekly = ~24 points
-      expect(result.length).toBeGreaterThanOrEqual(24);
-      expect(result.length).toBeLessThanOrEqual(25);
+      // Jan 7 to Jun 9 = 23 weekly + today = 24 points
+      expect(result).toHaveLength(24);
     });
 
-    it("handles YTD when today aligns with weekly interval from Jan 1", () => {
-      // Jan 1 + 24*7 = Jun 17 → weekly point lands exactly on today
-      const result = computeNetWorthSeries([], [], ChartPeriod.YTD, "2024-06-17");
-      expect(result[0].date).toBe("2024-01-01");
-      expect(result[result.length - 1].date).toBe("2024-06-17");
+    it("handles YTD when today aligns with weekly interval from first Sunday", () => {
+      // Jan 1 2024 is Monday, first Sunday = Jan 7. Jan 7 + 23*7 = Jun 16
+      const result = computeNetWorthSeries([], [], ChartPeriod.YTD, "2024-06-16");
+      expect(result[0].date).toBe("2024-01-07");
+      expect(result[result.length - 1].date).toBe("2024-06-16");
     });
 
     it("handles SixMonths when today aligns with weekly interval", () => {
@@ -104,43 +103,67 @@ describe("computeNetWorthSeries", () => {
       expect(result[result.length - 1].date).toBe("2024-06-17");
     });
 
-    it("generates monthly points for OneYear", () => {
+    it("handles SixMonths when today is a Sunday", () => {
+      // 2024-06-16 is Sunday → last weekly point equals today, no extra point needed
+      const result = computeNetWorthSeries([], [], ChartPeriod.SixMonths, "2024-06-16");
+      expect(result[result.length - 1].date).toBe("2024-06-16");
+    });
+
+    it("handles YTD when Jan 1 is a Sunday", () => {
+      // Jan 1, 2023 is Sunday → start = Jan 1 (day === 0 branch)
+      const result = computeNetWorthSeries([], [], ChartPeriod.YTD, "2023-06-15");
+      expect(result[0].date).toBe("2023-01-01");
+    });
+
+    it("handles All monthly when today is end of month", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [makeTx("1", 100, "2022-01-01")];
+      // Today = Jun 30 → aligns with end-of-month, no extra point
+      const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, "2024-06-30");
+      expect(result[result.length - 1].date).toBe("2024-06-30");
+    });
+
+    it("generates end-of-month points for OneYear", () => {
       const result = computeNetWorthSeries([], [], ChartPeriod.OneYear, TODAY);
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      expect(result[0].date).toBe("2023-06-15");
+      // 12 end-of-month points (Jun 2023 through May 2024) + today
+      expect(result[0].date).toBe("2023-06-30");
       expect(result).toHaveLength(13);
     });
 
-    it("generates adaptive spacing for All period based on transaction history", () => {
+    it("generates end-of-month spacing for All period based on transaction history", () => {
       const accounts = [makeAccount("1", AccountType.Asset)];
       const transactions = [
         makeTx("1", 100, "2022-01-01"),
         makeTx("1", 200, "2024-06-10"),
       ];
       const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, TODAY);
-      expect(result[0].date).toBe("2022-01-01");
+      // startMonth = Jan 2022, endOfMonth = Jan 31
+      expect(result[0].date).toBe("2022-01-31");
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      // Should use monthly spacing for multi-year ranges
-      expect(result.length).toBeGreaterThanOrEqual(20);
+      // Jan 2022 to Jun 2024 = 30 end-of-month + today = 31 points
+      expect(result.length).toBeGreaterThanOrEqual(30);
     });
 
-    it("uses weekly spacing for All period with short history (< 180 days)", () => {
+    it("uses Sunday-snapped weekly spacing for All period with short history (< 180 days)", () => {
       const accounts = [makeAccount("1", AccountType.Asset)];
       const transactions = [
         makeTx("1", 100, "2024-03-01"),
         makeTx("1", 200, "2024-06-10"),
       ];
       const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, TODAY);
-      expect(result[0].date).toBe("2024-03-01");
+      // 2024-03-01 is Friday (day=5), toSunday = Feb 25
+      expect(result[0].date).toBe("2024-02-25");
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      // ~107 days / 7 ≈ ~15-16 weekly points
-      expect(result.length).toBeGreaterThanOrEqual(15);
+      // Feb 25 to Jun 9 = 16 weekly + today = 17 points
+      expect(result.length).toBeGreaterThanOrEqual(16);
       expect(result.length).toBeLessThanOrEqual(17);
     });
 
-    it("falls back to 1 year for All period with no transactions", () => {
+    it("falls back to 1 year end-of-month for All period with no transactions", () => {
       const result = computeNetWorthSeries([], [], ChartPeriod.All, TODAY);
-      expect(result[0].date).toBe("2023-06-15");
+      // fallback = Jun 15, 2023 → startMonth = Jun 2023 → endOfMonth = Jun 30
+      expect(result[0].date).toBe("2023-06-30");
       expect(result[result.length - 1].date).toBe("2024-06-15");
     });
 

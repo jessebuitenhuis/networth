@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, addMonths, addYears, formatDate } from "./dateUtils";
+import { addDays, addMonths, addYears, endOfMonth, formatDate, toSunday } from "./dateUtils";
 
 function d(s: string): Date {
   return new Date(s + "T00:00:00");
@@ -68,5 +68,45 @@ describe("formatDate", () => {
 
   it("pads single-digit month and day", () => {
     expect(formatDate(d("2024-01-05"))).toBe("2024-01-05");
+  });
+});
+
+describe("toSunday", () => {
+  it("returns same date if already Sunday", () => {
+    // 2024-03-17 is Sunday
+    expect(formatDate(toSunday(d("2024-03-17")))).toBe("2024-03-17");
+  });
+
+  it("returns previous Sunday for Monday", () => {
+    // 2024-03-18 is Monday → previous Sunday is 2024-03-17
+    expect(formatDate(toSunday(d("2024-03-18")))).toBe("2024-03-17");
+  });
+
+  it("returns previous Sunday for Saturday", () => {
+    // 2024-06-15 is Saturday → previous Sunday is 2024-06-09
+    expect(formatDate(toSunday(d("2024-06-15")))).toBe("2024-06-09");
+  });
+
+  it("crosses month boundary", () => {
+    // 2024-07-01 is Monday → previous Sunday is 2024-06-30
+    expect(formatDate(toSunday(d("2024-07-01")))).toBe("2024-06-30");
+  });
+});
+
+describe("endOfMonth", () => {
+  it("returns last day of a 31-day month", () => {
+    expect(formatDate(endOfMonth(d("2024-07-15")))).toBe("2024-07-31");
+  });
+
+  it("returns last day of a 30-day month", () => {
+    expect(formatDate(endOfMonth(d("2024-06-15")))).toBe("2024-06-30");
+  });
+
+  it("returns Feb 29 for leap year", () => {
+    expect(formatDate(endOfMonth(d("2024-02-10")))).toBe("2024-02-29");
+  });
+
+  it("returns Feb 28 for non-leap year", () => {
+    expect(formatDate(endOfMonth(d("2023-02-10")))).toBe("2023-02-28");
   });
 });

@@ -8,6 +8,7 @@ import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
 import { addMonths, formatDate } from "@/lib/dateUtils";
+import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { ChartLegend } from "./ChartLegend";
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
 import { PeriodPicker } from "./PeriodPicker";
@@ -55,6 +56,7 @@ export function NetWorthChart() {
     undefined,
     period === ChartPeriod.Custom ? customRange : undefined
   );
+  const tickFormat = getTickFormat(period, data);
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
@@ -72,9 +74,12 @@ export function NetWorthChart() {
       <div data-testid="net-worth-chart">
         <ResponsiveContainer width="100%" height={256}>
           <LineChart key={chartKey} data={data}>
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+            <XAxis dataKey="date" tickFormatter={(v) => formatTick(v, tickFormat)} tick={{ fontSize: 12 }} />
             <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} width={80} />
-            <Tooltip formatter={(value) => formatCurrency(value as number)} />
+            <Tooltip
+              labelFormatter={(v) => formatTick(v as string, tickFormat)}
+              formatter={(value) => formatCurrency(value as number)}
+            />
             <Line
               type="monotone"
               dataKey="netWorth"
