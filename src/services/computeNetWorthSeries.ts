@@ -1,21 +1,33 @@
 import type { Account } from "@/models/Account";
 import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
+import type { DateRange } from "@/models/DateRange";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
 import type { Transaction } from "@/models/Transaction";
 import { addDays, addMonths, formatDate } from "@/lib/dateUtils";
 
-function generateDatePoints(period: ChartPeriod, today: Date): string[] {
+function generateDatePoints(
+  period: ChartPeriod,
+  today: Date,
+  transactions: Transaction[] = [],
+  customRange?: DateRange
+): string[] {
   const dates: string[] = [];
 
   switch (period) {
-    case ChartPeriod.Week:
+    case ChartPeriod.OneWeek:
       for (let i = 7; i >= 0; i--) dates.push(formatDate(addDays(today, -i)));
       break;
-    case ChartPeriod.Month:
+    case ChartPeriod.MTD: {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      for (let d = start; d <= today; d = addDays(d, 1))
+        dates.push(formatDate(d));
+      break;
+    }
+    case ChartPeriod.OneMonth:
       for (let i = 30; i >= 0; i--) dates.push(formatDate(addDays(today, -i)));
       break;
-    case ChartPeriod.Quarter: {
+    case ChartPeriod.ThreeMonths: {
       const start = addDays(today, -90);
       for (let d = start; d <= today; d = addDays(d, 7))
         dates.push(formatDate(d));
@@ -23,12 +35,57 @@ function generateDatePoints(period: ChartPeriod, today: Date): string[] {
         dates.push(formatDate(today));
       break;
     }
-    case ChartPeriod.Year: {
+    case ChartPeriod.SixMonths: {
+      const start = addDays(today, -180);
+      for (let d = start; d <= today; d = addDays(d, 7))
+        dates.push(formatDate(d));
+      if (dates[dates.length - 1] !== formatDate(today))
+        dates.push(formatDate(today));
+      break;
+    }
+    case ChartPeriod.YTD: {
+      const start = new Date(today.getFullYear(), 0, 1);
+      for (let d = start; d <= today; d = addDays(d, 7))
+        dates.push(formatDate(d));
+      if (dates[dates.length - 1] !== formatDate(today))
+        dates.push(formatDate(today));
+      break;
+    }
+    case ChartPeriod.OneYear: {
       const start = addMonths(today, -12);
       for (let d = start; d <= today; d = addMonths(d, 1))
         dates.push(formatDate(d));
       if (dates[dates.length - 1] !== formatDate(today))
         dates.push(formatDate(today));
+      break;
+    }
+    case ChartPeriod.All: {
+      const txDates = transactions
+        .map((t) => t.date)
+        .sort((a, b) => a.localeCompare(b));
+      const earliest = txDates.length > 0
+        ? new Date(txDates[0] + "T00:00:00")
+        : addMonths(today, -12);
+      const totalDays = Math.floor(
+        (today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (totalDays <= 180) {
+        for (let d = earliest; d <= today; d = addDays(d, 7))
+          dates.push(formatDate(d));
+      } else {
+        for (let d = earliest; d <= today; d = addMonths(d, 1))
+          dates.push(formatDate(d));
+      }
+      if (dates[dates.length - 1] !== formatDate(today))
+        dates.push(formatDate(today));
+      break;
+    }
+    case ChartPeriod.Custom: {
+      if (!customRange) return [formatDate(today)];
+      const start = new Date(customRange.start + "T00:00:00");
+      const end = new Date(customRange.end + "T00:00:00");
+      for (let d = start; d <= end; d = addDays(d, 1))
+        dates.push(formatDate(d));
       break;
     }
   }
@@ -40,10 +97,11 @@ export function computeNetWorthSeries(
   accounts: Account[],
   transactions: Transaction[],
   period: ChartPeriod,
-  today: string = formatDate(new Date())
+  today: string = formatDate(new Date()),
+  customRange?: DateRange
 ): NetWorthDataPoint[] {
   const todayDate = new Date(today + "T00:00:00");
-  const datePoints = generateDatePoints(period, todayDate);
+  const datePoints = generateDatePoints(period, todayDate, transactions, customRange);
 
   const accountTypes = new Map<string, AccountType>();
   for (const a of accounts) accountTypes.set(a.id, a.type);

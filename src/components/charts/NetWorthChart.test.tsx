@@ -50,10 +50,10 @@ describe("formatCurrency", () => {
 describe("NetWorthChart", () => {
   beforeEach(() => localStorage.clear());
 
-  it("renders the period picker with Month selected by default", () => {
+  it("renders the period picker with 1M selected by default", () => {
     renderWithProviders();
 
-    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
@@ -62,13 +62,13 @@ describe("NetWorthChart", () => {
   it("switches period on button click", async () => {
     renderWithProviders();
 
-    await userEvent.click(screen.getByRole("button", { name: "Year" }));
+    await userEvent.click(screen.getByRole("button", { name: "1Y" }));
 
-    expect(screen.getByRole("button", { name: "Year" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "1Y" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
-    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
       "aria-pressed",
       "false"
     );
@@ -149,21 +149,33 @@ describe("NetWorthChart", () => {
     expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("switches to Week period", async () => {
+  it("switches to 1W period", async () => {
     renderWithProviders();
 
-    await userEvent.click(screen.getByRole("button", { name: "Week" }));
+    await userEvent.click(screen.getByRole("button", { name: "1W" }));
 
-    expect(screen.getByRole("button", { name: "Week" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "1W" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("switches to Quarter period", async () => {
+  it("switches to 3M period", async () => {
     renderWithProviders();
 
-    await userEvent.click(screen.getByRole("button", { name: "Quarter" }));
+    await userEvent.click(screen.getByRole("button", { name: "3M" }));
 
-    expect(screen.getByRole("button", { name: "Quarter" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "3M" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("shows custom date range picker when Custom is selected", async () => {
+    renderWithProviders();
+    await userEvent.click(screen.getByRole("button", { name: "Custom" }));
+    expect(screen.getByLabelText("Start")).toBeInTheDocument();
+    expect(screen.getByLabelText("End")).toBeInTheDocument();
+  });
+
+  it("does not show custom date range picker by default", () => {
+    renderWithProviders();
+    expect(screen.queryByLabelText("Start")).not.toBeInTheDocument();
   });
 });

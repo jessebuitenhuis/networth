@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computeProjectedSeries } from "./computeProjectedSeries";
-import { ProjectionPeriod } from "@/models/ProjectionPeriod";
+import { ChartPeriod } from "@/models/ChartPeriod";
 import { AccountType } from "@/models/AccountType";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import type { Account } from "@/models/Account";
@@ -31,33 +31,66 @@ function makeTx(
 
 describe("computeProjectedSeries", () => {
   describe("date range generation", () => {
+    it("generates 8 daily points for OneWeek", () => {
+      const result = computeProjectedSeries([], [], ChartPeriod.OneWeek, TODAY);
+      expect(result[0].date).toBe(TODAY);
+      expect(result).toHaveLength(8);
+    });
+
     it("generates daily points for OneMonth (31 points)", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.OneMonth, TODAY);
+      const result = computeProjectedSeries([], [], ChartPeriod.OneMonth, TODAY);
       expect(result[0].date).toBe(TODAY);
       expect(result).toHaveLength(31);
     });
 
     it("generates daily points for ThreeMonths (91 points)", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.ThreeMonths, TODAY);
+      const result = computeProjectedSeries([], [], ChartPeriod.ThreeMonths, TODAY);
       expect(result[0].date).toBe(TODAY);
       expect(result).toHaveLength(91);
     });
 
     it("generates weekly points for SixMonths", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.SixMonths, TODAY);
+      const result = computeProjectedSeries([], [], ChartPeriod.SixMonths, TODAY);
       expect(result[0].date).toBe(TODAY);
       const lastDate = result[result.length - 1].date;
       expect(lastDate >= "2024-12-12").toBe(true);
     });
 
     it("generates monthly points for OneYear", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.OneYear, TODAY);
+      const result = computeProjectedSeries([], [], ChartPeriod.OneYear, TODAY);
       expect(result[0].date).toBe(TODAY);
       expect(result).toHaveLength(13);
     });
 
+    it("generates points for All period (today to latest future tx, fallback 1yr)", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [
+        makeTx("1", 100, "2025-12-15"),
+      ];
+      const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, TODAY);
+      expect(result[0].date).toBe(TODAY);
+      // Should extend to at least the latest future transaction date
+      expect(result[result.length - 1].date >= "2025-12-15").toBe(true);
+    });
+
+    it("falls back to 1 year for All period with no future transactions", () => {
+      const result = computeProjectedSeries([], [], ChartPeriod.All, TODAY);
+      expect(result[0].date).toBe(TODAY);
+      // Should be approximately 12 monthly points
+      expect(result).toHaveLength(13);
+    });
+
+    it("includes exact end date for All when not aligned with monthly points", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      // Transaction on a date that won't align with monthly increments from today
+      const transactions = [makeTx("1", 100, "2025-08-20")];
+      const result = computeProjectedSeries(accounts, transactions, ChartPeriod.All, TODAY);
+      expect(result[0].date).toBe(TODAY);
+      expect(result[result.length - 1].date).toBe("2025-08-20");
+    });
+
     it("generates daily points for Custom range", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.Custom, TODAY, {
+      const result = computeProjectedSeries([], [], ChartPeriod.Custom, TODAY, {
         start: "2024-06-20",
         end: "2024-06-25",
       });
@@ -67,14 +100,14 @@ describe("computeProjectedSeries", () => {
     });
 
     it("returns single point for Custom period without range", () => {
-      const result = computeProjectedSeries([], [], ProjectionPeriod.Custom, TODAY);
+      const result = computeProjectedSeries([], [], ChartPeriod.Custom, TODAY);
       expect(result).toHaveLength(1);
       expect(result[0].date).toBe(TODAY);
     });
 
     it("ensures SixMonths includes exact end date", () => {
       // Test that the end date is included even if it doesn't align with weekly intervals
-      const result = computeProjectedSeries([], [], ProjectionPeriod.SixMonths, "2024-01-01");
+      const result = computeProjectedSeries([], [], ChartPeriod.SixMonths, "2024-01-01");
       const lastDate = result[result.length - 1].date;
       // 6 months from 2024-01-01 is 2024-07-01
       expect(lastDate).toBe("2024-07-01");
@@ -90,7 +123,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries(
       accounts,
       transactions,
-      ProjectionPeriod.OneMonth,
+      ChartPeriod.OneMonth,
       TODAY
     );
 
@@ -103,7 +136,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries(
       accounts,
       transactions,
-      ProjectionPeriod.OneMonth,
+      ChartPeriod.OneMonth,
       TODAY
     );
 
@@ -119,7 +152,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries(
       accounts,
       transactions,
-      ProjectionPeriod.OneMonth,
+      ChartPeriod.OneMonth,
       TODAY
     );
 
@@ -142,7 +175,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries(
       accounts,
       transactions,
-      ProjectionPeriod.OneMonth,
+      ChartPeriod.OneMonth,
       TODAY
     );
 
@@ -152,7 +185,7 @@ describe("computeProjectedSeries", () => {
   });
 
   it("returns all zeros with no accounts or transactions", () => {
-    const result = computeProjectedSeries([], [], ProjectionPeriod.OneMonth, TODAY);
+    const result = computeProjectedSeries([], [], ChartPeriod.OneMonth, TODAY);
     result.forEach((p) => expect(p.netWorth).toBe(0));
   });
 
@@ -165,7 +198,7 @@ describe("computeProjectedSeries", () => {
     const result = computeProjectedSeries(
       accounts,
       transactions,
-      ProjectionPeriod.OneMonth,
+      ChartPeriod.OneMonth,
       TODAY
     );
 
@@ -189,7 +222,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         transactions,
-        ProjectionPeriod.ThreeMonths,
+        ChartPeriod.ThreeMonths,
         TODAY,
         undefined,
         recurring
@@ -216,7 +249,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         [],
-        ProjectionPeriod.OneYear,
+        ChartPeriod.OneYear,
         TODAY,
         undefined,
         recurring
@@ -242,7 +275,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         [],
-        ProjectionPeriod.ThreeMonths,
+        ChartPeriod.ThreeMonths,
         TODAY,
         undefined,
         recurring
@@ -276,7 +309,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         transactions,
-        ProjectionPeriod.OneMonth,
+        ChartPeriod.OneMonth,
         TODAY,
         undefined,
         recurring
@@ -303,7 +336,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         [],
-        ProjectionPeriod.OneMonth,
+        ChartPeriod.OneMonth,
         TODAY,
         undefined,
         recurring
@@ -318,7 +351,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         transactions,
-        ProjectionPeriod.OneMonth,
+        ChartPeriod.OneMonth,
         TODAY
       );
 
@@ -340,7 +373,7 @@ describe("computeProjectedSeries", () => {
       const result = computeProjectedSeries(
         accounts,
         [],
-        ProjectionPeriod.OneMonth,
+        ChartPeriod.OneMonth,
         TODAY,
         undefined,
         recurring

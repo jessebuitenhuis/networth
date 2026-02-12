@@ -3,17 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { ChartPeriod } from "@/models/ChartPeriod";
 
-const PERIODS = [ChartPeriod.Week, ChartPeriod.Month, ChartPeriod.Quarter, ChartPeriod.Year];
-
 type PeriodPickerProps = {
+  periods: ChartPeriod[];
   selected: ChartPeriod;
   onSelect: (period: ChartPeriod) => void;
 };
 
-export function PeriodPicker({ selected, onSelect }: PeriodPickerProps) {
+export function PeriodPicker({ periods, selected, onSelect }: PeriodPickerProps) {
   return (
     <div className="flex gap-2">
-      {PERIODS.map((period) => (
+      {periods.map((period) => (
         <Button
           key={period}
           variant={period === selected ? "default" : "outline"}

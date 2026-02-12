@@ -5,9 +5,24 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { ChartPeriod } from "@/models/ChartPeriod";
+import type { DateRange } from "@/models/DateRange";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
+import { addMonths, formatDate } from "@/lib/dateUtils";
 import { ChartLegend } from "./ChartLegend";
+import { CustomDateRangePicker } from "./CustomDateRangePicker";
 import { PeriodPicker } from "./PeriodPicker";
+
+const HISTORICAL_PERIODS = [
+  ChartPeriod.OneWeek,
+  ChartPeriod.MTD,
+  ChartPeriod.OneMonth,
+  ChartPeriod.ThreeMonths,
+  ChartPeriod.SixMonths,
+  ChartPeriod.YTD,
+  ChartPeriod.OneYear,
+  ChartPeriod.All,
+  ChartPeriod.Custom,
+];
 
 export function formatCurrency(value: number): string {
   return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -16,8 +31,12 @@ export function formatCurrency(value: number): string {
 export function NetWorthChart() {
   const { accounts } = useAccounts();
   const { transactions } = useTransactions();
-  const [period, setPeriod] = useState(ChartPeriod.Month);
+  const [period, setPeriod] = useState(ChartPeriod.OneMonth);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
+  const today = formatDate(new Date());
+  const defaultEnd = formatDate(addMonths(new Date(), -1));
+  const [customRange, setCustomRange] = useState<DateRange>({ start: defaultEnd, end: today });
+  const chartKey = `${period}-${customRange.start}-${customRange.end}`;
 
   function handleToggle(id: string) {
     setExcludedIds((prev) => {
@@ -29,17 +48,30 @@ export function NetWorthChart() {
   }
 
   const filteredAccounts = accounts.filter((a) => !excludedIds.has(a.id));
-  const data = computeNetWorthSeries(filteredAccounts, transactions, period);
+  const data = computeNetWorthSeries(
+    filteredAccounts,
+    transactions,
+    period,
+    undefined,
+    period === ChartPeriod.Custom ? customRange : undefined
+  );
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-muted-foreground">Net Worth Over Time</h2>
-        <PeriodPicker selected={period} onSelect={setPeriod} />
+        <PeriodPicker periods={HISTORICAL_PERIODS} selected={period} onSelect={setPeriod} />
       </div>
+      {period === ChartPeriod.Custom && (
+        <CustomDateRangePicker
+          start={customRange.start}
+          end={customRange.end}
+          onChange={setCustomRange}
+        />
+      )}
       <div data-testid="net-worth-chart">
         <ResponsiveContainer width="100%" height={256}>
-          <LineChart data={data}>
+          <LineChart key={chartKey} data={data}>
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} width={80} />
             <Tooltip formatter={(value) => formatCurrency(value as number)} />
@@ -49,6 +81,8 @@ export function NetWorthChart() {
               stroke="var(--color-primary)"
               strokeWidth={2}
               dot={false}
+              isAnimationActive={true}
+              animationDuration={300}
             />
           </LineChart>
         </ResponsiveContainer>

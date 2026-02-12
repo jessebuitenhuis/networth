@@ -1,37 +1,57 @@
 import type { Account } from "@/models/Account";
 import { AccountType } from "@/models/AccountType";
+import { ChartPeriod } from "@/models/ChartPeriod";
+import type { DateRange } from "@/models/DateRange";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint";
-import { ProjectionPeriod } from "@/models/ProjectionPeriod";
 import type { RecurringTransaction } from "@/models/RecurringTransaction";
 import type { Transaction } from "@/models/Transaction";
 import { addDays, addMonths, formatDate } from "@/lib/dateUtils";
 import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
-  period: ProjectionPeriod,
+  period: ChartPeriod,
   today: Date,
-  customRange?: { start: string; end: string }
+  customRange?: DateRange,
+  transactions?: Transaction[]
 ): string[] {
   const dates: string[] = [];
 
   switch (period) {
-    case ProjectionPeriod.OneMonth:
+    case ChartPeriod.OneWeek:
+      for (let i = 0; i <= 7; i++) dates.push(formatDate(addDays(today, i)));
+      break;
+    case ChartPeriod.OneMonth:
       for (let i = 0; i <= 30; i++) dates.push(formatDate(addDays(today, i)));
       break;
-    case ProjectionPeriod.ThreeMonths:
+    case ChartPeriod.ThreeMonths:
       for (let i = 0; i <= 90; i++) dates.push(formatDate(addDays(today, i)));
       break;
-    case ProjectionPeriod.SixMonths: {
+    case ChartPeriod.SixMonths: {
       const end = addMonths(today, 6);
       for (let d = today; d <= end; d = addDays(d, 7)) dates.push(formatDate(d));
       if (dates[dates.length - 1] !== formatDate(end)) dates.push(formatDate(end));
       break;
     }
-    case ProjectionPeriod.OneYear: {
+    case ChartPeriod.OneYear: {
       for (let i = 0; i <= 12; i++) dates.push(formatDate(addMonths(today, i)));
       break;
     }
-    case ProjectionPeriod.Custom: {
+    case ChartPeriod.All: {
+      const futureDates = (transactions ?? [])
+        .map((t) => t.date)
+        .filter((d) => d > formatDate(today))
+        .sort((a, b) => a.localeCompare(b));
+      const end =
+        futureDates.length > 0
+          ? new Date(futureDates[futureDates.length - 1] + "T00:00:00")
+          : addMonths(today, 12);
+      for (let d = today; d <= end; d = addMonths(d, 1))
+        dates.push(formatDate(d));
+      if (dates[dates.length - 1] !== formatDate(end))
+        dates.push(formatDate(end));
+      break;
+    }
+    case ChartPeriod.Custom: {
       if (!customRange) return [formatDate(today)];
       const start = new Date(customRange.start + "T00:00:00");
       const end = new Date(customRange.end + "T00:00:00");
@@ -46,18 +66,17 @@ function generateProjectedDatePoints(
 export function computeProjectedSeries(
   accounts: Account[],
   transactions: Transaction[],
-  period: ProjectionPeriod,
+  period: ChartPeriod,
   today: string = formatDate(new Date()),
-  customRange?: { start: string; end: string },
+  customRange?: DateRange,
   recurringTransactions: RecurringTransaction[] = []
 ): NetWorthDataPoint[] {
   const todayDate = new Date(today + "T00:00:00");
-  const datePoints = generateProjectedDatePoints(period, todayDate, customRange);
+  const datePoints = generateProjectedDatePoints(period, todayDate, customRange, transactions);
 
   const accountTypes = new Map<string, AccountType>();
   for (const a of accounts) accountTypes.set(a.id, a.type);
 
-  // Compute starting net worth from all transactions up to today
   let netWorth = 0;
   const futureTx: Transaction[] = [];
 
@@ -71,7 +90,6 @@ export function computeProjectedSeries(
     }
   }
 
-  // Generate recurring transaction occurrences within the projection range
   const rangeEnd = datePoints[datePoints.length - 1];
   for (const rt of recurringTransactions) {
     if (!accountTypes.has(rt.accountId)) continue;
@@ -83,7 +101,6 @@ export function computeProjectedSeries(
     }
   }
 
-  // Sort future transactions by date for accumulation
   futureTx.sort((a, b) => a.date.localeCompare(b.date));
 
   let txIndex = 0;
