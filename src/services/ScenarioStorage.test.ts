@@ -97,5 +97,14 @@ describe("ScenarioStorage", () => {
       const stored = localStorage.getItem("activeScenarioId");
       expect(stored).toBe("new-id");
     });
+
+    it("removes activeScenarioId when null is passed", () => {
+      localStorage.setItem("activeScenarioId", "some-id");
+
+      ScenarioStorage.saveActiveScenarioId(null);
+
+      const stored = localStorage.getItem("activeScenarioId");
+      expect(stored).toBeNull();
+    });
   });
 });

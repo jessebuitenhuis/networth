@@ -202,4 +202,13 @@ describe("TransactionList", () => {
 
     expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
   });
+
+  it("shows Unknown for account name when account does not exist", async () => {
+    const orphanTransactions: Transaction[] = [
+      { id: "t1", accountId: "unknown-account", amount: 1000, date: "2024-01-15", description: "Orphan transaction" }
+    ];
+    renderWithProvider("unknown-account", orphanTransactions);
+
+    expect(await screen.findByText("Unknown")).toBeInTheDocument();
+  });
 });

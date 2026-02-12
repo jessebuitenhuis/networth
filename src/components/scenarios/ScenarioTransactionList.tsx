@@ -19,27 +19,38 @@ export function ScenarioTransactionList() {
 
   const today = formatDate(new Date());
 
-  // Baseline (no scenarioId) + active scenario
-  const projectedItems: DisplayTransaction[] = transactions
-    .filter(
-      (t) => t.isProjected && (!t.scenarioId || t.scenarioId === activeScenarioId)
-    )
+  // Filter logic:
+  // - If activeScenarioId is null (baseline only): show only transactions with no scenarioId
+  // - If activeScenarioId is set: show baseline (no scenarioId) + matching scenario transactions
+  const transactionItems: DisplayTransaction[] = transactions
+    .filter((t) => {
+      if (activeScenarioId === null) {
+        return !t.scenarioId;
+      }
+      return !t.scenarioId || t.scenarioId === activeScenarioId;
+    })
     .map((tx) => {
       const account = accounts.find((a) => a.id === tx.accountId);
       const accountName = account?.name || "Unknown";
       return {
         id: tx.id,
-        description: `${tx.description} (${accountName})`,
+        description: tx.description,
+        accountName,
         date: tx.date,
         amount: tx.amount,
-        isProjected: true,
+        isProjected: tx.isProjected || false,
         isRecurring: false,
         editAction: <EditTransactionDialog transaction={tx} />,
       };
     });
 
   const recurringItems = recurringTransactions
-    .filter((rt) => !rt.scenarioId || rt.scenarioId === activeScenarioId)
+    .filter((rt) => {
+      if (activeScenarioId === null) {
+        return !rt.scenarioId;
+      }
+      return !rt.scenarioId || rt.scenarioId === activeScenarioId;
+    })
     .map((rt) => {
       const next = getNextOccurrence(rt, today);
       if (!next) return null;
@@ -47,7 +58,8 @@ export function ScenarioTransactionList() {
       const accountName = account?.name || "Unknown";
       const item: DisplayTransaction = {
         id: next.id,
-        description: `${next.description} (${accountName})`,
+        description: next.description,
+        accountName,
         date: next.date,
         amount: next.amount,
         isProjected: true,
@@ -58,7 +70,7 @@ export function ScenarioTransactionList() {
     })
     .filter((item): item is DisplayTransaction => item !== null);
 
-  const allItems = [...projectedItems, ...recurringItems].sort(
+  const allItems = [...transactionItems, ...recurringItems].sort(
     (a, b) => b.date.localeCompare(a.date)
   );
 

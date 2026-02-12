@@ -69,4 +69,42 @@ describe("PlanningPage", () => {
       screen.getByRole("button", { name: /duplicate/i })
     ).toBeInTheDocument();
   });
+
+  it("shows edit button when scenario is selected", () => {
+    localStorage.setItem("scenarios", JSON.stringify([{ id: "1", name: "Test" }]));
+    localStorage.setItem("activeScenarioId", "1");
+
+    render(
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <PlanningPage />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "Edit Scenario" })).toBeInTheDocument();
+  });
+
+  it("hides edit button when baseline is selected", () => {
+    localStorage.setItem("scenarios", JSON.stringify([{ id: "1", name: "Test" }]));
+    localStorage.setItem("activeScenarioId", "");
+
+    render(
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <PlanningPage />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    );
+
+    expect(screen.queryByRole("button", { name: "Edit Scenario" })).not.toBeInTheDocument();
+  });
 });

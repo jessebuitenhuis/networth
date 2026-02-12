@@ -194,6 +194,57 @@ describe("ProjectedNetWorthChart", () => {
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 
+  it("filters to baseline only when activeScenarioId is null", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Base Plan" },
+    ];
+    const transactions: Transaction[] = [
+      {
+        id: "t-1",
+        accountId: "1",
+        amount: 1000,
+        date: "2024-06-01",
+        description: "Baseline transaction",
+        // No scenarioId
+      },
+      {
+        id: "t-2",
+        accountId: "1",
+        amount: 2000,
+        date: "2024-07-01",
+        description: "Scenario transaction",
+        scenarioId: "scenario-1",
+      },
+    ];
+    const recurringTransactions: RecurringTransaction[] = [
+      {
+        id: "rt-1",
+        accountId: "1",
+        amount: 100,
+        description: "Baseline recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        // No scenarioId
+      },
+      {
+        id: "rt-2",
+        accountId: "1",
+        amount: 200,
+        description: "Scenario recurring",
+        frequency: RecurrenceFrequency.Monthly,
+        startDate: "2024-01-01",
+        scenarioId: "scenario-1",
+      },
+    ];
+
+    renderWithProviders(accounts, transactions, recurringTransactions, scenarios, null);
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
+
   it("includes projected transactions for active scenario", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },

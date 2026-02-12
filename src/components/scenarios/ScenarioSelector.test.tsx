@@ -84,4 +84,49 @@ describe("ScenarioSelector", () => {
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
+
+  it("shows Baseline only option in dropdown", async () => {
+    const user = userEvent.setup();
+    render(
+      <ScenarioSelector
+        scenarios={scenarios}
+        activeScenarioId="1"
+        onSelect={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole("combobox"));
+
+    expect(screen.getByRole("option", { name: "Baseline only" })).toBeInTheDocument();
+  });
+
+  it("calls onSelect with null when Baseline only is chosen", async () => {
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ScenarioSelector
+        scenarios={scenarios}
+        activeScenarioId="1"
+        onSelect={onSelect}
+      />
+    );
+
+    await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getByRole("option", { name: "Baseline only" }));
+
+    expect(onSelect).toHaveBeenCalledWith(null);
+  });
+
+  it("displays Baseline only when activeScenarioId is null", () => {
+    render(
+      <ScenarioSelector
+        scenarios={scenarios}
+        activeScenarioId={null}
+        onSelect={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole("combobox")).toHaveTextContent("Baseline only");
+  });
 });

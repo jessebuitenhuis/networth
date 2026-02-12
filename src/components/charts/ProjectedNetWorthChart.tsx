@@ -57,18 +57,26 @@ export function ProjectedNetWorthChart() {
 
   const filteredAccounts = accounts.filter((a) => !excludedIds.has(a.id));
 
-  // Baseline (no scenarioId) + active scenario
-  const filteredRecurringTransactions = recurringTransactions.filter(
-    (rt) => !rt.scenarioId || rt.scenarioId === activeScenarioId
-  );
+  // Filter by scenario:
+  // - If activeScenarioId is null (baseline only): show only items with no scenarioId
+  // - If activeScenarioId is set: show baseline (no scenarioId) + matching scenario items
+  const filteredRecurringTransactions = recurringTransactions.filter((rt) => {
+    if (activeScenarioId === null) {
+      return !rt.scenarioId;
+    }
+    return !rt.scenarioId || rt.scenarioId === activeScenarioId;
+  });
 
-  const filteredProjectedTransactions = transactions.filter(
-    (t) => !t.isProjected || !t.scenarioId || t.scenarioId === activeScenarioId
-  );
+  const filteredTransactions = transactions.filter((t) => {
+    if (activeScenarioId === null) {
+      return !t.scenarioId;
+    }
+    return !t.scenarioId || t.scenarioId === activeScenarioId;
+  });
 
   const data = computeProjectedSeries(
     filteredAccounts,
-    filteredProjectedTransactions,
+    filteredTransactions,
     period,
     today,
     period === ChartPeriod.Custom ? customRange : undefined,

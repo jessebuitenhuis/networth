@@ -88,6 +88,22 @@ describe("ScenarioContext", () => {
       expect(result.current.activeScenarioId).toBe("2");
     });
 
+    it("sets active scenario to null", () => {
+      const initial: Scenario[] = [{ id: "1", name: "First" }];
+      vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue(initial);
+      vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue("1");
+
+      const { result } = renderHook(() => useScenarios(), {
+        wrapper: ScenarioProvider,
+      });
+
+      act(() => {
+        result.current.setActiveScenario(null);
+      });
+
+      expect(result.current.activeScenarioId).toBe(null);
+    });
+
     it("sets all scenarios", () => {
       vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([]);
       vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(null);
@@ -174,6 +190,22 @@ describe("ScenarioContext", () => {
       });
 
       expect(ScenarioStorage.saveActiveScenarioId).toHaveBeenCalledWith("2");
+    });
+
+    it("persists null when active scenario is set to null", () => {
+      const initial: Scenario[] = [{ id: "1", name: "First" }];
+      vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue(initial);
+      vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue("1");
+
+      const { result } = renderHook(() => useScenarios(), {
+        wrapper: ScenarioProvider,
+      });
+
+      act(() => {
+        result.current.setActiveScenario(null);
+      });
+
+      expect(ScenarioStorage.saveActiveScenarioId).toHaveBeenCalledWith(null);
     });
 
     it("throws error when used outside provider", () => {
