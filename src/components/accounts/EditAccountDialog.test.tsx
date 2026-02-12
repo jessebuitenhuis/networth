@@ -165,7 +165,7 @@ describe("EditAccountDialog", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("Checking");
   });
 
-  it("canceling delete closes confirmation", async () => {
+  it("canceling delete returns to edit dialog", async () => {
     const user = await openDialog();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -175,8 +175,8 @@ describe("EditAccountDialog", () => {
       screen.queryByText(/are you sure you want to delete this account/i)
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("dialog", { name: "Edit Account" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("dialog", { name: "Edit Account" })
+    ).toBeInTheDocument();
   });
 
   it("delete confirmation button uses destructive variant", async () => {

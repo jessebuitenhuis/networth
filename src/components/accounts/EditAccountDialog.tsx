@@ -67,6 +67,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
     setIsDeleteConfirmOpen(true);
   }
 
+  function handleCancelDelete() {
+    setIsDeleteConfirmOpen(false);
+    setIsOpen(true);
+  }
+
   function handleDelete() {
     removeTransactionsByAccountId(account.id);
     removeAccount(account.id);
@@ -139,7 +144,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={setIsDeleteConfirmOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelDelete();
+          }
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
