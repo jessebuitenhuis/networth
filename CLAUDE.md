@@ -36,14 +36,14 @@ See `PRD.md` for full product requirements.
 
 ### State Management
 
-- React Context + `useReducer` for accounts and transactions
-- Contexts defined in `src/context/` — `AccountContext` and `TransactionContext`
-- Both persist to `localStorage` via services in `src/services/`
+- React Context + `useReducer` for all domain entities
+- Contexts defined in `src/context/` — `AccountContext`, `TransactionContext`, `RecurringTransactionContext`, `ScenarioContext`
+- All persist to `localStorage` via services in `src/services/`
 
 ### Storage Layer
 
-- `localStorage`-based with an abstraction layer (`AccountStorage`, `TransactionStorage`)
-- Storage keys: `"accounts"`, `"transactions"`
+- `localStorage`-based with an abstraction layer (`AccountStorage`, `TransactionStorage`, `RecurringTransactionStorage`, `ScenarioStorage`)
+- Storage keys: `"accounts"`, `"transactions"`, `"recurringTransactions"`, `"scenarios"`, `"activeScenarioId"`
 - Designed for future migration to a server-backed solution
 
 ### Data Flow
@@ -61,6 +61,7 @@ src/
     accounts/       # Account-related components
     charts/         # Net worth chart + legend + period picker
     layout/         # App shell (sidebar, layout wrapper)
+    scenarios/      # Scenario management components
     transactions/   # Transaction-related components
     ui/             # shadcn/ui primitives (do not edit directly)
   context/          # React context providers (AccountContext, TransactionContext)
