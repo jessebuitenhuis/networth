@@ -51,4 +51,22 @@ describe("PlanningPage", () => {
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
+
+  it("renders the duplicate scenario button", () => {
+    render(
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <PlanningPage />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: /duplicate/i })
+    ).toBeInTheDocument();
+  });
 });

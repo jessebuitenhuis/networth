@@ -4,6 +4,7 @@ import { useScenarios } from "@/context/ScenarioContext";
 import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
 import { ScenarioSelector } from "@/components/scenarios/ScenarioSelector";
 import { CreateScenarioDialog } from "@/components/scenarios/CreateScenarioDialog";
+import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenarioDialog";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
 
 export default function PlanningPage() {
@@ -19,6 +20,7 @@ export default function PlanningPage() {
             activeScenarioId={activeScenarioId}
             onSelect={setActiveScenario}
           />
+          <DuplicateScenarioDialog />
           <CreateScenarioDialog />
         </div>
       </div>
