@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider, useAccounts } from "@/context/AccountContext";
 import {
   TransactionProvider,
@@ -39,11 +40,13 @@ export class CreateAccountDialogPage {
   static render() {
     const user = userEvent.setup();
     render(
-      <AccountProvider>
-        <TransactionProvider>
-          <TestHarness />
-        </TransactionProvider>
-      </AccountProvider>
+      <SidebarProvider>
+        <AccountProvider>
+          <TransactionProvider>
+            <TestHarness />
+          </TransactionProvider>
+        </AccountProvider>
+      </SidebarProvider>
     );
     return new CreateAccountDialogPage(user);
   }
@@ -61,7 +64,7 @@ export class CreateAccountDialogPage {
   }
 
   get triggerButton() {
-    return screen.getByRole("button", { name: "Add Account" });
+    return screen.getByRole("button", { name: /New Account/i });
   }
 
   get dialog() {

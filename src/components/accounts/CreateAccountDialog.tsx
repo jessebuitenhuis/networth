@@ -21,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarGroupAction } from "@/components/ui/sidebar";
+import {
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
@@ -73,13 +76,18 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <SidebarGroupAction aria-label="Add Account">
-            <Plus />
-          </SidebarGroupAction>
-        )}
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <SidebarMenuItem>
+          <DialogTrigger asChild>
+            <SidebarMenuButton className="text-muted-foreground">
+              <Plus className="size-4" />
+              <span>New Account</span>
+            </SidebarMenuButton>
+          </DialogTrigger>
+        </SidebarMenuItem>
+      )}
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Add Account</DialogTitle>

@@ -2,6 +2,7 @@
 
 import { DollarSign } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import {
   Sidebar,
@@ -23,6 +24,8 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ navGroups }: AppSidebarProps) {
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -44,28 +47,51 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
       <SidebarContent>
         {navGroups.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              {group.label}
+              {group.labelSuffix && (
+                <span
+                  className="ml-auto font-normal text-muted-foreground"
+                  suppressHydrationWarning
+                >
+                  {group.labelSuffix}
+                </span>
+              )}
+            </SidebarGroupLabel>
             {group.action}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
-                  <SidebarMenuItem key={item.url}>
+                  <SidebarMenuItem
+                    key={item.url}
+                    onMouseEnter={() => setHoveredItem(item.url)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
                     <SidebarMenuButton
                       asChild
                       isActive={item.isActive}
                       tooltip={item.title}
-                      className={item.isActive ? "font-bold" : ""}
+                      className={`transition-none ${item.isActive ? "font-bold" : ""}`}
                     >
                       <Link href={item.url}>
                         {item.icon}
                         <span>{item.title}</span>
+                        {item.subtitle && (
+                          <span
+                            className="ml-auto text-xs text-muted-foreground"
+                            suppressHydrationWarning
+                          >
+                            {item.subtitle}
+                          </span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
-                    {item.action}
+                    {hoveredItem === item.url && item.action}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
+            {group.footerAction}
           </SidebarGroup>
         ))}
       </SidebarContent>

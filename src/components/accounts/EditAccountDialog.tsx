@@ -90,7 +90,7 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
         }}
       >
         <DialogTrigger asChild>
-          <SidebarMenuAction showOnHover aria-label="Edit Account">
+          <SidebarMenuAction aria-label="Edit Account">
             <Pencil />
           </SidebarMenuAction>
         </DialogTrigger>
