@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScenarios } from "@/context/ScenarioContext";
+import { generateId } from "@/lib/generateId";
 
 type CreateScenarioDialogProps = {
   onCreate?: (id: string) => void;
@@ -32,7 +33,7 @@ export function CreateScenarioDialog({ onCreate }: CreateScenarioDialogProps = {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const scenarioId = crypto.randomUUID();
+    const scenarioId = generateId();
 
     addScenario({
       id: scenarioId,

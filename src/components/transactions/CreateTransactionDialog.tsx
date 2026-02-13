@@ -25,6 +25,7 @@ import {
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 
 import { ScenarioSelect } from "./ScenarioSelect";
@@ -67,7 +68,7 @@ export function CreateTransactionDialog({
 
     if (isRecurring) {
       addRecurringTransaction({
-        id: crypto.randomUUID(),
+        id: generateId(),
         accountId,
         amount,
         description: description.trim(),
@@ -78,7 +79,7 @@ export function CreateTransactionDialog({
       });
     } else {
       addTransaction({
-        id: crypto.randomUUID(),
+        id: generateId(),
         accountId,
         amount,
         date,
@@ -92,7 +93,7 @@ export function CreateTransactionDialog({
   }
 
   function handleCreateScenario(name: string): string {
-    const id = crypto.randomUUID();
+    const id = generateId();
     addScenario({ id, name });
     return id;
   }

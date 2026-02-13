@@ -1,3 +1,4 @@
+import { generateId } from "@/lib/generateId";
 import type { Account } from "@/models/Account.type";
 import type { Transaction } from "@/models/Transaction.type";
 
@@ -41,7 +42,7 @@ export function migrateAccountBalances(): Transaction[] {
   for (const account of legacy) {
     if (account.balance && account.balance !== 0) {
       transactions.push({
-        id: crypto.randomUUID(),
+        id: generateId(),
         accountId: account.id,
         amount: account.balance,
         date: today,

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { generateId } from "@/lib/generateId";
 
 type DuplicateScenarioDialogProps = {
   scenarioId: string;
@@ -47,7 +48,7 @@ export function DuplicateScenarioDialog({
     const trimmedName = name.trim();
     if (!trimmedName) return;
 
-    const newScenarioId = crypto.randomUUID();
+    const newScenarioId = generateId();
 
     addScenario({
       id: newScenarioId,
@@ -60,7 +61,7 @@ export function DuplicateScenarioDialog({
       .forEach((t) => {
         addTransaction({
           ...t,
-          id: crypto.randomUUID(),
+          id: generateId(),
           scenarioId: newScenarioId,
         });
       });
@@ -71,7 +72,7 @@ export function DuplicateScenarioDialog({
       .forEach((rt) => {
         addRecurringTransaction({
           ...rt,
-          id: crypto.randomUUID(),
+          id: generateId(),
           scenarioId: newScenarioId,
         });
       });

@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { generateId } from "@/lib/generateId";
 import type { Transaction } from "@/models/Transaction.type";
 
 import { ScenarioSelect } from "./ScenarioSelect";
@@ -80,7 +81,7 @@ export function EditTransactionDialog({
   }
 
   function handleCreateScenario(name: string): string {
-    const id = crypto.randomUUID();
+    const id = generateId();
     addScenario({ id, name });
     return id;
   }

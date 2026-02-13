@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
+import { generateId } from "@/lib/generateId";
 import type { Scenario } from "@/models/Scenario.type";
 import { ScenarioStorage } from "@/services/ScenarioStorage";
 
@@ -76,7 +77,7 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
 
     if (loadedScenarios.length === 0) {
       const basePlan: Scenario = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: "Base Plan",
       };
       dispatch({
