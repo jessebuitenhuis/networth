@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -76,6 +77,9 @@ export function UpdateBalanceDialog({ accountId }: UpdateBalanceDialogProps) {
       <DialogContent aria-labelledby="update-balance-title">
         <DialogHeader>
           <DialogTitle id="update-balance-title">Update Balance</DialogTitle>
+          <DialogDescription>
+            Enter the target balance to automatically calculate and create an adjustment transaction.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
