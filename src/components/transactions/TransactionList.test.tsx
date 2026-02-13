@@ -23,7 +23,8 @@ function renderWithProvider(
   accountId: string,
   initialTransactions: Transaction[] = [],
   initialRecurring: RecurringTransaction[] = [],
-  initialScenarios: Scenario[] = []
+  initialScenarios: Scenario[] = [],
+  activeScenarioId?: string | null
 ) {
   localStorage.setItem("transactions", JSON.stringify(initialTransactions));
   localStorage.setItem(
@@ -31,6 +32,13 @@ function renderWithProvider(
     JSON.stringify(initialRecurring)
   );
   localStorage.setItem("scenarios", JSON.stringify(initialScenarios));
+  if (activeScenarioId !== undefined) {
+    if (activeScenarioId === null) {
+      localStorage.removeItem("activeScenarioId");
+    } else {
+      localStorage.setItem("activeScenarioId", activeScenarioId);
+    }
+  }
   return render(
     <TooltipProvider>
       <AccountProvider>
@@ -222,12 +230,12 @@ describe("TransactionList", () => {
 
   it("shows scenario icon for transactions with a scenarioId", async () => {
     const scenarios: Scenario[] = [
-      { id: "s1", name: "Early Retirement" },
+      { id: "s1", name: "Early Retirement", description: "" },
     ];
     const scenarioTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "s1" },
     ];
-    renderWithProvider("a1", scenarioTransactions, [], scenarios);
+    renderWithProvider("a1", scenarioTransactions, [], scenarios, "s1");
 
     expect(await screen.findByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
   });
@@ -246,9 +254,43 @@ describe("TransactionList", () => {
     const orphanScenarioTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "deleted-scenario" },
     ];
-    renderWithProvider("a1", orphanScenarioTransactions, [], []);
+    const dummyScenarios: Scenario[] = [
+      { id: "dummy", name: "Dummy", description: "" },
+    ];
+    renderWithProvider("a1", orphanScenarioTransactions, [], dummyScenarios, "deleted-scenario");
 
     await screen.findByText("New Car");
     expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+  });
+
+  it("shows only baseline transactions when activeScenarioId is null", async () => {
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Scenario 1", description: "" },
+    ];
+    const mixedTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 100, date: "2024-01-15", description: "Baseline tx" },
+      { id: "t2", accountId: "a1", amount: 200, date: "2024-01-16", description: "Scenario tx", scenarioId: "s1" },
+    ];
+    renderWithProvider("a1", mixedTransactions, [], scenarios, null);
+
+    expect(await screen.findByText("Baseline tx")).toBeInTheDocument();
+    expect(screen.queryByText("Scenario tx")).not.toBeInTheDocument();
+  });
+
+  it("shows baseline + scenario transactions when activeScenarioId is set", async () => {
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Scenario 1", description: "" },
+      { id: "s2", name: "Scenario 2", description: "" },
+    ];
+    const mixedTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 100, date: "2024-01-15", description: "Baseline tx" },
+      { id: "t2", accountId: "a1", amount: 200, date: "2024-01-16", description: "Scenario 1 tx", scenarioId: "s1" },
+      { id: "t3", accountId: "a1", amount: 300, date: "2024-01-17", description: "Scenario 2 tx", scenarioId: "s2" },
+    ];
+    renderWithProvider("a1", mixedTransactions, [], scenarios, "s1");
+
+    expect(await screen.findByText("Baseline tx")).toBeInTheDocument();
+    expect(screen.getByText("Scenario 1 tx")).toBeInTheDocument();
+    expect(screen.queryByText("Scenario 2 tx")).not.toBeInTheDocument();
   });
 });
