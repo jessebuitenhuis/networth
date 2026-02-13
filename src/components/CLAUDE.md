@@ -45,6 +45,14 @@ App shell components.
 | `NavGroup` | Type | `{ label, items: NavItem[], action?: ReactNode }` |
 | `NavItem` | Type | `{ title, url, isActive? }` |
 
+### `shared/`
+
+Reusable non-shadcn components used across multiple feature directories.
+
+| Component | Type | Description |
+|---|---|---|
+| `MultiSelectPicker` | Dumb | Generic popover + checkbox list. Used by `AccountPicker` and `ScenarioPicker`. Props: `label`, `items`, `selectedIds`, `onToggle`, optional `onClearAll`, `renderActions`, `popoverWidth` |
+
 ### `ui/`
 
 Auto-generated shadcn/ui primitives. **Do not edit directly** — these are managed by `npx shadcn add`.

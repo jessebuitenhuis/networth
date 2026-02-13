@@ -13,6 +13,6 @@ Pure TypeScript types and enums representing the domain. No logic, no imports fr
 ## Conventions
 
 - Dates are ISO `YYYY-MM-DD` strings (not `Date` objects)
-- IDs are `crypto.randomUUID()` strings
+- IDs are UUID strings generated via `generateId()` from `src/lib/generateId.ts`
 - Amounts are plain numbers (positive = inflow, negative = outflow)
 - Net worth = sum of asset balances minus sum of liability balances

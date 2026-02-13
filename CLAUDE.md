@@ -64,6 +64,7 @@ src/
     layout/         # App shell (sidebar, layout wrapper)
     scenarios/      # Scenario management components
     transactions/   # Transaction-related components
+    shared/         # Reusable non-shadcn components (e.g. MultiSelectPicker)
     ui/             # shadcn/ui primitives (do not edit directly)
   context/          # React context providers (AccountContext, TransactionContext)
   hooks/            # Custom React hooks
@@ -84,6 +85,10 @@ src/
 - Mock utilities in `src/test/mocks/` for non-universal mocks (ResizeObserver, Recharts warnings)
 - Use `it.each()` for parameterized tests (3+ cases with same structure)
 - Import sorting enforced via `eslint-plugin-simple-import-sort`; run `npm run format` to auto-fix
+- Storage services use function exports (not classes), with SSR guards and try/catch
+- Use `generateId()` from `src/lib/generateId.ts` for all UUID generation
+- Smart components delegate data transformation to services (e.g. `buildDisplayTransactions`)
+- Reusable non-shadcn components go in `src/components/shared/`
 
 ## Known Issues
 
