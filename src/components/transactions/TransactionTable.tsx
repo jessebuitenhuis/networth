@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Repeat, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Repeat, ArrowUpDown, ArrowUp, ArrowDown, FlaskConical } from "lucide-react";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import {
   Table,
@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 
@@ -74,9 +75,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
           bVal = b.amount;
           break;
         default:
-          aVal = a.date;
-          bVal = b.date;
-          break;
+          return 0;
       }
 
       if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
@@ -166,6 +165,19 @@ export function TransactionTable({ items }: TransactionTableProps) {
                   <Repeat className="h-3 w-3" />
                   Recurring
                 </span>
+              )}
+              {item.scenarioName && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      aria-label={`Scenario: ${item.scenarioName}`}
+                      className="ml-2 inline-flex items-center text-xs text-muted-foreground"
+                    >
+                      <FlaskConical className="h-3 w-3" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>{item.scenarioName}</TooltipContent>
+                </Tooltip>
               )}
             </TableCell>
             <TableCell className="text-left text-muted-foreground">

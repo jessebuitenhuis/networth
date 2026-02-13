@@ -8,6 +8,8 @@ import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import type { Scenario } from "@/models/Scenario.type";
 
 const transactions: Transaction[] = [
   { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-15", description: "Opening balance" },
@@ -18,23 +20,27 @@ const transactions: Transaction[] = [
 function renderWithProvider(
   accountId: string,
   initialTransactions: Transaction[] = [],
-  initialRecurring: RecurringTransaction[] = []
+  initialRecurring: RecurringTransaction[] = [],
+  initialScenarios: Scenario[] = []
 ) {
   localStorage.setItem("transactions", JSON.stringify(initialTransactions));
   localStorage.setItem(
     "recurringTransactions",
     JSON.stringify(initialRecurring)
   );
+  localStorage.setItem("scenarios", JSON.stringify(initialScenarios));
   return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <ScenarioProvider>
-          <RecurringTransactionProvider>
-            <TransactionList accountId={accountId} />
-          </RecurringTransactionProvider>
-        </ScenarioProvider>
-      </TransactionProvider>
-    </AccountProvider>
+    <TooltipProvider>
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <TransactionList accountId={accountId} />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    </TooltipProvider>
   );
 }
 
@@ -210,5 +216,37 @@ describe("TransactionList", () => {
     renderWithProvider("unknown-account", orphanTransactions);
 
     expect(await screen.findByText("Unknown")).toBeInTheDocument();
+  });
+
+  it("shows scenario icon for transactions with a scenarioId", async () => {
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Early Retirement" },
+    ];
+    const scenarioTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "s1" },
+    ];
+    renderWithProvider("a1", scenarioTransactions, [], scenarios);
+
+    expect(await screen.findByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
+  });
+
+  it("does not show scenario icon for baseline transactions", async () => {
+    const baselineTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: -200, date: "2024-01-15", description: "Groceries" },
+    ];
+    renderWithProvider("a1", baselineTransactions);
+
+    await screen.findByText("Groceries");
+    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+  });
+
+  it("does not show scenario icon when scenario was deleted", async () => {
+    const orphanScenarioTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "deleted-scenario" },
+    ];
+    renderWithProvider("a1", orphanScenarioTransactions, [], []);
+
+    await screen.findByText("New Car");
+    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
   });
 });

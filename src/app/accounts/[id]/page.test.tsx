@@ -4,6 +4,7 @@ import AccountDetailPage from "./page";
 import { AccountType } from "@/models/AccountType";
 import type { Account } from "@/models/Account.type";
 import type { Transaction } from "@/models/Transaction.type";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
@@ -29,15 +30,17 @@ const transactions: Transaction[] = [
 
 function renderPage(id: string) {
   return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <ScenarioProvider>
-          <RecurringTransactionProvider>
-            <AccountDetailPage params={{ id }} />
-          </RecurringTransactionProvider>
-        </ScenarioProvider>
-      </TransactionProvider>
-    </AccountProvider>
+    <SidebarProvider>
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <AccountDetailPage params={{ id }} />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    </SidebarProvider>
   );
 }
 

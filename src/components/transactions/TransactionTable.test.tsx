@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { TransactionTable } from "./TransactionTable";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 describe("TransactionTable", () => {
   const mockEditAction = <button aria-label="Edit">Edit</button>;
@@ -572,5 +573,97 @@ describe("TransactionTable", () => {
     const rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("First");
     expect(rows[2]).toHaveTextContent("Second");
+  });
+
+  it("shows scenario icon when scenarioName is set", () => {
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "New Car",
+        date: "2024-01-15",
+        amount: -30000,
+        isProjected: false,
+        isRecurring: false,
+        scenarioName: "Early Retirement",
+        editAction: mockEditAction,
+      },
+    ];
+    render(
+      <TooltipProvider>
+        <TransactionTable items={items} />
+      </TooltipProvider>
+    );
+
+    expect(screen.getByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
+  });
+
+  it("does not show scenario icon when scenarioName is undefined", () => {
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "Groceries",
+        date: "2024-01-15",
+        amount: -200,
+        isProjected: false,
+        isRecurring: false,
+        editAction: mockEditAction,
+      },
+    ];
+    render(
+      <TooltipProvider>
+        <TransactionTable items={items} />
+      </TooltipProvider>
+    );
+
+    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+  });
+
+  it("shows tooltip content on hover", async () => {
+    const user = userEvent.setup();
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "New Car",
+        date: "2024-01-15",
+        amount: -30000,
+        isProjected: false,
+        isRecurring: false,
+        scenarioName: "Early Retirement",
+        editAction: mockEditAction,
+      },
+    ];
+    render(
+      <TooltipProvider>
+        <TransactionTable items={items} />
+      </TooltipProvider>
+    );
+
+    const scenarioIcon = screen.getByLabelText("Scenario: Early Retirement");
+    await user.hover(scenarioIcon);
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Early Retirement");
+  });
+
+  it("shows scenario icon alongside recurring badge when both apply", () => {
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "Monthly Savings",
+        date: "2024-01-15",
+        amount: -500,
+        isProjected: true,
+        isRecurring: true,
+        scenarioName: "Early Retirement",
+        editAction: mockEditAction,
+      },
+    ];
+    render(
+      <TooltipProvider>
+        <TransactionTable items={items} />
+      </TooltipProvider>
+    );
+
+    expect(screen.getByText("Recurring")).toBeInTheDocument();
+    expect(screen.getByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
   });
 });

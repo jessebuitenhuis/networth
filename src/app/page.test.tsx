@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, beforeEach, vi } from "vitest";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
@@ -17,15 +18,17 @@ vi.stubGlobal(
 
 function renderPage() {
   return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <ScenarioProvider>
-          <RecurringTransactionProvider>
-            <Home />
-          </RecurringTransactionProvider>
-        </ScenarioProvider>
-      </TransactionProvider>
-    </AccountProvider>
+    <SidebarProvider>
+      <AccountProvider>
+        <TransactionProvider>
+          <ScenarioProvider>
+            <RecurringTransactionProvider>
+              <Home />
+            </RecurringTransactionProvider>
+          </ScenarioProvider>
+        </TransactionProvider>
+      </AccountProvider>
+    </SidebarProvider>
   );
 }
 

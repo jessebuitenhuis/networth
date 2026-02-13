@@ -14,7 +14,7 @@ import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 export function ScenarioTransactionList() {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
-  const { activeScenarioId } = useScenarios();
+  const { activeScenarioId, scenarios } = useScenarios();
   const { accounts } = useAccounts();
 
   const today = formatDate(new Date());
@@ -40,6 +40,7 @@ export function ScenarioTransactionList() {
         amount: tx.amount,
         isProjected: tx.isProjected || false,
         isRecurring: false,
+        scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
         editAction: <EditTransactionDialog transaction={tx} />,
       };
     });
@@ -64,6 +65,7 @@ export function ScenarioTransactionList() {
         amount: next.amount,
         isProjected: true,
         isRecurring: true,
+        scenarioName: rt.scenarioId ? scenarios.find(s => s.id === rt.scenarioId)?.name : undefined,
         editAction: <EditRecurringTransactionDialog recurringTransaction={rt} />,
       };
       return item;
