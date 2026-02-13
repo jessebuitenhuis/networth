@@ -2,6 +2,7 @@
 
 import { use } from "react";
 
+import { UpdateBalanceDialog } from "@/components/accounts/UpdateBalanceDialog";
 import TopBar from "@/components/layout/TopBar";
 import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelect";
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
@@ -79,7 +80,10 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
               })}
             </p>
           </div>
-          <CreateTransactionDialog accountId={account.id} />
+          <div className="flex gap-2">
+            <CreateTransactionDialog accountId={account.id} />
+            <UpdateBalanceDialog accountId={account.id} />
+          </div>
           <TransactionList accountId={account.id} />
         </div>
       </div>
