@@ -10,7 +10,12 @@ import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Transaction } from "@/models/Transaction.type";
 import * as AccountStorage from "@/services/AccountStorage";
 import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
-import { ScenarioStorage } from "@/services/ScenarioStorage";
+import {
+  loadActiveScenarioId,
+  loadScenarios,
+  saveActiveScenarioId,
+  saveScenarios,
+} from "@/services/ScenarioStorage";
 import * as TransactionStorage from "@/services/TransactionStorage";
 
 import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
@@ -40,10 +45,10 @@ describe("DuplicateScenarioDialog", () => {
     vi.mocked(AccountStorage).migrateAccountBalances.mockReturnValue([]);
     vi.mocked(TransactionStorage).loadTransactions.mockReturnValue([]);
     vi.mocked(RecurringTransactionStorage).loadRecurringTransactions.mockReturnValue([]);
-    vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
+    vi.mocked(loadScenarios).mockReturnValue([
       { id: "scenario-1", name: "Base Plan" },
     ]);
-    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(null);
+    vi.mocked(loadActiveScenarioId).mockReturnValue(null);
   });
 
   it("renders icon-only trigger button", () => {
@@ -89,8 +94,8 @@ describe("DuplicateScenarioDialog", () => {
     await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    expect(saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(saveScenarios).mock.calls;
     const lastCall = calls[calls.length - 1][0];
     expect(lastCall).toContainEqual(
       expect.objectContaining({ name: "Optimistic Plan" })
@@ -272,13 +277,13 @@ describe("DuplicateScenarioDialog", () => {
     );
 
     // Clear calls from initialization
-    vi.mocked(ScenarioStorage.saveActiveScenarioId).mockClear();
+    vi.mocked(saveActiveScenarioId).mockClear();
 
     await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     // Should not save active scenario ID (planning page manages selection)
-    expect(ScenarioStorage.saveActiveScenarioId).not.toHaveBeenCalled();
+    expect(saveActiveScenarioId).not.toHaveBeenCalled();
   });
 
   it("closes dialog after successful submit", async () => {
@@ -322,8 +327,8 @@ describe("DuplicateScenarioDialog", () => {
     await user.type(screen.getByLabelText(/name/i), "  Padded Name  ");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    expect(saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(saveScenarios).mock.calls;
     const lastCall = calls[calls.length - 1][0];
     expect(lastCall).toContainEqual(
       expect.objectContaining({ name: "Padded Name" })
@@ -484,7 +489,7 @@ describe("DuplicateScenarioDialog", () => {
       </Wrapper>
     );
 
-    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+    const initialCallCount = vi.mocked(saveScenarios).mock.calls.length;
 
     await user.click(screen.getByRole("button"));
 
@@ -498,7 +503,7 @@ describe("DuplicateScenarioDialog", () => {
 
     form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
 
-    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+    expect(vi.mocked(saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 
   it("stops propagation on trigger click", async () => {
