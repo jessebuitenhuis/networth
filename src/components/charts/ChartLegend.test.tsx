@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { ChartLegend } from "./ChartLegend";
-import { AccountType } from "@/models/AccountType";
+
 import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+
+import { ChartLegend } from "./ChartLegend";
 
 const accounts: Account[] = [
   { id: "1", name: "Checking", type: AccountType.Asset },

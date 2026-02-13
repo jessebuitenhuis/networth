@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type TopBarProps = {

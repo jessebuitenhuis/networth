@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Minus,Plus } from "lucide-react";
+import { useEffect, useLayoutEffect,useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getCurrencySymbol } from "@/lib/getLocale";
 import {
   formatLocaleNumber,
-  parseLocaleNumber,
   getDecimalSeparator,
+  parseLocaleNumber,
 } from "@/lib/localeNumber";
-import { getCurrencySymbol } from "@/lib/getLocale";
 
 interface CurrencyInputProps {
   value: number;

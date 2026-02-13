@@ -1,11 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, beforeEach } from "vitest";
-import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
+import { beforeEach,describe, expect, it } from "vitest";
+
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
+import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 
 const mockRecurringTransaction: RecurringTransaction = {
   id: "r1",

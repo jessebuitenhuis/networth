@@ -1,15 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { TransactionList } from "./TransactionList";
-import type { Transaction } from "@/models/Transaction.type";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
-import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AccountProvider } from "@/context/AccountContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Scenario } from "@/models/Scenario.type";
+import type { Transaction } from "@/models/Transaction.type";
+
+import { TransactionList } from "./TransactionList";
 
 const transactions: Transaction[] = [
   { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-15", description: "Opening balance" },

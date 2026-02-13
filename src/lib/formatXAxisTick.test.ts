@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { formatTick, getTickFormat } from "./formatXAxisTick";
+
 import { ChartPeriod } from "@/models/ChartPeriod";
+
+import { formatTick, getTickFormat } from "./formatXAxisTick";
 
 describe("getTickFormat", () => {
   it("returns weekday for OneWeek", () => {

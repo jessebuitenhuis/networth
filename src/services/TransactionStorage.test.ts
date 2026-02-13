@@ -1,6 +1,8 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { loadTransactions, saveTransactions } from "./TransactionStorage";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Transaction } from "@/models/Transaction.type";
+
+import { loadTransactions, saveTransactions } from "./TransactionStorage";
 
 const transaction: Transaction = {
   id: "t1",

@@ -1,8 +1,10 @@
-import { render, screen, act } from "@testing-library/react";
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { AccountProvider, useAccounts } from "./AccountContext";
-import { AccountType } from "@/models/AccountType";
+import { act,render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+
+import { AccountProvider, useAccounts } from "./AccountContext";
 import { accountReducer } from "./AccountContext";
 
 const asset: Account = {

@@ -1,17 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
+import { beforeEach,describe, expect, it, vi } from "vitest";
+
+import { AccountProvider } from "@/context/AccountContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { AccountProvider } from "@/context/AccountContext";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { Transaction } from "@/models/Transaction.type";
+import * as AccountStorage from "@/services/AccountStorage";
+import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
 import { ScenarioStorage } from "@/services/ScenarioStorage";
 import * as TransactionStorage from "@/services/TransactionStorage";
-import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
-import * as AccountStorage from "@/services/AccountStorage";
-import type { Transaction } from "@/models/Transaction.type";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
+import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
 
 vi.mock("@/services/ScenarioStorage");
 vi.mock("@/services/TransactionStorage");

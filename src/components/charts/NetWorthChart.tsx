@@ -1,18 +1,20 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "recharts";
+
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { addMonths, formatDate } from "@/lib/dateUtils";
+import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
+import { getDefaultCurrency } from "@/lib/getLocale";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange.type";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
-import { addMonths, formatDate } from "@/lib/dateUtils";
-import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
+
 import { ChartLegend } from "./ChartLegend";
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
 import { PeriodPicker } from "./PeriodPicker";
-import { getDefaultCurrency } from "@/lib/getLocale";
 
 const HISTORICAL_PERIODS = [
   ChartPeriod.OneWeek,

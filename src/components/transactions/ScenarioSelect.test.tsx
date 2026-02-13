@@ -1,8 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ScenarioSelect } from "./ScenarioSelect";
+import { describe, expect, it, vi } from "vitest";
+
 import type { Scenario } from "@/models/Scenario.type";
+
+import { ScenarioSelect } from "./ScenarioSelect";
 
 const mockScenarios: Scenario[] = [
   { id: "scenario-1", name: "Retirement" },

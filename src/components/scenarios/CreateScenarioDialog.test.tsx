@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CreateScenarioDialog } from "./CreateScenarioDialog";
+import { beforeEach,describe, expect, it, vi } from "vitest";
+
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { ScenarioStorage } from "@/services/ScenarioStorage";
+
+import { CreateScenarioDialog } from "./CreateScenarioDialog";
 
 vi.mock("@/services/ScenarioStorage");
 

@@ -1,18 +1,20 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ScenarioTransactionList } from "./ScenarioTransactionList";
+import { beforeEach,describe, expect, it } from "vitest";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TransactionProvider } from "@/context/TransactionContext";
 import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import type { Scenario } from "@/models/Scenario.type";
 import { AccountType } from "@/models/AccountType";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { Scenario } from "@/models/Scenario.type";
+import type { Transaction } from "@/models/Transaction.type";
+
+import { ScenarioTransactionList } from "./ScenarioTransactionList";
 
 function renderWithProviders(
   accounts: Account[] = [],

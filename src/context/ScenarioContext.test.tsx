@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { ScenarioProvider, useScenarios } from "./ScenarioContext";
-import { ScenarioStorage } from "@/services/ScenarioStorage";
+import { act,renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Scenario } from "@/models/Scenario.type";
+import { ScenarioStorage } from "@/services/ScenarioStorage";
+
+import { ScenarioProvider, useScenarios } from "./ScenarioContext";
 
 vi.mock("@/services/ScenarioStorage");
 

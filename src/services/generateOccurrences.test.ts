@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { generateOccurrences } from "./generateOccurrences";
+
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
+import { generateOccurrences } from "./generateOccurrences";
 
 function makeRecurring(
   overrides: Partial<RecurringTransaction> = {}

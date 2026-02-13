@@ -3,6 +3,7 @@
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
+
 import { NetWorthCard } from "./NetWorthCard";
 
 export function NetWorthSummary() {

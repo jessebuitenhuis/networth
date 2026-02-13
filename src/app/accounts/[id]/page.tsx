@@ -1,11 +1,12 @@
 "use client";
 
 import { use } from "react";
+
+import TopBar from "@/components/layout/TopBar";
+import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
+import { TransactionList } from "@/components/transactions/TransactionList";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
-import TopBar from "@/components/layout/TopBar";
-import { TransactionList } from "@/components/transactions/TransactionList";
-import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
 import { getDefaultCurrency } from "@/lib/getLocale";
 
 type AccountDetailPageProps = {

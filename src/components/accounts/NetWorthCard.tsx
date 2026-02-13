@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { formatCurrency } from "@/lib/formatCurrency";
+import { useEffect,useState } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 type NetWorthCardProps = {
   netWorth: number;

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({
@@ -7,13 +8,14 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+
 import { AppLayout } from "./AppLayout";
 import type { NavGroup } from "./NavGroup.type";
-import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account.type";
 
 const testGroups: NavGroup[] = [
   {

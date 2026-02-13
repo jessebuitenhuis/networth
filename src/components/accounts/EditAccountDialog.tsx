@@ -1,30 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import { SidebarMenuAction } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +14,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SidebarMenuAction } from "@/components/ui/sidebar";
+import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
 
 type EditAccountDialogProps = {
   account: Account;

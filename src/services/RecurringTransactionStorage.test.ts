@@ -1,10 +1,12 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
 import {
   loadRecurringTransactions,
   saveRecurringTransactions,
 } from "./RecurringTransactionStorage";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 const recurring: RecurringTransaction = {
   id: "r1",

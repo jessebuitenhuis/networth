@@ -1,10 +1,12 @@
-import { render, screen, act } from "@testing-library/react";
+import { act,render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, beforeEach } from "vitest";
-import { EditTransactionDialog } from "./EditTransactionDialog";
-import { TransactionProvider } from "@/context/TransactionContext";
+import { beforeEach,describe, expect, it } from "vitest";
+
 import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 import type { Transaction } from "@/models/Transaction.type";
+
+import { EditTransactionDialog } from "./EditTransactionDialog";
 
 const mockTransaction: Transaction = {
   id: "t1",

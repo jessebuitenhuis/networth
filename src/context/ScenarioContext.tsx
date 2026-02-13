@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useReducer } from "react";
+
 import type { Scenario } from "@/models/Scenario.type";
 import { ScenarioStorage } from "@/services/ScenarioStorage";
 

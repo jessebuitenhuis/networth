@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { DollarSign } from "lucide-react";
+import Link from "next/link";
+
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+
 import type { NavGroup } from "./NavGroup.type";
 
 type AppSidebarProps = {

@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ScenarioStorage } from "./ScenarioStorage";
+import { beforeEach,describe, expect, it } from "vitest";
+
 import type { Scenario } from "@/models/Scenario.type";
+
+import { ScenarioStorage } from "./ScenarioStorage";
 
 describe("ScenarioStorage", () => {
   beforeEach(() => {

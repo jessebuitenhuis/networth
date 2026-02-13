@@ -1,22 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Pencil } from "lucide-react";
-import { useTransactions } from "@/context/TransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import type { Transaction } from "@/models/Transaction.type";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
-import { ScenarioSelect } from "./ScenarioSelect";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +14,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useScenarios } from "@/context/ScenarioContext";
+import { useTransactions } from "@/context/TransactionContext";
+import type { Transaction } from "@/models/Transaction.type";
+
+import { ScenarioSelect } from "./ScenarioSelect";
 
 type EditTransactionDialogProps = {
   transaction: Transaction;

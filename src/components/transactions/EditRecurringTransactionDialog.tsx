@@ -1,30 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Pencil } from "lucide-react";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
-import { ScenarioSelect } from "./ScenarioSelect";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +14,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
+import { ScenarioSelect } from "./ScenarioSelect";
 
 type EditRecurringTransactionDialogProps = {
   recurringTransaction: RecurringTransaction;

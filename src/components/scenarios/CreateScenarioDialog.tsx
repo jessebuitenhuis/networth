@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useScenarios } from "@/context/ScenarioContext";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useScenarios } from "@/context/ScenarioContext";
 
 export function CreateScenarioDialog() {
   const { addScenario, setActiveScenario } = useScenarios();

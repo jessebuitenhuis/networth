@@ -1,11 +1,13 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+
 import {
   loadAccounts,
-  saveAccounts,
   migrateAccountBalances,
+  saveAccounts,
 } from "./AccountStorage";
-import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account.type";
 
 describe("AccountStorage", () => {
   beforeEach(() => {

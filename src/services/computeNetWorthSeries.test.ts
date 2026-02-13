@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { computeNetWorthSeries } from "./computeNetWorthSeries";
-import { ChartPeriod } from "@/models/ChartPeriod";
-import { AccountType } from "@/models/AccountType";
+
 import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+import { ChartPeriod } from "@/models/ChartPeriod";
 import type { Transaction } from "@/models/Transaction.type";
+
+import { computeNetWorthSeries } from "./computeNetWorthSeries";
 
 const TODAY = "2024-06-15";
 

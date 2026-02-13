@@ -1,12 +1,14 @@
-import { render, screen, act } from "@testing-library/react";
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import {
-  RecurringTransactionProvider,
-  useRecurringTransactions,
-  recurringTransactionReducer,
-} from "./RecurringTransactionContext";
+import { act,render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+
+import {
+  RecurringTransactionProvider,
+  recurringTransactionReducer,
+  useRecurringTransactions,
+} from "./RecurringTransactionContext";
 
 const rt1: RecurringTransaction = {
   id: "r1",

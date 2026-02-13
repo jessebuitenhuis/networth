@@ -1,24 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useTransactions } from "@/context/TransactionContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
-import { ScenarioSelect } from "./ScenarioSelect";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +13,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
+import { useTransactions } from "@/context/TransactionContext";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+
+import { ScenarioSelect } from "./ScenarioSelect";
 
 type CreateTransactionDialogProps = {
   accountId: string;

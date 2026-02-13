@@ -1,16 +1,17 @@
 "use client";
 
-import { useTransactions } from "@/context/TransactionContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useAccounts } from "@/context/AccountContext";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
-import { isTransactionProjected } from "@/services/isTransactionProjected";
-import { getNextOccurrence } from "@/services/getNextOccurrence";
+import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
-import { TransactionTable } from "./TransactionTable";
-import { EditTransactionDialog } from "./EditTransactionDialog";
-import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { getNextOccurrence } from "@/services/getNextOccurrence";
+import { isTransactionProjected } from "@/services/isTransactionProjected";
+
+import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
+import { EditTransactionDialog } from "./EditTransactionDialog";
+import { TransactionTable } from "./TransactionTable";
 
 type TransactionListProps = {
   accountId: string;

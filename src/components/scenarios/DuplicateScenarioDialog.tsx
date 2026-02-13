@@ -1,13 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Copy } from "lucide-react";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useScenarios } from "@/context/ScenarioContext";
+import { useTransactions } from "@/context/TransactionContext";
 
 export function DuplicateScenarioDialog() {
   const { scenarios, activeScenarioId, addScenario, setActiveScenario } =

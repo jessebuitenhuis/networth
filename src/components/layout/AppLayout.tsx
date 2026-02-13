@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { SidebarInset } from "@/components/ui/sidebar";
-import { useAccounts } from "@/context/AccountContext";
+import { useMemo } from "react";
+
+import { AccountIcon } from "@/components/accounts/AccountIcon";
 import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
-import { AccountIcon } from "@/components/accounts/AccountIcon";
+import { SidebarInset } from "@/components/ui/sidebar";
+import { useAccounts } from "@/context/AccountContext";
+
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup.type";
 

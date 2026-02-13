@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import { AccountIcon } from "./AccountIcon";
+import { describe, expect,it } from "vitest";
+
 import { AccountType } from "@/models/AccountType";
+
+import { AccountIcon } from "./AccountIcon";
 
 describe("AccountIcon", () => {
   it("renders first two letters of name, uppercased", () => {

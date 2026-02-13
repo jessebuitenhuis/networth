@@ -1,22 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
-import { AccountType } from "@/models/AccountType";
-import { SidebarGroupAction } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +12,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SidebarGroupAction } from "@/components/ui/sidebar";
+import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
+import { AccountType } from "@/models/AccountType";
 
 export function CreateAccountDialog() {
   const { addAccount } = useAccounts();

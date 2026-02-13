@@ -1,15 +1,17 @@
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
 import { LayoutDashboard, TrendingUp } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
+
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup.type";
-import "./globals.css";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AccountProvider } from "@/context/AccountContext";
+import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

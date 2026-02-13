@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { computeProjectedSeries } from "./computeProjectedSeries";
-import { ChartPeriod } from "@/models/ChartPeriod";
-import { AccountType } from "@/models/AccountType";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+
 import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { AccountType } from "@/models/AccountType";
+import { ChartPeriod } from "@/models/ChartPeriod";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { Transaction } from "@/models/Transaction.type";
+
+import { computeProjectedSeries } from "./computeProjectedSeries";
 
 const TODAY = "2024-06-15";
 

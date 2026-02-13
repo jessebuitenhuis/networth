@@ -1,11 +1,13 @@
-import { render, screen, act } from "@testing-library/react";
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { act,render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { Transaction } from "@/models/Transaction.type";
+
 import {
   TransactionProvider,
-  useTransactions,
   transactionReducer,
+  useTransactions,
 } from "./TransactionContext";
-import type { Transaction } from "@/models/Transaction.type";
 
 const tx1: Transaction = {
   id: "t1",

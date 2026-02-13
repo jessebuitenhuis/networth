@@ -1,8 +1,8 @@
 "use client";
 
-import TopBar from "@/components/layout/TopBar";
 import { NetWorthSummary } from "@/components/accounts/NetWorthSummary";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
+import TopBar from "@/components/layout/TopBar";
 
 export default function Home() {
   return (
