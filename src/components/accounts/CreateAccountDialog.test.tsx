@@ -1,53 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CreateAccountDialog } from "./CreateAccountDialog";
-import { AccountProvider, useAccounts } from "@/context/AccountContext";
-import {
-  TransactionProvider,
-  useTransactions,
-} from "@/context/TransactionContext";
 
-function TestHarness() {
-  const { accounts } = useAccounts();
-  const { transactions } = useTransactions();
-  return (
-    <div>
-      <CreateAccountDialog />
-      <ul data-testid="accounts">
-        {accounts.map((a) => (
-          <li key={a.id}>
-            {a.name} - {a.type}
-          </li>
-        ))}
-      </ul>
-      <ul data-testid="transactions">
-        {transactions.map((t) => (
-          <li key={t.id}>
-            {t.description} - {t.amount}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function renderDialog() {
-  return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <TestHarness />
-      </TransactionProvider>
-    </AccountProvider>
-  );
-}
-
-async function openDialog() {
-  const user = userEvent.setup();
-  renderDialog();
-  await user.click(screen.getByRole("button", { name: "Add Account" }));
-  return user;
-}
+import { CreateAccountDialogPage } from "./CreateAccountDialog.page";
 
 describe("CreateAccountDialog", () => {
   beforeEach(() => {
@@ -61,104 +14,84 @@ describe("CreateAccountDialog", () => {
   });
 
   it("renders a trigger button", () => {
-    renderDialog();
-
-    expect(
-      screen.getByRole("button", { name: "Add Account" })
-    ).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    expect(page.triggerButton).toBeInTheDocument();
   });
 
   it("opens dialog when trigger is clicked", async () => {
-    await openDialog();
-
-    expect(
-      screen.getByRole("dialog", { name: "Add Account" })
-    ).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    expect(page.dialog).toBeInTheDocument();
   });
 
   it("dialog contains Name, Type, and Balance fields", async () => {
-    await openDialog();
-
-    expect(screen.getByLabelText("Name")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Type" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Balance")).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    expect(page.nameInput).toBeInTheDocument();
+    expect(page.typeSelect).toBeInTheDocument();
+    expect(page.balanceInput).toBeInTheDocument();
   });
 
   it("submits and creates account with correct data", async () => {
-    const user = await openDialog();
-
-    await user.type(screen.getByLabelText("Name"), "Checking");
-    await user.clear(screen.getByLabelText("Balance"));
-    await user.type(screen.getByLabelText("Balance"), "1500");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByText("Checking - Asset")).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Checking");
+    await page.clearAndFillBalance("1500");
+    await page.submit();
+    expect(page.accountsList).toHaveTextContent("Checking - Asset");
   });
 
   it("creates opening balance transaction when balance is non-zero", async () => {
-    const user = await openDialog();
-
-    await user.type(screen.getByLabelText("Name"), "Checking");
-    await user.clear(screen.getByLabelText("Balance"));
-    await user.type(screen.getByLabelText("Balance"), "1500");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByText("Opening balance - 1500")).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Checking");
+    await page.clearAndFillBalance("1500");
+    await page.submit();
+    expect(page.transactionsList).toHaveTextContent("Opening balance - 1500");
   });
 
   it("does not create transaction when balance is zero", async () => {
-    const user = await openDialog();
-
-    await user.type(screen.getByLabelText("Name"), "Empty");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByTestId("transactions")).toBeEmptyDOMElement();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Empty");
+    await page.submit();
+    expect(page.transactionsList).toBeEmptyDOMElement();
   });
 
   it("closes dialog after successful submit", async () => {
-    const user = await openDialog();
-
-    await user.type(screen.getByLabelText("Name"), "Checking");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Checking");
+    await page.submit();
+    expect(page.queryDialog()).not.toBeInTheDocument();
   });
 
   it("resets form after submit", async () => {
-    const user = await openDialog();
-
-    await user.type(screen.getByLabelText("Name"), "Checking");
-    await user.clear(screen.getByLabelText("Balance"));
-    await user.type(screen.getByLabelText("Balance"), "500");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    // Re-open dialog to check form is reset
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByLabelText("Name")).toHaveValue("");
-    expect(screen.getByLabelText("Balance")).toHaveValue("0");
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Checking");
+    await page.clearAndFillBalance("500");
+    await page.submit();
+    await page.open();
+    expect(page.nameInput).toHaveValue("");
+    expect(page.balanceInput).toHaveValue("0");
   });
 
   it("does not submit with empty name", async () => {
-    const user = await openDialog();
-
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByTestId("accounts")).toBeEmptyDOMElement();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.submit();
+    expect(page.accountsList).toBeEmptyDOMElement();
+    expect(page.dialog).toBeInTheDocument();
   });
 
   it("creates liability account", async () => {
-    const user = await openDialog();
-
-    await user.click(screen.getByRole("combobox", { name: "Type" }));
-    await user.click(screen.getByRole("option", { name: "Liability" }));
-
-    await user.type(screen.getByLabelText("Name"), "Credit Card");
-    await user.clear(screen.getByLabelText("Balance"));
-    await user.type(screen.getByLabelText("Balance"), "800");
-    await user.click(screen.getByRole("button", { name: "Add Account" }));
-
-    expect(screen.getByText("Credit Card - Liability")).toBeInTheDocument();
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.selectType("Liability");
+    await page.fillName("Credit Card");
+    await page.clearAndFillBalance("800");
+    await page.submit();
+    expect(page.accountsList).toHaveTextContent("Credit Card - Liability");
   });
 });

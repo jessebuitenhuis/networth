@@ -2,23 +2,19 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.stubGlobal(
-  "ResizeObserver",
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-);
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 
-import { CreateTransactionDialog } from "./CreateTransactionDialog";
+mockResizeObserver();
+
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
-import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
 } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
+import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
+
+import { CreateTransactionDialog } from "./CreateTransactionDialog";
 
 function TestHarness({ accountId }: { accountId: string }) {
   const { transactions } = useTransactions();

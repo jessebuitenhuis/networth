@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
+  formatLocaleNumber,
   getDecimalSeparator,
   getGroupingSeparator,
-  formatLocaleNumber,
   parseLocaleNumber,
 } from "./localeNumber";
 
@@ -67,16 +68,13 @@ describe("localeNumber", () => {
   });
 
   describe("parseLocaleNumber", () => {
-    it("parses zero", () => {
-      expect(parseLocaleNumber("0")).toBe(0);
-    });
-
-    it("parses empty string as zero", () => {
-      expect(parseLocaleNumber("")).toBe(0);
-    });
-
-    it("parses simple integers", () => {
-      expect(parseLocaleNumber("123")).toBe(123);
+    it.each([
+      ["0", 0],
+      ["", 0],
+      ["123", 123],
+      ["abc", 0],
+    ])('parseLocaleNumber("%s") = %s', (input, expected) => {
+      expect(parseLocaleNumber(input)).toBe(expected);
     });
 
     it("parses formatted integers", () => {
@@ -92,10 +90,6 @@ describe("localeNumber", () => {
     it("parses large formatted numbers", () => {
       const formatted = formatLocaleNumber(1234567.89);
       expect(parseLocaleNumber(formatted)).toBeCloseTo(1234567.89, 2);
-    });
-
-    it("handles invalid input", () => {
-      expect(parseLocaleNumber("abc")).toBe(0);
     });
 
     it("strips multiple grouping separators", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { addDays, addMonths, addYears, endOfMonth, formatDate, toSunday } from "./dateUtils";
 
 function d(s: string): Date {
@@ -6,107 +7,69 @@ function d(s: string): Date {
 }
 
 describe("addDays", () => {
-  it("adds positive days", () => {
-    expect(formatDate(addDays(d("2024-06-10"), 5))).toBe("2024-06-15");
-  });
-
-  it("subtracts with negative days", () => {
-    expect(formatDate(addDays(d("2024-06-10"), -3))).toBe("2024-06-07");
-  });
-
-  it("crosses month boundary", () => {
-    expect(formatDate(addDays(d("2024-01-30"), 3))).toBe("2024-02-02");
+  it.each([
+    ["2024-06-10", 5, "2024-06-15"],
+    ["2024-06-10", -3, "2024-06-07"],
+    ["2024-01-30", 3, "2024-02-02"],
+  ])("addDays(%s, %i) = %s", (date, days, expected) => {
+    expect(formatDate(addDays(d(date), days))).toBe(expected);
   });
 
   it("returns a new Date instance", () => {
     const original = d("2024-06-10");
-    const result = addDays(original, 1);
-    expect(result).not.toBe(original);
+    expect(addDays(original, 1)).not.toBe(original);
   });
 });
 
 describe("addMonths", () => {
-  it("adds positive months", () => {
-    expect(formatDate(addMonths(d("2024-01-15"), 3))).toBe("2024-04-15");
-  });
-
-  it("subtracts with negative months", () => {
-    expect(formatDate(addMonths(d("2024-06-15"), -2))).toBe("2024-04-15");
-  });
-
-  it("clamps when target month has fewer days (Jan 31 + 1m = Feb 29 leap)", () => {
-    expect(formatDate(addMonths(d("2024-01-31"), 1))).toBe("2024-02-29");
-  });
-
-  it("clamps when target month has fewer days (Jan 31 + 1m = Feb 28 non-leap)", () => {
-    expect(formatDate(addMonths(d("2023-01-31"), 1))).toBe("2023-02-28");
-  });
-
-  it("handles leap year Feb 29 back 12 months", () => {
-    expect(formatDate(addMonths(d("2024-02-29"), -12))).toBe("2023-02-28");
+  it.each([
+    ["2024-01-15", 3, "2024-04-15"],
+    ["2024-06-15", -2, "2024-04-15"],
+    ["2024-01-31", 1, "2024-02-29"],
+    ["2023-01-31", 1, "2023-02-28"],
+    ["2024-02-29", -12, "2023-02-28"],
+  ])("addMonths(%s, %i) = %s", (date, months, expected) => {
+    expect(formatDate(addMonths(d(date), months))).toBe(expected);
   });
 });
 
 describe("addYears", () => {
-  it("adds positive years", () => {
-    expect(formatDate(addYears(d("2024-06-15"), 1))).toBe("2025-06-15");
-  });
-
-  it("subtracts with negative years", () => {
-    expect(formatDate(addYears(d("2024-06-15"), -2))).toBe("2022-06-15");
-  });
-
-  it("clamps leap day to Feb 28 in non-leap year", () => {
-    expect(formatDate(addYears(d("2024-02-29"), 1))).toBe("2025-02-28");
+  it.each([
+    ["2024-06-15", 1, "2025-06-15"],
+    ["2024-06-15", -2, "2022-06-15"],
+    ["2024-02-29", 1, "2025-02-28"],
+  ])("addYears(%s, %i) = %s", (date, years, expected) => {
+    expect(formatDate(addYears(d(date), years))).toBe(expected);
   });
 });
 
 describe("formatDate", () => {
-  it("formats as YYYY-MM-DD", () => {
-    expect(formatDate(new Date("2024-06-15"))).toBe("2024-06-15");
-  });
-
-  it("pads single-digit month and day", () => {
-    expect(formatDate(d("2024-01-05"))).toBe("2024-01-05");
+  it.each([
+    [new Date("2024-06-15"), "2024-06-15"],
+    [d("2024-01-05"), "2024-01-05"],
+  ])("formats as YYYY-MM-DD", (date, expected) => {
+    expect(formatDate(date)).toBe(expected);
   });
 });
 
 describe("toSunday", () => {
-  it("returns same date if already Sunday", () => {
-    // 2024-03-17 is Sunday
-    expect(formatDate(toSunday(d("2024-03-17")))).toBe("2024-03-17");
-  });
-
-  it("returns previous Sunday for Monday", () => {
-    // 2024-03-18 is Monday → previous Sunday is 2024-03-17
-    expect(formatDate(toSunday(d("2024-03-18")))).toBe("2024-03-17");
-  });
-
-  it("returns previous Sunday for Saturday", () => {
-    // 2024-06-15 is Saturday → previous Sunday is 2024-06-09
-    expect(formatDate(toSunday(d("2024-06-15")))).toBe("2024-06-09");
-  });
-
-  it("crosses month boundary", () => {
-    // 2024-07-01 is Monday → previous Sunday is 2024-06-30
-    expect(formatDate(toSunday(d("2024-07-01")))).toBe("2024-06-30");
+  it.each([
+    ["2024-03-17", "2024-03-17"],
+    ["2024-03-18", "2024-03-17"],
+    ["2024-06-15", "2024-06-09"],
+    ["2024-07-01", "2024-06-30"],
+  ])("toSunday(%s) = %s", (date, expected) => {
+    expect(formatDate(toSunday(d(date)))).toBe(expected);
   });
 });
 
 describe("endOfMonth", () => {
-  it("returns last day of a 31-day month", () => {
-    expect(formatDate(endOfMonth(d("2024-07-15")))).toBe("2024-07-31");
-  });
-
-  it("returns last day of a 30-day month", () => {
-    expect(formatDate(endOfMonth(d("2024-06-15")))).toBe("2024-06-30");
-  });
-
-  it("returns Feb 29 for leap year", () => {
-    expect(formatDate(endOfMonth(d("2024-02-10")))).toBe("2024-02-29");
-  });
-
-  it("returns Feb 28 for non-leap year", () => {
-    expect(formatDate(endOfMonth(d("2023-02-10")))).toBe("2023-02-28");
+  it.each([
+    ["2024-07-15", "2024-07-31"],
+    ["2024-06-15", "2024-06-30"],
+    ["2024-02-10", "2024-02-29"],
+    ["2023-02-10", "2023-02-28"],
+  ])("endOfMonth(%s) = %s", (date, expected) => {
+    expect(formatDate(endOfMonth(d(date)))).toBe(expected);
   });
 });

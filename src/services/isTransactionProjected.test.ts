@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isTransactionProjected } from "./isTransactionProjected";
+
 import type { Transaction } from "@/models/Transaction.type";
+
+import { isTransactionProjected } from "./isTransactionProjected";
 
 function makeTx(overrides: Partial<Transaction> = {}): Transaction {
   return {
@@ -16,28 +18,14 @@ function makeTx(overrides: Partial<Transaction> = {}): Transaction {
 const TODAY = "2024-06-15";
 
 describe("isTransactionProjected", () => {
-  it("returns false for a past date", () => {
-    expect(isTransactionProjected(makeTx({ date: "2024-06-10" }), TODAY)).toBe(false);
-  });
-
-  it("returns false for today's date", () => {
-    expect(isTransactionProjected(makeTx({ date: "2024-06-15" }), TODAY)).toBe(false);
-  });
-
-  it("returns true for a future date", () => {
-    expect(isTransactionProjected(makeTx({ date: "2024-06-16" }), TODAY)).toBe(true);
-  });
-
-  it("returns true when isProjected flag is true", () => {
-    expect(
-      isTransactionProjected(makeTx({ date: "2024-06-10", isProjected: true }), TODAY)
-    ).toBe(true);
-  });
-
-  it("returns true when date is future even if isProjected is false", () => {
-    expect(
-      isTransactionProjected(makeTx({ date: "2024-06-20", isProjected: false }), TODAY)
-    ).toBe(true);
+  it.each([
+    { overrides: { date: "2024-06-10" }, expected: false, desc: "past date" },
+    { overrides: { date: "2024-06-15" }, expected: false, desc: "today's date" },
+    { overrides: { date: "2024-06-16" }, expected: true, desc: "future date" },
+    { overrides: { date: "2024-06-10", isProjected: true } as Partial<Transaction>, expected: true, desc: "isProjected flag true" },
+    { overrides: { date: "2024-06-20", isProjected: false } as Partial<Transaction>, expected: true, desc: "future with isProjected false" },
+  ])("returns $expected for $desc", ({ overrides, expected }) => {
+    expect(isTransactionProjected(makeTx(overrides), TODAY)).toBe(expected);
   });
 
   it("defaults today to current date when not provided", () => {

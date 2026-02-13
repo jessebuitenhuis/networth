@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
 import { NetWorthCard } from "./NetWorthCard";
 
 describe("NetWorthCard", () => {
@@ -8,18 +9,12 @@ describe("NetWorthCard", () => {
     expect(screen.getByText("Net Worth")).toBeInTheDocument();
   });
 
-  it("formats positive net worth", () => {
-    render(<NetWorthCard netWorth={6500} />);
-    expect(screen.getByText("US$6,500.00")).toBeInTheDocument();
-  });
-
-  it("formats negative net worth", () => {
-    render(<NetWorthCard netWorth={-1500} />);
-    expect(screen.getByText("-US$1,500.00")).toBeInTheDocument();
-  });
-
-  it("formats zero", () => {
-    render(<NetWorthCard netWorth={0} />);
-    expect(screen.getByText("US$0.00")).toBeInTheDocument();
+  it.each([
+    [6500, "US$6,500.00"],
+    [-1500, "-US$1,500.00"],
+    [0, "US$0.00"],
+  ])("formats net worth %s as %s", (netWorth, expected) => {
+    render(<NetWorthCard netWorth={netWorth} />);
+    expect(screen.getByText(expected)).toBeInTheDocument();
   });
 });

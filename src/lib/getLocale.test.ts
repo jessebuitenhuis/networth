@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { getBrowserLocale, getDefaultCurrency, getCurrencySymbol } from "./getLocale";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getBrowserLocale, getCurrencySymbol,getDefaultCurrency } from "./getLocale";
 
 describe("getLocale", () => {
   describe("getBrowserLocale", () => {
@@ -36,34 +37,20 @@ describe("getLocale", () => {
       });
     });
 
-    it("returns USD for en-US locale", () => {
+    it.each([
+      ["en-US", "USD"],
+      ["en-GB", "GBP"],
+      ["de-DE", "EUR"],
+      ["en-CA", "USD"],
+      ["ja-JP", "JPY"],
+      ["zh-CN", "CNY"],
+    ])("returns %s for %s locale", (locale, expected) => {
       Object.defineProperty(global, "navigator", {
-        value: { language: "en-US" },
+        value: { language: locale },
         writable: true,
         configurable: true,
       });
-
-      expect(getDefaultCurrency()).toBe("USD");
-    });
-
-    it("returns GBP for en-GB locale", () => {
-      Object.defineProperty(global, "navigator", {
-        value: { language: "en-GB" },
-        writable: true,
-        configurable: true,
-      });
-
-      expect(getDefaultCurrency()).toBe("GBP");
-    });
-
-    it("returns EUR for European locales", () => {
-      Object.defineProperty(global, "navigator", {
-        value: { language: "de-DE" },
-        writable: true,
-        configurable: true,
-      });
-
-      expect(getDefaultCurrency()).toBe("EUR");
+      expect(getDefaultCurrency()).toBe(expected);
     });
 
     it("returns USD when navigator is undefined", () => {
@@ -72,38 +59,7 @@ describe("getLocale", () => {
         writable: true,
         configurable: true,
       });
-
       expect(getDefaultCurrency()).toBe("USD");
-    });
-
-    it("returns USD for en-CA locale", () => {
-      Object.defineProperty(global, "navigator", {
-        value: { language: "en-CA" },
-        writable: true,
-        configurable: true,
-      });
-
-      expect(getDefaultCurrency()).toBe("USD");
-    });
-
-    it("returns JPY for ja locale", () => {
-      Object.defineProperty(global, "navigator", {
-        value: { language: "ja-JP" },
-        writable: true,
-        configurable: true,
-      });
-
-      expect(getDefaultCurrency()).toBe("JPY");
-    });
-
-    it("returns CNY for zh-CN locale", () => {
-      Object.defineProperty(global, "navigator", {
-        value: { language: "zh-CN" },
-        writable: true,
-        configurable: true,
-      });
-
-      expect(getDefaultCurrency()).toBe("CNY");
     });
   });
 

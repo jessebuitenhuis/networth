@@ -1,20 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import PlanningPage from "./page";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
-vi.stubGlobal(
-  "ResizeObserver",
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-);
+import PlanningPage from "./page";
+
+mockResizeObserver();
+suppressRechartsWarnings();
 
 function renderPage() {
   return render(

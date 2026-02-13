@@ -1,23 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import AccountDetailPage from "./page";
-import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+import type { Transaction } from "@/models/Transaction.type";
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
-vi.stubGlobal(
-  "ResizeObserver",
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-);
+import AccountDetailPage from "./page";
+
+mockResizeObserver();
+suppressRechartsWarnings();
 
 const accounts: Account[] = [
   { id: "a1", name: "Checking", type: AccountType.Asset },

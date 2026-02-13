@@ -1,29 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  NetWorthChart,
-  formatCurrency,
-  formatXAxisTick,
-  formatYAxisValue,
-  formatTooltipLabel,
-  formatTooltipValue,
-} from "./NetWorthChart";
-import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { AccountProvider } from "@/context/AccountContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+import type { Transaction } from "@/models/Transaction.type";
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
-// Recharts uses ResizeObserver which jsdom doesn't provide
-vi.stubGlobal(
-  "ResizeObserver",
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-);
+import {
+  formatCurrency,
+  formatTooltipLabel,
+  formatTooltipValue,
+  formatXAxisTick,
+  formatYAxisValue,
+  NetWorthChart,
+} from "./NetWorthChart";
+
+mockResizeObserver();
+suppressRechartsWarnings();
 
 function renderWithProviders(
   accounts: Account[] = [],

@@ -25,6 +25,7 @@ See `PRD.md` for full product requirements.
 | `npm test` | Single test run with coverage |
 | `npm run test:watch` | Watch mode |
 | `npm run verify` | Lint + build + test via Turborepo |
+| `npm run format` | Auto-fix lint issues (import sorting, etc.) |
 
 ## Architecture
 
@@ -79,6 +80,10 @@ src/
 - TDD workflow: write tests first, then implement
 - Use shadcn/ui components over native HTML elements
 - Verify with `npm run dev:random-port` after features (not just `npm run build`)
+- Page Object pattern (`*.page.tsx`) for dialog/form test infrastructure
+- Mock utilities in `src/test/mocks/` for non-universal mocks (ResizeObserver, Recharts warnings)
+- Use `it.each()` for parameterized tests (3+ cases with same structure)
+- Import sorting enforced via `eslint-plugin-simple-import-sort`; run `npm run format` to auto-fix
 
 ## Known Issues
 

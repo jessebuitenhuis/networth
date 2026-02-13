@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "verify": "turbo run lint build test:coverage"
+    "verify": "turbo run lint build test:coverage",
+    "format": "eslint --fix src/"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -37,6 +38,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "jsdom": "^28.0.0",
     "shadcn": "^3.8.4",
     "tailwindcss": "^4",

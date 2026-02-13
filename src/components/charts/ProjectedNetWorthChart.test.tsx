@@ -1,26 +1,24 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ProjectedNetWorthChart } from "./ProjectedNetWorthChart";
-import { AccountType } from "@/models/AccountType";
-import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Scenario } from "@/models/Scenario.type";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import type { Transaction } from "@/models/Transaction.type";
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
-vi.stubGlobal(
-  "ResizeObserver",
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-);
+import { ProjectedNetWorthChart } from "./ProjectedNetWorthChart";
+
+mockResizeObserver();
+suppressRechartsWarnings();
 
 function renderWithProviders(
   accounts: Account[] = [],

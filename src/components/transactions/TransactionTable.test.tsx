@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { TransactionTable } from "./TransactionTable";
-import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { describe, expect, it } from "vitest";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+
+import { TransactionTable } from "./TransactionTable";
+
+mockResizeObserver();
 
 describe("TransactionTable", () => {
   const mockEditAction = <button aria-label="Edit">Edit</button>;
