@@ -54,10 +54,10 @@ A single-user personal finance app that replaces spreadsheet-based net worth tra
 
 ### Scenario Filtering
 
-| ID  | User Story                                                                                                                                                                        | Status      |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 18  | As a user, I want to select a scenario on the account detail page (single-select, default: "Baseline only") so I can see baseline transactions plus that scenario's transactions. | Not started |
-| 19  | As a user, I want my selected scenario to persist globally so it stays selected when I navigate between pages.                                                                    | Done        |
+| ID  | User Story                                                                                                                                                                        | Status |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 18  | As a user, I want to select a scenario on the account detail page (single-select, default: "Baseline only") so I can see baseline transactions plus that scenario's transactions. | Done   |
+| 19  | As a user, I want my selected scenario to persist globally so it stays selected when I navigate between pages.                                                                    | Done   |
 
 ### Layout & Navigation
 
