@@ -93,7 +93,7 @@ describe("AppLayout", () => {
     renderWithProvider(testGroups, <p>Content</p>);
 
     expect(
-      screen.getByRole("button", { name: "Add Account" })
+      screen.getByRole("button", { name: /New Account/i })
     ).toBeInTheDocument();
   });
 
@@ -113,5 +113,76 @@ describe("AppLayout", () => {
     const creditIcon = screen.getByText("CR");
     expect(creditIcon).toBeInTheDocument();
     expect(creditIcon).toHaveClass("bg-zinc-800");
+  });
+
+  it("shows abbreviated balance next to each account name", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
+    ];
+    const transactions = [
+      {
+        id: "t1",
+        accountId: "1",
+        description: "Initial",
+        amount: 1500,
+        date: "2024-01-01",
+        scenarioIds: [],
+      },
+      {
+        id: "t2",
+        accountId: "2",
+        description: "Initial",
+        amount: 250000,
+        date: "2024-01-01",
+        scenarioIds: [],
+      },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    expect(await screen.findByText("US$1.5K")).toBeInTheDocument();
+    expect(screen.getByText("US$250K")).toBeInTheDocument();
+  });
+
+  it("shows total net worth next to Accounts label", async () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Credit Card", type: AccountType.Liability },
+    ];
+    const transactions = [
+      {
+        id: "t1",
+        accountId: "1",
+        description: "Initial",
+        amount: 5000,
+        date: "2024-01-01",
+        scenarioIds: [],
+      },
+      {
+        id: "t2",
+        accountId: "2",
+        description: "Initial",
+        amount: 1000,
+        date: "2024-01-01",
+        scenarioIds: [],
+      },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    expect(await screen.findByText("US$4K")).toBeInTheDocument();
+  });
+
+  it("renders New Account as a muted link at the bottom of account list", () => {
+    renderWithProvider(testGroups, <p>Content</p>);
+
+    const newAccountLink = screen.getByRole("button", { name: /New Account/i });
+    expect(newAccountLink).toBeInTheDocument();
+    expect(newAccountLink).toHaveClass("text-muted-foreground");
   });
 });

@@ -6,4 +6,5 @@ export type NavItem = {
   isActive?: boolean;
   icon?: ReactNode;
   action?: ReactNode;
+  subtitle?: string;
 };

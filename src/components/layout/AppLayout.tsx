@@ -8,6 +8,9 @@ import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useAccounts } from "@/context/AccountContext";
+import { useTransactions } from "@/context/TransactionContext";
+import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
+import { AccountType } from "@/models/AccountType";
 
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup.type";
@@ -19,6 +22,7 @@ type AppLayoutProps = {
 
 export function AppLayout({ navGroups, children }: AppLayoutProps) {
   const { accounts } = useAccounts();
+  const { getBalance } = useTransactions();
   const pathname = usePathname();
 
   const allGroups = useMemo(() => {
@@ -30,19 +34,26 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
       })),
     }));
 
+    const netWorth = accounts.reduce((sum, a) => {
+      const bal = getBalance(a.id);
+      return a.type === AccountType.Asset ? sum + bal : sum - bal;
+    }, 0);
+
     const accountsGroup: NavGroup = {
       label: "Accounts",
+      labelSuffix: formatCompactCurrency(netWorth),
       items: accounts.map((a) => ({
         title: a.name,
         url: `/accounts/${a.id}`,
         icon: <AccountIcon name={a.name} type={a.type} />,
         isActive: pathname === `/accounts/${a.id}`,
         action: <EditAccountDialog account={a} />,
+        subtitle: formatCompactCurrency(getBalance(a.id)),
       })),
-      action: <CreateAccountDialog />,
+      footerAction: <CreateAccountDialog />,
     };
     return [...mainGroups, accountsGroup];
-  }, [navGroups, accounts, pathname]);
+  }, [navGroups, accounts, pathname, getBalance]);
 
   return (
     <>

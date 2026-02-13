@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -62,7 +62,7 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("button", { name: "+" })).toBeInTheDocument();
   });
 
-  it("renders item action when provided", () => {
+  it("renders item action only on hover", () => {
     const groups: NavGroup[] = [
       {
         label: "Accounts",
@@ -76,6 +76,12 @@ describe("AppSidebar", () => {
       },
     ];
     renderWithProvider(groups);
+
+    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+
+    const checkingLink = screen.getByRole("link", { name: "Checking" });
+    const listItem = checkingLink.closest('[data-slot="sidebar-menu-item"]')!;
+    fireEvent.mouseEnter(listItem);
 
     expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
   });
@@ -128,5 +134,51 @@ describe("AppSidebar", () => {
 
     const trigger = header?.querySelector("[data-slot='sidebar-trigger']");
     expect(trigger).not.toBeInTheDocument();
+  });
+
+  it("renders labelSuffix next to group label", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Accounts",
+        labelSuffix: "US$250K",
+        items: [],
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByText("Accounts")).toBeInTheDocument();
+    expect(screen.getByText("US$250K")).toBeInTheDocument();
+  });
+
+  it("renders subtitle next to item title", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Accounts",
+        items: [
+          {
+            title: "Checking",
+            url: "/accounts/1",
+            subtitle: "US$1.5K",
+          },
+        ],
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByText("Checking")).toBeInTheDocument();
+    expect(screen.getByText("US$1.5K")).toBeInTheDocument();
+  });
+
+  it("renders footerAction below items", () => {
+    const groups: NavGroup[] = [
+      {
+        label: "Accounts",
+        items: [{ title: "Checking", url: "/accounts/1" }],
+        footerAction: <button>New Account</button>,
+      },
+    ];
+    renderWithProvider(groups);
+
+    expect(screen.getByRole("button", { name: "New Account" })).toBeInTheDocument();
   });
 });
