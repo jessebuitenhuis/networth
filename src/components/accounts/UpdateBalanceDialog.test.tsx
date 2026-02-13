@@ -4,6 +4,17 @@ import type { Transaction } from "@/models/Transaction.type";
 
 import { UpdateBalanceDialogPage } from "./UpdateBalanceDialog.page";
 
+const createTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
+  id: "t1",
+  accountId: "a1",
+  amount: 500,
+  date: "2024-01-10",
+  description: "Opening balance",
+  ...overrides,
+});
+
+const withBalance500 = [createTransaction()];
+
 describe("UpdateBalanceDialog", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -24,156 +35,72 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("shows current baseline balance", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     expect(page.currentBalanceDisplay).toHaveTextContent("$500.00");
   });
 
   it("shows $0.00 when no transactions exist", async () => {
-    const page = UpdateBalanceDialogPage.render({ transactions: [] });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: [] });
     expect(page.currentBalanceDisplay).toHaveTextContent("$0.00");
   });
 
   it("has New Value, Description, and Date fields", async () => {
-    const page = UpdateBalanceDialogPage.render();
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen();
     expect(page.newValueInput).toBeInTheDocument();
     expect(page.descriptionInput).toBeInTheDocument();
     expect(page.dateInput).toBeInTheDocument();
   });
 
   it("description defaults to 'Balance adjustment'", async () => {
-    const page = UpdateBalanceDialogPage.render();
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen();
     expect(page.descriptionInput).toHaveValue("Balance adjustment");
   });
 
   it("date defaults to today", async () => {
-    const page = UpdateBalanceDialogPage.render();
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen();
     expect(page.dateInput).toHaveValue("2024-01-15");
   });
 
   it("shows calculated positive adjustment", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     expect(page.adjustmentDisplay).toHaveTextContent("+US$250.00");
   });
 
   it("shows calculated negative adjustment", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("300");
     expect(page.adjustmentDisplay).toHaveTextContent("-US$200.00");
   });
 
   it("disables submit when adjustment is zero", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("500");
     expect(page.submitButton).toBeDisabled();
   });
 
   it("enables submit when adjustment is non-zero", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     expect(page.submitButton).not.toBeDisabled();
   });
 
   it("creates adjustment transaction on submit", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.submit();
     expect(page.transactionsList).toHaveTextContent("Balance adjustment - 250");
   });
 
   it("creates negative adjustment transaction", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("300");
     await page.submit();
     expect(page.transactionsList).toHaveTextContent("Balance adjustment - -200");
   });
 
   it("created transaction has no scenarioId (baseline)", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.submit();
     const savedTransactions = JSON.parse(
@@ -187,17 +114,7 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("uses custom description when edited", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("Bank reconciliation");
     await page.submit();
@@ -205,17 +122,7 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("uses custom date when edited", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDate("2024-01-20");
     await page.submit();
@@ -229,17 +136,7 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("trims whitespace from description", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("  Reconcile  ");
     await page.submit();
@@ -253,17 +150,7 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("closes dialog after submit", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     expect(page.dialog).toBeInTheDocument();
     await page.clearAndFillNewValue("750");
     await page.submit();
@@ -271,17 +158,7 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("resets form when reopened", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 500,
-        date: "2024-01-10",
-        description: "Opening balance",
-      },
-    ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("Custom");
     await page.submit();
@@ -293,24 +170,11 @@ describe("UpdateBalanceDialog", () => {
   });
 
   it("recalculates current balance when date changes to past", async () => {
-    const transactions: Transaction[] = [
-      {
-        id: "t1",
-        accountId: "a1",
-        amount: 300,
-        date: "2024-01-05",
-        description: "Opening balance",
-      },
-      {
-        id: "t2",
-        accountId: "a1",
-        amount: 200,
-        date: "2024-01-10",
-        description: "Deposit",
-      },
+    const transactions = [
+      createTransaction({ amount: 300, date: "2024-01-05" }),
+      createTransaction({ id: "t2", amount: 200, date: "2024-01-10", description: "Deposit" }),
     ];
-    const page = UpdateBalanceDialogPage.render({ transactions });
-    await page.open();
+    const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions });
 
     expect(page.currentBalanceDisplay).toHaveTextContent("$500.00");
 

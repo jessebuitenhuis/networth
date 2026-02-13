@@ -60,6 +60,12 @@ export class UpdateBalanceDialogPage {
     return new UpdateBalanceDialogPage(user);
   }
 
+  static async renderAndOpen(options: RenderOptions = {}) {
+    const page = this.render(options);
+    await page.open();
+    return page;
+  }
+
   get triggerButton() {
     return screen.getByRole("button", { name: "Update Balance" });
   }
