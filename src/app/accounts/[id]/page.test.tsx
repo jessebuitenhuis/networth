@@ -1,21 +1,26 @@
 import { render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
+import type { Scenario } from "@/models/Scenario.type";
 import type { Transaction } from "@/models/Transaction.type";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
 import AccountDetailPage from "./page";
 
 mockResizeObserver();
 suppressRechartsWarnings();
+suppressActWarnings();
 
 const accounts: Account[] = [
   { id: "a1", name: "Checking", type: AccountType.Asset },
@@ -26,19 +31,35 @@ const transactions: Transaction[] = [
   { id: "t2", accountId: "a1", amount: -200, date: "2024-01-02", description: "Groceries" },
 ];
 
-function renderPage(id: string) {
+function renderPage(
+  id: string,
+  activeScenarioId?: string | null,
+  scenarios: Scenario[] = []
+) {
+  if (scenarios.length > 0) {
+    localStorage.setItem("scenarios", JSON.stringify(scenarios));
+  }
+  if (activeScenarioId !== undefined) {
+    if (activeScenarioId === null) {
+      localStorage.removeItem("activeScenarioId");
+    } else {
+      localStorage.setItem("activeScenarioId", activeScenarioId);
+    }
+  }
   return render(
-    <SidebarProvider>
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <AccountDetailPage params={{ id }} />
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    </SidebarProvider>
+    <TooltipProvider>
+      <SidebarProvider>
+        <AccountProvider>
+          <TransactionProvider>
+            <ScenarioProvider>
+              <RecurringTransactionProvider>
+                <AccountDetailPage params={{ id }} />
+              </RecurringTransactionProvider>
+            </ScenarioProvider>
+          </TransactionProvider>
+        </AccountProvider>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
 
@@ -85,5 +106,59 @@ describe("AccountDetailPage", () => {
     renderPage("nonexistent");
 
     expect(screen.getByText("Account not found")).toBeInTheDocument();
+  });
+
+  it("shows scenario filter in TopBar with 'Baseline only' default", () => {
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Scenario 1", description: "" },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    renderPage("a1", null, scenarios);
+
+    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
+    expect(filter).toHaveTextContent("Baseline only");
+  });
+
+  it("filters balance by selected scenario", async () => {
+    const user = userEvent.setup();
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Scenario 1", description: "" },
+    ];
+    const scenarioTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
+      { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Scenario tx", scenarioId: "s1" },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(scenarioTransactions));
+    renderPage("a1", null, scenarios);
+
+    expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();
+
+    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
+    await user.click(filter);
+
+    const scenario1Option = screen.getByRole("option", { name: "Scenario 1" });
+    await user.click(scenario1Option);
+
+    expect(await screen.findByText("US$1,500.00")).toBeInTheDocument();
+  });
+
+  it("handles deleted scenario gracefully (falls back to baseline)", async () => {
+    const scenarios: Scenario[] = [
+      { id: "s1", name: "Scenario 1", description: "" },
+    ];
+    const scenarioTransactions: Transaction[] = [
+      { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
+      { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Deleted scenario tx", scenarioId: "deleted" },
+    ];
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("transactions", JSON.stringify(scenarioTransactions));
+    renderPage("a1", "deleted", scenarios);
+
+    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
+    expect(filter).toHaveTextContent("Baseline only");
+
+    expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();
   });
 });

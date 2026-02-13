@@ -82,10 +82,10 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
       dispatch({
         type: "set",
         scenarios: [basePlan],
-        activeScenarioId: basePlan.id,
+        activeScenarioId: null,
       });
       ScenarioStorage.saveScenarios([basePlan]);
-      ScenarioStorage.saveActiveScenarioId(basePlan.id);
+      ScenarioStorage.saveActiveScenarioId(null);
     } else {
       dispatch({
         type: "set",

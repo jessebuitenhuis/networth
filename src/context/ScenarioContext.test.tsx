@@ -139,9 +139,7 @@ describe("ScenarioContext", () => {
       expect(result.current.scenarios).toHaveLength(1);
       expect(result.current.scenarios[0].name).toBe("Base Plan");
       expect(result.current.scenarios[0].id).toBeDefined();
-      expect(result.current.activeScenarioId).toBe(
-        result.current.scenarios[0].id
-      );
+      expect(result.current.activeScenarioId).toBe(null);
     });
 
     it("loads existing scenarios from storage", () => {

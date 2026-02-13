@@ -6,6 +6,7 @@ import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 import { isTransactionProjected } from "@/services/isTransactionProjected";
 
@@ -21,28 +22,31 @@ export function TransactionList({ accountId }: TransactionListProps) {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
   const { accounts } = useAccounts();
-  const { scenarios } = useScenarios();
+  const { scenarios, activeScenarioId } = useScenarios();
 
   const today = formatDate(new Date());
   const account = accounts.find((a) => a.id === accountId);
   const accountName = account?.name || "Unknown";
 
-  const regularItems: DisplayTransaction[] = transactions
-    .filter((t) => t.accountId === accountId)
-    .map((tx) => ({
-      id: tx.id,
-      description: tx.description,
-      accountName,
-      date: tx.date,
-      amount: tx.amount,
-      isProjected: isTransactionProjected(tx),
-      isRecurring: false,
-      scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
-      editAction: <EditTransactionDialog transaction={tx} />,
-    }));
+  const regularItems: DisplayTransaction[] = filterTransactionsByScenario(
+    transactions.filter((t) => t.accountId === accountId),
+    activeScenarioId
+  ).map((tx) => ({
+    id: tx.id,
+    description: tx.description,
+    accountName,
+    date: tx.date,
+    amount: tx.amount,
+    isProjected: isTransactionProjected(tx),
+    isRecurring: false,
+    scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
+    editAction: <EditTransactionDialog transaction={tx} />,
+  }));
 
-  const recurringItems = recurringTransactions
-    .filter((rt) => rt.accountId === accountId)
+  const recurringItems = filterTransactionsByScenario(
+    recurringTransactions.filter((rt) => rt.accountId === accountId),
+    activeScenarioId
+  )
     .map((rt) => {
       const next = getNextOccurrence(rt, today);
       if (!next) return null;
