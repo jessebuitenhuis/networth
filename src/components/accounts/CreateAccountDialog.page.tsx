@@ -48,6 +48,18 @@ export class CreateAccountDialogPage {
     return new CreateAccountDialogPage(user);
   }
 
+  static renderWithTrigger(trigger: React.ReactNode) {
+    const user = userEvent.setup();
+    render(
+      <AccountProvider>
+        <TransactionProvider>
+          <CreateAccountDialog trigger={trigger} />
+        </TransactionProvider>
+      </AccountProvider>
+    );
+    return new CreateAccountDialogPage(user);
+  }
+
   get triggerButton() {
     return screen.getByRole("button", { name: "Add Account" });
   }
@@ -69,7 +81,7 @@ export class CreateAccountDialogPage {
   }
 
   get balanceInput() {
-    return screen.getByLabelText("Balance");
+    return screen.getByLabelText("Balance (optional)");
   }
 
   get submitButton() {
@@ -108,6 +120,11 @@ export class CreateAccountDialogPage {
 
   async submit() {
     await this._user.click(this.submitButton);
+    return this;
+  }
+
+  async clickCustomTrigger(name: string) {
+    await this._user.click(screen.getByRole("button", { name }));
     return this;
   }
 }

@@ -27,7 +27,11 @@ import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
 import { AccountType } from "@/models/AccountType";
 
-export function CreateAccountDialog() {
+interface CreateAccountDialogProps {
+  trigger?: React.ReactNode;
+}
+
+export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
   const { addAccount } = useAccounts();
   const { addTransaction } = useTransactions();
   const [isOpen, setIsOpen] = useState(false);
@@ -70,9 +74,11 @@ export function CreateAccountDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <SidebarGroupAction aria-label="Add Account">
-          <Plus />
-        </SidebarGroupAction>
+        {trigger ?? (
+          <SidebarGroupAction aria-label="Add Account">
+            <Plus />
+          </SidebarGroupAction>
+        )}
       </DialogTrigger>
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
@@ -105,10 +111,13 @@ export function CreateAccountDialog() {
             </Select>
           </div>
           <div>
-            <Label htmlFor="account-balance" className="mb-2">Balance</Label>
+            <Label htmlFor="account-balance" className="mb-2">
+              Balance{" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
             <CurrencyInput
               id="account-balance"
-              aria-label="Balance"
+              aria-label="Balance (optional)"
               value={balance}
               onChange={setBalance}
             />

@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CreateAccountDialogPage } from "./CreateAccountDialog.page";
@@ -30,6 +31,13 @@ describe("CreateAccountDialog", () => {
     expect(page.nameInput).toBeInTheDocument();
     expect(page.typeSelect).toBeInTheDocument();
     expect(page.balanceInput).toBeInTheDocument();
+  });
+
+  it("shows Balance label with optional indicator", async () => {
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    expect(screen.getByText("Balance")).toBeInTheDocument();
+    expect(screen.getByText("(optional)")).toBeInTheDocument();
   });
 
   it("submits and creates account with correct data", async () => {
@@ -93,5 +101,18 @@ describe("CreateAccountDialog", () => {
     await page.clearAndFillBalance("800");
     await page.submit();
     expect(page.accountsList).toHaveTextContent("Credit Card - Liability");
+  });
+
+  it("renders custom trigger when provided", () => {
+    const customTrigger = <button>Custom Trigger</button>;
+    CreateAccountDialogPage.renderWithTrigger(customTrigger);
+    expect(screen.getByRole("button", { name: "Custom Trigger" })).toBeInTheDocument();
+  });
+
+  it("opens dialog when custom trigger is clicked", async () => {
+    const customTrigger = <button>Custom Trigger</button>;
+    const page = CreateAccountDialogPage.renderWithTrigger(customTrigger);
+    await page.clickCustomTrigger("Custom Trigger");
+    expect(page.dialog).toBeInTheDocument();
   });
 });

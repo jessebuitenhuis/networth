@@ -1,17 +1,33 @@
 "use client";
 
+import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
+import { EmptyDashboard } from "@/components/accounts/EmptyDashboard";
 import { NetWorthSummary } from "@/components/accounts/NetWorthSummary";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import TopBar from "@/components/layout/TopBar";
+import { Button } from "@/components/ui/button";
+import { useAccounts } from "@/context/AccountContext";
 
 export default function Home() {
+  const { accounts } = useAccounts();
+
   return (
     <>
       <TopBar title="Dashboard" />
       <div className="p-4">
         <div className="mx-auto max-w-2xl space-y-6">
-          <NetWorthSummary />
-          <NetWorthChart />
+          {accounts.length === 0 ? (
+            <EmptyDashboard
+              createAccountTrigger={
+                <CreateAccountDialog trigger={<Button>Get Started</Button>} />
+              }
+            />
+          ) : (
+            <>
+              <NetWorthSummary />
+              <NetWorthChart />
+            </>
+          )}
         </div>
       </div>
     </>
