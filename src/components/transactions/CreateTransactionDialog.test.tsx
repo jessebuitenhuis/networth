@@ -3,8 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
+import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 
 mockResizeObserver();
+suppressActWarnings();
 
 import { AccountProvider } from "@/context/AccountContext";
 import {
@@ -282,11 +284,8 @@ describe("CreateTransactionDialog", () => {
     await user.type(screen.getByLabelText("Amount"), "300");
     await user.type(screen.getByLabelText("Description"), "Scenario TX");
 
-    const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
-    await user.click(scenarioTrigger);
-
-    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
-    await user.click(scenarioOption);
+    await user.click(screen.getByRole("combobox", { name: "Scenario" }));
+    await user.click(screen.getByRole("option", { name: "Test Scenario" }));
 
     await user.click(screen.getByRole("button", { name: "Submit" }));
 

@@ -23,14 +23,17 @@ Non-universal mocks live in `src/test/mocks/` and are imported explicitly by tes
 |---|---|
 | `mockResizeObserver()` | Tests rendering Recharts charts or Radix Tooltip |
 | `suppressRechartsWarnings()` | Tests rendering Recharts components (suppresses jsdom dimension warnings) |
+| `suppressActWarnings()` | Tests interacting with Radix Select or other Radix components that trigger act() warnings |
 
 Usage:
 ```ts
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 
 mockResizeObserver();
 suppressRechartsWarnings();
+suppressActWarnings();
 ```
 
 **Important:** If a component import triggers ResizeObserver usage (e.g., via Radix Tooltip), call `mockResizeObserver()` *before* the component import.
