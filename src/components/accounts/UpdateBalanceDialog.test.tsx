@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Transaction } from "@/models/Transaction.type";
+import { suppressRadixDialogWarnings } from "@/test/mocks/suppressRadixDialogWarnings";
 
 import { UpdateBalanceDialogPage } from "./UpdateBalanceDialog.page";
+
+suppressRadixDialogWarnings();
 
 const createTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
   id: "t1",
