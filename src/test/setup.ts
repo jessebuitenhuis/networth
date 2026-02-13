@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterEach, beforeAll, vi } from "vitest";
 
 afterEach(cleanup);
 
@@ -27,4 +27,25 @@ Object.defineProperty(window, "matchMedia", {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }),
+});
+
+beforeAll(() => {
+  const originalError = console.error;
+  const originalWarn = console.warn;
+
+  vi.spyOn(console, "error").mockImplementation((...args) => {
+    const message = args[0]?.toString() || "";
+
+    throw new Error(
+      `Unexpected console.error during test:\n${message}\n\nFix the underlying issue or explicitly suppress this specific error if unavoidable.`
+    );
+  });
+
+  vi.spyOn(console, "warn").mockImplementation((...args) => {
+    const message = args[0]?.toString() || "";
+
+    throw new Error(
+      `Unexpected console.warn during test:\n${message}\n\nFix the underlying issue or explicitly suppress this specific warning if unavoidable.`
+    );
+  });
 });
