@@ -33,7 +33,8 @@ import {
 } from "@/components/ui/select";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import { generateId } from "@/lib/generateId";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 
 import { ScenarioSelect } from "./ScenarioSelect";
@@ -99,7 +100,7 @@ export function EditRecurringTransactionDialog({
   }
 
   function handleCreateScenario(name: string): string {
-    const id = crypto.randomUUID();
+    const id = generateId();
     addScenario({ id, name });
     return id;
   }

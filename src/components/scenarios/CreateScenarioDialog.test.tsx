@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach,describe, expect, it, vi } from "vitest";
 
 import { ScenarioProvider } from "@/context/ScenarioContext";
-import { ScenarioStorage } from "@/services/ScenarioStorage";
+import {
+  loadActiveScenarioId,
+  loadScenarios,
+  saveActiveScenarioId,
+  saveScenarios,
+} from "@/services/ScenarioStorage";
 
 import { CreateScenarioDialog } from "./CreateScenarioDialog";
 
@@ -13,10 +18,10 @@ describe("CreateScenarioDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
+    vi.mocked(loadScenarios).mockReturnValue([
       { id: "1", name: "Base Plan" },
     ]);
-    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue("1");
+    vi.mocked(loadActiveScenarioId).mockReturnValue("1");
   });
 
   it("renders trigger button", () => {
@@ -59,8 +64,8 @@ describe("CreateScenarioDialog", () => {
     await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
     await user.click(screen.getByRole("button", { name: /create$/i }));
 
-    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    expect(saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(saveScenarios).mock.calls;
     const lastCall = calls[calls.length - 1][0];
     expect(lastCall).toContainEqual(
       expect.objectContaining({ name: "Optimistic Plan" })
@@ -79,7 +84,7 @@ describe("CreateScenarioDialog", () => {
     await user.type(screen.getByLabelText(/name/i), "New Scenario");
     await user.click(screen.getByRole("button", { name: /create$/i }));
 
-    expect(ScenarioStorage.saveActiveScenarioId).toHaveBeenCalled();
+    expect(saveActiveScenarioId).toHaveBeenCalled();
   });
 
   it("closes dialog after creating scenario", async () => {
@@ -135,7 +140,7 @@ describe("CreateScenarioDialog", () => {
       </ScenarioProvider>
     );
 
-    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+    const initialCallCount = vi.mocked(saveScenarios).mock.calls.length;
 
     await user.click(screen.getByRole("button", { name: /new scenario/i }));
     await user.type(screen.getByLabelText(/name/i), "   "); // Only spaces
@@ -145,7 +150,7 @@ describe("CreateScenarioDialog", () => {
     expect(createButton).toBeDisabled();
 
     // Verify no new scenario was created
-    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+    expect(vi.mocked(saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 
   it("closes dialog via Escape key without creating scenario", async () => {
@@ -156,7 +161,7 @@ describe("CreateScenarioDialog", () => {
       </ScenarioProvider>
     );
 
-    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+    const initialCallCount = vi.mocked(saveScenarios).mock.calls.length;
 
     await user.click(screen.getByRole("button", { name: /new scenario/i }));
     await user.type(screen.getByLabelText(/name/i), "Test Scenario");
@@ -168,7 +173,7 @@ describe("CreateScenarioDialog", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     // No scenario should have been created
-    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+    expect(vi.mocked(saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 
   it("trims whitespace from scenario name", async () => {
@@ -183,8 +188,8 @@ describe("CreateScenarioDialog", () => {
     await user.type(screen.getByLabelText(/name/i), "  Padded Name  ");
     await user.click(screen.getByRole("button", { name: /create$/i }));
 
-    expect(ScenarioStorage.saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(ScenarioStorage.saveScenarios).mock.calls;
+    expect(saveScenarios).toHaveBeenCalled();
+    const calls = vi.mocked(saveScenarios).mock.calls;
     const lastCall = calls[calls.length - 1][0];
     expect(lastCall).toContainEqual(
       expect.objectContaining({ name: "Padded Name" })
@@ -199,7 +204,7 @@ describe("CreateScenarioDialog", () => {
       </ScenarioProvider>
     );
 
-    const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
+    const initialCallCount = vi.mocked(saveScenarios).mock.calls.length;
 
     await user.click(screen.getByRole("button", { name: /new scenario/i }));
 
@@ -208,7 +213,7 @@ describe("CreateScenarioDialog", () => {
 
     form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
 
-    expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+    expect(vi.mocked(saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 
   it("calls onCreate callback with new scenario id", async () => {

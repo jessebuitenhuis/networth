@@ -24,6 +24,7 @@ import {
 import { SidebarGroupAction } from "@/components/ui/sidebar";
 import { useAccounts } from "@/context/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
+import { generateId } from "@/lib/generateId";
 import { AccountType } from "@/models/AccountType";
 
 export function CreateAccountDialog() {
@@ -44,7 +45,7 @@ export function CreateAccountDialog() {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const accountId = crypto.randomUUID();
+    const accountId = generateId();
 
     addAccount({
       id: accountId,
@@ -54,7 +55,7 @@ export function CreateAccountDialog() {
 
     if (balance !== 0) {
       addTransaction({
-        id: crypto.randomUUID(),
+        id: generateId(),
         accountId,
         amount: balance,
         date: new Date().toISOString().split("T")[0],

@@ -7,6 +7,7 @@ import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Transaction } from "@/models/Transaction.type";
 
+import { accumulateNetWorth } from "./accumulateNetWorth";
 import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
@@ -121,15 +122,5 @@ export function computeProjectedSeries(
 
   futureTx.sort((a, b) => a.date.localeCompare(b.date));
 
-  let txIndex = 0;
-
-  return datePoints.map((date) => {
-    while (txIndex < futureTx.length && futureTx[txIndex].date <= date) {
-      const tx = futureTx[txIndex];
-      const type = accountTypes.get(tx.accountId)!;
-      netWorth += type === AccountType.Asset ? tx.amount : -tx.amount;
-      txIndex++;
-    }
-    return { date, netWorth };
-  });
+  return accumulateNetWorth(datePoints, futureTx, accountTypes, netWorth);
 }

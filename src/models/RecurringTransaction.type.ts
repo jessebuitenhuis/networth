@@ -1,4 +1,4 @@
-import type { RecurrenceFrequency } from "./RecurrenceFrequency.type";
+import type { RecurrenceFrequency } from "./RecurrenceFrequency";
 
 export type RecurringTransaction = {
   id: string;

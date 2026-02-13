@@ -6,6 +6,8 @@ import type { DateRange } from "@/models/DateRange.type";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
 import type { Transaction } from "@/models/Transaction.type";
 
+import { accumulateNetWorth } from "./accumulateNetWorth";
+
 function generateDatePoints(
   period: ChartPeriod,
   today: Date,
@@ -114,16 +116,5 @@ export function computeNetWorthSeries(
     .filter((t) => accountTypes.has(t.accountId))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  let netWorth = 0;
-  let txIndex = 0;
-
-  return datePoints.map((date) => {
-    while (txIndex < sorted.length && sorted[txIndex].date <= date) {
-      const tx = sorted[txIndex];
-      const type = accountTypes.get(tx.accountId)!;
-      netWorth += type === AccountType.Asset ? tx.amount : -tx.amount;
-      txIndex++;
-    }
-    return { date, netWorth };
-  });
+  return accumulateNetWorth(datePoints, sorted, accountTypes);
 }

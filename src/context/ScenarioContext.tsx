@@ -2,8 +2,14 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
+import { generateId } from "@/lib/generateId";
 import type { Scenario } from "@/models/Scenario.type";
-import { ScenarioStorage } from "@/services/ScenarioStorage";
+import {
+  loadActiveScenarioId,
+  loadScenarios,
+  saveActiveScenarioId,
+  saveScenarios,
+} from "@/services/ScenarioStorage";
 
 type ScenarioState = {
   scenarios: Scenario[];
@@ -71,12 +77,12 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const loadedScenarios = ScenarioStorage.loadScenarios();
-    const loadedActiveId = ScenarioStorage.loadActiveScenarioId();
+    const loadedScenarios = loadScenarios();
+    const loadedActiveId = loadActiveScenarioId();
 
     if (loadedScenarios.length === 0) {
       const basePlan: Scenario = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: "Base Plan",
       };
       dispatch({
@@ -84,8 +90,8 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
         scenarios: [basePlan],
         activeScenarioId: null,
       });
-      ScenarioStorage.saveScenarios([basePlan]);
-      ScenarioStorage.saveActiveScenarioId(null);
+      saveScenarios([basePlan]);
+      saveActiveScenarioId(null);
     } else {
       dispatch({
         type: "set",
@@ -97,12 +103,12 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (state.scenarios.length > 0) {
-      ScenarioStorage.saveScenarios(state.scenarios);
+      saveScenarios(state.scenarios);
     }
   }, [state.scenarios]);
 
   useEffect(() => {
-    ScenarioStorage.saveActiveScenarioId(state.activeScenarioId);
+    saveActiveScenarioId(state.activeScenarioId);
   }, [state.activeScenarioId]);
 
   function addScenario(scenario: Scenario) {

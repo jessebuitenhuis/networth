@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Transaction } from "@/models/Transaction.type";
 
