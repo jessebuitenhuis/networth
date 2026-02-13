@@ -1,6 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { mergeProjectedSeries } from "./mergeProjectedSeries";
+import { describe, expect,it } from "vitest";
+
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
+
+import { mergeProjectedSeries } from "./mergeProjectedSeries";
 
 describe("mergeProjectedSeries", () => {
   it("returns empty array when seriesMap is empty", () => {

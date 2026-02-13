@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useAccounts } from "@/context/AccountContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import TopBar from "@/components/layout/TopBar";
-import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
-import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
+
 import { AccountPicker } from "@/components/charts/AccountPicker";
+import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
+import TopBar from "@/components/layout/TopBar";
 import { CreateScenarioDialog } from "@/components/scenarios/CreateScenarioDialog";
 import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenarioDialog";
 import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
+import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
+import { useAccounts } from "@/context/AccountContext";
+import { useScenarios } from "@/context/ScenarioContext";
 
 export default function PlanningPage() {
   const { accounts } = useAccounts();

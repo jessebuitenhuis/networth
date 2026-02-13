@@ -1,13 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import PlanningPage from "./page";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { ScenarioProvider } from "@/context/ScenarioContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 import { AccountType } from "@/models/AccountType";
+
+import PlanningPage from "./page";
 
 vi.stubGlobal(
   "ResizeObserver",

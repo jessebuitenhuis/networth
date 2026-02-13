@@ -1,17 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EditScenarioDialog } from "./EditScenarioDialog";
+
+import {
+  RecurringTransactionProvider,
+  useRecurringTransactions,
+} from "@/context/RecurringTransactionContext";
 import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
 import {
   TransactionProvider,
   useTransactions,
 } from "@/context/TransactionContext";
-import {
-  RecurringTransactionProvider,
-  useRecurringTransactions,
-} from "@/context/RecurringTransactionContext";
 import type { Scenario } from "@/models/Scenario.type";
+
+import { EditScenarioDialog } from "./EditScenarioDialog";
 
 const scenario: Scenario = {
   id: "1",

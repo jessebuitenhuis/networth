@@ -2,27 +2,29 @@
 
 import { useState } from "react";
 import {
-  LineChart,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
+
 import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
+import { useTransactions } from "@/context/TransactionContext";
+import { getScenarioColor } from "@/lib/chartColors";
+import { addMonths, formatDate } from "@/lib/dateUtils";
+import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange.type";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
 import { mergeProjectedSeries } from "@/services/mergeProjectedSeries";
-import { addMonths, formatDate } from "@/lib/dateUtils";
-import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
-import { formatCurrency } from "./NetWorthChart";
-import { getScenarioColor } from "@/lib/chartColors";
-import { PeriodPicker } from "./PeriodPicker";
+
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
+import { formatCurrency } from "./NetWorthChart";
+import { PeriodPicker } from "./PeriodPicker";
 import { ScenarioLegend } from "./ScenarioLegend";
 
 const PROJECTED_PERIODS = [

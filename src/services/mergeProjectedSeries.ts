@@ -1,5 +1,5 @@
-import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
 import type { MultiSeriesDataPoint } from "@/models/MultiSeriesDataPoint.type";
+import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
 
 export function mergeProjectedSeries(
   seriesMap: Map<string, NetWorthDataPoint[]>

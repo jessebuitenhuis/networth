@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { AccountPicker } from "./AccountPicker";
-import { AccountType } from "@/models/AccountType";
+
 import type { Account } from "@/models/Account.type";
+import { AccountType } from "@/models/AccountType";
+
+import { AccountPicker } from "./AccountPicker";
 
 const mockAccounts: Account[] = [
   { id: "1", name: "Checking", type: AccountType.Asset },
