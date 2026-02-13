@@ -1,5 +1,5 @@
 import { addMonths, addYears, formatDate } from "@/lib/dateUtils";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Transaction } from "@/models/Transaction.type";
 

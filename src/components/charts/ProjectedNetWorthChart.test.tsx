@@ -8,7 +8,7 @@ import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency.type";
+import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Scenario } from "@/models/Scenario.type";
 import type { Transaction } from "@/models/Transaction.type";
