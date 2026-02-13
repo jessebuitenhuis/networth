@@ -27,7 +27,8 @@ function renderWithProviders(
   transactions: Transaction[] = [],
   recurringTransactions: RecurringTransaction[] = [],
   scenarios: Scenario[] = [],
-  activeScenarioId: string | null = null
+  selectedScenarioIds: Set<string> = new Set(),
+  excludedAccountIds: Set<string> = new Set()
 ) {
   localStorage.setItem("accounts", JSON.stringify(accounts));
   localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -35,15 +36,17 @@ function renderWithProviders(
   if (scenarios.length > 0) {
     localStorage.setItem("scenarios", JSON.stringify(scenarios));
   }
-  if (activeScenarioId) {
-    localStorage.setItem("activeScenarioId", activeScenarioId);
-  }
+  localStorage.setItem("activeScenarioId", null);
+
   return render(
     <AccountProvider>
       <TransactionProvider>
         <ScenarioProvider>
           <RecurringTransactionProvider>
-            <ProjectedNetWorthChart />
+            <ProjectedNetWorthChart
+              selectedScenarioIds={selectedScenarioIds}
+              excludedAccountIds={excludedAccountIds}
+            />
           </RecurringTransactionProvider>
         </ScenarioProvider>
       </TransactionProvider>
@@ -99,206 +102,6 @@ describe("ProjectedNetWorthChart", () => {
     expect(screen.getByLabelText("End")).toBeInTheDocument();
   });
 
-  it("renders legend with account names", () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-      { id: "2", name: "Savings", type: AccountType.Asset },
-    ];
-    renderWithProviders(accounts);
-
-    expect(screen.getByRole("button", { name: "Checking" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Savings" })).toBeInTheDocument();
-  });
-
-  it("toggles an account off when clicked", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-      { id: "2", name: "Savings", type: AccountType.Asset },
-    ];
-    renderWithProviders(accounts);
-
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
-
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
-  });
-
-  it("only includes recurring transactions for active scenario", () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-      { id: "scenario-2", name: "Optimistic" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Base salary",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "rt-2",
-        accountId: "1",
-        amount: 200,
-        description: "Bonus income",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-2",
-      },
-    ];
-
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      "scenario-1"
-    );
-
-    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
-  });
-
-  it("treats undefined scenarioId as default scenario", () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Legacy transaction",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-      },
-    ];
-
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      "scenario-1"
-    );
-
-    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
-  });
-
-  it("filters to baseline only when activeScenarioId is null", () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 1000,
-        date: "2024-06-01",
-        description: "Baseline transaction",
-        // No scenarioId
-      },
-      {
-        id: "t-2",
-        accountId: "1",
-        amount: 2000,
-        date: "2024-07-01",
-        description: "Scenario transaction",
-        scenarioId: "scenario-1",
-      },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Baseline recurring",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        // No scenarioId
-      },
-      {
-        id: "rt-2",
-        accountId: "1",
-        amount: 200,
-        description: "Scenario recurring",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-    ];
-
-    renderWithProviders(accounts, transactions, recurringTransactions, scenarios, null);
-
-    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
-  });
-
-  it("includes projected transactions for active scenario", () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-      { id: "scenario-2", name: "Optimistic" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 500,
-        date: "2024-06-01",
-        description: "Projected bonus",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "t-2",
-        accountId: "1",
-        amount: 1000,
-        date: "2024-07-01",
-        description: "Optimistic bonus",
-        isProjected: true,
-        scenarioId: "scenario-2",
-      },
-    ];
-
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
-
-    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
-  });
-
-  it("toggles an account back on when clicked twice", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-      { id: "2", name: "Savings", type: AccountType.Asset },
-    ];
-    renderWithProviders(accounts);
-
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
-
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-  });
-
   it("updates custom range when date inputs change", async () => {
     renderWithProviders();
 
@@ -316,49 +119,44 @@ describe("ProjectedNetWorthChart", () => {
     expect(endInput).toHaveValue("2024-12-31");
   });
 
-  it("renders ScenarioChartPicker in the chart header", () => {
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Optimistic" },
-      { id: "scenario-2", name: "Pessimistic" },
+  it("renders baseline only when no scenarios selected", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
     ];
-    renderWithProviders([], [], [], scenarios, null);
+    renderWithProviders(accounts, [], [], []);
 
-    expect(screen.getByRole("button", { name: /Scenarios/ })).toBeInTheDocument();
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+    expect(screen.getByText("Baseline")).toBeInTheDocument();
   });
 
-  it("shows 'Scenarios (0)' by default", () => {
+  it("renders scenario legend when scenario is selected", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
     const scenarios: Scenario[] = [
       { id: "scenario-1", name: "Optimistic" },
     ];
-    renderWithProviders([], [], [], scenarios, null);
+    const selectedScenarioIds = new Set(["scenario-1"]);
 
-    expect(
-      screen.getByRole("button", { name: "Scenarios (0)" })
-    ).toBeInTheDocument();
+    renderWithProviders(accounts, [], [], scenarios, selectedScenarioIds);
+
+    expect(screen.getByText("Baseline")).toBeInTheDocument();
+    expect(screen.getByText("Optimistic")).toBeInTheDocument();
   });
 
-  it("allows toggling scenarios on and off", async () => {
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Optimistic" },
-      { id: "scenario-2", name: "Pessimistic" },
+  it("filters accounts based on excludedAccountIds prop", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+      { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    renderWithProviders([], [], [], scenarios, null);
+    const excludedAccountIds = new Set(["2"]);
 
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+    renderWithProviders(accounts, [], [], [], new Set(), excludedAccountIds);
 
-    expect(
-      screen.getByRole("button", { name: "Scenarios (1)" })
-    ).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
-
-    expect(
-      screen.getByRole("button", { name: "Scenarios (0)" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 
-  it("renders chart with scenario data when scenario is selected", async () => {
+  it("includes scenario transactions when scenario is selected", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -382,6 +180,20 @@ describe("ProjectedNetWorthChart", () => {
         scenarioId: "scenario-1",
       },
     ];
+    const selectedScenarioIds = new Set(["scenario-1"]);
+
+    renderWithProviders(accounts, transactions, [], scenarios, selectedScenarioIds);
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
+
+  it("includes scenario recurring transactions when scenario is selected", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+    ];
     const recurringTransactions: RecurringTransaction[] = [
       {
         id: "rt-1",
@@ -401,12 +213,37 @@ describe("ProjectedNetWorthChart", () => {
         scenarioId: "scenario-1",
       },
     ];
+    const selectedScenarioIds = new Set(["scenario-1"]);
 
-    renderWithProviders(accounts, transactions, recurringTransactions, scenarios, null);
-
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+    renderWithProviders(accounts, [], recurringTransactions, scenarios, selectedScenarioIds);
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+  });
+
+  it("renders empty scenario legend when no scenarios selected", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    renderWithProviders(accounts, [], [], []);
+
+    // Should only show baseline in legend
+    expect(screen.getByText("Baseline")).toBeInTheDocument();
+  });
+
+  it("renders multiple scenarios in legend when multiple selected", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const scenarios: Scenario[] = [
+      { id: "scenario-1", name: "Optimistic" },
+      { id: "scenario-2", name: "Pessimistic" },
+    ];
+    const selectedScenarioIds = new Set(["scenario-1", "scenario-2"]);
+
+    renderWithProviders(accounts, [], [], scenarios, selectedScenarioIds);
+
+    expect(screen.getByText("Baseline")).toBeInTheDocument();
+    expect(screen.getByText("Optimistic")).toBeInTheDocument();
+    expect(screen.getByText("Pessimistic")).toBeInTheDocument();
   });
 });

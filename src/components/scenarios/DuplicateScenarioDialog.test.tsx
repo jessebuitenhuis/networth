@@ -41,32 +41,31 @@ describe("DuplicateScenarioDialog", () => {
     vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
       { id: "scenario-1", name: "Base Plan" },
     ]);
-    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(
-      "scenario-1"
-    );
+    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(null);
   });
 
-  it("renders trigger button", () => {
+  it("renders icon-only trigger button", () => {
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    expect(
-      screen.getByRole("button", { name: /duplicate/i })
-    ).toBeInTheDocument();
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
+    expect(button.className).toContain("h-6");
+    expect(button.className).toContain("w-6");
   });
 
-  it("opens dialog with name input pre-filled", async () => {
+  it("opens dialog with name input pre-filled from scenarioId prop", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
@@ -79,11 +78,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
     await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
@@ -94,6 +93,22 @@ describe("DuplicateScenarioDialog", () => {
     expect(lastCall).toContainEqual(
       expect.objectContaining({ name: "Optimistic Plan" })
     );
+  });
+
+  it("calls onDuplicate callback with new scenario id", async () => {
+    const onDuplicate = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <Wrapper>
+        <DuplicateScenarioDialog scenarioId="scenario-1" onDuplicate={onDuplicate} />
+      </Wrapper>
+    );
+
+    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
+
+    expect(onDuplicate).toHaveBeenCalledWith(expect.any(String));
+    expect(onDuplicate.mock.calls[0][0]).not.toBe("scenario-1");
   });
 
   it("copies transactions with source scenarioId to new scenario", async () => {
@@ -131,11 +146,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     expect(TransactionStorage.saveTransactions).toHaveBeenCalled();
@@ -204,11 +219,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     expect(
@@ -246,33 +261,33 @@ describe("DuplicateScenarioDialog", () => {
     expect(copiedRecurringTransactions[1].id).not.toBe("rt-2");
   });
 
-  it("sets new scenario as active after duplication", async () => {
+  it("does not call setActiveScenario after duplication", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    // Clear calls from initialization
+    vi.mocked(ScenarioStorage.saveActiveScenarioId).mockClear();
+
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(ScenarioStorage.saveActiveScenarioId).toHaveBeenCalled();
-    const calls = vi.mocked(ScenarioStorage.saveActiveScenarioId).mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-    // Should be a new UUID, not the original scenario-1
-    expect(lastCall).not.toBe("scenario-1");
+    // Should not save active scenario ID (planning page manages selection)
+    expect(ScenarioStorage.saveActiveScenarioId).not.toHaveBeenCalled();
   });
 
   it("closes dialog after successful submit", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -282,11 +297,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
 
     expect(screen.getByRole("button", { name: /duplicate$/i })).toBeDisabled();
@@ -296,11 +311,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
     await user.type(screen.getByLabelText(/name/i), "  Padded Name  ");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
@@ -317,34 +332,20 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
     // First open
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     const input = screen.getByLabelText(/name/i);
     await user.clear(input);
     await user.type(input, "Modified Name");
     await user.click(screen.getByRole("button", { name: /cancel/i }));
 
     // Second open should be reset to default
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     expect(screen.getByLabelText(/name/i)).toHaveValue("Base Plan (Copy)");
-  });
-
-  it("disables the button when no active scenario is selected", () => {
-    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(null);
-
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog />
-      </Wrapper>
-    );
-
-    expect(
-      screen.getByRole("button", { name: /duplicate/i })
-    ).toBeDisabled();
   });
 
   it("does not copy transactions without scenarioId", async () => {
@@ -373,11 +374,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     expect(TransactionStorage.saveTransactions).toHaveBeenCalled();
@@ -428,11 +429,11 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     expect(
@@ -460,37 +461,30 @@ describe("DuplicateScenarioDialog", () => {
     });
   });
 
-  it("does not pre-fill name when active scenario is not found", async () => {
-    vi.mocked(ScenarioStorage.loadScenarios).mockReturnValue([
-      { id: "scenario-1", name: "Base Plan" },
-    ]);
-    vi.mocked(ScenarioStorage.loadActiveScenarioId).mockReturnValue(
-      "non-existent-scenario"
-    );
-
+  it("does not pre-fill name when scenario is not found", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="non-existent-scenario" />
       </Wrapper>
     );
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
 
     expect(screen.getByLabelText(/name/i)).toHaveValue("");
   });
 
-  it("does not submit when form is submitted with whitespace-only name programmatically", async () => {
+  it("does not submit when form is submitted with whitespace-only name", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog />
+        <DuplicateScenarioDialog scenarioId="scenario-1" />
       </Wrapper>
     );
 
     const initialCallCount = vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length;
 
-    await user.click(screen.getByRole("button", { name: /duplicate/i }));
+    await user.click(screen.getByRole("button"));
 
     const input = screen.getByLabelText(/name/i);
     await user.clear(input);
@@ -503,5 +497,23 @@ describe("DuplicateScenarioDialog", () => {
     form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
 
     expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
+  });
+
+  it("stops propagation on trigger click", async () => {
+    const parentClickHandler = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <div onClick={parentClickHandler}>
+        <Wrapper>
+          <DuplicateScenarioDialog scenarioId="scenario-1" />
+        </Wrapper>
+      </div>
+    );
+
+    await user.click(screen.getByRole("button"));
+
+    // Should not propagate to parent (Popover)
+    expect(parentClickHandler).not.toHaveBeenCalled();
   });
 });

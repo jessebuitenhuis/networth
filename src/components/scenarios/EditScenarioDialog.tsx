@@ -29,10 +29,11 @@ import {
 
 type EditScenarioDialogProps = {
   scenario: Scenario;
+  onDelete?: (id: string) => void;
 };
 
-export function EditScenarioDialog({ scenario }: EditScenarioDialogProps) {
-  const { updateScenario, removeScenario, setActiveScenario } = useScenarios();
+export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogProps) {
+  const { updateScenario, removeScenario } = useScenarios();
   const { removeTransactionsByScenarioId } = useTransactions();
   const { removeRecurringTransactionsByScenarioId } = useRecurringTransactions();
   const [isOpen, setIsOpen] = useState(false);
@@ -65,8 +66,12 @@ export function EditScenarioDialog({ scenario }: EditScenarioDialogProps) {
     removeTransactionsByScenarioId(scenario.id);
     removeRecurringTransactionsByScenarioId(scenario.id);
     removeScenario(scenario.id);
-    setActiveScenario(null);
+    onDelete?.(scenario.id);
     setIsDeleteConfirmOpen(false);
+  }
+
+  function handleTriggerClick(e: React.MouseEvent) {
+    e.stopPropagation();
   }
 
   return (
@@ -79,8 +84,14 @@ export function EditScenarioDialog({ scenario }: EditScenarioDialogProps) {
         }}
       >
         <DialogTrigger asChild>
-          <Button size="icon" variant="ghost" aria-label="Edit Scenario">
-            <Pencil />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6"
+            aria-label="Edit Scenario"
+            onClick={handleTriggerClick}
+          >
+            <Pencil className="h-4 w-4" />
           </Button>
         </DialogTrigger>
         <DialogContent aria-describedby={undefined}>

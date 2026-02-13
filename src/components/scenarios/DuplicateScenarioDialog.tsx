@@ -16,21 +16,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function DuplicateScenarioDialog() {
-  const { scenarios, activeScenarioId, addScenario, setActiveScenario } =
-    useScenarios();
+type DuplicateScenarioDialogProps = {
+  scenarioId: string;
+  onDuplicate?: (newId: string) => void;
+};
+
+export function DuplicateScenarioDialog({
+  scenarioId,
+  onDuplicate,
+}: DuplicateScenarioDialogProps) {
+  const { scenarios, addScenario } = useScenarios();
   const { transactions, addTransaction } = useTransactions();
   const { recurringTransactions, addRecurringTransaction } =
     useRecurringTransactions();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
 
-  const activeScenario = scenarios.find((s) => s.id === activeScenarioId);
+  const scenario = scenarios.find((s) => s.id === scenarioId);
 
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
-    if (open && activeScenario) {
-      setName(`${activeScenario.name} (Copy)`);
+    if (open && scenario) {
+      setName(`${scenario.name} (Copy)`);
     }
   }
 
@@ -48,7 +55,7 @@ export function DuplicateScenarioDialog() {
 
     // Copy transactions
     transactions
-      .filter((t) => t.scenarioId === activeScenarioId)
+      .filter((t) => t.scenarioId === scenarioId)
       .forEach((t) => {
         addTransaction({
           ...t,
@@ -59,7 +66,7 @@ export function DuplicateScenarioDialog() {
 
     // Copy recurring transactions
     recurringTransactions
-      .filter((rt) => rt.scenarioId === activeScenarioId)
+      .filter((rt) => rt.scenarioId === scenarioId)
       .forEach((rt) => {
         addRecurringTransaction({
           ...rt,
@@ -68,16 +75,24 @@ export function DuplicateScenarioDialog() {
         });
       });
 
-    setActiveScenario(newScenarioId);
+    onDuplicate?.(newScenarioId);
     setIsOpen(false);
+  }
+
+  function handleTriggerClick(e: React.MouseEvent) {
+    e.stopPropagation();
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" disabled={!activeScenarioId}>
-          <Copy />
-          Duplicate
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6"
+          onClick={handleTriggerClick}
+        >
+          <Copy className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent aria-describedby={undefined}>

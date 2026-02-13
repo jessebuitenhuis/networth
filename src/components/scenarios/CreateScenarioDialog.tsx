@@ -14,7 +14,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function CreateScenarioDialog() {
+type CreateScenarioDialogProps = {
+  onCreate?: (id: string) => void;
+};
+
+export function CreateScenarioDialog({ onCreate }: CreateScenarioDialogProps = {}) {
   const { addScenario, setActiveScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
@@ -35,6 +39,7 @@ export function CreateScenarioDialog() {
     });
 
     setActiveScenario(scenarioId);
+    onCreate?.(scenarioId);
 
     resetForm();
     setIsOpen(false);
