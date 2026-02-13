@@ -210,4 +210,20 @@ describe("CreateScenarioDialog", () => {
 
     expect(vi.mocked(ScenarioStorage.saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
+
+  it("calls onCreate callback with new scenario id", async () => {
+    const onCreate = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <ScenarioProvider>
+        <CreateScenarioDialog onCreate={onCreate} />
+      </ScenarioProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /new scenario/i }));
+    await user.type(screen.getByLabelText(/name/i), "New Scenario");
+    await user.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(onCreate).toHaveBeenCalledWith(expect.any(String));
+  });
 });

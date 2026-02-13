@@ -21,7 +21,7 @@ function renderWithProviders(
   transactions: Transaction[] = [],
   recurringTransactions: RecurringTransaction[] = [],
   scenarios: Scenario[] = [],
-  activeScenarioId: string | null = null
+  selectedScenarioIds: Set<string> = new Set()
 ) {
   localStorage.setItem("accounts", JSON.stringify(accounts));
   localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -29,16 +29,14 @@ function renderWithProviders(
   if (scenarios.length > 0) {
     localStorage.setItem("scenarios", JSON.stringify(scenarios));
   }
-  if (activeScenarioId) {
-    localStorage.setItem("activeScenarioId", activeScenarioId);
-  }
+  localStorage.setItem("activeScenarioId", null);
   return render(
     <TooltipProvider>
       <AccountProvider>
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <ScenarioTransactionList />
+              <ScenarioTransactionList selectedScenarioIds={selectedScenarioIds} />
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>
@@ -86,7 +84,7 @@ describe("ScenarioTransactionList", () => {
       [],
       recurringTransactions,
       scenarios,
-      "scenario-1"
+      new Set(["scenario-1"])
     );
 
     expect(screen.getByText(/Base salary/)).toBeInTheDocument();
@@ -111,7 +109,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByText(/Bonus payment/)).toBeInTheDocument();
   });
@@ -119,10 +117,10 @@ describe("ScenarioTransactionList", () => {
   it("shows empty state when no transactions", () => {
     const scenarios: Scenario[] = [{ id: "scenario-1", name: "Base Plan" }];
 
-    renderWithProviders([], [], [], scenarios, "scenario-1");
+    renderWithProviders([], [], [], scenarios, new Set(["scenario-1"]));
 
     expect(
-      screen.getByText(/no transactions in this scenario/i)
+      screen.getByText(/no transactions yet/i)
     ).toBeInTheDocument();
   });
 
@@ -151,7 +149,7 @@ describe("ScenarioTransactionList", () => {
       [],
       recurringTransactions,
       scenarios,
-      "scenario-1"
+      new Set(["scenario-1"])
     );
 
     const editButton = screen.getByRole("button", { name: /edit/i });
@@ -190,7 +188,7 @@ describe("ScenarioTransactionList", () => {
       [],
       recurringTransactions,
       scenarios,
-      "scenario-1"
+      new Set(["scenario-1"])
     );
 
     expect(screen.getByText(/Legacy transaction/)).toBeInTheDocument();
@@ -233,7 +231,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     const items = screen.getAllByText(/transaction/);
     expect(items[0]).toHaveTextContent("Recent transaction");
@@ -258,7 +256,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByText(/Orphan transaction/)).toBeInTheDocument();
   });
@@ -288,12 +286,12 @@ describe("ScenarioTransactionList", () => {
       [],
       recurringTransactions,
       scenarios,
-      "scenario-1"
+      new Set(["scenario-1"])
     );
 
     // Should show empty state since the recurring transaction has no future occurrences
     expect(
-      screen.getByText(/no transactions in this scenario/i)
+      screen.getByText(/no transactions yet/i)
     ).toBeInTheDocument();
   });
 
@@ -318,7 +316,7 @@ describe("ScenarioTransactionList", () => {
     ];
 
     // Render with scenario-2 active (not the first scenario)
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-2");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-2"]));
 
     // Should show the baseline transaction since baseline appears in all scenarios
     expect(screen.getByText(/Baseline transaction/)).toBeInTheDocument();
@@ -341,7 +339,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, [], recurringTransactions, scenarios, "scenario-1");
+    renderWithProviders(accounts, [], recurringTransactions, scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByText(/Orphan recurring/)).toBeInTheDocument();
   });
@@ -372,7 +370,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, null);
+    renderWithProviders(accounts, transactions, [], scenarios, new Set());
 
     expect(screen.getByText(/Baseline transaction/)).toBeInTheDocument();
     expect(screen.queryByText(/Scenario transaction/)).not.toBeInTheDocument();
@@ -406,7 +404,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, [], recurringTransactions, scenarios, null);
+    renderWithProviders(accounts, [], recurringTransactions, scenarios, new Set());
 
     expect(screen.getByText(/Baseline recurring/)).toBeInTheDocument();
     expect(screen.queryByText(/Scenario recurring/)).not.toBeInTheDocument();
@@ -440,7 +438,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByText(/Past transaction/)).toBeInTheDocument();
     expect(screen.getByText(/Future transaction/)).toBeInTheDocument();
@@ -464,7 +462,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
   });
@@ -487,7 +485,7 @@ describe("ScenarioTransactionList", () => {
       },
     ];
 
-    renderWithProviders(accounts, transactions, [], scenarios, "scenario-1");
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
 
     expect(screen.getByText(/Groceries/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
@@ -513,8 +511,8 @@ describe("ScenarioTransactionList", () => {
     ];
 
     // Viewing scenario-1, but transaction with deleted scenario ID will still show
-    // because the filter only checks activeScenarioId match, not scenario existence
-    renderWithProviders(accounts, transactions, [], scenarios, "deleted-scenario-id");
+    // because the filter only checks selectedScenarioIds match, not scenario existence
+    renderWithProviders(accounts, transactions, [], scenarios, new Set(["deleted-scenario-id"]));
 
     expect(screen.getByText(/New Car/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();

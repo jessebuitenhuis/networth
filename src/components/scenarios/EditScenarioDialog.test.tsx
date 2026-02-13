@@ -1,59 +1,62 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
-
-import {
-  RecurringTransactionProvider,
-  useRecurringTransactions,
-} from "@/context/RecurringTransactionContext";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EditScenarioDialog } from "./EditScenarioDialog";
 import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
 import {
   TransactionProvider,
   useTransactions,
 } from "@/context/TransactionContext";
+import {
+  RecurringTransactionProvider,
+  useRecurringTransactions,
+} from "@/context/RecurringTransactionContext";
 import type { Scenario } from "@/models/Scenario.type";
-
-import { EditScenarioDialog } from "./EditScenarioDialog";
 
 const scenario: Scenario = {
   id: "1",
   name: "Test Scenario",
 };
 
-function TestHarness({ scenario }: { scenario: Scenario }) {
-  const { scenarios, activeScenarioId } = useScenarios();
+function TestHarness({
+  scenario,
+  onDelete,
+}: {
+  scenario: Scenario;
+  onDelete?: (id: string) => void;
+}) {
+  const { scenarios } = useScenarios();
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
   return (
     <div>
-      <EditScenarioDialog scenario={scenario} />
+      <EditScenarioDialog scenario={scenario} onDelete={onDelete} />
       <ul data-testid="scenarios">
         {scenarios.map((s) => (
           <li key={s.id}>{s.name}</li>
         ))}
       </ul>
-      <span data-testid="active">{activeScenarioId ?? "null"}</span>
       <span data-testid="tx-count">{transactions.length}</span>
       <span data-testid="rt-count">{recurringTransactions.length}</span>
     </div>
   );
 }
 
-function renderDialog(s: Scenario = scenario) {
+function renderDialog(s: Scenario = scenario, onDelete?: (id: string) => void) {
   return render(
     <ScenarioProvider>
       <TransactionProvider>
         <RecurringTransactionProvider>
-          <TestHarness scenario={s} />
+          <TestHarness scenario={s} onDelete={onDelete} />
         </RecurringTransactionProvider>
       </TransactionProvider>
     </ScenarioProvider>
   );
 }
 
-async function openDialog(s: Scenario = scenario) {
+async function openDialog(s: Scenario = scenario, onDelete?: (id: string) => void) {
   const user = userEvent.setup();
-  renderDialog(s);
+  renderDialog(s, onDelete);
   await user.click(screen.getByRole("button", { name: "Edit Scenario" }));
   return user;
 }
@@ -63,11 +66,12 @@ describe("EditScenarioDialog", () => {
     localStorage.clear();
   });
 
-  it("renders pencil trigger with correct aria-label", () => {
+  it("renders pencil trigger with correct size and aria-label", () => {
     renderDialog();
-    expect(
-      screen.getByRole("button", { name: "Edit Scenario" })
-    ).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Edit Scenario" });
+    expect(button).toBeInTheDocument();
+    expect(button.className).toContain("h-6");
+    expect(button.className).toContain("w-6");
   });
 
   it("opens dialog with current name pre-populated", async () => {
@@ -181,16 +185,17 @@ describe("EditScenarioDialog", () => {
     expect(screen.getByTestId("rt-count")).toHaveTextContent("0");
   });
 
-  it("sets active to null after delete", async () => {
+  it("calls onDelete callback after delete", async () => {
     localStorage.setItem("scenarios", JSON.stringify([scenario]));
     localStorage.setItem("activeScenarioId", "1");
-    const user = await openDialog();
+    const onDelete = vi.fn();
+    const user = await openDialog(scenario, onDelete);
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
     const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
     await user.click(deleteButtons[deleteButtons.length - 1]);
 
-    expect(screen.getByTestId("active")).toHaveTextContent("null");
+    expect(onDelete).toHaveBeenCalledWith("1");
   });
 
   it("canceling delete returns to edit dialog", async () => {
@@ -215,5 +220,27 @@ describe("EditScenarioDialog", () => {
     const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
     const confirmButton = deleteButtons[deleteButtons.length - 1];
     expect(confirmButton).toHaveClass("bg-destructive");
+  });
+
+  it("stops propagation on trigger click", async () => {
+    const parentClickHandler = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <div onClick={parentClickHandler}>
+        <ScenarioProvider>
+          <TransactionProvider>
+            <RecurringTransactionProvider>
+              <TestHarness scenario={scenario} />
+            </RecurringTransactionProvider>
+          </TransactionProvider>
+        </ScenarioProvider>
+      </div>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Edit Scenario" }));
+
+    // Should not propagate to parent (Popover)
+    expect(parentClickHandler).not.toHaveBeenCalled();
   });
 });

@@ -11,23 +11,27 @@ import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
 
-export function ScenarioTransactionList() {
+type ScenarioTransactionListProps = {
+  selectedScenarioIds: Set<string>;
+};
+
+export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransactionListProps) {
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
-  const { activeScenarioId, scenarios } = useScenarios();
+  const { scenarios } = useScenarios();
   const { accounts } = useAccounts();
 
   const today = formatDate(new Date());
 
   // Filter logic:
-  // - If activeScenarioId is null (baseline only): show only transactions with no scenarioId
-  // - If activeScenarioId is set: show baseline (no scenarioId) + matching scenario transactions
+  // - If selectedScenarioIds is empty: show only baseline transactions (no scenarioId)
+  // - Otherwise: show baseline + union of all selected scenario transactions
   const transactionItems: DisplayTransaction[] = transactions
     .filter((t) => {
-      if (activeScenarioId === null) {
+      if (selectedScenarioIds.size === 0) {
         return !t.scenarioId;
       }
-      return !t.scenarioId || t.scenarioId === activeScenarioId;
+      return !t.scenarioId || (t.scenarioId && selectedScenarioIds.has(t.scenarioId));
     })
     .map((tx) => {
       const account = accounts.find((a) => a.id === tx.accountId);
@@ -47,10 +51,10 @@ export function ScenarioTransactionList() {
 
   const recurringItems = recurringTransactions
     .filter((rt) => {
-      if (activeScenarioId === null) {
+      if (selectedScenarioIds.size === 0) {
         return !rt.scenarioId;
       }
-      return !rt.scenarioId || rt.scenarioId === activeScenarioId;
+      return !rt.scenarioId || (rt.scenarioId && selectedScenarioIds.has(rt.scenarioId));
     })
     .map((rt) => {
       const next = getNextOccurrence(rt, today);
@@ -79,7 +83,7 @@ export function ScenarioTransactionList() {
   if (allItems.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-8">
-        No transactions in this scenario yet.
+        No transactions yet.
       </p>
     );
   }

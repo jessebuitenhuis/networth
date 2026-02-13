@@ -1,17 +1,62 @@
 "use client";
 
-import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
+import { useState } from "react";
+import { useAccounts } from "@/context/AccountContext";
+import { useScenarios } from "@/context/ScenarioContext";
 import TopBar from "@/components/layout/TopBar";
+import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
+import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
+import { AccountPicker } from "@/components/charts/AccountPicker";
 import { CreateScenarioDialog } from "@/components/scenarios/CreateScenarioDialog";
 import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenarioDialog";
 import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
-import { ScenarioSelector } from "@/components/scenarios/ScenarioSelector";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
-import { useScenarios } from "@/context/ScenarioContext";
 
 export default function PlanningPage() {
-  const { scenarios, activeScenarioId, setActiveScenario } = useScenarios();
-  const activeScenario = scenarios.find((s) => s.id === activeScenarioId);
+  const { accounts } = useAccounts();
+  const { scenarios } = useScenarios();
+  const [selectedScenarioIds, setSelectedScenarioIds] = useState<Set<string>>(new Set());
+  const [excludedAccountIds, setExcludedAccountIds] = useState<Set<string>>(new Set());
+
+  function handleScenarioToggle(id: string) {
+    setSelectedScenarioIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleAccountToggle(id: string) {
+    setExcludedAccountIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleScenarioDuplicate(newId: string) {
+    setSelectedScenarioIds((prev) => new Set(prev).add(newId));
+  }
+
+  function handleScenarioDelete(id: string) {
+    setSelectedScenarioIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+
+  function handleClearAllScenarios() {
+    setSelectedScenarioIds(new Set());
+  }
 
   return (
     <>
@@ -19,20 +64,33 @@ export default function PlanningPage() {
         title="Planning"
         actions={
           <>
-            <ScenarioSelector
+            <ScenarioPicker
               scenarios={scenarios}
-              activeScenarioId={activeScenarioId}
-              onSelect={setActiveScenario}
+              selectedIds={selectedScenarioIds}
+              onToggle={handleScenarioToggle}
+              onClearAll={handleClearAllScenarios}
+              renderActions={(scenario) => (
+                <>
+                  <EditScenarioDialog scenario={scenario} onDelete={handleScenarioDelete} />
+                  <DuplicateScenarioDialog scenarioId={scenario.id} onDuplicate={handleScenarioDuplicate} />
+                </>
+              )}
             />
-            <DuplicateScenarioDialog />
-            {activeScenario && <EditScenarioDialog scenario={activeScenario} />}
-            <CreateScenarioDialog />
+            <AccountPicker
+              accounts={accounts}
+              excludedIds={excludedAccountIds}
+              onToggle={handleAccountToggle}
+            />
+            <CreateScenarioDialog onCreate={handleScenarioToggle} />
           </>
         }
       />
       <div className="p-4 space-y-6">
-        <ProjectedNetWorthChart />
-        <ScenarioTransactionList />
+        <ProjectedNetWorthChart
+          selectedScenarioIds={selectedScenarioIds}
+          excludedAccountIds={excludedAccountIds}
+        />
+        <ScenarioTransactionList selectedScenarioIds={selectedScenarioIds} />
       </div>
     </>
   );
