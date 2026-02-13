@@ -101,4 +101,30 @@ describe("AppSidebar", () => {
 
     expect(screen.getByTestId("dashboard-icon")).toBeInTheDocument();
   });
+
+  it("renders app name in sidebar header", () => {
+    renderWithProvider(testGroups);
+
+    expect(screen.getByText("Net Worth")).toBeInTheDocument();
+  });
+
+  it("renders money icon in sidebar header", () => {
+    const { container } = renderWithProvider(testGroups);
+
+    const header = container.querySelector("[data-slot='sidebar-header']");
+    expect(header).toBeInTheDocument();
+
+    const icon = header?.querySelector("svg");
+    expect(icon).toBeInTheDocument();
+  });
+
+  it("does not render toggle in sidebar header", () => {
+    const { container } = renderWithProvider(testGroups);
+
+    const header = container.querySelector("[data-slot='sidebar-header']");
+    expect(header).toBeInTheDocument();
+
+    const trigger = header?.querySelector("[data-slot='sidebar-trigger']");
+    expect(trigger).not.toBeInTheDocument();
+  });
 });
