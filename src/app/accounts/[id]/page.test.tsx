@@ -66,6 +66,7 @@ function renderPage(
 describe("AccountDetailPage", () => {
   beforeEach(() => {
     localStorage.clear();
+    // AGENT: should this be a re-usable util function?
     vi.stubGlobal("crypto", { randomUUID: () => "test-uuid" });
   });
 
@@ -109,6 +110,7 @@ describe("AccountDetailPage", () => {
   });
 
   it("shows scenario filter in TopBar with 'Baseline only' default", () => {
+    // AGENT: description does not exist in type Scenario. I see an error in my IDE, why do you not see this? Fix this, but also the root cause so this error is clear (run tsc?)
     const scenarios: Scenario[] = [
       { id: "s1", name: "Scenario 1", description: "" },
     ];

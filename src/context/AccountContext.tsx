@@ -70,6 +70,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
 export function useAccounts(): AccountContextValue {
   const ctx = useContext(AccountContext);
+  // AGENT: Is this check needed, is this not already handled in useContext?
   if (!ctx) {
     throw new Error("useAccounts must be used within AccountProvider");
   }

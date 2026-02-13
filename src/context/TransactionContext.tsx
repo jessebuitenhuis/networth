@@ -103,6 +103,7 @@ export function TransactionProvider({
 
 export function useTransactions(): TransactionContextValue {
   const ctx = useContext(TransactionContext);
+  // AGENT: Is this check needed? Is this not handled in useContext?
   if (!ctx) {
     throw new Error(
       "useTransactions must be used within TransactionProvider"

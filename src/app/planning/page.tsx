@@ -16,6 +16,8 @@ import { useScenarios } from "@/context/ScenarioContext";
 export default function PlanningPage() {
   const { accounts } = useAccounts();
   const { scenarios } = useScenarios();
+
+  // AGENT: should this and the handleScenarioToggle, handleAccountToggle, etc etc. be handled in two hooks?
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<Set<string>>(new Set());
   const [excludedAccountIds, setExcludedAccountIds] = useState<Set<string>>(new Set());
 
@@ -59,6 +61,7 @@ export default function PlanningPage() {
     setSelectedScenarioIds(new Set());
   }
 
+  // AGENT: should the ScenarioPicker, EditScenarioDialog and DuplicateScenarioDialog be encapsulated in a component?
   return (
     <>
       <TopBar

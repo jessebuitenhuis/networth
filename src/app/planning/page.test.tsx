@@ -11,6 +11,7 @@ import { AccountType } from "@/models/AccountType";
 
 import PlanningPage from "./page";
 
+// AGENT: there's a util function for this. Use it here and check if this happens in more places
 vi.stubGlobal(
   "ResizeObserver",
   class {
@@ -39,6 +40,7 @@ function renderPage() {
 describe("PlanningPage", () => {
   beforeEach(() => localStorage.clear());
 
+  // AGENT: the it(renders the...) tests here use a lot of duplication. Should this be done with it.each() or asserting multiple items in one go? Also check other test cases that follow the same pattern in this and other files.
   it("renders the Planning heading", () => {
     renderPage();
 

@@ -154,6 +154,7 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
 
 export function useScenarios(): ScenarioContextValue {
   const ctx = useContext(ScenarioContext);
+  // AGENT: Is this check needed? Is this not handled in useContext?
   if (!ctx) {
     throw new Error("useScenarios must be used within ScenarioProvider");
   }
