@@ -77,7 +77,8 @@ describe("TransactionList", () => {
     renderWithProvider("a1", [transactions[0]]);
 
     expect(await screen.findByText("Opening balance")).toBeInTheDocument();
-    expect(screen.getByText("1/15/2024")).toBeInTheDocument();
+    const formattedDate = new Date("2024-01-15T00:00:00").toLocaleDateString();
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
     expect(screen.getByText("+US$1,000.00")).toBeInTheDocument();
   });
 
