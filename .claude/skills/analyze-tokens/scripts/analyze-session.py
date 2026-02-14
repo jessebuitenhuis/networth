@@ -54,9 +54,9 @@ def analyze_session(filepath):
                     # Track tokens
                     usage = message.get('usage', {})
                     if usage:
-                        total_input_tokens += usage.get('input_tokens', 0)
-                        total_output_tokens += usage.get('output_tokens', 0)
-                        total_cache_read += usage.get('cache_read_input_tokens', 0)
+                        total_input_tokens += usage.get('input_tokens', 0) or 0
+                        total_output_tokens += usage.get('output_tokens', 0) or 0
+                        total_cache_read += usage.get('cache_read_input_tokens', 0) or 0
 
                     content = message.get('content', [])
                     message_count += 1
