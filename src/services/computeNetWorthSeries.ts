@@ -74,11 +74,14 @@ function generateDatePoints(
         (today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)
       );
       if (totalDays <= 180) {
-        const start = toSunday(earliest);
+        const start = txDates.length > 0
+          ? toSunday(addDays(earliest, -1))
+          : toSunday(earliest);
         for (let d = start; d <= today; d = addDays(d, 7))
           dates.push(formatDate(d));
       } else {
-        const startMonth = new Date(earliest.getFullYear(), earliest.getMonth(), 1);
+        const monthOffset = txDates.length > 0 ? 1 : 0;
+        const startMonth = new Date(earliest.getFullYear(), earliest.getMonth() - monthOffset, 1);
         for (let m = startMonth; m < today; m = new Date(m.getFullYear(), m.getMonth() + 1, 1))
           dates.push(formatDate(endOfMonth(m)));
       }

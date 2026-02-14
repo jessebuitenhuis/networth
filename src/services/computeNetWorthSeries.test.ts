@@ -140,11 +140,11 @@ describe("computeNetWorthSeries", () => {
         makeTx("1", 200, "2024-06-10"),
       ];
       const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, TODAY);
-      // startMonth = Jan 2022, endOfMonth = Jan 31
-      expect(result[0].date).toBe("2022-01-31");
+      // startMonth = Dec 2021 (one month before first tx), endOfMonth = Dec 31
+      expect(result[0].date).toBe("2021-12-31");
       expect(result[result.length - 1].date).toBe("2024-06-15");
-      // Jan 2022 to Jun 2024 = 30 end-of-month + today = 31 points
-      expect(result.length).toBeGreaterThanOrEqual(30);
+      // Dec 2021 to Jun 2024 = 31 end-of-month + today = 32 points
+      expect(result.length).toBeGreaterThanOrEqual(31);
     });
 
     it("uses Sunday-snapped weekly spacing for All period with short history (< 180 days)", () => {
@@ -160,6 +160,29 @@ describe("computeNetWorthSeries", () => {
       // Feb 25 to Jun 9 = 16 weekly + today = 17 points
       expect(result.length).toBeGreaterThanOrEqual(16);
       expect(result.length).toBeLessThanOrEqual(17);
+    });
+
+    it("All period starts with $0 net worth before the first transaction (monthly spacing)", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [makeTx("1", 1000, "2022-01-15")];
+      const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, "2024-06-15");
+
+      // First data point should have $0 net worth
+      expect(result[0].netWorth).toBe(0);
+      // First data point should be before the transaction date
+      expect(new Date(result[0].date).getTime()).toBeLessThan(new Date("2022-01-15").getTime());
+    });
+
+    it("All period starts with $0 net worth before the first transaction (weekly spacing)", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      // 2024-06-09 is a Sunday
+      const transactions = [makeTx("1", 500, "2024-06-09")];
+      const result = computeNetWorthSeries(accounts, transactions, ChartPeriod.All, "2024-06-15");
+
+      // First data point should have $0 net worth
+      expect(result[0].netWorth).toBe(0);
+      // First data point should be before the transaction date (even when tx is on a Sunday)
+      expect(new Date(result[0].date).getTime()).toBeLessThan(new Date("2024-06-09").getTime());
     });
 
     it("falls back to 1 year end-of-month for All period with no transactions", () => {

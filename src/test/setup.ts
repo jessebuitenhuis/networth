@@ -30,9 +30,6 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 beforeAll(() => {
-  const originalError = console.error;
-  const originalWarn = console.warn;
-
   vi.spyOn(console, "error").mockImplementation((...args) => {
     const message = args[0]?.toString() || "";
 
