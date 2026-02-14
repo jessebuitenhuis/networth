@@ -89,11 +89,11 @@ export function TransactionTable({ items }: TransactionTableProps) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead
-            className="text-left cursor-pointer select-none"
+            className="w-[120px] text-left cursor-pointer select-none"
             onClick={() => handleSort("date")}
           >
             <div className="flex items-center gap-1">
@@ -106,7 +106,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </div>
           </TableHead>
           <TableHead
-            className="text-left cursor-pointer select-none"
+            className="w-[40%] text-left cursor-pointer select-none"
             onClick={() => handleSort("description")}
           >
             <div className="flex items-center gap-1">
@@ -119,7 +119,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </div>
           </TableHead>
           <TableHead
-            className="text-left cursor-pointer select-none"
+            className="w-[180px] text-left cursor-pointer select-none"
             onClick={() => handleSort("account")}
           >
             <div className="flex items-center gap-1">
@@ -132,7 +132,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </div>
           </TableHead>
           <TableHead
-            className="text-right cursor-pointer select-none"
+            className="w-[140px] text-right cursor-pointer select-none"
             onClick={() => handleSort("amount")}
           >
             <div className="flex items-center justify-end gap-1">
@@ -144,7 +144,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
               />
             </div>
           </TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="w-[100px] text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -156,9 +156,9 @@ export function TransactionTable({ items }: TransactionTableProps) {
             <TableCell className="text-left text-muted-foreground">
               {new Date(item.date + "T00:00:00").toLocaleDateString()}
             </TableCell>
-            <TableCell className="text-left max-w-md">
+            <TableCell className="text-left">
               <span
-                className={cn("break-words", item.isProjected && "text-muted-foreground")}
+                className={cn("break-words whitespace-normal", item.isProjected && "text-muted-foreground")}
               >
                 {item.description}
               </span>
