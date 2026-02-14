@@ -6,6 +6,8 @@ import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import type { Goal } from "@/goals/Goal.type";
+import { GoalProvider } from "@/goals/GoalContext";
 import type { Account } from "@/models/Account.type";
 import { AccountType } from "@/models/AccountType";
 import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
@@ -26,7 +28,8 @@ function renderWithProviders(
   recurringTransactions: RecurringTransaction[] = [],
   scenarios: Scenario[] = [],
   selectedScenarioIds: Set<string> = new Set(),
-  excludedAccountIds: Set<string> = new Set()
+  excludedAccountIds: Set<string> = new Set(),
+  goals: Goal[] = []
 ) {
   localStorage.setItem("accounts", JSON.stringify(accounts));
   localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -34,17 +37,22 @@ function renderWithProviders(
   if (scenarios.length > 0) {
     localStorage.setItem("scenarios", JSON.stringify(scenarios));
   }
-  localStorage.setItem("activeScenarioId", null);
+  if (goals.length > 0) {
+    localStorage.setItem("goals", JSON.stringify(goals));
+  }
+  localStorage.removeItem("activeScenarioId");
 
   return render(
     <AccountProvider>
       <TransactionProvider>
         <ScenarioProvider>
           <RecurringTransactionProvider>
-            <ProjectedNetWorthChart
-              selectedScenarioIds={selectedScenarioIds}
-              excludedAccountIds={excludedAccountIds}
-            />
+            <GoalProvider>
+              <ProjectedNetWorthChart
+                selectedScenarioIds={selectedScenarioIds}
+                excludedAccountIds={excludedAccountIds}
+              />
+            </GoalProvider>
           </RecurringTransactionProvider>
         </ScenarioProvider>
       </TransactionProvider>
@@ -243,5 +251,44 @@ describe("ProjectedNetWorthChart", () => {
     expect(screen.getByText("Baseline")).toBeInTheDocument();
     expect(screen.getByText("Optimistic")).toBeInTheDocument();
     expect(screen.getByText("Pessimistic")).toBeInTheDocument();
+  });
+
+  it("renders goal names in legend when goals exist", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const goals: Goal[] = [
+      { id: "goal-1", name: "Emergency Fund", targetAmount: 10000 },
+      { id: "goal-2", name: "House Down Payment", targetAmount: 50000 },
+    ];
+
+    renderWithProviders(accounts, [], [], [], new Set(), new Set(), goals);
+
+    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
+    expect(screen.getByText("House Down Payment")).toBeInTheDocument();
+  });
+
+  it("does not render goal entries in legend when no goals exist", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+
+    renderWithProviders(accounts, [], [], [], new Set(), new Set(), []);
+
+    expect(screen.getByText("Baseline")).toBeInTheDocument();
+    expect(screen.queryByText("Emergency Fund")).not.toBeInTheDocument();
+  });
+
+  it("renders chart container when goals exist", () => {
+    const accounts: Account[] = [
+      { id: "1", name: "Checking", type: AccountType.Asset },
+    ];
+    const goals: Goal[] = [
+      { id: "goal-1", name: "Emergency Fund", targetAmount: 10000 },
+    ];
+
+    renderWithProviders(accounts, [], [], [], new Set(), new Set(), goals);
+
+    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 });

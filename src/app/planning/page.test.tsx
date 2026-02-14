@@ -7,6 +7,7 @@ import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { GoalProvider } from "@/goals/GoalContext";
 import { AccountType } from "@/models/AccountType";
 
 import PlanningPage from "./page";
@@ -28,7 +29,9 @@ function renderPage() {
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <PlanningPage />
+              <GoalProvider>
+                <PlanningPage />
+              </GoalProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>

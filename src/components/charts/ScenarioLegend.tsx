@@ -1,7 +1,7 @@
 type ScenarioLegendEntry = {
   name: string;
   color: string;
-  isDashed: boolean;
+  lineStyle: "solid" | "dashed" | "dotted";
 };
 
 type ScenarioLegendProps = {
@@ -17,10 +17,10 @@ export function ScenarioLegend({ entries }: ScenarioLegendProps) {
         <div key={entry.name} className="flex items-center gap-1.5 text-sm">
           <span
             data-testid="legend-indicator"
-            className={`inline-block h-0 w-4 border-t-2 ${entry.isDashed ? "dashed" : ""}`}
+            className="inline-block h-0 w-4 border-t-2"
             style={{
               borderColor: entry.color,
-              borderStyle: entry.isDashed ? "dashed" : "solid",
+              borderStyle: entry.lineStyle,
             }}
           />
           <span>{entry.name}</span>

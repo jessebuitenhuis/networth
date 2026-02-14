@@ -18,3 +18,14 @@ export function getAccountColor(index: number): string {
 export function getScenarioColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
+
+export const GOAL_COLORS = [
+  "#f59e0b", // amber-500
+  "#10b981", // emerald-500
+  "#f43f5e", // rose-500
+  "#a855f7", // purple-500
+];
+
+export function getGoalColor(index: number): string {
+  return GOAL_COLORS[index % GOAL_COLORS.length];
+}

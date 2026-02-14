@@ -11,9 +11,9 @@ describe("ScenarioLegend", () => {
 
   it("renders each entry with name and color", () => {
     const entries = [
-      { name: "Baseline", color: "#3b82f6", isDashed: false },
-      { name: "Optimistic", color: "#ef4444", isDashed: true },
-      { name: "Conservative", color: "#22c55e", isDashed: true },
+      { name: "Baseline", color: "#3b82f6", lineStyle: "solid" as const },
+      { name: "Optimistic", color: "#ef4444", lineStyle: "dashed" as const },
+      { name: "Conservative", color: "#22c55e", lineStyle: "dashed" as const },
     ];
 
     render(<ScenarioLegend entries={entries} />);
@@ -25,32 +25,32 @@ describe("ScenarioLegend", () => {
 
   it("renders solid line indicator for non-dashed entries", () => {
     const entries = [
-      { name: "Baseline", color: "#3b82f6", isDashed: false },
+      { name: "Baseline", color: "#3b82f6", lineStyle: "solid" as const },
     ];
 
     const { container } = render(<ScenarioLegend entries={entries} />);
     const indicator = container.querySelector('[data-testid="legend-indicator"]');
 
     expect(indicator).toBeInTheDocument();
-    expect(indicator?.className).not.toContain("dashed");
+    expect((indicator as HTMLElement).style.borderStyle).toBe("solid");
   });
 
   it("renders dashed line indicator for dashed entries", () => {
     const entries = [
-      { name: "Optimistic", color: "#ef4444", isDashed: true },
+      { name: "Optimistic", color: "#ef4444", lineStyle: "dashed" as const },
     ];
 
     const { container } = render(<ScenarioLegend entries={entries} />);
     const indicator = container.querySelector('[data-testid="legend-indicator"]');
 
     expect(indicator).toBeInTheDocument();
-    expect(indicator?.className).toContain("dashed");
+    expect((indicator as HTMLElement).style.borderStyle).toBe("dashed");
   });
 
   it("applies correct color to indicators", () => {
     const entries = [
-      { name: "Baseline", color: "#3b82f6", isDashed: false },
-      { name: "Optimistic", color: "#ef4444", isDashed: true },
+      { name: "Baseline", color: "#3b82f6", lineStyle: "solid" as const },
+      { name: "Optimistic", color: "#ef4444", lineStyle: "dashed" as const },
     ];
 
     const { container } = render(<ScenarioLegend entries={entries} />);
@@ -63,8 +63,8 @@ describe("ScenarioLegend", () => {
 
   it("renders entries in a centered flex-wrap row", () => {
     const entries = [
-      { name: "Baseline", color: "#3b82f6", isDashed: false },
-      { name: "Optimistic", color: "#ef4444", isDashed: true },
+      { name: "Baseline", color: "#3b82f6", lineStyle: "solid" as const },
+      { name: "Optimistic", color: "#ef4444", lineStyle: "dashed" as const },
     ];
 
     const { container } = render(<ScenarioLegend entries={entries} />);
@@ -73,5 +73,41 @@ describe("ScenarioLegend", () => {
     expect(wrapper.className).toContain("flex");
     expect(wrapper.className).toContain("flex-wrap");
     expect(wrapper.className).toContain("justify-center");
+  });
+
+  it("renders dotted border style when lineStyle is dotted", () => {
+    const entries = [
+      { name: "Goal 1", color: "#f59e0b", lineStyle: "dotted" as const },
+    ];
+
+    const { container } = render(<ScenarioLegend entries={entries} />);
+    const indicator = container.querySelector('[data-testid="legend-indicator"]');
+
+    expect(indicator).toBeInTheDocument();
+    expect((indicator as HTMLElement).style.borderStyle).toBe("dotted");
+  });
+
+  it("works with lineStyle solid", () => {
+    const entries = [
+      { name: "Baseline", color: "#3b82f6", lineStyle: "solid" as const },
+    ];
+
+    const { container } = render(<ScenarioLegend entries={entries} />);
+    const indicator = container.querySelector('[data-testid="legend-indicator"]');
+
+    expect(indicator).toBeInTheDocument();
+    expect((indicator as HTMLElement).style.borderStyle).toBe("solid");
+  });
+
+  it("works with lineStyle dashed", () => {
+    const entries = [
+      { name: "Scenario", color: "#ef4444", lineStyle: "dashed" as const },
+    ];
+
+    const { container } = render(<ScenarioLegend entries={entries} />);
+    const indicator = container.querySelector('[data-testid="legend-indicator"]');
+
+    expect(indicator).toBeInTheDocument();
+    expect((indicator as HTMLElement).style.borderStyle).toBe("dashed");
   });
 });

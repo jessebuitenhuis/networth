@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -14,7 +15,8 @@ import { useAccounts } from "@/context/AccountContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
-import { getScenarioColor } from "@/lib/chartColors";
+import { useGoals } from "@/goals/GoalContext";
+import { getGoalColor, getScenarioColor } from "@/lib/chartColors";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { ChartPeriod } from "@/models/ChartPeriod";
@@ -50,6 +52,7 @@ export function ProjectedNetWorthChart({
   const { transactions } = useTransactions();
   const { recurringTransactions } = useRecurringTransactions();
   const { scenarios } = useScenarios();
+  const { goals } = useGoals();
   const [period, setPeriod] = useState(ChartPeriod.OneMonth);
 
   const today = formatDate(new Date());
@@ -98,16 +101,21 @@ export function ProjectedNetWorthChart({
 
   // Build legend entries
   const legendEntries = [
-    { name: "Baseline", color: "var(--color-primary)", isDashed: false },
+    { name: "Baseline", color: "var(--color-primary)", lineStyle: "solid" as const },
     ...Array.from(selectedScenarioIds).map((scenarioId) => {
       const scenario = scenarios.find((s) => s.id === scenarioId);
       const scenarioIndex = scenarios.findIndex((s) => s.id === scenarioId);
       return {
         name: scenario?.name || scenarioId,
         color: getScenarioColor(scenarioIndex),
-        isDashed: true,
+        lineStyle: "dashed" as const,
       };
     }),
+    ...goals.map((goal, i) => ({
+      name: goal.name,
+      color: getGoalColor(i),
+      lineStyle: "dotted" as const,
+    })),
   ];
 
   return (
@@ -174,6 +182,15 @@ export function ProjectedNetWorthChart({
                 />
               );
             })}
+            {goals.map((goal, i) => (
+              <ReferenceLine
+                key={goal.id}
+                y={goal.targetAmount}
+                stroke={getGoalColor(i)}
+                strokeDasharray="2 4"
+                strokeWidth={2}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
