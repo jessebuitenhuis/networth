@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
