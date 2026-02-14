@@ -1,7 +1,8 @@
 ---
 name: commit
 description: Verify build/test/lint pass, then create a conventional commit
-allowed-tools: Bash, Read, Grep, Glob
+context: fork
+allowed-tools: Bash, Read, Grep, Glob, Edit
 argument-hint: "[optional commit message override]"
 ---
 
