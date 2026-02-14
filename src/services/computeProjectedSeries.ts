@@ -8,6 +8,7 @@ import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
 import type { Transaction } from "@/models/Transaction.type";
 
 import { accumulateNetWorth } from "./accumulateNetWorth";
+import { generateCompoundGrowthTransactions } from "./generateCompoundGrowthTransactions";
 import { generateOccurrences } from "./generateOccurrences";
 
 function generateProjectedDatePoints(
@@ -118,6 +119,32 @@ export function computeProjectedSeries(
         futureTx.push(occ);
       }
     }
+  }
+
+  for (const account of accounts) {
+    if (account.expectedReturnRate === undefined) continue;
+
+    let startBalance = 0;
+    for (const tx of transactions) {
+      if (tx.accountId === account.id && tx.date <= today) {
+        startBalance += tx.amount;
+      }
+    }
+
+    const accountFutureTx = futureTx
+      .filter((tx) => tx.accountId === account.id)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const growthTx = generateCompoundGrowthTransactions(
+      account.id,
+      startBalance,
+      account.expectedReturnRate,
+      accountFutureTx,
+      datePoints,
+      today
+    );
+
+    futureTx.push(...growthTx);
   }
 
   futureTx.sort((a, b) => a.date.localeCompare(b.date));

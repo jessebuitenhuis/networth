@@ -25,19 +25,20 @@ describe("CreateAccountDialog", () => {
     expect(page.dialog).toBeInTheDocument();
   });
 
-  it("dialog contains Name, Type, and Balance fields", async () => {
+  it("dialog contains Name, Type, Balance, and Expected Return Rate fields", async () => {
     const page = CreateAccountDialogPage.render();
     await page.open();
     expect(page.nameInput).toBeInTheDocument();
     expect(page.typeSelect).toBeInTheDocument();
     expect(page.balanceInput).toBeInTheDocument();
+    expect(page.expectedReturnInput).toBeInTheDocument();
   });
 
   it("shows Balance label with optional indicator", async () => {
     const page = CreateAccountDialogPage.render();
     await page.open();
     expect(screen.getByText("Balance")).toBeInTheDocument();
-    expect(screen.getByText("(optional)")).toBeInTheDocument();
+    expect(screen.getAllByText("(optional)")).toHaveLength(2);
   });
 
   it("submits and creates account with correct data", async () => {
@@ -114,5 +115,32 @@ describe("CreateAccountDialog", () => {
     const page = CreateAccountDialogPage.renderWithTrigger(customTrigger);
     await page.clickCustomTrigger("Custom Trigger");
     expect(page.dialog).toBeInTheDocument();
+  });
+
+  it("shows Expected Annual Rate input in the form", async () => {
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    expect(page.expectedReturnInput).toBeInTheDocument();
+    expect(screen.getByText("Expected Annual Rate")).toBeInTheDocument();
+    expect(screen.getAllByText("(optional)")).toHaveLength(2); // Balance and Expected Return Rate
+  });
+
+  it("saves account with expectedReturnRate when provided", async () => {
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Investment");
+    await page.fillExpectedReturn("8");
+    await page.submit();
+    expect(page.accountsList).toHaveTextContent("Investment - Asset - 8%");
+  });
+
+  it("does not include expectedReturnRate when field is empty", async () => {
+    const page = CreateAccountDialogPage.render();
+    await page.open();
+    await page.fillName("Checking");
+    await page.submit();
+    // Should not show the "%" suffix when no rate is set
+    expect(page.accountsList).toHaveTextContent("Checking - Asset");
+    expect(page.accountsList).not.toHaveTextContent("%");
   });
 });

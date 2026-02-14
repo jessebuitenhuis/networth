@@ -27,6 +27,7 @@ function TestHarness({ account }: { account: Account }) {
         {accounts.map((a) => (
           <li key={a.id}>
             {a.name} - {a.type}
+            {a.expectedReturnRate !== undefined && ` - ${a.expectedReturnRate}%`}
           </li>
         ))}
       </ul>
@@ -68,6 +69,10 @@ export class EditAccountDialogPage {
 
   get typeSelect() {
     return screen.getByRole("combobox", { name: "Type" });
+  }
+
+  get expectedReturnInput() {
+    return screen.getByLabelText("Expected Annual Rate (optional)");
   }
 
   get saveButton() {
@@ -113,6 +118,17 @@ export class EditAccountDialogPage {
     if (name) {
       await this._user.type(this.nameInput, name);
     }
+    return this;
+  }
+
+  async fillExpectedReturn(rate: string) {
+    await this._user.clear(this.expectedReturnInput);
+    await this._user.type(this.expectedReturnInput, rate);
+    return this;
+  }
+
+  async clearExpectedReturn() {
+    await this._user.clear(this.expectedReturnInput);
     return this;
   }
 
