@@ -7,6 +7,7 @@ import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { GoalProvider } from "@/goals/GoalContext";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 
@@ -22,7 +23,9 @@ function renderPage() {
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <Home />
+              <GoalProvider>
+                <Home />
+              </GoalProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>
@@ -97,6 +100,21 @@ describe("Dashboard", () => {
     it("does not render empty state CTA", () => {
       renderPage();
       expect(screen.queryByText("Welcome to Net Worth Tracker")).not.toBeInTheDocument();
+    });
+
+    it("does not render goal section when no goals exist", () => {
+      renderPage();
+      expect(screen.queryByText("Goal Progress")).not.toBeInTheDocument();
+    });
+
+    it("renders goal section when goals exist", () => {
+      localStorage.setItem(
+        "goals",
+        JSON.stringify([{ id: "g1", name: "Retirement", targetAmount: 100000 }])
+      );
+      renderPage();
+      expect(screen.getByText("Goal Progress")).toBeInTheDocument();
+      expect(screen.getByText("Retirement")).toBeInTheDocument();
     });
   });
 });
