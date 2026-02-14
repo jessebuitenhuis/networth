@@ -6,6 +6,7 @@ import { UpdateBalanceDialog } from "@/components/accounts/UpdateBalanceDialog";
 import TopBar from "@/components/layout/TopBar";
 import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelect";
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
+import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { useAccounts } from "@/context/AccountContext";
 import { useScenarios } from "@/context/ScenarioContext";
@@ -90,6 +91,7 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
           <div className="flex gap-2">
             <CreateTransactionDialog accountId={account.id} />
             <UpdateBalanceDialog accountId={account.id} />
+            <ImportCsvDialog accountId={account.id} />
           </div>
           <TransactionList accountId={account.id} />
         </div>

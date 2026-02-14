@@ -98,16 +98,33 @@ describe("transactionReducer", () => {
     });
     expect(result).toEqual([updated, tx2]);
   });
+
+  it("adds multiple transactions", () => {
+    const result = transactionReducer([tx1], {
+      type: "addMany",
+      transactions: [tx2, tx3],
+    });
+    expect(result).toEqual([tx1, tx2, tx3]);
+  });
+
+  it("returns state unchanged when adding empty array", () => {
+    const result = transactionReducer([tx1], {
+      type: "addMany",
+      transactions: [],
+    });
+    expect(result).toEqual([tx1]);
+  });
 });
 
 function TestConsumer() {
-  const { transactions, addTransaction, removeTransaction, removeTransactionsByAccountId, removeTransactionsByScenarioId, updateTransaction, getBalance } =
+  const { transactions, addTransaction, addTransactions, removeTransaction, removeTransactionsByAccountId, removeTransactionsByScenarioId, updateTransaction, getBalance } =
     useTransactions();
   return (
     <div>
       <span data-testid="count">{transactions.length}</span>
       <span data-testid="balance">{getBalance("a1")}</span>
       <button onClick={() => addTransaction(tx1)}>Add</button>
+      <button onClick={() => addTransactions([tx2, tx3])}>Add Many</button>
       <button onClick={() => removeTransaction("t1")}>Remove</button>
       <button onClick={() => removeTransactionsByAccountId("a1")}>Remove By Account</button>
       <button onClick={() => removeTransactionsByScenarioId("s1")}>Remove By Scenario</button>
@@ -269,6 +286,33 @@ describe("TransactionProvider", () => {
     expect(screen.getByText("Updated")).toBeInTheDocument();
     expect(screen.queryByText("Opening balance")).not.toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("2");
+  });
+
+  it("adds multiple transactions", () => {
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => screen.getByText("Add Many").click());
+
+    expect(screen.getByText("Groceries")).toBeInTheDocument();
+    expect(screen.getByText("Other account")).toBeInTheDocument();
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
+  });
+
+  it("persists multiple transactions to localStorage", () => {
+    render(
+      <TransactionProvider>
+        <TestConsumer />
+      </TransactionProvider>
+    );
+
+    act(() => screen.getByText("Add Many").click());
+
+    const stored = JSON.parse(localStorage.getItem("transactions")!);
+    expect(stored).toEqual([tx2, tx3]);
   });
 
   it("throws when useTransactions is called outside provider", () => {
