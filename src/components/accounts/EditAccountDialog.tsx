@@ -49,17 +49,26 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(account.name);
   const [type, setType] = useState<AccountType>(account.type);
+  const [expectedReturnRate, setExpectedReturnRate] = useState(
+    account.expectedReturnRate?.toString() ?? ""
+  );
 
   function resetForm() {
     setName(account.name);
     setType(account.type);
+    setExpectedReturnRate(account.expectedReturnRate?.toString() ?? "");
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
 
-    updateAccount({ ...account, name: name.trim(), type });
+    updateAccount({
+      ...account,
+      name: name.trim(),
+      type,
+      expectedReturnRate: expectedReturnRate ? Number(expectedReturnRate) : undefined,
+    });
     setIsOpen(false);
   }
 
@@ -128,6 +137,22 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-expected-return-rate" className="mb-2">
+                Expected Annual Rate (%){" "}
+                <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="edit-expected-return-rate"
+                aria-label="Expected Annual Rate (%) (optional)"
+                type="number"
+                step="0.1"
+                placeholder="e.g. 8"
+                value={expectedReturnRate}
+                onChange={(e) => setExpectedReturnRate(e.target.value)}
+                autoComplete="off"
+              />
             </div>
             <div className="flex justify-between">
               <Button

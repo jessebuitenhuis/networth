@@ -120,4 +120,43 @@ describe("EditAccountDialog", () => {
     await page.clickDelete();
     expect(page.confirmDeleteButton).toHaveClass("bg-destructive");
   });
+
+  it("shows Expected Annual Rate (%) with current value for accounts with return rate", async () => {
+    const accountWithRate: Account = {
+      id: "1",
+      name: "Investment",
+      type: AccountType.Asset,
+      expectedReturnRate: 8,
+    };
+    localStorage.setItem("accounts", JSON.stringify([accountWithRate]));
+    const page = EditAccountDialogPage.render(accountWithRate);
+    await page.open();
+    expect(page.expectedReturnInput).toHaveValue(8);
+  });
+
+  it("saves updated expectedReturnRate", async () => {
+    localStorage.setItem("accounts", JSON.stringify([account]));
+    const page = EditAccountDialogPage.render();
+    await page.open();
+    await page.fillExpectedReturn("12");
+    await page.save();
+    expect(page.accountsList).toHaveTextContent("Checking - Asset - 12%");
+  });
+
+  it("clears expectedReturnRate when field is emptied", async () => {
+    const accountWithRate: Account = {
+      id: "1",
+      name: "Investment",
+      type: AccountType.Asset,
+      expectedReturnRate: 8,
+    };
+    localStorage.setItem("accounts", JSON.stringify([accountWithRate]));
+    const page = EditAccountDialogPage.render(accountWithRate);
+    await page.open();
+    expect(page.accountsList).toHaveTextContent("Investment - Asset - 8%");
+    await page.clearExpectedReturn();
+    await page.save();
+    expect(page.accountsList).toHaveTextContent("Investment - Asset");
+    expect(page.accountsList).not.toHaveTextContent("%");
+  });
 });

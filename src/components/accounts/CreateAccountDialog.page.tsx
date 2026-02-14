@@ -20,6 +20,7 @@ function TestHarness() {
         {accounts.map((a) => (
           <li key={a.id}>
             {a.name} - {a.type}
+            {a.expectedReturnRate !== undefined && ` - ${a.expectedReturnRate}%`}
           </li>
         ))}
       </ul>
@@ -87,6 +88,10 @@ export class CreateAccountDialogPage {
     return screen.getByLabelText("Balance (optional)");
   }
 
+  get expectedReturnInput() {
+    return screen.getByLabelText("Expected Annual Rate (%) (optional)");
+  }
+
   get submitButton() {
     return screen.getByRole("button", { name: "Add Account" });
   }
@@ -112,6 +117,11 @@ export class CreateAccountDialogPage {
   async clearAndFillBalance(balance: string) {
     await this._user.clear(this.balanceInput);
     await this._user.type(this.balanceInput, balance);
+    return this;
+  }
+
+  async fillExpectedReturn(rate: string) {
+    await this._user.type(this.expectedReturnInput, rate);
     return this;
   }
 

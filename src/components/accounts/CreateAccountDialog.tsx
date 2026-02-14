@@ -41,11 +41,13 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
   const [name, setName] = useState("");
   const [type, setType] = useState<AccountType>(AccountType.Asset);
   const [balance, setBalance] = useState(0);
+  const [expectedReturnRate, setExpectedReturnRate] = useState("");
 
   function resetForm() {
     setName("");
     setBalance(0);
     setType(AccountType.Asset);
+    setExpectedReturnRate("");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -58,6 +60,7 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
       id: accountId,
       name: name.trim(),
       type,
+      expectedReturnRate: expectedReturnRate ? Number(expectedReturnRate) : undefined,
     });
 
     if (balance !== 0) {
@@ -128,6 +131,22 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
               aria-label="Balance (optional)"
               value={balance}
               onChange={setBalance}
+            />
+          </div>
+          <div>
+            <Label htmlFor="expected-return-rate" className="mb-2">
+              Expected Annual Rate (%){" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="expected-return-rate"
+              aria-label="Expected Annual Rate (%) (optional)"
+              type="number"
+              step="0.1"
+              placeholder="e.g. 8"
+              value={expectedReturnRate}
+              onChange={(e) => setExpectedReturnRate(e.target.value)}
+              autoComplete="off"
             />
           </div>
           <Button type="submit">Add Account</Button>

@@ -444,4 +444,96 @@ describe("computeProjectedSeries", () => {
       expect(future.length).toBeGreaterThan(0);
     });
   });
+
+  describe("compound growth", () => {
+    it("account with expectedReturnRate shows compound growth in projected series", () => {
+      const accounts = [
+        { ...makeAccount("1", AccountType.Asset), expectedReturnRate: 12 },
+      ];
+      const transactions = [makeTx("1", 10000, "2024-01-01")];
+      const result = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.ThreeMonths,
+        TODAY
+      );
+
+      // Net worth should increase over time due to compound growth
+      const start = result[0].netWorth;
+      const end = result[result.length - 1].netWorth;
+      expect(end).toBeGreaterThan(start);
+      // With 12% annual return over 3 months, should gain roughly 3%
+      expect(end).toBeCloseTo(start * 1.03, -2);
+    });
+
+    it("account without expectedReturnRate remains flat (unchanged behavior)", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [makeTx("1", 10000, "2024-01-01")];
+      const result = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.ThreeMonths,
+        TODAY
+      );
+
+      // All points should have same net worth (no growth)
+      result.forEach((p) => expect(p.netWorth).toBe(10000));
+    });
+
+    it("growth interacts correctly with recurring transactions", () => {
+      const accounts = [
+        { ...makeAccount("1", AccountType.Asset), expectedReturnRate: 12 },
+      ];
+      const transactions = [makeTx("1", 10000, "2024-01-01")];
+      const recurring: RecurringTransaction[] = [
+        {
+          id: "r1",
+          accountId: "1",
+          amount: 5000,
+          description: "Monthly deposit",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-06-20",
+        },
+      ];
+      const result = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.ThreeMonths,
+        TODAY,
+        undefined,
+        recurring
+      );
+
+      // Net worth should increase from:
+      // 1. Recurring deposits (5000 each month)
+      // 2. Compound growth on the increasing balance
+      const start = result[0].netWorth;
+      const end = result[result.length - 1].netWorth;
+
+      // End should be greater than start + deposits alone
+      // (growth compounds on both initial balance and deposits)
+      expect(end).toBeGreaterThan(start + 10000); // More than just deposits
+    });
+
+    it("liability account with expectedReturnRate increases debt (decreases net worth)", () => {
+      const accounts = [
+        { ...makeAccount("l", AccountType.Liability), expectedReturnRate: 4 },
+      ];
+      const transactions = [makeTx("l", 200000, "2024-01-01")];
+      const result = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.OneYear,
+        TODAY
+      );
+
+      // Net worth should decrease over time (debt growing due to interest)
+      const start = result[0].netWorth;
+      const end = result[result.length - 1].netWorth;
+      expect(end).toBeLessThan(start);
+      // With 4% annual interest, debt should grow ~4% over a year
+      // (slightly less due to monthly compounding intervals)
+      expect(end).toBeCloseTo(start - (200000 * 0.04), -3);
+    });
+  });
 });
