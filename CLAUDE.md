@@ -22,9 +22,12 @@ See `PRD.md` for full product requirements.
 |---|---|
 | `npm run dev:random-port` | Dev server on auto-assigned port (avoids collisions) |
 | `npm run build` | Production build |
-| `npm test` | Single test run with coverage |
+| `npm test` | Single test run without coverage |
+| `npm run test:coverage` | Single test run with coverage |
 | `npm run test:watch` | Watch mode |
-| `npm run verify` | Lint + build + test via Turborepo |
+| `npm run test:quiet` | Test run with dot reporter and coverage (compact output) |
+| `npm run verify` | Lint + build + test:coverage via Turborepo |
+| `npm run verify:quiet` | Same as verify, but suppresses output on success |
 | `npm run format` | Auto-fix lint issues (import sorting, etc.) |
 
 ## Architecture

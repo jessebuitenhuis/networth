@@ -12,7 +12,7 @@ Take a user story (`$ARGUMENTS`) through requirements clarification and implemen
 ## Current State
 
 ### Verification
-!`npm run verify 2>&1`
+!`npm run verify > /dev/null 2>&1 && echo "✓ verify passed" || echo "✗ verify failed"`
 
 ## Steps
 

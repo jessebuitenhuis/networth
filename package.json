@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:quiet": "vitest run --reporter=dot --coverage --coverage.skipFull",
     "verify": "turbo run lint build test:coverage",
+    "verify:quiet": "bash scripts/verify-quiet.sh",
     "format": "eslint --fix src/"
   },
   "dependencies": {

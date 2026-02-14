@@ -12,7 +12,7 @@ Create a verified, well-formatted git commit following the Conventional Commits 
 ## Current state
 
 ### Verification
-!`npm run verify 2>&1`
+!`npm run verify:quiet 2>&1`
 
 ### Git status
 !`git status`
