@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
+import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -135,18 +136,15 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
           </div>
           <div>
             <Label htmlFor="expected-return-rate" className="mb-2">
-              Expected Annual Rate (%){" "}
+              Expected Annual Rate{" "}
               <span className="text-muted-foreground font-normal">(optional)</span>
             </Label>
-            <Input
+            <PercentageInput
               id="expected-return-rate"
-              aria-label="Expected Annual Rate (%) (optional)"
-              type="number"
-              step="0.1"
+              aria-label="Expected Annual Rate (optional)"
               placeholder="e.g. 8"
               value={expectedReturnRate}
-              onChange={(e) => setExpectedReturnRate(e.target.value)}
-              autoComplete="off"
+              onChange={setExpectedReturnRate}
             />
           </div>
           <Button type="submit">Add Account</Button>

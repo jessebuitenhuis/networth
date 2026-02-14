@@ -117,11 +117,11 @@ describe("CreateAccountDialog", () => {
     expect(page.dialog).toBeInTheDocument();
   });
 
-  it("shows Expected Annual Rate (%) input in the form", async () => {
+  it("shows Expected Annual Rate input in the form", async () => {
     const page = CreateAccountDialogPage.render();
     await page.open();
     expect(page.expectedReturnInput).toBeInTheDocument();
-    expect(screen.getByText("Expected Annual Rate (%)")).toBeInTheDocument();
+    expect(screen.getByText("Expected Annual Rate")).toBeInTheDocument();
     expect(screen.getAllByText("(optional)")).toHaveLength(2); // Balance and Expected Return Rate
   });
 

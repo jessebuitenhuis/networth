@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -140,18 +141,15 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
             </div>
             <div>
               <Label htmlFor="edit-expected-return-rate" className="mb-2">
-                Expected Annual Rate (%){" "}
+                Expected Annual Rate{" "}
                 <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
-              <Input
+              <PercentageInput
                 id="edit-expected-return-rate"
-                aria-label="Expected Annual Rate (%) (optional)"
-                type="number"
-                step="0.1"
+                aria-label="Expected Annual Rate (optional)"
                 placeholder="e.g. 8"
                 value={expectedReturnRate}
-                onChange={(e) => setExpectedReturnRate(e.target.value)}
-                autoComplete="off"
+                onChange={setExpectedReturnRate}
               />
             </div>
             <div className="flex justify-between">

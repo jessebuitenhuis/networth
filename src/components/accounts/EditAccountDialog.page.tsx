@@ -72,7 +72,7 @@ export class EditAccountDialogPage {
   }
 
   get expectedReturnInput() {
-    return screen.getByLabelText("Expected Annual Rate (%) (optional)");
+    return screen.getByLabelText("Expected Annual Rate (optional)");
   }
 
   get saveButton() {
