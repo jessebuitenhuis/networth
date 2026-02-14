@@ -99,6 +99,19 @@ export function ProjectedNetWorthChart({
   const data = mergeProjectedSeries(seriesMap);
   const tickFormat = getTickFormat(period, baselineSeries);
 
+  // Calculate Y-axis domain to include goal target amounts
+  const maxGoalAmount = goals.length > 0 ? Math.max(...goals.map((g) => g.targetAmount)) : 0;
+  const maxDataValue = data.reduce((max, point) => {
+    const values = Object.values(point).filter((v) => typeof v === "number");
+    return Math.max(max, ...values);
+  }, 0);
+  const yAxisMax = Math.max(maxDataValue, maxGoalAmount);
+  const minDataValue = data.reduce((min, point) => {
+    const values = Object.values(point).filter((v) => typeof v === "number");
+    return Math.min(min, ...values);
+  }, 0);
+  const yAxisDomain = [Math.min(0, minDataValue), yAxisMax];
+
   // Build legend entries
   const legendEntries = [
     { name: "Baseline", color: "var(--color-primary)", lineStyle: "solid" as const },
@@ -146,6 +159,7 @@ export function ProjectedNetWorthChart({
               tick={{ fontSize: 12 }}
             />
             <YAxis
+              domain={yAxisDomain}
               tickFormatter={formatCurrency}
               tick={{ fontSize: 12 }}
               width={80}
