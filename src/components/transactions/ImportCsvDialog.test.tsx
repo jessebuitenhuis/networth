@@ -52,9 +52,9 @@ describe("ImportCsvDialog", () => {
       await page.uploadFile(csv);
 
       await waitFor(() => {
-        expect(screen.getByText("Date")).toBeInTheDocument();
-        expect(screen.getByText("Amount")).toBeInTheDocument();
-        expect(screen.getByText("Description")).toBeInTheDocument();
+        expect(page.dateColumnSelect).toHaveTextContent("Date");
+        expect(page.amountColumnSelect).toHaveTextContent("Amount");
+        expect(page.descriptionColumnSelect).toHaveTextContent("Description");
       });
     });
   });
@@ -72,7 +72,7 @@ describe("ImportCsvDialog", () => {
       });
 
       await page.selectDateColumn("Date");
-      expect(screen.getByText("Date")).toBeInTheDocument();
+      expect(page.dateColumnSelect).toHaveTextContent("Date");
     });
 
     it("disables Next until all columns mapped", async () => {

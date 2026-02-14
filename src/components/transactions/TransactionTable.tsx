@@ -88,8 +88,9 @@ export function TransactionTable({ items }: TransactionTableProps) {
   }, [items, sortColumn, sortDirection]);
 
   return (
-    <Table>
-      <TableHeader>
+    <div className="w-full overflow-x-auto">
+      <Table>
+        <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead
             className="text-left cursor-pointer select-none"
@@ -153,11 +154,11 @@ export function TransactionTable({ items }: TransactionTableProps) {
             className={cn("group", item.isProjected && "border-dashed")}
           >
             <TableCell className="text-left text-muted-foreground">
-              {new Date(item.date + "T00:00:00").toLocaleDateString("en-US")}
+              {new Date(item.date + "T00:00:00").toLocaleDateString()}
             </TableCell>
-            <TableCell className="text-left">
+            <TableCell className="text-left max-w-md">
               <span
-                className={cn(item.isProjected && "text-muted-foreground")}
+                className={cn("break-words", item.isProjected && "text-muted-foreground")}
               >
                 {item.description}
               </span>
@@ -202,6 +203,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+      </Table>
+    </div>
   );
 }

@@ -149,7 +149,7 @@ export function ImportCsvDialog({ accountId }: ImportCsvDialogProps) {
           Import CSV
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import CSV</DialogTitle>
           <DialogDescription>
@@ -265,6 +265,32 @@ export function ImportCsvDialog({ accountId }: ImportCsvDialogProps) {
                 </SelectContent>
               </Select>
             </div>
+
+            {dataRows.length > 0 && (
+              <div>
+                <Label>Sample Data (first 3 rows)</Label>
+                <div className="mt-2 border rounded-md overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {headers.map((header, index) => (
+                          <TableHead key={index}>{header}</TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dataRows.slice(0, 3).map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          {row.map((cell, cellIndex) => (
+                            <TableCell key={cellIndex}>{cell}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}>

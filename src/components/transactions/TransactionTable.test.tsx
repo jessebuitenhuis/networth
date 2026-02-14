@@ -55,7 +55,8 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    expect(screen.getByText("1/20/2024")).toBeInTheDocument();
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
   });
 
   it("displays date in muted color", () => {
@@ -72,7 +73,8 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const dateCell = screen.getByText("1/20/2024");
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    const dateCell = screen.getByText(formattedDate);
     expect(dateCell).toHaveClass("text-muted-foreground");
   });
 
@@ -268,7 +270,8 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const dateCell = screen.getByText("1/20/2024").closest("td");
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    const dateCell = screen.getByText(formattedDate).closest("td");
     expect(dateCell).toHaveClass("text-left");
   });
 
