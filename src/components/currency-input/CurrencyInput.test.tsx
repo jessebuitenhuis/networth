@@ -265,4 +265,21 @@ describe("CurrencyInput", () => {
     expect(input.value).toBe(".5");
     expect(onChange).toHaveBeenLastCalledWith(0.5);
   });
+
+  it("hides sign toggle when showSignToggle is false", () => {
+    render(
+      <CurrencyInput value={100} onChange={() => {}} showSignToggle={false} />
+    );
+    expect(
+      screen.queryByRole("button", { name: /plus/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /minus/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows sign toggle by default", () => {
+    render(<CurrencyInput value={100} onChange={() => {}} />);
+    expect(screen.getByRole("button", { name: /plus/i })).toBeInTheDocument();
+  });
 });

@@ -17,6 +17,7 @@ interface CurrencyInputProps {
   onChange: (value: number) => void;
   id?: string;
   "aria-label"?: string;
+  showSignToggle?: boolean;
 }
 
 export function CurrencyInput({
@@ -24,6 +25,7 @@ export function CurrencyInput({
   onChange,
   id,
   "aria-label": ariaLabel,
+  showSignToggle,
 }: CurrencyInputProps) {
   const [displayValue, setDisplayValue] = useState(() =>
     formatLocaleNumber(Math.abs(value))
@@ -144,16 +146,26 @@ export function CurrencyInput({
 
   return (
     <div className="flex gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={handleToggleSign}
-        aria-label={isPositive ? "Plus" : "Minus"}
-        className={isPositive ? "text-green-600 hover:text-green-700" : "text-red-600 hover:text-red-700"}
-      >
-        {isPositive ? <Plus className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
-      </Button>
+      {showSignToggle !== false && (
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleToggleSign}
+          aria-label={isPositive ? "Plus" : "Minus"}
+          className={
+            isPositive
+              ? "text-green-600 hover:text-green-700"
+              : "text-red-600 hover:text-red-700"
+          }
+        >
+          {isPositive ? (
+            <Plus className="h-4 w-4" />
+          ) : (
+            <Minus className="h-4 w-4" />
+          )}
+        </Button>
+      )}
       <div className="relative flex-1">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
           {currencySymbol}

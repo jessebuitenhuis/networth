@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { LayoutDashboard, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Target, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
@@ -12,6 +12,7 @@ import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
+import { GoalProvider } from "@/goals/GoalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
       { title: "Planning", url: "/planning", icon: <TrendingUp /> },
+      { title: "Goals", url: "/goals", icon: <Target /> },
     ],
   },
 ];
@@ -56,7 +58,9 @@ export default async function RootLayout({
             <TransactionProvider>
               <ScenarioProvider>
                 <RecurringTransactionProvider>
-                  <AppLayout navGroups={navGroups}>{children}</AppLayout>
+                  <GoalProvider>
+                    <AppLayout navGroups={navGroups}>{children}</AppLayout>
+                  </GoalProvider>
                 </RecurringTransactionProvider>
               </ScenarioProvider>
             </TransactionProvider>
