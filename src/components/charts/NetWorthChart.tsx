@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "recharts";
 
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";

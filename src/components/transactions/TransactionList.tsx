@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";

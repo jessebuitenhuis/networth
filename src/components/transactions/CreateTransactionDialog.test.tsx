@@ -8,7 +8,7 @@ import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 mockResizeObserver();
 suppressActWarnings();
 
-import { AccountProvider } from "@/context/AccountContext";
+import { AccountProvider } from "@/accounts/AccountContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,

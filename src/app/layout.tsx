@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup.type";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/context/AccountContext";
+import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";

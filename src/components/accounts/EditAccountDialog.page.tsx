@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
-import { AccountProvider, useAccounts } from "@/context/AccountContext";
+import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
 import {
   TransactionProvider,
   useTransactions,

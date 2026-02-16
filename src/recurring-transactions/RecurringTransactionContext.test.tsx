@@ -1,5 +1,5 @@
-import { act,render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
@@ -8,7 +8,7 @@ import {
   RecurringTransactionProvider,
   recurringTransactionReducer,
   useRecurringTransactions,
-} from "./RecurringTransactionContext";
+} from "../context/RecurringTransactionContext";
 
 const rt1: RecurringTransaction = {
   id: "r1",
@@ -47,6 +47,13 @@ const rt4: RecurringTransaction = {
   startDate: "2024-01-01",
   scenarioId: "s1",
 };
+
+function mockFetch(data: RecurringTransaction[]) {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve(data),
+  });
+}
 
 describe("recurringTransactionReducer", () => {
   it("adds a recurring transaction", () => {
@@ -108,8 +115,20 @@ function TestConsumer() {
       <span data-testid="count">{recurringTransactions.length}</span>
       <button onClick={() => addRecurringTransaction(rt1)}>Add</button>
       <button onClick={() => removeRecurringTransaction("r1")}>Remove</button>
-      <button onClick={() => removeRecurringTransactionsByScenarioId("s1")}>Remove By Scenario</button>
-      <button onClick={() => updateRecurringTransaction({ ...rt1, amount: 6000, description: "Updated" })}>Update</button>
+      <button onClick={() => removeRecurringTransactionsByScenarioId("s1")}>
+        Remove By Scenario
+      </button>
+      <button
+        onClick={() =>
+          updateRecurringTransaction({
+            ...rt1,
+            amount: 6000,
+            description: "Updated",
+          })
+        }
+      >
+        Update
+      </button>
       {recurringTransactions.map((rt) => (
         <span key={rt.id}>{rt.description}</span>
       ))}
@@ -119,116 +138,141 @@ function TestConsumer() {
 
 describe("RecurringTransactionProvider", () => {
   beforeEach(() => {
-    localStorage.clear();
+    mockFetch([]);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("starts with empty recurring transactions", () => {
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
     expect(screen.getByTestId("count")).toHaveTextContent("0");
   });
 
-  it("loads recurring transactions from localStorage on mount", async () => {
-    localStorage.setItem(
-      "recurringTransactions",
-      JSON.stringify([rt1])
-    );
+  it("loads recurring transactions from API on mount", async () => {
+    mockFetch([rt1]);
 
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
 
     expect(await screen.findByText("Salary")).toBeInTheDocument();
+    expect(globalThis.fetch).toHaveBeenCalledWith("/api/recurring-transactions");
   });
 
-  it("adds a recurring transaction", () => {
+  it("adds a recurring transaction and calls API", async () => {
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
 
-    act(() => screen.getByText("Add").click());
+    await act(() => screen.getByText("Add").click());
 
     expect(screen.getByText("Salary")).toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("1");
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/recurring-transactions",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify(rt1),
+        }),
+      );
+    });
   });
 
-  it("removes a recurring transaction", () => {
-    localStorage.setItem(
-      "recurringTransactions",
-      JSON.stringify([rt1])
-    );
+  it("removes a recurring transaction and calls API", async () => {
+    mockFetch([rt1]);
 
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
 
-    act(() => screen.getByText("Remove").click());
+    await screen.findByText("Salary");
+
+    await act(() => screen.getByText("Remove").click());
 
     expect(screen.getByTestId("count")).toHaveTextContent("0");
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/recurring-transactions/r1",
+        expect.objectContaining({ method: "DELETE" }),
+      );
+    });
   });
 
-  it("persists recurring transactions to localStorage on change", () => {
-    render(
-      <RecurringTransactionProvider>
-        <TestConsumer />
-      </RecurringTransactionProvider>
-    );
-
-    act(() => screen.getByText("Add").click());
-
-    const stored = JSON.parse(
-      localStorage.getItem("recurringTransactions")!
-    );
-    expect(stored).toEqual([rt1]);
-  });
-
-  it("updates a recurring transaction", () => {
-    localStorage.setItem("recurringTransactions", JSON.stringify([rt1, rt2]));
+  it("updates a recurring transaction and calls API", async () => {
+    mockFetch([rt1, rt2]);
 
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
 
-    act(() => screen.getByText("Update").click());
+    await screen.findByText("Salary");
+
+    await act(() => screen.getByText("Update").click());
 
     expect(screen.getByText("Updated")).toBeInTheDocument();
     expect(screen.queryByText("Salary")).not.toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("2");
+
+    const updated = { ...rt1, amount: 6000, description: "Updated" };
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/recurring-transactions/r1",
+        expect.objectContaining({
+          method: "PUT",
+          body: JSON.stringify(updated),
+        }),
+      );
+    });
   });
 
-  it("removes all recurring transactions for a scenario", () => {
-    localStorage.setItem("recurringTransactions", JSON.stringify([rt1, rt2, rt3, rt4]));
+  it("removes all recurring transactions for a scenario and calls API", async () => {
+    mockFetch([rt1, rt2, rt3, rt4]);
 
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
-      </RecurringTransactionProvider>
+      </RecurringTransactionProvider>,
     );
 
-    act(() => screen.getByText("Remove By Scenario").click());
+    await screen.findByText("Salary");
+
+    await act(() => screen.getByText("Remove By Scenario").click());
 
     expect(screen.getByTestId("count")).toHaveTextContent("2");
     expect(screen.getByText("Salary")).toBeInTheDocument();
     expect(screen.getByText("Rent")).toBeInTheDocument();
     expect(screen.queryByText("Scenario income")).not.toBeInTheDocument();
     expect(screen.queryByText("Scenario expense")).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/recurring-transactions?scenarioId=s1",
+        expect.objectContaining({ method: "DELETE" }),
+      );
+    });
   });
 
   it("throws when useRecurringTransactions is called outside provider", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<TestConsumer />)).toThrow(
-      "useRecurringTransactions must be used within RecurringTransactionProvider"
+      "useRecurringTransactions must be used within RecurringTransactionProvider",
     );
     spy.mockRestore();
   });

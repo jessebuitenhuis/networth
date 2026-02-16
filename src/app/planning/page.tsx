@@ -10,7 +10,7 @@ import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenari
 import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
 import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { useScenarios } from "@/context/ScenarioContext";
 
 export default function PlanningPage() {

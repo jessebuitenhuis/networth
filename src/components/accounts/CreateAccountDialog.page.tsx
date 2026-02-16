@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider, useAccounts } from "@/context/AccountContext";
+import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
 import {
   TransactionProvider,
   useTransactions,

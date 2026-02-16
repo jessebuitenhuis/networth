@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/context/AccountContext";
+import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";

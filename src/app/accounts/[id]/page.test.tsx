@@ -6,7 +6,7 @@ import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AccountProvider } from "@/context/AccountContext";
+import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";

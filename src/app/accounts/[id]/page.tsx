@@ -8,7 +8,7 @@ import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelec
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
 import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";

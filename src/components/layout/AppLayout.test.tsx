@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
 }));
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
-import { AccountProvider } from "@/context/AccountContext";
+import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";

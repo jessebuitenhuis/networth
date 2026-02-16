@@ -8,7 +8,7 @@ import { AccountIcon } from "@/components/accounts/AccountIcon";
 import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
 

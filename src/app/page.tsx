@@ -7,7 +7,7 @@ import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { GoalProgressSection } from "@/components/goals/GoalProgressSection";
 import TopBar from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
-import { useAccounts } from "@/context/AccountContext";
+import { useAccounts } from "@/accounts/AccountContext";
 
 export default function Home() {
   const { accounts } = useAccounts();

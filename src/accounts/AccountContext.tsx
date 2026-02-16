@@ -2,8 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import type { Account } from "@/accounts/Account.type";
-import { loadAccounts, saveAccounts } from "@/services/AccountStorage";
+import type { Account } from "./Account.type";
 
 export type AccountAction =
   | { type: "add"; account: Account }
@@ -13,7 +12,7 @@ export type AccountAction =
 
 export function accountReducer(
   state: Account[],
-  action: AccountAction
+  action: AccountAction,
 ): Account[] {
   switch (action.type) {
     case "add":
@@ -22,7 +21,7 @@ export function accountReducer(
       return state.filter((a) => a.id !== action.id);
     case "update":
       return state.map((a) =>
-        a.id === action.account.id ? action.account : a
+        a.id === action.account.id ? action.account : a,
       );
     case "set":
       return action.accounts;
@@ -31,9 +30,9 @@ export function accountReducer(
 
 type AccountContextValue = {
   accounts: Account[];
-  addAccount: (account: Account) => void;
-  removeAccount: (id: string) => void;
-  updateAccount: (account: Account) => void;
+  addAccount: (account: Account) => Promise<void>;
+  removeAccount: (id: string) => Promise<void>;
+  updateAccount: (account: Account) => Promise<void>;
 };
 
 const AccountContext = createContext<AccountContextValue | null>(null);
@@ -42,22 +41,31 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const [accounts, dispatch] = useReducer(accountReducer, []);
 
   useEffect(() => {
-    dispatch({ type: "set", accounts: loadAccounts() });
+    fetch("/api/accounts")
+      .then((res) => res.json())
+      .then((data) => dispatch({ type: "set", accounts: data }));
   }, []);
 
-  useEffect(() => {
-    saveAccounts(accounts);
-  }, [accounts]);
-
-  function addAccount(account: Account) {
+  async function addAccount(account: Account) {
+    await fetch("/api/accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(account),
+    });
     dispatch({ type: "add", account });
   }
 
-  function removeAccount(id: string) {
+  async function removeAccount(id: string) {
+    await fetch(`/api/accounts/${id}`, { method: "DELETE" });
     dispatch({ type: "remove", id });
   }
 
-  function updateAccount(account: Account) {
+  async function updateAccount(account: Account) {
+    await fetch(`/api/accounts/${account.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(account),
+    });
     dispatch({ type: "update", account });
   }
 
@@ -70,7 +78,6 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
 export function useAccounts(): AccountContextValue {
   const ctx = useContext(AccountContext);
-  // AGENT: Is this check needed, is this not already handled in useContext?
   if (!ctx) {
     throw new Error("useAccounts must be used within AccountProvider");
   }

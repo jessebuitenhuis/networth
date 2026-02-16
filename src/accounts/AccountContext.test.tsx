@@ -1,11 +1,9 @@
-import { act,render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
-
-import { AccountProvider, useAccounts } from "./AccountContext";
-import { accountReducer } from "./AccountContext";
+import { AccountProvider, accountReducer,useAccounts } from "@/accounts/AccountContext";
 
 const asset: Account = {
   id: "1",
@@ -16,6 +14,12 @@ const asset: Account = {
 const liability: Account = {
   id: "2",
   name: "Credit Card",
+  type: AccountType.Liability,
+};
+
+const updatedAsset: Account = {
+  id: "1",
+  name: "Savings",
   type: AccountType.Liability,
 };
 
@@ -48,11 +52,7 @@ describe("accountReducer", () => {
   });
 });
 
-const updatedAsset: Account = {
-  id: "1",
-  name: "Savings",
-  type: AccountType.Liability,
-};
+const mockFetch = vi.fn();
 
 function TestConsumer() {
   const { accounts, addAccount, removeAccount, updateAccount } = useAccounts();
@@ -71,20 +71,19 @@ function TestConsumer() {
 
 describe("AccountProvider", () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.stubGlobal("fetch", mockFetch);
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
   });
 
-  it("starts with empty accounts", () => {
-    render(
-      <AccountProvider>
-        <TestConsumer />
-      </AccountProvider>
-    );
-    expect(screen.getByTestId("count")).toHaveTextContent("0");
-  });
-
-  it("loads accounts from localStorage on mount", async () => {
-    localStorage.setItem("accounts", JSON.stringify([asset]));
+  it("fetches accounts from API on mount", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [asset],
+    });
 
     render(
       <AccountProvider>
@@ -93,50 +92,50 @@ describe("AccountProvider", () => {
     );
 
     expect(await screen.findByText("Checking - Asset")).toBeInTheDocument();
+    expect(mockFetch).toHaveBeenCalledWith("/api/accounts");
   });
 
-  it("adds an account", () => {
-    render(
-      <AccountProvider>
-        <TestConsumer />
-      </AccountProvider>
-    );
-
-    act(() => screen.getByText("Add").click());
-
-    expect(screen.getByText("Checking - Asset")).toBeInTheDocument();
-    expect(screen.getByTestId("count")).toHaveTextContent("1");
-  });
-
-  it("removes an account", () => {
-    localStorage.setItem("accounts", JSON.stringify([asset]));
+  it("starts with empty accounts before API responds", () => {
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
     render(
       <AccountProvider>
         <TestConsumer />
       </AccountProvider>
     );
-
-    act(() => screen.getByText("Remove").click());
 
     expect(screen.getByTestId("count")).toHaveTextContent("0");
   });
 
-  it("persists accounts to localStorage on change", () => {
+  it("calls POST /api/accounts on add", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
+      .mockResolvedValueOnce({ ok: true, json: async () => asset });
+
     render(
       <AccountProvider>
         <TestConsumer />
       </AccountProvider>
     );
 
-    act(() => screen.getByText("Add").click());
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith("/api/accounts")
+    );
 
-    const stored = JSON.parse(localStorage.getItem("accounts")!);
-    expect(stored).toEqual([asset]);
+    await act(async () => screen.getByText("Add").click());
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(asset),
+    });
+    expect(screen.getByText("Checking - Asset")).toBeInTheDocument();
   });
 
-  it("updates an account", () => {
-    localStorage.setItem("accounts", JSON.stringify([asset, liability]));
+  it("calls DELETE /api/accounts/:id on remove", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [asset] })
+      .mockResolvedValueOnce({ ok: true });
 
     render(
       <AccountProvider>
@@ -144,8 +143,36 @@ describe("AccountProvider", () => {
       </AccountProvider>
     );
 
-    act(() => screen.getByText("Update").click());
+    await screen.findByText("Checking - Asset");
 
+    await act(async () => screen.getByText("Remove").click());
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/accounts/1", {
+      method: "DELETE",
+    });
+    expect(screen.getByTestId("count")).toHaveTextContent("0");
+  });
+
+  it("calls PUT /api/accounts/:id on update", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [asset, liability] })
+      .mockResolvedValueOnce({ ok: true, json: async () => updatedAsset });
+
+    render(
+      <AccountProvider>
+        <TestConsumer />
+      </AccountProvider>
+    );
+
+    await screen.findByText("Checking - Asset");
+
+    await act(async () => screen.getByText("Update").click());
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/accounts/1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedAsset),
+    });
     expect(screen.getByText("Savings - Liability")).toBeInTheDocument();
     expect(screen.getByText("Credit Card - Liability")).toBeInTheDocument();
     expect(screen.queryByText("Checking - Asset")).not.toBeInTheDocument();
