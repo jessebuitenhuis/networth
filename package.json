@@ -16,7 +16,8 @@
     "test:quiet": "vitest run --reporter=dot --coverage --coverage.skipFull",
     "verify": "turbo run lint build test:coverage",
     "verify:quiet": "bash scripts/verify-quiet.sh",
-    "format": "eslint --fix src/"
+    "format": "eslint --fix src/",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
