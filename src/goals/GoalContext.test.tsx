@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Goal } from "./Goal.type";
@@ -68,98 +68,171 @@ function TestConsumer() {
   );
 }
 
+function mockFetchResponses(goals: Goal[]) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url: string, options?: RequestInit) => {
+      const method = options?.method ?? "GET";
+
+      if (method === "GET") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(goals),
+        });
+      }
+
+      if (method === "POST") {
+        const body = JSON.parse(options!.body as string);
+        goals.push(body);
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(body),
+        });
+      }
+
+      if (method === "PUT") {
+        const body = JSON.parse(options!.body as string);
+        const idx = goals.findIndex((g) => g.id === body.id);
+        if (idx >= 0) goals[idx] = body;
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(body),
+        });
+      }
+
+      if (method === "DELETE") {
+        const id = (url as string).split("/").pop();
+        const idx = goals.findIndex((g) => g.id === id);
+        if (idx >= 0) goals.splice(idx, 1);
+        return Promise.resolve({ ok: true, status: 204 });
+      }
+
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    }),
+  );
+}
+
 describe("GoalProvider", () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.restoreAllMocks();
   });
 
-  it("starts with empty goals", () => {
+  it("starts with empty goals when API returns empty", async () => {
+    mockFetchResponses([]);
+
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
-    expect(screen.getByTestId("count")).toHaveTextContent("0");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("0");
+    });
   });
 
-  it("loads goals from localStorage on mount", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal1]));
+  it("loads goals from API on mount", async () => {
+    mockFetchResponses([goal1]);
 
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
 
     expect(
-      await screen.findByText("Emergency Fund - 10000")
+      await screen.findByText("Emergency Fund - 10000"),
     ).toBeInTheDocument();
   });
 
-  it("adds a goal", () => {
+  it("adds a goal via API", async () => {
+    mockFetchResponses([]);
+
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
 
-    act(() => screen.getByText("Add").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("0");
+    });
 
-    expect(screen.getByText("Emergency Fund - 10000")).toBeInTheDocument();
-    expect(screen.getByTestId("count")).toHaveTextContent("1");
+    await act(async () => screen.getByText("Add").click());
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Emergency Fund - 10000"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("count")).toHaveTextContent("1");
+    });
   });
 
-  it("removes a goal", () => {
-    localStorage.setItem("goals", JSON.stringify([goal1]));
+  it("removes a goal via API", async () => {
+    mockFetchResponses([{ ...goal1 }]);
 
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
 
-    act(() => screen.getByText("Remove").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("1");
+    });
 
-    expect(screen.getByTestId("count")).toHaveTextContent("0");
+    await act(async () => screen.getByText("Remove").click());
+
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("0");
+    });
   });
 
-  it("persists goals to localStorage on change", () => {
+  it("calls fetch with correct URL on mount", async () => {
+    mockFetchResponses([]);
+
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
 
-    act(() => screen.getByText("Add").click());
-
-    const stored = JSON.parse(localStorage.getItem("goals")!);
-    expect(stored).toEqual([goal1]);
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith("/api/goals");
+    });
   });
 
-  it("updates a goal", () => {
-    localStorage.setItem("goals", JSON.stringify([goal1, goal2]));
+  it("updates a goal via API", async () => {
+    mockFetchResponses([{ ...goal1 }, { ...goal2 }]);
 
     render(
       <GoalProvider>
         <TestConsumer />
-      </GoalProvider>
+      </GoalProvider>,
     );
 
-    act(() => screen.getByText("Update").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("count")).toHaveTextContent("2");
+    });
 
-    expect(
-      screen.getByText("Emergency Fund (Updated) - 15000")
-    ).toBeInTheDocument();
-    expect(screen.getByText("FIRE - 500000")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Emergency Fund - 10000")
-    ).not.toBeInTheDocument();
+    await act(async () => screen.getByText("Update").click());
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Emergency Fund (Updated) - 15000"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("FIRE - 500000")).toBeInTheDocument();
+      expect(
+        screen.queryByText("Emergency Fund - 10000"),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("throws when useGoals is called outside provider", () => {
+    mockFetchResponses([]);
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<TestConsumer />)).toThrow(
-      "useGoals must be used within GoalProvider"
+      "useGoals must be used within GoalProvider",
     );
     spy.mockRestore();
   });
