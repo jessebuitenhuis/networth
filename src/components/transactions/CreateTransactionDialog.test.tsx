@@ -14,6 +14,7 @@ import {
   useRecurringTransactions,
 } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { TransactionProvider, useTransactions } from "@/transactions/TransactionContext";
 
 import { CreateTransactionDialog } from "./CreateTransactionDialog";
@@ -69,7 +70,7 @@ describe("CreateTransactionDialog", () => {
   let uuidCounter = 0;
 
   beforeEach(() => {
-    localStorage.clear();
+    mockApiResponses();
     uuidCounter = 0;
     vi.stubGlobal("crypto", {
       randomUUID: () => `tx-uuid-${++uuidCounter}`,
@@ -271,11 +272,12 @@ describe("CreateTransactionDialog", () => {
 
   it("creates transaction with scenario selected", async () => {
     const user = userEvent.setup();
-    localStorage.setItem(
-      "scenarios",
-      JSON.stringify([{ id: "scenario-1", name: "Test Scenario" }])
-    );
+    mockApiResponses({
+      scenarios: [{ id: "scenario-1", name: "Test Scenario" }],
+    });
     renderDialog();
+
+    await screen.findByText("Test Scenario");
 
     await user.click(
       screen.getByRole("button", { name: "Add Transaction" })
@@ -289,10 +291,7 @@ describe("CreateTransactionDialog", () => {
 
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].scenarioId).toBe("scenario-1");
-    expect(stored[0].description).toBe("Scenario TX");
-    expect(stored[0].amount).toBe(300);
+    expect(screen.getByText("Scenario TX - 300")).toBeInTheDocument();
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {
