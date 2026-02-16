@@ -1,7 +1,9 @@
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 
 import { EditAccountDialogPage } from "./EditAccountDialog.page";
 
@@ -18,7 +20,7 @@ vi.mock("next/navigation", () => ({
 
 describe("EditAccountDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
+    mockApiResponses();
     mockPush.mockClear();
   });
 
@@ -36,8 +38,9 @@ describe("EditAccountDialog", () => {
   });
 
   it("editing name and saving calls updateAccount", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
+    mockApiResponses({ accounts: [account] });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.clearAndFillName("Savings");
     await page.save();
@@ -46,8 +49,9 @@ describe("EditAccountDialog", () => {
   });
 
   it("editing type and saving calls updateAccount", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
+    mockApiResponses({ accounts: [account] });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.selectType("Liability");
     await page.save();
@@ -55,8 +59,9 @@ describe("EditAccountDialog", () => {
   });
 
   it("empty name prevents submit", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
+    mockApiResponses({ accounts: [account] });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.clearAndFillName("");
     await page.save();
@@ -73,10 +78,9 @@ describe("EditAccountDialog", () => {
   });
 
   it("confirming delete calls removeTransactionsByAccountId and removeAccount", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
-    localStorage.setItem(
-      "transactions",
-      JSON.stringify([
+    mockApiResponses({
+      accounts: [account],
+      transactions: [
         {
           id: "t1",
           accountId: "1",
@@ -84,9 +88,10 @@ describe("EditAccountDialog", () => {
           date: "2024-01-01",
           description: "Test",
         },
-      ])
-    );
+      ],
+    });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.clickDelete();
     await page.confirmDelete();
@@ -96,8 +101,9 @@ describe("EditAccountDialog", () => {
   });
 
   it("resets form when dialog is reopened", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
+    mockApiResponses({ accounts: [account] });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.clearAndFillName("Changed");
     await page.pressEscape();
@@ -128,15 +134,17 @@ describe("EditAccountDialog", () => {
       type: AccountType.Asset,
       expectedReturnRate: 8,
     };
-    localStorage.setItem("accounts", JSON.stringify([accountWithRate]));
+    mockApiResponses({ accounts: [accountWithRate] });
     const page = EditAccountDialogPage.render(accountWithRate);
+    await screen.findByText("Investment - Asset - 8%");
     await page.open();
     expect(page.expectedReturnInput).toHaveValue(8);
   });
 
   it("saves updated expectedReturnRate", async () => {
-    localStorage.setItem("accounts", JSON.stringify([account]));
+    mockApiResponses({ accounts: [account] });
     const page = EditAccountDialogPage.render();
+    await screen.findByText("Checking - Asset");
     await page.open();
     await page.fillExpectedReturn("12");
     await page.save();
@@ -150,8 +158,9 @@ describe("EditAccountDialog", () => {
       type: AccountType.Asset,
       expectedReturnRate: 8,
     };
-    localStorage.setItem("accounts", JSON.stringify([accountWithRate]));
+    mockApiResponses({ accounts: [accountWithRate] });
     const page = EditAccountDialogPage.render(accountWithRate);
+    await screen.findByText("Investment - Asset - 8%");
     await page.open();
     expect(page.accountsList).toHaveTextContent("Investment - Asset - 8%");
     await page.clearExpectedReturn();
