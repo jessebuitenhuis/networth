@@ -17,10 +17,11 @@ type TransactionListProps = {
 };
 
 export function TransactionList({ accountId }: TransactionListProps) {
-  const { transactions } = useTransactions();
-  const { recurringTransactions } = useRecurringTransactions();
+  const { transactions, updateTransaction, removeTransaction } = useTransactions();
+  const { recurringTransactions, updateRecurringTransaction, removeRecurringTransaction } =
+    useRecurringTransactions();
   const { accounts } = useAccounts();
-  const { scenarios, activeScenarioId } = useScenarios();
+  const { scenarios, activeScenarioId, addScenario } = useScenarios();
 
   const today = formatDate(new Date());
   const account = accounts.find((a) => a.id === accountId);
@@ -41,9 +42,19 @@ export function TransactionList({ accountId }: TransactionListProps) {
     editAction: item.sourceRecurringTransaction ? (
       <EditRecurringTransactionDialog
         recurringTransaction={item.sourceRecurringTransaction}
+        scenarios={scenarios}
+        onSave={updateRecurringTransaction}
+        onDelete={removeRecurringTransaction}
+        onCreateScenario={addScenario}
       />
     ) : item.sourceTransaction ? (
-      <EditTransactionDialog transaction={item.sourceTransaction} />
+      <EditTransactionDialog
+        transaction={item.sourceTransaction}
+        scenarios={scenarios}
+        onSave={updateTransaction}
+        onDelete={removeTransaction}
+        onCreateScenario={addScenario}
+      />
     ) : null,
   }));
 

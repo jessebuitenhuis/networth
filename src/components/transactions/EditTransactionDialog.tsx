@@ -25,21 +25,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generateId } from "@/lib/generateId";
-import { useScenarios } from "@/scenarios/ScenarioContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { useTransactions } from "@/transactions/TransactionContext";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 
 type EditTransactionDialogProps = {
   transaction: Transaction;
+  scenarios: Scenario[];
+  onSave: (transaction: Transaction) => void;
+  onDelete: (id: string) => void;
+  onCreateScenario: (scenario: { id: string; name: string }) => void;
 };
 
 export function EditTransactionDialog({
   transaction,
+  scenarios,
+  onSave,
+  onDelete,
+  onCreateScenario,
 }: EditTransactionDialogProps) {
-  const { updateTransaction, removeTransaction } = useTransactions();
-  const { scenarios, addScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(transaction.amount);
@@ -60,7 +65,7 @@ export function EditTransactionDialog({
     e.preventDefault();
     if (amount === 0) return;
 
-    updateTransaction({
+    onSave({
       ...transaction,
       amount,
       date,
@@ -76,13 +81,13 @@ export function EditTransactionDialog({
   }
 
   function handleDelete() {
-    removeTransaction(transaction.id);
+    onDelete(transaction.id);
     setIsDeleteOpen(false);
   }
 
   function handleCreateScenario(name: string): string {
     const id = generateId();
-    addScenario({ id, name });
+    onCreateScenario({ id, name });
     return id;
   }
 

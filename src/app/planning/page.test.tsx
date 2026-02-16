@@ -6,6 +6,7 @@ import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { GoalProvider } from "@/goals/GoalContext";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
@@ -121,6 +122,71 @@ describe("PlanningPage", () => {
 
     // Should update to 0 accounts
     expect(screen.getByRole("button", { name: "Accounts (0)" })).toBeInTheDocument();
+  });
+
+  it("creates scenario and auto-selects it", async () => {
+    mockApiResponses();
+
+    renderPage();
+
+    await userEvent.click(screen.getByRole("button", { name: /new scenario/i }));
+    await userEvent.type(screen.getByLabelText(/name/i), "My Scenario");
+    await userEvent.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+  });
+
+  it("removes deleted scenario from selection", async () => {
+    mockApiResponses({
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+    });
+
+    renderPage();
+
+    await screen.findByRole("button", { name: "Scenarios (0)" });
+
+    // Open picker, select the scenario, then click edit (popover stays open)
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+    await userEvent.click(screen.getByLabelText("Edit Scenario"));
+
+    // Click delete in the edit dialog
+    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    // Confirm delete in the alert dialog
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    await userEvent.click(deleteButtons[deleteButtons.length - 1]);
+
+    // Scenario should be removed from selection
+    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+  });
+
+  it("duplicates scenario with transactions and auto-selects the copy", async () => {
+    mockApiResponses({
+      accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+      transactions: [
+        { id: "t-1", accountId: "acc-1", amount: 500, date: "2024-06-01", description: "Bonus", scenarioId: "scenario-1" },
+      ],
+      recurringTransactions: [
+        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Monthly", frequency: RecurrenceFrequency.Monthly, startDate: "2024-01-01", scenarioId: "scenario-1" },
+      ],
+    });
+
+    renderPage();
+
+    await screen.findByRole("button", { name: "Scenarios (0)" });
+
+    // Open picker to render the duplicate button
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByLabelText("Duplicate Scenario"));
+
+    // Submit duplicate dialog with pre-filled name
+    expect(screen.getByLabelText(/name/i)).toHaveValue("Optimistic (Copy)");
+    await userEvent.click(screen.getByRole("button", { name: /duplicate$/i }));
+
+    // New scenario should be auto-selected
+    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
   });
 
   it("clears all scenarios when Deselect all is clicked", async () => {

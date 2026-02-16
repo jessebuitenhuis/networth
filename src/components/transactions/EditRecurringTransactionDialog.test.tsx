@@ -1,12 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 
@@ -20,49 +17,38 @@ const mockRecurringTransaction: RecurringTransaction = {
   endDate: "2024-12-31",
 };
 
+function renderDialog(
+  overrides: Partial<React.ComponentProps<typeof EditRecurringTransactionDialog>> = {},
+) {
+  const props = {
+    recurringTransaction: mockRecurringTransaction,
+    scenarios: [],
+    onSave: vi.fn(),
+    onDelete: vi.fn(),
+    onCreateScenario: vi.fn(),
+    ...overrides,
+  };
+  render(<EditRecurringTransactionDialog {...props} />);
+  return props;
+}
+
 describe("EditRecurringTransactionDialog", () => {
-  beforeEach(() => {
-    mockApiResponses({ recurringTransactions: [mockRecurringTransaction] });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("opens dialog with current values pre-populated", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
     expect(screen.getByLabelText("Amount")).toHaveValue("5,000");
     expect(screen.getByLabelText("Description")).toHaveValue("Salary");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2024-01-15");
-    expect(screen.getByLabelText("End Date (optional)")).toHaveValue(
-      "2024-12-31"
-    );
+    expect(screen.getByLabelText("End Date (optional)")).toHaveValue("2024-12-31");
     expect(screen.getByRole("combobox", { name: "Frequency" })).toBeInTheDocument();
   });
 
-  it("updates recurring transaction when saving with new values", async () => {
+  it("calls onSave with updated recurring transaction when saving", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -79,26 +65,19 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/recurring-transactions/r1",
+    expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        method: "PUT",
-        body: expect.stringContaining('"amount":6000'),
+        id: "r1",
+        amount: 6000,
+        description: "Updated salary",
+        startDate: "2024-02-01",
       }),
     );
   });
 
   it("prevents submit when amount is 0", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -108,20 +87,13 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
+    expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("closes edit dialog before showing delete confirmation", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
@@ -135,15 +107,7 @@ describe("EditRecurringTransactionDialog", () => {
 
   it("delete confirmation button uses destructive variant", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
@@ -153,17 +117,9 @@ describe("EditRecurringTransactionDialog", () => {
     expect(confirmButton).toHaveClass("bg-destructive");
   });
 
-  it("removes recurring transaction when confirming delete", async () => {
+  it("calls onDelete with recurring transaction id when confirming delete", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onDelete } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
@@ -172,23 +128,12 @@ describe("EditRecurringTransactionDialog", () => {
     const confirmButton = deleteButtons[deleteButtons.length - 1];
     await user.click(confirmButton);
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/recurring-transactions/r1",
-      expect.objectContaining({ method: "DELETE" }),
-    );
+    expect(onDelete).toHaveBeenCalledWith("r1");
   });
 
   it("returns to edit dialog when canceling delete", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByText("Delete"));
@@ -206,15 +151,7 @@ describe("EditRecurringTransactionDialog", () => {
 
   it("resets form when reopening dialog", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -228,17 +165,9 @@ describe("EditRecurringTransactionDialog", () => {
     expect(screen.getByLabelText("Amount")).toHaveValue("5,000");
   });
 
-  it("updates end date when provided", async () => {
+  it("calls onSave with updated end date", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -248,31 +177,16 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/recurring-transactions/r1",
-      expect.objectContaining({
-        method: "PUT",
-        body: expect.stringContaining('"endDate":"2025-06-30"'),
-      }),
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ endDate: "2025-06-30" }),
     );
   });
 
-  it("updates scenario when selecting a specific scenario", async () => {
-    mockApiResponses({
-      recurringTransactions: [mockRecurringTransaction],
+  it("calls onSave with scenarioId when selecting a scenario", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderDialog({
       scenarios: [{ id: "s1", name: "Test Scenario" }],
     });
-    const user = userEvent.setup();
-
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>,
-    );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -284,26 +198,14 @@ describe("EditRecurringTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/recurring-transactions/r1",
-      expect.objectContaining({
-        method: "PUT",
-        body: expect.stringContaining('"scenarioId":"s1"'),
-      }),
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: "s1" }),
     );
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByRole("combobox", { name: "Scenario" }));
@@ -313,16 +215,7 @@ describe("EditRecurringTransactionDialog", () => {
 
   it("creates scenario inline and auto-selects it", async () => {
     const user = userEvent.setup();
-
-    render(
-      <ScenarioProvider>
-        <RecurringTransactionProvider>
-          <EditRecurringTransactionDialog
-            recurringTransaction={mockRecurringTransaction}
-          />
-        </RecurringTransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave, onCreateScenario } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -333,24 +226,15 @@ describe("EditRecurringTransactionDialog", () => {
     await user.type(input, "Early Retirement");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
-    // Verify scenario was created via API
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/scenarios",
-      expect.objectContaining({
-        method: "POST",
-        body: expect.stringContaining("Early Retirement"),
-      }),
+    expect(onCreateScenario).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Early Retirement" }),
     );
+    const createdScenarioId = onCreateScenario.mock.calls[0][0].id;
 
-    // Save recurring transaction and verify scenario ID was set
     await user.click(screen.getByText("Save"));
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "/api/recurring-transactions/r1",
-      expect.objectContaining({
-        method: "PUT",
-        body: expect.stringContaining('"scenarioId"'),
-      }),
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: createdScenarioId }),
     );
   });
 });

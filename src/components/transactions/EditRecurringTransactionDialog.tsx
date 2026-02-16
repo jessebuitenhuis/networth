@@ -34,21 +34,25 @@ import {
 import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 
 type EditRecurringTransactionDialogProps = {
   recurringTransaction: RecurringTransaction;
+  scenarios: Scenario[];
+  onSave: (rt: RecurringTransaction) => void;
+  onDelete: (id: string) => void;
+  onCreateScenario: (scenario: { id: string; name: string }) => void;
 };
 
 export function EditRecurringTransactionDialog({
   recurringTransaction,
+  scenarios,
+  onSave,
+  onDelete,
+  onCreateScenario,
 }: EditRecurringTransactionDialogProps) {
-  const { updateRecurringTransaction, removeRecurringTransaction } =
-    useRecurringTransactions();
-  const { scenarios, addScenario } = useScenarios();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(recurringTransaction.amount);
@@ -77,7 +81,7 @@ export function EditRecurringTransactionDialog({
     e.preventDefault();
     if (amount === 0) return;
 
-    updateRecurringTransaction({
+    onSave({
       ...recurringTransaction,
       amount,
       description: description.trim(),
@@ -95,13 +99,13 @@ export function EditRecurringTransactionDialog({
   }
 
   function handleDelete() {
-    removeRecurringTransaction(recurringTransaction.id);
+    onDelete(recurringTransaction.id);
     setIsDeleteOpen(false);
   }
 
   function handleCreateScenario(name: string): string {
     const id = generateId();
-    addScenario({ id, name });
+    onCreateScenario({ id, name });
     return id;
   }
 

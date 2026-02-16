@@ -21,15 +21,19 @@ import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { generateId } from "@/lib/generateId";
 import { computeBalance } from "@/services/computeBalance";
 import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
-import { useTransactions } from "@/transactions/TransactionContext";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 interface UpdateBalanceDialogProps {
   accountId: string;
+  transactions: Transaction[];
+  onSave: (transaction: Transaction) => void;
 }
 
-export function UpdateBalanceDialog({ accountId }: UpdateBalanceDialogProps) {
-  const { transactions, addTransaction } = useTransactions();
-
+export function UpdateBalanceDialog({
+  accountId,
+  transactions,
+  onSave,
+}: UpdateBalanceDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newValue, setNewValue] = useState(0);
   const [description, setDescription] = useState("Balance adjustment");
@@ -55,7 +59,7 @@ export function UpdateBalanceDialog({ accountId }: UpdateBalanceDialogProps) {
       return;
     }
 
-    addTransaction({
+    onSave({
       id: generateId(),
       accountId,
       amount: adjustmentAmount,

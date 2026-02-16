@@ -1,11 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { EditTransactionDialog } from "./EditTransactionDialog";
 
@@ -17,23 +14,22 @@ const mockTransaction: Transaction = {
   description: "Test transaction",
 };
 
+function renderDialog(overrides: Partial<React.ComponentProps<typeof EditTransactionDialog>> = {}) {
+  const props = {
+    transaction: mockTransaction,
+    scenarios: [],
+    onSave: vi.fn(),
+    onDelete: vi.fn(),
+    onCreateScenario: vi.fn(),
+    ...overrides,
+  };
+  render(<EditTransactionDialog {...props} />);
+  return props;
+}
+
 describe("EditTransactionDialog", () => {
-  beforeEach(() => {
-    mockApiResponses({ transactions: [mockTransaction] });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("opens dialog with current values pre-populated", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
@@ -42,15 +38,9 @@ describe("EditTransactionDialog", () => {
     expect(screen.getByLabelText("Description")).toHaveValue("Test transaction");
   });
 
-  it("updates transaction when saving with new values", async () => {
+  it("calls onSave with updated transaction when saving", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -67,28 +57,19 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "t1",
+        amount: 1500,
+        date: "2024-01-20",
+        description: "Updated transaction",
+      }),
     );
-    expect(putCalls).toHaveLength(1);
-    const body = JSON.parse(putCalls[0][1]!.body as string);
-    expect(body).toMatchObject({
-      id: "t1",
-      amount: 1500,
-      date: "2024-01-20",
-      description: "Updated transaction",
-    });
   });
 
   it("prevents submit when amount is 0", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -98,18 +79,12 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
+    expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText("Amount")).toBeInTheDocument();
   });
 
   it("closes edit dialog before showing delete confirmation", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -120,13 +95,7 @@ describe("EditTransactionDialog", () => {
   });
 
   it("delete confirmation button uses destructive variant", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -136,14 +105,8 @@ describe("EditTransactionDialog", () => {
     expect(confirmButton).toHaveClass("bg-destructive");
   });
 
-  it("removes transaction when confirming delete", async () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+  it("calls onDelete with transaction id when confirming delete", async () => {
+    const { onDelete } = renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -152,20 +115,11 @@ describe("EditTransactionDialog", () => {
     const confirmButton = deleteButtons[deleteButtons.length - 1];
     await act(async () => confirmButton.click());
 
-    const deleteCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/transactions/t1" && init?.method === "DELETE",
-    );
-    expect(deleteCalls).toHaveLength(1);
+    expect(onDelete).toHaveBeenCalledWith("t1");
   });
 
   it("returns to edit dialog when canceling delete", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -180,13 +134,7 @@ describe("EditTransactionDialog", () => {
   });
 
   it("resets form when reopening dialog", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
@@ -208,13 +156,7 @@ describe("EditTransactionDialog", () => {
 
   it("trims whitespace from description when saving", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -224,28 +166,16 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Padded Description" }),
     );
-    expect(putCalls).toHaveLength(1);
-    const body = JSON.parse(putCalls[0][1]!.body as string);
-    expect(body.description).toBe("Padded Description");
   });
 
-  it("updates scenario when selecting a specific scenario", async () => {
+  it("calls onSave with scenarioId when selecting a scenario", async () => {
     const user = userEvent.setup();
-    mockApiResponses({
-      transactions: [mockTransaction],
+    const { onSave } = renderDialog({
       scenarios: [{ id: "s1", name: "Test Scenario" }],
     });
-
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -257,23 +187,14 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: "s1" }),
     );
-    expect(putCalls).toHaveLength(1);
-    const body = JSON.parse(putCalls[0][1]!.body as string);
-    expect(body.scenarioId).toBe("s1");
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByRole("combobox", { name: "Scenario" }));
@@ -283,14 +204,7 @@ describe("EditTransactionDialog", () => {
 
   it("creates scenario inline and auto-selects it", async () => {
     const user = userEvent.setup();
-
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>,
-    );
+    const { onSave, onCreateScenario } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -301,23 +215,15 @@ describe("EditTransactionDialog", () => {
     await user.type(input, "Retirement Plan");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
-    // Verify scenario was created via API
-    const scenarioPostCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/scenarios" && init?.method === "POST",
+    expect(onCreateScenario).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Retirement Plan" }),
     );
-    expect(scenarioPostCalls).toHaveLength(1);
-    const scenarioBody = JSON.parse(scenarioPostCalls[0][1]!.body as string);
-    expect(scenarioBody.name).toBe("Retirement Plan");
-    const createdScenarioId = scenarioBody.id;
+    const createdScenarioId = onCreateScenario.mock.calls[0][0].id;
 
-    // Save transaction and verify scenario ID was set
     await user.click(screen.getByText("Save"));
 
-    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: createdScenarioId }),
     );
-    expect(putCalls).toHaveLength(1);
-    const txBody = JSON.parse(putCalls[0][1]!.body as string);
-    expect(txBody.scenarioId).toBe(createdScenarioId);
   });
 });

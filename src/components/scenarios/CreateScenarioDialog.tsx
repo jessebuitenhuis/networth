@@ -13,15 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { generateId } from "@/lib/generateId";
-import { useScenarios } from "@/scenarios/ScenarioContext";
 
 type CreateScenarioDialogProps = {
-  onCreate?: (id: string) => void;
+  onSubmit: (name: string) => void;
 };
 
-export function CreateScenarioDialog({ onCreate }: CreateScenarioDialogProps = {}) {
-  const { addScenario, setActiveScenario } = useScenarios();
+export function CreateScenarioDialog({ onSubmit }: CreateScenarioDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
 
@@ -33,15 +30,7 @@ export function CreateScenarioDialog({ onCreate }: CreateScenarioDialogProps = {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const scenarioId = generateId();
-
-    addScenario({
-      id: scenarioId,
-      name: name.trim(),
-    });
-
-    setActiveScenario(scenarioId);
-    onCreate?.(scenarioId);
+    onSubmit(name.trim());
 
     resetForm();
     setIsOpen(false);

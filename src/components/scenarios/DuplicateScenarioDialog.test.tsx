@@ -1,85 +1,33 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { AccountProvider } from "@/accounts/AccountContext";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
+import { describe, expect, it, vi } from "vitest";
 
 import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
 
-const mockFetch = vi.fn();
-
-function Wrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <AccountProvider>
-      <TransactionProvider>
-        <ScenarioProvider>
-          <RecurringTransactionProvider>{children}</RecurringTransactionProvider>
-        </ScenarioProvider>
-      </TransactionProvider>
-    </AccountProvider>
-  );
+function renderDialog(
+  overrides: Partial<React.ComponentProps<typeof DuplicateScenarioDialog>> = {},
+) {
+  const props = {
+    scenarioName: "Base Plan",
+    onSubmit: vi.fn(),
+    ...overrides,
+  };
+  render(<DuplicateScenarioDialog {...props} />);
+  return props;
 }
 
-beforeEach(() => {
-  vi.stubGlobal("fetch", mockFetch);
-  mockFetch.mockReset();
-  mockFetch.mockImplementation(async (url: string) => {
-    if (url === "/api/accounts") {
-      return { ok: true, json: async () => [] };
-    }
-    if (url === "/api/transactions") {
-      return { ok: true, json: async () => [] };
-    }
-    if (url === "/api/scenarios") {
-      return {
-        ok: true,
-        json: async () => ({
-          scenarios: [{ id: "scenario-1", name: "Base Plan" }],
-          activeScenarioId: null,
-        }),
-      };
-    }
-    if (url === "/api/recurring-transactions") {
-      return { ok: true, json: async () => [] };
-    }
-    return { ok: true, status: 200, json: async () => ({}) };
-  });
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
 describe("DuplicateScenarioDialog", () => {
-  it("renders icon-only trigger button", async () => {
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
+  it("renders icon-only trigger button", () => {
+    renderDialog();
 
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
-    const button = screen.getByRole("button");
+    const button = screen.getByLabelText("Duplicate Scenario");
     expect(button.className).toContain("h-6");
     expect(button.className).toContain("w-6");
   });
 
-  it("opens dialog with name input pre-filled from scenarioId prop", async () => {
+  it("opens dialog with name input pre-filled from scenarioName prop", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    renderDialog();
 
     await user.click(screen.getByRole("button"));
 
@@ -90,66 +38,31 @@ describe("DuplicateScenarioDialog", () => {
     expect(screen.getByLabelText(/name/i)).toHaveValue("Base Plan (Copy)");
   });
 
-  it("creates new scenario on submit", async () => {
+  it("calls onSubmit with entered name", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    const { onSubmit } = renderDialog();
 
     await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
     await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/scenarios",
-      expect.objectContaining({
-        method: "POST",
-        body: expect.stringContaining("Optimistic Plan"),
-      }),
-    );
+    expect(onSubmit).toHaveBeenCalledWith("Optimistic Plan");
   });
 
-  it("calls onDuplicate callback with new scenario id", async () => {
-    const onDuplicate = vi.fn();
+  it("calls onSubmit with pre-filled name when submitting directly", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog
-          scenarioId="scenario-1"
-          onDuplicate={onDuplicate}
-        />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    const { onSubmit } = renderDialog();
 
     await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(onDuplicate).toHaveBeenCalledWith(expect.any(String));
-    expect(onDuplicate.mock.calls[0][0]).not.toBe("scenario-1");
+    expect(onSubmit).toHaveBeenCalledWith("Base Plan (Copy)");
   });
 
   it("closes dialog after successful submit", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    renderDialog();
 
     await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
@@ -159,15 +72,7 @@ describe("DuplicateScenarioDialog", () => {
 
   it("disables submit when name is empty", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    renderDialog();
 
     await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
@@ -179,15 +84,7 @@ describe("DuplicateScenarioDialog", () => {
 
   it("resets form when dialog is reopened", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    renderDialog();
 
     await user.click(screen.getByRole("button"));
     const input = screen.getByLabelText(/name/i);
@@ -199,17 +96,9 @@ describe("DuplicateScenarioDialog", () => {
     expect(screen.getByLabelText(/name/i)).toHaveValue("Base Plan (Copy)");
   });
 
-  it("does not pre-fill name when scenario is not found", async () => {
+  it("does not pre-fill name when scenarioName is not provided", async () => {
     const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="non-existent-scenario" />
-      </Wrapper>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
+    renderDialog({ scenarioName: undefined });
 
     await user.click(screen.getByRole("button"));
 
@@ -222,15 +111,9 @@ describe("DuplicateScenarioDialog", () => {
 
     render(
       <div onClick={parentClickHandler}>
-        <Wrapper>
-          <DuplicateScenarioDialog scenarioId="scenario-1" />
-        </Wrapper>
+        <DuplicateScenarioDialog scenarioName="Base Plan" onSubmit={vi.fn()} />
       </div>,
     );
-
-    await waitFor(() => {
-      expect(screen.getByRole("button")).toBeInTheDocument();
-    });
 
     await user.click(screen.getByRole("button"));
 
