@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
@@ -11,21 +12,26 @@ import { NetWorthSummary } from "./NetWorthSummary";
 
 function renderWithProvider(
   accounts: Account[] = [],
-  transactions: Transaction[] = []
+  transactions: Transaction[] = [],
 ) {
-  localStorage.setItem("accounts", JSON.stringify(accounts));
-  localStorage.setItem("transactions", JSON.stringify(transactions));
+  mockApiResponses({ accounts, transactions });
   return render(
     <AccountProvider>
       <TransactionProvider>
         <NetWorthSummary />
       </TransactionProvider>
-    </AccountProvider>
+    </AccountProvider>,
   );
 }
 
 describe("NetWorthSummary", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockApiResponses();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it("displays $0.00 with no accounts", () => {
     renderWithProvider();
