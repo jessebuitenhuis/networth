@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   RecurringTransactionProvider,
@@ -8,6 +8,7 @@ import {
 } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import {
   TransactionProvider,
   useTransactions,
@@ -65,7 +66,11 @@ async function openDialog(s: Scenario = scenario, onDelete?: (id: string) => voi
 
 describe("EditScenarioDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
+    mockApiResponses();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("renders pencil trigger with correct size and aria-label", () => {
@@ -86,10 +91,10 @@ describe("EditScenarioDialog", () => {
   });
 
   it("saves updated name", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
-    localStorage.setItem("activeScenarioId", "1");
+    mockApiResponses({ scenarios: [scenario], activeScenarioId: "1" });
     const user = await openDialog();
 
+    await screen.findByText("Test Scenario");
     await user.clear(screen.getByLabelText("Name"));
     await user.type(screen.getByLabelText("Name"), "Updated Name");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -99,10 +104,10 @@ describe("EditScenarioDialog", () => {
   });
 
   it("trims whitespace from name", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
-    localStorage.setItem("activeScenarioId", "1");
+    mockApiResponses({ scenarios: [scenario], activeScenarioId: "1" });
     const user = await openDialog();
 
+    await screen.findByText("Test Scenario");
     await user.clear(screen.getByLabelText("Name"));
     await user.type(screen.getByLabelText("Name"), "  Trimmed  ");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -111,7 +116,7 @@ describe("EditScenarioDialog", () => {
   });
 
   it("empty name prevents submit", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
+    mockApiResponses({ scenarios: [scenario] });
     const user = await openDialog();
 
     await user.clear(screen.getByLabelText("Name"));
@@ -122,7 +127,7 @@ describe("EditScenarioDialog", () => {
   });
 
   it("resets form when dialog is reopened", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
+    mockApiResponses({ scenarios: [scenario] });
     const user = await openDialog();
 
     await user.clear(screen.getByLabelText("Name"));
@@ -147,11 +152,10 @@ describe("EditScenarioDialog", () => {
   });
 
   it("deletes scenario and associated transactions", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
-    localStorage.setItem("activeScenarioId", "1");
-    localStorage.setItem(
-      "transactions",
-      JSON.stringify([
+    mockApiResponses({
+      scenarios: [scenario],
+      activeScenarioId: "1",
+      transactions: [
         {
           id: "t1",
           accountId: "a1",
@@ -160,11 +164,8 @@ describe("EditScenarioDialog", () => {
           description: "Test",
           scenarioId: "1",
         },
-      ])
-    );
-    localStorage.setItem(
-      "recurringTransactions",
-      JSON.stringify([
+      ],
+      recurringTransactions: [
         {
           id: "r1",
           accountId: "a1",
@@ -174,8 +175,8 @@ describe("EditScenarioDialog", () => {
           startDate: "2024-01-01",
           scenarioId: "1",
         },
-      ])
-    );
+      ],
+    });
     const user = await openDialog();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -188,8 +189,7 @@ describe("EditScenarioDialog", () => {
   });
 
   it("calls onDelete callback after delete", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([scenario]));
-    localStorage.setItem("activeScenarioId", "1");
+    mockApiResponses({ scenarios: [scenario], activeScenarioId: "1" });
     const onDelete = vi.fn();
     const user = await openDialog(scenario, onDelete);
 
