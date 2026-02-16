@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { scenarios } from "@/db/schema";
+import {
+  deleteScenario,
+  getScenarioById,
+  updateScenario,
+} from "@/scenarios/scenarioRepository";
 
 export async function PUT(
   request: Request,
@@ -12,26 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = db
-      .select()
-      .from(scenarios)
-      .where(eq(scenarios.id, id))
-      .all();
+    const existing = getScenarioById(id);
 
-    if (existing.length === 0) {
+    if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    db.update(scenarios)
-      .set({ name: body.name })
-      .where(eq(scenarios.id, id))
-      .run();
-
-    const [updated] = db
-      .select()
-      .from(scenarios)
-      .where(eq(scenarios.id, id))
-      .all();
+    const updated = updateScenario(id, { name: body.name });
 
     return NextResponse.json(updated);
   } catch {
@@ -45,17 +34,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = db
-    .select()
-    .from(scenarios)
-    .where(eq(scenarios.id, id))
-    .all();
+  const existing = getScenarioById(id);
 
-  if (existing.length === 0) {
+  if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  db.delete(scenarios).where(eq(scenarios.id, id)).run();
+  deleteScenario(id);
 
   return new NextResponse(null, { status: 204 });
 }

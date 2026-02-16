@@ -1,11 +1,15 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { transactions } from "@/db/schema";
+import {
+  createTransaction,
+  createTransactions,
+  deleteTransactionsByAccountId,
+  deleteTransactionsByScenarioId,
+  getAllTransactions,
+} from "@/transactions/transactionRepository";
 
 export async function GET() {
-  const rows = db.select().from(transactions).all();
+  const rows = getAllTransactions();
   return NextResponse.json(rows);
 }
 
@@ -23,31 +27,13 @@ export async function POST(request: Request) {
       }
     }
 
-    for (const item of items) {
-      db.insert(transactions)
-        .values({
-          id: item.id,
-          accountId: item.accountId,
-          amount: item.amount,
-          date: item.date,
-          description: item.description,
-          isProjected: item.isProjected ?? null,
-          scenarioId: item.scenarioId ?? null,
-        })
-        .run();
+    if (Array.isArray(body)) {
+      const created = createTransactions(items);
+      return NextResponse.json(created, { status: 201 });
     }
 
-    const ids = items.map((item) => item.id);
-    const created = db
-      .select()
-      .from(transactions)
-      .all()
-      .filter((row) => ids.includes(row.id));
-
-    return NextResponse.json(
-      Array.isArray(body) ? created : created[0],
-      { status: 201 },
-    );
+    const created = createTransaction(items[0]);
+    return NextResponse.json(created, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
@@ -66,11 +52,11 @@ export async function DELETE(request: Request) {
   }
 
   if (accountId) {
-    db.delete(transactions).where(eq(transactions.accountId, accountId)).run();
+    deleteTransactionsByAccountId(accountId);
   }
 
   if (scenarioId) {
-    db.delete(transactions).where(eq(transactions.scenarioId, scenarioId)).run();
+    deleteTransactionsByScenarioId(scenarioId);
   }
 
   return new NextResponse(null, { status: 204 });

@@ -1,11 +1,13 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { recurringTransactions } from "@/db/schema";
+import {
+  createRecurringTransaction,
+  deleteRecurringTransactionsByScenarioId,
+  getAllRecurringTransactions,
+} from "@/recurring-transactions/recurringTransactionRepository";
 
 export async function GET() {
-  const rows = db.select().from(recurringTransactions).all();
+  const rows = getAllRecurringTransactions();
   return NextResponse.json(rows);
 }
 
@@ -27,24 +29,16 @@ export async function POST(request: Request) {
       );
     }
 
-    db.insert(recurringTransactions)
-      .values({
-        id: body.id,
-        accountId: body.accountId,
-        amount: body.amount,
-        description: body.description,
-        frequency: body.frequency,
-        startDate: body.startDate,
-        endDate: body.endDate ?? null,
-        scenarioId: body.scenarioId ?? null,
-      })
-      .run();
-
-    const [created] = db
-      .select()
-      .from(recurringTransactions)
-      .where(eq(recurringTransactions.id, body.id))
-      .all();
+    const created = createRecurringTransaction({
+      id: body.id,
+      accountId: body.accountId,
+      amount: body.amount,
+      description: body.description,
+      frequency: body.frequency,
+      startDate: body.startDate,
+      endDate: body.endDate,
+      scenarioId: body.scenarioId,
+    });
 
     return NextResponse.json(created, { status: 201 });
   } catch {
@@ -63,9 +57,7 @@ export async function DELETE(request: Request) {
     );
   }
 
-  db.delete(recurringTransactions)
-    .where(eq(recurringTransactions.scenarioId, scenarioId))
-    .run();
+  deleteRecurringTransactionsByScenarioId(scenarioId);
 
   return new NextResponse(null, { status: 204 });
 }

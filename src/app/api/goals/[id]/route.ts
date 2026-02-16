@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { goals } from "@/db/schema";
+import {
+  deleteGoal,
+  getGoalById,
+  updateGoal,
+} from "@/goals/goalRepository";
 
 export async function PUT(
   request: Request,
@@ -12,29 +14,16 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = db
-      .select()
-      .from(goals)
-      .where(eq(goals.id, id))
-      .all();
+    const existing = getGoalById(id);
 
-    if (existing.length === 0) {
+    if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    db.update(goals)
-      .set({
-        name: body.name,
-        targetAmount: body.targetAmount,
-      })
-      .where(eq(goals.id, id))
-      .run();
-
-    const [updated] = db
-      .select()
-      .from(goals)
-      .where(eq(goals.id, id))
-      .all();
+    const updated = updateGoal(id, {
+      name: body.name,
+      targetAmount: body.targetAmount,
+    });
 
     return NextResponse.json(updated);
   } catch {
@@ -48,17 +37,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = db
-    .select()
-    .from(goals)
-    .where(eq(goals.id, id))
-    .all();
+  const existing = getGoalById(id);
 
-  if (existing.length === 0) {
+  if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  db.delete(goals).where(eq(goals.id, id)).run();
+  deleteGoal(id);
 
   return new NextResponse(null, { status: 204 });
 }

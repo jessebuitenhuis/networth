@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { recurringTransactions } from "@/db/schema";
+import {
+  deleteRecurringTransaction,
+  getRecurringTransactionById,
+  updateRecurringTransaction,
+} from "@/recurring-transactions/recurringTransactionRepository";
 
 export async function PUT(
   request: Request,
@@ -12,34 +14,21 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = db
-      .select()
-      .from(recurringTransactions)
-      .where(eq(recurringTransactions.id, id))
-      .all();
+    const existing = getRecurringTransactionById(id);
 
-    if (existing.length === 0) {
+    if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    db.update(recurringTransactions)
-      .set({
-        accountId: body.accountId,
-        amount: body.amount,
-        description: body.description,
-        frequency: body.frequency,
-        startDate: body.startDate,
-        endDate: body.endDate ?? null,
-        scenarioId: body.scenarioId ?? null,
-      })
-      .where(eq(recurringTransactions.id, id))
-      .run();
-
-    const [updated] = db
-      .select()
-      .from(recurringTransactions)
-      .where(eq(recurringTransactions.id, id))
-      .all();
+    const updated = updateRecurringTransaction(id, {
+      accountId: body.accountId,
+      amount: body.amount,
+      description: body.description,
+      frequency: body.frequency,
+      startDate: body.startDate,
+      endDate: body.endDate,
+      scenarioId: body.scenarioId,
+    });
 
     return NextResponse.json(updated);
   } catch {
@@ -53,19 +42,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = db
-    .select()
-    .from(recurringTransactions)
-    .where(eq(recurringTransactions.id, id))
-    .all();
+  const existing = getRecurringTransactionById(id);
 
-  if (existing.length === 0) {
+  if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  db.delete(recurringTransactions)
-    .where(eq(recurringTransactions.id, id))
-    .run();
+  deleteRecurringTransaction(id);
 
   return new NextResponse(null, { status: 204 });
 }

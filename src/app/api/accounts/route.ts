@@ -1,11 +1,9 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { accounts } from "@/db/schema";
+import { createAccount, getAllAccounts } from "@/accounts/accountRepository";
 
 export async function GET() {
-  const rows = db.select().from(accounts).all();
+  const rows = getAllAccounts();
   return NextResponse.json(rows);
 }
 
@@ -20,20 +18,12 @@ export async function POST(request: Request) {
       );
     }
 
-    db.insert(accounts)
-      .values({
-        id: body.id,
-        name: body.name,
-        type: body.type,
-        expectedReturnRate: body.expectedReturnRate ?? null,
-      })
-      .run();
-
-    const [created] = db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, body.id))
-      .all();
+    const created = createAccount({
+      id: body.id,
+      name: body.name,
+      type: body.type,
+      expectedReturnRate: body.expectedReturnRate,
+    });
 
     return NextResponse.json(created, { status: 201 });
   } catch {

@@ -1,11 +1,9 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { goals } from "@/db/schema";
+import { createGoal, getAllGoals } from "@/goals/goalRepository";
 
 export async function GET() {
-  const rows = db.select().from(goals).all();
+  const rows = getAllGoals();
   return NextResponse.json(rows);
 }
 
@@ -20,19 +18,11 @@ export async function POST(request: Request) {
       );
     }
 
-    db.insert(goals)
-      .values({
-        id: body.id,
-        name: body.name,
-        targetAmount: body.targetAmount,
-      })
-      .run();
-
-    const [created] = db
-      .select()
-      .from(goals)
-      .where(eq(goals.id, body.id))
-      .all();
+    const created = createGoal({
+      id: body.id,
+      name: body.name,
+      targetAmount: body.targetAmount,
+    });
 
     return NextResponse.json(created, { status: 201 });
   } catch {

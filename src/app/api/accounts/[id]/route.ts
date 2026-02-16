@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { accounts } from "@/db/schema";
+import {
+  deleteAccount,
+  getAccountById,
+  updateAccount,
+} from "@/accounts/accountRepository";
 
 export async function PUT(
   request: Request,
@@ -12,30 +14,17 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, id))
-      .all();
+    const existing = getAccountById(id);
 
-    if (existing.length === 0) {
+    if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    db.update(accounts)
-      .set({
-        name: body.name,
-        type: body.type,
-        expectedReturnRate: body.expectedReturnRate ?? null,
-      })
-      .where(eq(accounts.id, id))
-      .run();
-
-    const [updated] = db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, id))
-      .all();
+    const updated = updateAccount(id, {
+      name: body.name,
+      type: body.type,
+      expectedReturnRate: body.expectedReturnRate,
+    });
 
     return NextResponse.json(updated);
   } catch {
@@ -49,17 +38,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = db
-    .select()
-    .from(accounts)
-    .where(eq(accounts.id, id))
-    .all();
+  const existing = getAccountById(id);
 
-  if (existing.length === 0) {
+  if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  db.delete(accounts).where(eq(accounts.id, id)).run();
+  deleteAccount(id);
 
   return new NextResponse(null, { status: 204 });
 }

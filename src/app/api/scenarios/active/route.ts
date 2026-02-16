@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { db } from "@/db/connection";
-import { settings } from "@/db/schema";
+import { setActiveScenarioId } from "@/scenarios/scenarioRepository";
 
 export async function PUT(request: Request) {
   try {
@@ -14,13 +13,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    db.insert(settings)
-      .values({ key: "activeScenarioId", value: body.scenarioId })
-      .onConflictDoUpdate({
-        target: settings.key,
-        set: { value: body.scenarioId },
-      })
-      .run();
+    setActiveScenarioId(body.scenarioId);
 
     return NextResponse.json({ activeScenarioId: body.scenarioId });
   } catch {
