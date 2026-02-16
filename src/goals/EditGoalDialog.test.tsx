@@ -1,5 +1,7 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 
 import { EditGoalDialogPage } from "./EditGoalDialog.page";
 import type { Goal } from "./Goal.type";
@@ -10,16 +12,9 @@ const goal: Goal = {
   targetAmount: 10000,
 };
 
-const mockFetch = vi.fn();
-
 describe("EditGoalDialog", () => {
   beforeEach(() => {
-    vi.stubGlobal("fetch", mockFetch);
-    mockFetch.mockReset();
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => [],
-    });
+    mockApiResponses();
   });
 
   it("renders pencil trigger with correct aria-label", () => {
@@ -36,9 +31,7 @@ describe("EditGoalDialog", () => {
   });
 
   it("editing name and saving updates the goal", async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...goal, name: "FIRE Goal" }) });
+    mockApiResponses({ goals: [goal] });
     const page = EditGoalDialogPage.render();
     await screen.findByText("Emergency Fund - 10000");
     await page.open();
@@ -49,9 +42,7 @@ describe("EditGoalDialog", () => {
   });
 
   it("editing target amount and saving updates the goal", async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...goal, targetAmount: 15000 }) });
+    mockApiResponses({ goals: [goal] });
     const page = EditGoalDialogPage.render();
     await screen.findByText("Emergency Fund - 10000");
     await page.open();
@@ -61,7 +52,7 @@ describe("EditGoalDialog", () => {
   });
 
   it("empty name prevents submit", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [goal] });
+    mockApiResponses({ goals: [goal] });
     const page = EditGoalDialogPage.render();
     await screen.findByText("Emergency Fund - 10000");
     await page.open();
@@ -80,9 +71,7 @@ describe("EditGoalDialog", () => {
   });
 
   it("confirming delete removes the goal", async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
-      .mockResolvedValueOnce({ ok: true });
+    mockApiResponses({ goals: [goal] });
     const page = EditGoalDialogPage.render();
     await screen.findByText("Emergency Fund - 10000");
     await page.open();
@@ -92,7 +81,7 @@ describe("EditGoalDialog", () => {
   });
 
   it("resets form when dialog is reopened", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [goal] });
+    mockApiResponses({ goals: [goal] });
     const page = EditGoalDialogPage.render();
     await screen.findByText("Emergency Fund - 10000");
     await page.open();
