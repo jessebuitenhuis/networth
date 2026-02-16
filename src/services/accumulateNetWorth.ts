@@ -1,6 +1,6 @@
-import { AccountType } from "@/models/AccountType";
+import { AccountType } from "@/accounts/AccountType";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 export function accumulateNetWorth(
   datePoints: string[],

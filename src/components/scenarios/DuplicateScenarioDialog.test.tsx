@@ -6,8 +6,7 @@ import { AccountProvider } from "@/context/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
 import { ScenarioProvider } from "@/context/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import type { Transaction } from "@/models/Transaction.type";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import * as AccountStorage from "@/services/AccountStorage";
 import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
 import {
@@ -17,6 +16,7 @@ import {
   saveScenarios,
 } from "@/services/ScenarioStorage";
 import * as TransactionStorage from "@/services/TransactionStorage";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
 

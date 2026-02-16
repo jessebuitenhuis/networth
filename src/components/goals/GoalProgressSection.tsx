@@ -2,13 +2,13 @@
 
 import { useMemo } from "react";
 
+import { AccountType } from "@/accounts/AccountType";
 import { useAccounts } from "@/context/AccountContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { useGoals } from "@/goals/GoalContext";
 import { addYears, formatDate } from "@/lib/dateUtils";
-import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import { computeGoalProgress } from "@/services/computeGoalProgress";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";

@@ -1,8 +1,8 @@
 import { act,render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/accounts/Account.type";
+import { AccountType } from "@/accounts/AccountType";
 
 import { AccountProvider, useAccounts } from "./AccountContext";
 import { accountReducer } from "./AccountContext";

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import type { Account } from "@/models/Account.type";
+import type { Account } from "@/accounts/Account.type";
 import { loadAccounts, saveAccounts } from "@/services/AccountStorage";
 
 export type AccountAction =

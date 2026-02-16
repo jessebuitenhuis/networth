@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { isTransactionProjected } from "./isTransactionProjected";
 

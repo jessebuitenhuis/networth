@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
 import { generateId } from "@/lib/generateId";
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 import {
   loadActiveScenarioId,
   loadScenarios,

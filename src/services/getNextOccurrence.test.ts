@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 
 import { getNextOccurrence } from "./getNextOccurrence";
 

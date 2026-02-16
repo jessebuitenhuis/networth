@@ -11,7 +11,7 @@ import {
   TransactionProvider,
   useTransactions,
 } from "@/context/TransactionContext";
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 import { EditScenarioDialog } from "./EditScenarioDialog";
 

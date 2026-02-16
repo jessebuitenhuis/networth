@@ -1,5 +1,6 @@
+import type { Transaction } from "@/transactions/Transaction.type";
+
 import type { CsvSkippedRow } from "./CsvSkippedRow.type";
-import type { Transaction } from "./Transaction.type";
 
 export type CsvParseResult = {
   transactions: Transaction[];

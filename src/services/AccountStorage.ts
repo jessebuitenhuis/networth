@@ -1,6 +1,6 @@
+import type { Account } from "@/accounts/Account.type";
 import { generateId } from "@/lib/generateId";
-import type { Account } from "@/models/Account.type";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 const STORAGE_KEY = "accounts";
 

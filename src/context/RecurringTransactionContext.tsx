@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import {
   loadRecurringTransactions,
   saveRecurringTransactions,

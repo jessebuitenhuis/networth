@@ -1,4 +1,4 @@
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 const SCENARIOS_KEY = "scenarios";
 const ACTIVE_SCENARIO_ID_KEY = "activeScenarioId";

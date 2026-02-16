@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Transaction } from "@/models/Transaction.type";
 import { suppressRadixDialogWarnings } from "@/test/mocks/suppressRadixDialogWarnings";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { UpdateBalanceDialogPage } from "./UpdateBalanceDialog.page";
 

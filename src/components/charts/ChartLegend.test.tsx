@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/accounts/Account.type";
+import { AccountType } from "@/accounts/AccountType";
 
 import { ChartLegend } from "./ChartLegend";
 

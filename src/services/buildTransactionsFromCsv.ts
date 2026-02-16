@@ -2,7 +2,7 @@ import type { CsvColumnMapping } from "@/models/CsvColumnMapping.type";
 import type { CsvParseResult } from "@/models/CsvParseResult.type";
 import type { CsvSkippedRow } from "@/models/CsvSkippedRow.type";
 import { DateFormat } from "@/models/DateFormat";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 export function buildTransactionsFromCsv(
   rows: string[][],

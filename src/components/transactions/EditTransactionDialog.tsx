@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 

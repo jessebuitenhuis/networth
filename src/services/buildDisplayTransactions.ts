@@ -1,7 +1,7 @@
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import type { Scenario } from "@/models/Scenario.type";
-import type { Transaction } from "@/models/Transaction.type";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { filterTransactionsByScenario } from "./filterTransactionsByScenario";
 import { getNextOccurrence } from "./getNextOccurrence";

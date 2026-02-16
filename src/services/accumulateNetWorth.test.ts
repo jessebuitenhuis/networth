@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { AccountType } from "@/models/AccountType";
-import type { Transaction } from "@/models/Transaction.type";
+import { AccountType } from "@/accounts/AccountType";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { accumulateNetWorth } from "./accumulateNetWorth";
 

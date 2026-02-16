@@ -1,4 +1,4 @@
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 export function generateCompoundGrowthTransactions(
   accountId: string,

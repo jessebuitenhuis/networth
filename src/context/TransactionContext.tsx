@@ -3,13 +3,13 @@
 import { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 
 import { formatDate } from "@/lib/dateUtils";
-import type { Transaction } from "@/models/Transaction.type";
 import { migrateAccountBalances } from "@/services/AccountStorage";
 import { computeBalance } from "@/services/computeBalance";
 import {
   loadTransactions,
   saveTransactions,
 } from "@/services/TransactionStorage";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 export type TransactionAction =
   | { type: "add"; transaction: Transaction }

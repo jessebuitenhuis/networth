@@ -1,4 +1,4 @@
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 const STORAGE_KEY = "transactions";
 

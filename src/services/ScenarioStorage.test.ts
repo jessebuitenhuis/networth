@@ -1,6 +1,6 @@
 import { beforeEach,describe, expect, it } from "vitest";
 
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 import {
   loadActiveScenarioId,

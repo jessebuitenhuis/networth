@@ -26,7 +26,7 @@ import { useRecurringTransactions } from "@/context/RecurringTransactionContext"
 import { useScenarios } from "@/context/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
+import type { Account } from "@/accounts/Account.type";
 import { MultiSelectPicker } from "@/components/shared/MultiSelectPicker";
-import type { Account } from "@/models/Account.type";
 
 type AccountPickerProps = {
   accounts: Account[];

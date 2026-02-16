@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/accounts/Account.type";
+import { AccountType } from "@/accounts/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { computeNetWorthSeries } from "./computeNetWorthSeries";
 
