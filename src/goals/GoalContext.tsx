@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
 import type { Goal } from "./Goal.type";
-import { loadGoals, saveGoals } from "./GoalStorage";
 
 export type GoalAction =
   | { type: "add"; goal: Goal }
@@ -26,9 +25,9 @@ export function goalReducer(state: Goal[], action: GoalAction): Goal[] {
 
 type GoalContextValue = {
   goals: Goal[];
-  addGoal: (goal: Goal) => void;
-  removeGoal: (id: string) => void;
-  updateGoal: (goal: Goal) => void;
+  addGoal: (goal: Goal) => Promise<void>;
+  removeGoal: (id: string) => Promise<void>;
+  updateGoal: (goal: Goal) => Promise<void>;
 };
 
 const GoalContext = createContext<GoalContextValue | null>(null);
@@ -37,22 +36,31 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
   const [goals, dispatch] = useReducer(goalReducer, []);
 
   useEffect(() => {
-    dispatch({ type: "set", goals: loadGoals() });
+    fetch("/api/goals")
+      .then((res) => res.json())
+      .then((data) => dispatch({ type: "set", goals: data }));
   }, []);
 
-  useEffect(() => {
-    saveGoals(goals);
-  }, [goals]);
-
-  function addGoal(goal: Goal) {
+  async function addGoal(goal: Goal) {
+    await fetch("/api/goals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(goal),
+    });
     dispatch({ type: "add", goal });
   }
 
-  function removeGoal(id: string) {
+  async function removeGoal(id: string) {
+    await fetch(`/api/goals/${id}`, { method: "DELETE" });
     dispatch({ type: "remove", id });
   }
 
-  function updateGoal(goal: Goal) {
+  async function updateGoal(goal: Goal) {
+    await fetch(`/api/goals/${goal.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(goal),
+    });
     dispatch({ type: "update", goal });
   }
 

@@ -68,22 +68,21 @@ function TestConsumer() {
   );
 }
 
-function mockFetchResponses(goals: Goal[]) {
+function mockFetchResponses(initialGoals: Goal[]) {
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: string, options?: RequestInit) => {
+    vi.fn((_url: string, options?: RequestInit) => {
       const method = options?.method ?? "GET";
 
       if (method === "GET") {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(goals),
+          json: () => Promise.resolve([...initialGoals]),
         });
       }
 
       if (method === "POST") {
         const body = JSON.parse(options!.body as string);
-        goals.push(body);
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(body),
@@ -92,8 +91,6 @@ function mockFetchResponses(goals: Goal[]) {
 
       if (method === "PUT") {
         const body = JSON.parse(options!.body as string);
-        const idx = goals.findIndex((g) => g.id === body.id);
-        if (idx >= 0) goals[idx] = body;
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(body),
@@ -101,9 +98,6 @@ function mockFetchResponses(goals: Goal[]) {
       }
 
       if (method === "DELETE") {
-        const id = (url as string).split("/").pop();
-        const idx = goals.findIndex((g) => g.id === id);
-        if (idx >= 0) goals.splice(idx, 1);
         return Promise.resolve({ ok: true, status: 204 });
       }
 
