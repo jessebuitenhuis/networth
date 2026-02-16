@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import PlanningPage from "./page";
@@ -20,34 +21,6 @@ vi.stubGlobal(
     disconnect() {}
   },
 );
-
-type ApiData = {
-  accounts?: unknown[];
-  transactions?: unknown[];
-  scenarios?: unknown[];
-  activeScenarioId?: string | null;
-  recurringTransactions?: unknown[];
-  goals?: unknown[];
-};
-
-function mockFetchWith(data: ApiData = {}) {
-  const responses: Record<string, unknown> = {
-    "/api/accounts": data.accounts ?? [],
-    "/api/transactions": data.transactions ?? [],
-    "/api/scenarios": {
-      scenarios: data.scenarios ?? [],
-      activeScenarioId: data.activeScenarioId ?? null,
-    },
-    "/api/recurring-transactions": data.recurringTransactions ?? [],
-    "/api/goals": data.goals ?? [],
-  };
-
-  globalThis.fetch = vi.fn(async (url: string) => ({
-    ok: true,
-    status: 200,
-    json: async () => responses[url] ?? [],
-  })) as unknown as typeof globalThis.fetch;
-}
 
 function renderPage() {
   return render(
@@ -69,7 +42,7 @@ function renderPage() {
 
 describe("PlanningPage", () => {
   beforeEach(() => {
-    mockFetchWith();
+    mockApiResponses();
   });
 
   afterEach(() => {
@@ -115,7 +88,7 @@ describe("PlanningPage", () => {
   });
 
   it("toggles scenario selection when checkbox is clicked", async () => {
-    mockFetchWith({
+    mockApiResponses({
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
     });
 
@@ -133,7 +106,7 @@ describe("PlanningPage", () => {
   });
 
   it("toggles account filter when checkbox is clicked", async () => {
-    mockFetchWith({
+    mockApiResponses({
       accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
     });
 
@@ -151,7 +124,7 @@ describe("PlanningPage", () => {
   });
 
   it("clears all scenarios when Deselect all is clicked", async () => {
-    mockFetchWith({
+    mockApiResponses({
       scenarios: [
         { id: "scenario-1", name: "Optimistic" },
         { id: "scenario-2", name: "Conservative" },
