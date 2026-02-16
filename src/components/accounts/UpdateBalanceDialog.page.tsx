@@ -1,9 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { expect } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
 import {
   TransactionProvider,
@@ -46,8 +48,7 @@ export class UpdateBalanceDialogPage {
     const account = options.account ?? defaultAccount;
     const transactions = options.transactions ?? [];
 
-    localStorage.setItem("accounts", JSON.stringify([account]));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+    mockApiResponses({ accounts: [account], transactions });
 
     const user = userEvent.setup();
     render(
@@ -55,13 +56,19 @@ export class UpdateBalanceDialogPage {
         <TransactionProvider>
           <TestHarness accountId={account.id} />
         </TransactionProvider>
-      </AccountProvider>
+      </AccountProvider>,
     );
     return new UpdateBalanceDialogPage(user);
   }
 
   static async renderAndOpen(options: RenderOptions = {}) {
     const page = this.render(options);
+    const transactions = options.transactions ?? [];
+    if (transactions.length > 0) {
+      await waitFor(() =>
+        expect(screen.getByTestId("transactions").children.length).toBeGreaterThan(0),
+      );
+    }
     await page.open();
     return page;
   }

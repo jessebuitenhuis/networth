@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { suppressRadixDialogWarnings } from "@/test/mocks/suppressRadixDialogWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";
 
@@ -20,8 +21,12 @@ const withBalance500 = [createTransaction()];
 
 describe("UpdateBalanceDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
+    mockApiResponses();
     vi.setSystemTime(new Date("2024-01-15"));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("renders trigger button with 'Update Balance' text", () => {
@@ -106,14 +111,14 @@ describe("UpdateBalanceDialog", () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    const postCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions" && init?.method === "POST",
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.description === "Balance adjustment"
-    );
-    expect(adjustmentTx).toBeDefined();
-    expect(adjustmentTx.scenarioId).toBeUndefined();
+    expect(postCalls).toHaveLength(1);
+    const body = JSON.parse(postCalls[0][1]!.body as string);
+    expect(body.description).toBe("Balance adjustment");
+    expect(body.scenarioId).toBeUndefined();
   });
 
   it("uses custom description when edited", async () => {
@@ -129,13 +134,13 @@ describe("UpdateBalanceDialog", () => {
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDate("2024-01-20");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    const postCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions" && init?.method === "POST",
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.description === "Balance adjustment"
-    );
-    expect(adjustmentTx.date).toBe("2024-01-20");
+    expect(postCalls).toHaveLength(1);
+    const body = JSON.parse(postCalls[0][1]!.body as string);
+    expect(body.date).toBe("2024-01-20");
   });
 
   it("trims whitespace from description", async () => {
@@ -143,13 +148,13 @@ describe("UpdateBalanceDialog", () => {
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("  Reconcile  ");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    const postCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions" && init?.method === "POST",
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.amount === 250
-    );
-    expect(adjustmentTx.description).toBe("Reconcile");
+    expect(postCalls).toHaveLength(1);
+    const body = JSON.parse(postCalls[0][1]!.body as string);
+    expect(body.description).toBe("Reconcile");
   });
 
   it("closes dialog after submit", async () => {
