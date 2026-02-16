@@ -2,14 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/accounts/AccountContext";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
-import { GoalProvider } from "@/goals/GoalContext";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import Home from "./page";
 

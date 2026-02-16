@@ -2,8 +2,8 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider, accountReducer,useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 
 const asset: Account = {
   id: "1",

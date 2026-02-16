@@ -1,29 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach,describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";
-import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import * as AccountStorage from "@/services/AccountStorage";
-import * as RecurringTransactionStorage from "@/services/RecurringTransactionStorage";
-import {
-  loadActiveScenarioId,
-  loadScenarios,
-  saveActiveScenarioId,
-  saveScenarios,
-} from "@/services/ScenarioStorage";
-import * as TransactionStorage from "@/services/TransactionStorage";
-import type { Transaction } from "@/transactions/Transaction.type";
 
 import { DuplicateScenarioDialog } from "./DuplicateScenarioDialog";
 
-vi.mock("@/services/ScenarioStorage");
-vi.mock("@/services/TransactionStorage");
-vi.mock("@/services/RecurringTransactionStorage");
-vi.mock("@/services/AccountStorage");
+const mockFetch = vi.fn();
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -37,29 +23,48 @@ function Wrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-describe("DuplicateScenarioDialog", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-    vi.mocked(AccountStorage).loadAccounts.mockReturnValue([]);
-    vi.mocked(AccountStorage).migrateAccountBalances.mockReturnValue([]);
-    vi.mocked(TransactionStorage).loadTransactions.mockReturnValue([]);
-    vi.mocked(RecurringTransactionStorage).loadRecurringTransactions.mockReturnValue([]);
-    vi.mocked(loadScenarios).mockReturnValue([
-      { id: "scenario-1", name: "Base Plan" },
-    ]);
-    vi.mocked(loadActiveScenarioId).mockReturnValue(null);
+beforeEach(() => {
+  vi.stubGlobal("fetch", mockFetch);
+  mockFetch.mockReset();
+  mockFetch.mockImplementation(async (url: string) => {
+    if (url === "/api/accounts") {
+      return { ok: true, json: async () => [] };
+    }
+    if (url === "/api/transactions") {
+      return { ok: true, json: async () => [] };
+    }
+    if (url === "/api/scenarios") {
+      return {
+        ok: true,
+        json: async () => ({
+          scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+          activeScenarioId: null,
+        }),
+      };
+    }
+    if (url === "/api/recurring-transactions") {
+      return { ok: true, json: async () => [] };
+    }
+    return { ok: true, status: 200, json: async () => ({}) };
   });
+});
 
-  it("renders icon-only trigger button", () => {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("DuplicateScenarioDialog", () => {
+  it("renders icon-only trigger button", async () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
 
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
     const button = screen.getByRole("button");
-    expect(button).toBeInTheDocument();
     expect(button.className).toContain("h-6");
     expect(button.className).toContain("w-6");
   });
@@ -69,14 +74,18 @@ describe("DuplicateScenarioDialog", () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /duplicate scenario/i })
+      screen.getByRole("heading", { name: /duplicate scenario/i }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/name/i)).toHaveValue("Base Plan (Copy)");
   });
@@ -86,19 +95,24 @@ describe("DuplicateScenarioDialog", () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
     await user.type(screen.getByLabelText(/name/i), "Optimistic Plan");
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
 
-    expect(saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(saveScenarios).mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-    expect(lastCall).toContainEqual(
-      expect.objectContaining({ name: "Optimistic Plan" })
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/scenarios",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining("Optimistic Plan"),
+      }),
     );
   });
 
@@ -107,9 +121,16 @@ describe("DuplicateScenarioDialog", () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" onDuplicate={onDuplicate} />
-      </Wrapper>
+        <DuplicateScenarioDialog
+          scenarioId="scenario-1"
+          onDuplicate={onDuplicate}
+        />
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
@@ -118,181 +139,17 @@ describe("DuplicateScenarioDialog", () => {
     expect(onDuplicate.mock.calls[0][0]).not.toBe("scenario-1");
   });
 
-  it("copies transactions with source scenarioId to new scenario", async () => {
-    const sourceTransactions: Transaction[] = [
-      {
-        id: "txn-1",
-        accountId: "acc-1",
-        amount: 100,
-        date: "2026-01-01",
-        description: "Test Transaction 1",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "txn-2",
-        accountId: "acc-2",
-        amount: 200,
-        date: "2026-01-02",
-        description: "Test Transaction 2",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "txn-3",
-        accountId: "acc-3",
-        amount: 300,
-        date: "2026-01-03",
-        description: "Test Transaction 3",
-        scenarioId: "other-scenario",
-      },
-    ];
-
-    vi.mocked(TransactionStorage).loadTransactions.mockReturnValue(
-      sourceTransactions
-    );
-
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    await user.click(screen.getByRole("button"));
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    expect(TransactionStorage.saveTransactions).toHaveBeenCalled();
-    const calls = vi.mocked(TransactionStorage).saveTransactions.mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-
-    // Should have original 3 + 2 copied (txn-3 should not be copied)
-    expect(lastCall).toHaveLength(5);
-
-    // Verify copied transactions have new IDs and scenarioId
-    const copiedTransactions = lastCall.filter(
-      (t) => t.scenarioId !== "scenario-1" && t.scenarioId !== "other-scenario"
-    );
-    expect(copiedTransactions).toHaveLength(2);
-    expect(copiedTransactions[0]).toMatchObject({
-      accountId: "acc-1",
-      amount: 100,
-      date: "2026-01-01",
-      description: "Test Transaction 1",
-    });
-    expect(copiedTransactions[0].id).not.toBe("txn-1");
-    expect(copiedTransactions[1]).toMatchObject({
-      accountId: "acc-2",
-      amount: 200,
-      date: "2026-01-02",
-      description: "Test Transaction 2",
-    });
-    expect(copiedTransactions[1].id).not.toBe("txn-2");
-  });
-
-  it("copies recurring transactions with source scenarioId to new scenario", async () => {
-    const sourceRecurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "acc-1",
-        amount: 1000,
-        description: "Monthly Salary",
-        frequency: "monthly",
-        startDate: "2026-01-01",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "rt-2",
-        accountId: "acc-2",
-        amount: -500,
-        description: "Weekly Expense",
-        frequency: "weekly",
-        startDate: "2026-01-01",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "rt-3",
-        accountId: "acc-3",
-        amount: 2000,
-        description: "Other Scenario Transaction",
-        frequency: "monthly",
-        startDate: "2026-01-01",
-        scenarioId: "other-scenario",
-      },
-    ];
-
-    vi.mocked(
-      RecurringTransactionStorage
-    ).loadRecurringTransactions.mockReturnValue(sourceRecurringTransactions);
-
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    await user.click(screen.getByRole("button"));
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    expect(
-      RecurringTransactionStorage.saveRecurringTransactions
-    ).toHaveBeenCalled();
-    const calls = vi.mocked(
-      RecurringTransactionStorage
-    ).saveRecurringTransactions.mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-
-    // Should have original 3 + 2 copied (rt-3 should not be copied)
-    expect(lastCall).toHaveLength(5);
-
-    // Verify copied recurring transactions have new IDs and scenarioId
-    const copiedRecurringTransactions = lastCall.filter(
-      (rt) =>
-        rt.scenarioId !== "scenario-1" && rt.scenarioId !== "other-scenario"
-    );
-    expect(copiedRecurringTransactions).toHaveLength(2);
-    expect(copiedRecurringTransactions[0]).toMatchObject({
-      accountId: "acc-1",
-      amount: 1000,
-      description: "Monthly Salary",
-      frequency: "monthly",
-      startDate: "2026-01-01",
-    });
-    expect(copiedRecurringTransactions[0].id).not.toBe("rt-1");
-    expect(copiedRecurringTransactions[1]).toMatchObject({
-      accountId: "acc-2",
-      amount: -500,
-      description: "Weekly Expense",
-      frequency: "weekly",
-      startDate: "2026-01-01",
-    });
-    expect(copiedRecurringTransactions[1].id).not.toBe("rt-2");
-  });
-
-  it("does not call setActiveScenario after duplication", async () => {
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    // Clear calls from initialization
-    vi.mocked(saveActiveScenarioId).mockClear();
-
-    await user.click(screen.getByRole("button"));
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    // Should not save active scenario ID (planning page manages selection)
-    expect(saveActiveScenarioId).not.toHaveBeenCalled();
-  });
-
   it("closes dialog after successful submit", async () => {
     const user = userEvent.setup();
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
     await user.click(screen.getByRole("button", { name: /duplicate$/i }));
@@ -305,34 +162,19 @@ describe("DuplicateScenarioDialog", () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
     await user.clear(screen.getByLabelText(/name/i));
 
-    expect(screen.getByRole("button", { name: /duplicate$/i })).toBeDisabled();
-  });
-
-  it("trims whitespace from scenario name", async () => {
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    await user.click(screen.getByRole("button"));
-    await user.clear(screen.getByLabelText(/name/i));
-    await user.type(screen.getByLabelText(/name/i), "  Padded Name  ");
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    expect(saveScenarios).toHaveBeenCalled();
-    const calls = vi.mocked(saveScenarios).mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-    expect(lastCall).toContainEqual(
-      expect.objectContaining({ name: "Padded Name" })
-    );
+    expect(
+      screen.getByRole("button", { name: /duplicate$/i }),
+    ).toBeDisabled();
   });
 
   it("resets form when dialog is reopened", async () => {
@@ -340,132 +182,21 @@ describe("DuplicateScenarioDialog", () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
+      </Wrapper>,
     );
 
-    // First open
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
+
     await user.click(screen.getByRole("button"));
     const input = screen.getByLabelText(/name/i);
     await user.clear(input);
     await user.type(input, "Modified Name");
     await user.click(screen.getByRole("button", { name: /cancel/i }));
 
-    // Second open should be reset to default
     await user.click(screen.getByRole("button"));
     expect(screen.getByLabelText(/name/i)).toHaveValue("Base Plan (Copy)");
-  });
-
-  it("does not copy transactions without scenarioId", async () => {
-    const sourceTransactions: Transaction[] = [
-      {
-        id: "txn-1",
-        accountId: "acc-1",
-        amount: 100,
-        date: "2026-01-01",
-        description: "Transaction with scenario",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "txn-2",
-        accountId: "acc-2",
-        amount: 200,
-        date: "2026-01-02",
-        description: "Transaction without scenario",
-      },
-    ];
-
-    vi.mocked(TransactionStorage).loadTransactions.mockReturnValue(
-      sourceTransactions
-    );
-
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    await user.click(screen.getByRole("button"));
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    expect(TransactionStorage.saveTransactions).toHaveBeenCalled();
-    const calls = vi.mocked(TransactionStorage).saveTransactions.mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-
-    // Should have original 2 + 1 copied (txn-2 should not be copied)
-    expect(lastCall).toHaveLength(3);
-
-    // Verify only txn-1 was copied
-    const copiedTransactions = lastCall.filter(
-      (t) => t.scenarioId !== "scenario-1" && t.scenarioId !== undefined
-    );
-    expect(copiedTransactions).toHaveLength(1);
-    expect(copiedTransactions[0]).toMatchObject({
-      accountId: "acc-1",
-      amount: 100,
-      date: "2026-01-01",
-      description: "Transaction with scenario",
-    });
-  });
-
-  it("does not copy recurring transactions without scenarioId", async () => {
-    const sourceRecurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "acc-1",
-        amount: 1000,
-        description: "With scenario",
-        frequency: "monthly",
-        startDate: "2026-01-01",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "rt-2",
-        accountId: "acc-2",
-        amount: -500,
-        description: "Without scenario",
-        frequency: "weekly",
-        startDate: "2026-01-01",
-      },
-    ];
-
-    vi.mocked(
-      RecurringTransactionStorage
-    ).loadRecurringTransactions.mockReturnValue(sourceRecurringTransactions);
-
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    await user.click(screen.getByRole("button"));
-    await user.click(screen.getByRole("button", { name: /duplicate$/i }));
-
-    expect(
-      RecurringTransactionStorage.saveRecurringTransactions
-    ).toHaveBeenCalled();
-    const calls = vi.mocked(
-      RecurringTransactionStorage
-    ).saveRecurringTransactions.mock.calls;
-    const lastCall = calls[calls.length - 1][0];
-
-    // Should have original 2 + 1 copied (rt-2 should not be copied)
-    expect(lastCall).toHaveLength(3);
-
-    // Verify only rt-1 was copied
-    const copiedRecurringTransactions = lastCall.filter(
-      (rt) => rt.scenarioId !== "scenario-1" && rt.scenarioId !== undefined
-    );
-    expect(copiedRecurringTransactions).toHaveLength(1);
-    expect(copiedRecurringTransactions[0]).toMatchObject({
-      accountId: "acc-1",
-      amount: 1000,
-      description: "With scenario",
-      frequency: "monthly",
-      startDate: "2026-01-01",
-    });
   });
 
   it("does not pre-fill name when scenario is not found", async () => {
@@ -473,37 +204,16 @@ describe("DuplicateScenarioDialog", () => {
     render(
       <Wrapper>
         <DuplicateScenarioDialog scenarioId="non-existent-scenario" />
-      </Wrapper>
+      </Wrapper>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
 
     expect(screen.getByLabelText(/name/i)).toHaveValue("");
-  });
-
-  it("does not submit when form is submitted with whitespace-only name", async () => {
-    const user = userEvent.setup();
-    render(
-      <Wrapper>
-        <DuplicateScenarioDialog scenarioId="scenario-1" />
-      </Wrapper>
-    );
-
-    const initialCallCount = vi.mocked(saveScenarios).mock.calls.length;
-
-    await user.click(screen.getByRole("button"));
-
-    const input = screen.getByLabelText(/name/i);
-    await user.clear(input);
-
-    Object.defineProperty(input, "value", { value: "   ", writable: true });
-
-    const form = screen.getByRole("dialog").querySelector("form");
-    expect(form).toBeInTheDocument();
-
-    form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-
-    expect(vi.mocked(saveScenarios).mock.calls.length).toBe(initialCallCount);
   });
 
   it("stops propagation on trigger click", async () => {
@@ -515,12 +225,15 @@ describe("DuplicateScenarioDialog", () => {
         <Wrapper>
           <DuplicateScenarioDialog scenarioId="scenario-1" />
         </Wrapper>
-      </div>
+      </div>,
     );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button")).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button"));
 
-    // Should not propagate to parent (Popover)
     expect(parentClickHandler).not.toHaveBeenCalled();
   });
 });

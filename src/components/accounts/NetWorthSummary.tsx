@@ -1,7 +1,7 @@
 "use client";
 
-import { AccountType } from "@/accounts/AccountType";
 import { useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 import { NetWorthCard } from "./NetWorthCard";

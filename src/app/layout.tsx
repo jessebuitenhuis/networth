@@ -5,14 +5,14 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 
+import { AccountProvider } from "@/accounts/AccountContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup.type";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/accounts/AccountContext";
+import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";
-import { GoalProvider } from "@/goals/GoalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

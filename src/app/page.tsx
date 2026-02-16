@@ -1,5 +1,6 @@
 "use client";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EmptyDashboard } from "@/components/accounts/EmptyDashboard";
 import { NetWorthSummary } from "@/components/accounts/NetWorthSummary";
@@ -7,7 +8,6 @@ import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { GoalProgressSection } from "@/components/goals/GoalProgressSection";
 import TopBar from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
-import { useAccounts } from "@/accounts/AccountContext";
 
 export default function Home() {
   const { accounts } = useAccounts();

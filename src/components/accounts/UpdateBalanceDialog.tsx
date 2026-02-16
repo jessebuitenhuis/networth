@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { generateId } from "@/lib/generateId";
 import { computeBalance } from "@/services/computeBalance";
 import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 interface UpdateBalanceDialogProps {
   accountId: string;

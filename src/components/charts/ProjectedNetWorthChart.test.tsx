@@ -3,19 +3,19 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
+import { AccountType } from "@/accounts/AccountType";
 import type { Goal } from "@/goals/Goal.type";
 import { GoalProvider } from "@/goals/GoalContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { ProjectedNetWorthChart } from "./ProjectedNetWorthChart";
 

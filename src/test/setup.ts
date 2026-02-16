@@ -1,9 +1,25 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup } from "@testing-library/react";
-import { afterEach, beforeAll, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, vi } from "vitest";
 
 afterEach(cleanup);
+
+const defaultFetchMock = async (url: string) => {
+  if (url === "/api/scenarios") {
+    return {
+      ok: true,
+      json: async () => ({ scenarios: [], activeScenarioId: null }),
+    };
+  }
+  return { ok: true, status: 200, json: async () => [] };
+};
+
+globalThis.fetch = vi.fn(defaultFetchMock) as unknown as typeof globalThis.fetch;
+
+beforeEach(() => {
+  (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(defaultFetchMock);
+});
 
 Object.defineProperty(window, "innerWidth", {
   writable: true,

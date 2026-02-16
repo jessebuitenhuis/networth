@@ -24,10 +24,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/transactions/TransactionContext";
 import { generateId } from "@/lib/generateId";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import type { Transaction } from "@/transactions/Transaction.type";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 

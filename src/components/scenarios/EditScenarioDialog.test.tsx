@@ -6,12 +6,12 @@ import {
   RecurringTransactionProvider,
   useRecurringTransactions,
 } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
 import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
 import {
   TransactionProvider,
   useTransactions,
 } from "@/transactions/TransactionContext";
-import type { Scenario } from "@/scenarios/Scenario.type";
 
 import { EditScenarioDialog } from "./EditScenarioDialog";
 

@@ -2,13 +2,13 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/accounts/AccountContext";
+import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";
-import { GoalProvider } from "@/goals/GoalContext";
 
 import PlanningPage from "./page";
 

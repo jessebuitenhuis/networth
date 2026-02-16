@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { AccountPicker } from "@/components/charts/AccountPicker";
 import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
 import TopBar from "@/components/layout/TopBar";
@@ -10,7 +11,6 @@ import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenari
 import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
 import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
-import { useAccounts } from "@/accounts/AccountContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 
 export default function PlanningPage() {

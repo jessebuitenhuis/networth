@@ -1,12 +1,12 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Scenario } from "@/scenarios/Scenario.type";
 import {
   ScenarioProvider,
   scenarioReducer,
   useScenarios,
 } from "@/scenarios/ScenarioContext";
-import type { Scenario } from "@/scenarios/Scenario.type";
 
 const scenario1: Scenario = { id: "1", name: "Base Plan" };
 const scenario2: Scenario = { id: "2", name: "Aggressive Savings" };
@@ -50,9 +50,9 @@ describe("scenarioReducer", () => {
     expect(result.activeScenarioId).toBe(null);
   });
 
-  it("sets all scenarios", () => {
+  it("initializes scenarios", () => {
     const result = scenarioReducer(initial, {
-      type: "set",
+      type: "init",
       scenarios: [scenario2],
       activeScenarioId: "2",
     });
@@ -71,7 +71,6 @@ function TestConsumer() {
     removeScenario,
     updateScenario,
     setActiveScenario,
-    setScenarios,
   } = useScenarios();
   return (
     <div>
@@ -82,7 +81,6 @@ function TestConsumer() {
       <button onClick={() => updateScenario("1", "Updated")}>Update</button>
       <button onClick={() => setActiveScenario("2")}>Set Active</button>
       <button onClick={() => setActiveScenario(null)}>Clear Active</button>
-      <button onClick={() => setScenarios([scenario2])}>Set All</button>
       {scenarios.map((s) => (
         <span key={s.id}>{s.name}</span>
       ))}

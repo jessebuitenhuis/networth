@@ -1,12 +1,12 @@
 "use client";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { buildDisplayTransactions } from "@/services/buildDisplayTransactions";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 import { EditTransactionDialog } from "./EditTransactionDialog";

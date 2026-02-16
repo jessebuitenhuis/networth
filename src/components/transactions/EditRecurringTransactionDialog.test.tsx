@@ -2,10 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach,describe, expect, it } from "vitest";
 
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 
 import { EditRecurringTransactionDialog } from "./EditRecurringTransactionDialog";
 

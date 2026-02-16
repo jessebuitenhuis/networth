@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useScenarios } from "@/scenarios/ScenarioContext";
 import { generateId } from "@/lib/generateId";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 
 type CreateScenarioDialogProps = {
   onCreate?: (id: string) => void;

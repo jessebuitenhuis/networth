@@ -8,8 +8,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";

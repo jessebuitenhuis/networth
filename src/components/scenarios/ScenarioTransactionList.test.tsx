@@ -3,16 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach,describe, expect, it } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AccountProvider } from "@/accounts/AccountContext";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { ScenarioTransactionList } from "./ScenarioTransactionList";
 

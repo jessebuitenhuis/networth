@@ -31,11 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
 import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 

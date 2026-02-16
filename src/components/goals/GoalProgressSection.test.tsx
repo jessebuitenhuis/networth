@@ -2,14 +2,14 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
+import { AccountType } from "@/accounts/AccountType";
 import type { Goal } from "@/goals/Goal.type";
 import { GoalProvider } from "@/goals/GoalContext";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { GoalProgressSection } from "./GoalProgressSection";
 

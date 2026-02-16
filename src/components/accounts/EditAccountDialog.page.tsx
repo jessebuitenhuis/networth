@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import {
   TransactionProvider,
   useTransactions,

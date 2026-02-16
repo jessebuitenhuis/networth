@@ -2,10 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { TransactionProvider } from "@/transactions/TransactionContext";
+import { AccountType } from "@/accounts/AccountType";
 import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { NetWorthSummary } from "./NetWorthSummary";
 

@@ -1,15 +1,15 @@
 "use client";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { EditRecurringTransactionDialog } from "@/components/transactions/EditRecurringTransactionDialog";
 import { EditTransactionDialog } from "@/components/transactions/EditTransactionDialog";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
-import { useAccounts } from "@/accounts/AccountContext";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type ScenarioTransactionListProps = {
   selectedScenarioIds: Set<string>;

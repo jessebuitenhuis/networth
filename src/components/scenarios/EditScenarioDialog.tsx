@@ -24,9 +24,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
-import type { Scenario } from "@/scenarios/Scenario.type";
 
 type EditScenarioDialogProps = {
   scenario: Scenario;

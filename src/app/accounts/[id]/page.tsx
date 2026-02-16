@@ -2,19 +2,19 @@
 
 import { use } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { UpdateBalanceDialog } from "@/components/accounts/UpdateBalanceDialog";
 import TopBar from "@/components/layout/TopBar";
 import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelect";
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
 import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
-import { useAccounts } from "@/accounts/AccountContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import { getDefaultCurrency } from "@/lib/getLocale";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { computeBalance } from "@/services/computeBalance";
 import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type AccountDetailPageProps = {
   // AGENT: Why is this either a promise or not a promise? Can we choose one?
