@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
@@ -12,15 +12,42 @@ import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import PlanningPage from "./page";
 
-// AGENT: there's a util function for this. Use it here and check if this happens in more places
 vi.stubGlobal(
   "ResizeObserver",
   class {
     observe() {}
     unobserve() {}
     disconnect() {}
-  }
+  },
 );
+
+type ApiData = {
+  accounts?: unknown[];
+  transactions?: unknown[];
+  scenarios?: unknown[];
+  activeScenarioId?: string | null;
+  recurringTransactions?: unknown[];
+  goals?: unknown[];
+};
+
+function mockFetchWith(data: ApiData = {}) {
+  const responses: Record<string, unknown> = {
+    "/api/accounts": data.accounts ?? [],
+    "/api/transactions": data.transactions ?? [],
+    "/api/scenarios": {
+      scenarios: data.scenarios ?? [],
+      activeScenarioId: data.activeScenarioId ?? null,
+    },
+    "/api/recurring-transactions": data.recurringTransactions ?? [],
+    "/api/goals": data.goals ?? [],
+  };
+
+  globalThis.fetch = vi.fn(async (url: string) => ({
+    ok: true,
+    status: 200,
+    json: async () => responses[url] ?? [],
+  })) as unknown as typeof globalThis.fetch;
+}
 
 function renderPage() {
   return render(
@@ -36,19 +63,24 @@ function renderPage() {
           </ScenarioProvider>
         </TransactionProvider>
       </AccountProvider>
-    </SidebarProvider>
+    </SidebarProvider>,
   );
 }
 
 describe("PlanningPage", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockFetchWith();
+  });
 
-  // AGENT: the it(renders the...) tests here use a lot of duplication. Should this be done with it.each() or asserting multiple items in one go? Also check other test cases that follow the same pattern in this and other files.
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("renders the Planning heading", () => {
     renderPage();
 
     expect(
-      screen.getByRole("heading", { name: "Planning" })
+      screen.getByRole("heading", { name: "Planning" }),
     ).toBeInTheDocument();
   });
 
@@ -62,7 +94,7 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /scenarios/i })
+      screen.getByRole("button", { name: /scenarios/i }),
     ).toBeInTheDocument();
   });
 
@@ -70,7 +102,7 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /accounts/i })
+      screen.getByRole("button", { name: /accounts/i }),
     ).toBeInTheDocument();
   });
 
@@ -78,19 +110,19 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /new scenario/i })
+      screen.getByRole("button", { name: /new scenario/i }),
     ).toBeInTheDocument();
   });
 
   it("toggles scenario selection when checkbox is clicked", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "scenario-1", name: "Optimistic" }
-    ]));
+    mockFetchWith({
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+    });
 
     renderPage();
 
-    // Initially shows 0 selected
-    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+    // Wait for scenario data to load
+    await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Open picker and click scenario
     await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
@@ -101,14 +133,14 @@ describe("PlanningPage", () => {
   });
 
   it("toggles account filter when checkbox is clicked", async () => {
-    localStorage.setItem("accounts", JSON.stringify([
-      { id: "acc-1", name: "Checking", type: AccountType.Asset }
-    ]));
+    mockFetchWith({
+      accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
+    });
 
     renderPage();
 
-    // Initially shows 1 account (all included)
-    expect(screen.getByRole("button", { name: "Accounts (1)" })).toBeInTheDocument();
+    // Wait for account data to load
+    await screen.findByRole("button", { name: "Accounts (1)" });
 
     // Open picker and toggle account off
     await userEvent.click(screen.getByRole("button", { name: "Accounts (1)" }));
@@ -119,12 +151,17 @@ describe("PlanningPage", () => {
   });
 
   it("clears all scenarios when Deselect all is clicked", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "scenario-1", name: "Optimistic" },
-      { id: "scenario-2", name: "Conservative" }
-    ]));
+    mockFetchWith({
+      scenarios: [
+        { id: "scenario-1", name: "Optimistic" },
+        { id: "scenario-2", name: "Conservative" },
+      ],
+    });
 
     renderPage();
+
+    // Wait for scenario data to load
+    await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Select two scenarios
     await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
