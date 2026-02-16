@@ -7,7 +7,7 @@ import {
   TransactionProvider,
   transactionReducer,
   useTransactions,
-} from "../context/TransactionContext";
+} from "@/transactions/TransactionContext";
 
 const tx1: Transaction = {
   id: "t1",
@@ -279,6 +279,10 @@ describe("TransactionProvider", () => {
         <TestConsumer />
       </TransactionProvider>,
     );
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalled();
+    });
 
     await act(async () => {
       screen.getByText("Add Many").click();

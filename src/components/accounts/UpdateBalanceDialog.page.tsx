@@ -7,7 +7,7 @@ import { AccountProvider } from "@/accounts/AccountContext";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
+} from "@/transactions/TransactionContext";
 import type { Transaction } from "@/transactions/Transaction.type";
 
 import { UpdateBalanceDialog } from "./UpdateBalanceDialog";

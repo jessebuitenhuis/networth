@@ -5,9 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 import { GoalProvider } from "@/goals/GoalContext";
 
 import PlanningPage from "./page";

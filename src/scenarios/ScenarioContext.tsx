@@ -14,7 +14,7 @@ export type ScenarioAction =
   | { type: "remove"; id: string }
   | { type: "update"; id: string; name: string }
   | { type: "setActive"; id: string | null }
-  | { type: "set"; scenarios: Scenario[]; activeScenarioId: string | null };
+  | { type: "init"; scenarios: Scenario[]; activeScenarioId: string | null };
 
 export function scenarioReducer(
   state: ScenarioState,
@@ -43,7 +43,7 @@ export function scenarioReducer(
         ...state,
         activeScenarioId: action.id,
       };
-    case "set":
+    case "init":
       return {
         scenarios: action.scenarios,
         activeScenarioId: action.activeScenarioId,
@@ -58,7 +58,6 @@ type ScenarioContextValue = {
   removeScenario: (id: string) => Promise<void>;
   updateScenario: (id: string, name: string) => Promise<void>;
   setActiveScenario: (id: string | null) => Promise<void>;
-  setScenarios: (scenarios: Scenario[]) => void;
 };
 
 const ScenarioContext = createContext<ScenarioContextValue | null>(null);
@@ -74,7 +73,7 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
       .then((res) => res.json())
       .then((data) =>
         dispatch({
-          type: "set",
+          type: "init",
           scenarios: data.scenarios,
           activeScenarioId: data.activeScenarioId,
         }),
@@ -113,14 +112,6 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "setActive", id });
   }
 
-  function setScenarios(scenarios: Scenario[]) {
-    dispatch({
-      type: "set",
-      scenarios,
-      activeScenarioId: state.activeScenarioId,
-    });
-  }
-
   return (
     <ScenarioContext
       value={{
@@ -130,7 +121,6 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
         removeScenario,
         updateScenario,
         setActiveScenario,
-        setScenarios,
       }}
     >
       {children}

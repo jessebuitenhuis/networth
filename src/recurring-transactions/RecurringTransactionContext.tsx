@@ -2,11 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import {
-  loadRecurringTransactions,
-  saveRecurringTransactions,
-} from "@/services/RecurringTransactionStorage";
+import type { RecurringTransaction } from "./RecurringTransaction.type";
 
 export type RecurringTransactionAction =
   | { type: "add"; recurringTransaction: RecurringTransaction }
@@ -17,7 +13,7 @@ export type RecurringTransactionAction =
 
 export function recurringTransactionReducer(
   state: RecurringTransaction[],
-  action: RecurringTransactionAction
+  action: RecurringTransactionAction,
 ): RecurringTransaction[] {
   switch (action.type) {
     case "add":
@@ -29,16 +25,22 @@ export function recurringTransactionReducer(
     case "set":
       return action.recurringTransactions;
     case "update":
-      return state.map((rt) => (rt.id === action.recurringTransaction.id ? action.recurringTransaction : rt));
+      return state.map((rt) =>
+        rt.id === action.recurringTransaction.id
+          ? action.recurringTransaction
+          : rt,
+      );
   }
 }
 
 type RecurringTransactionContextValue = {
   recurringTransactions: RecurringTransaction[];
-  addRecurringTransaction: (rt: RecurringTransaction) => void;
-  removeRecurringTransaction: (id: string) => void;
-  removeRecurringTransactionsByScenarioId: (scenarioId: string) => void;
-  updateRecurringTransaction: (rt: RecurringTransaction) => void;
+  addRecurringTransaction: (rt: RecurringTransaction) => Promise<void>;
+  removeRecurringTransaction: (id: string) => Promise<void>;
+  removeRecurringTransactionsByScenarioId: (
+    scenarioId: string,
+  ) => Promise<void>;
+  updateRecurringTransaction: (rt: RecurringTransaction) => Promise<void>;
 };
 
 const RecurringTransactionContext =
@@ -51,31 +53,44 @@ export function RecurringTransactionProvider({
 }) {
   const [recurringTransactions, dispatch] = useReducer(
     recurringTransactionReducer,
-    []
+    [],
   );
 
   useEffect(() => {
-    const stored = loadRecurringTransactions();
-    dispatch({ type: "set", recurringTransactions: stored });
+    fetch("/api/recurring-transactions")
+      .then((res) => res.json())
+      .then((data) =>
+        dispatch({ type: "set", recurringTransactions: data }),
+      );
   }, []);
 
-  useEffect(() => {
-    saveRecurringTransactions(recurringTransactions);
-  }, [recurringTransactions]);
-
-  function addRecurringTransaction(rt: RecurringTransaction) {
+  async function addRecurringTransaction(rt: RecurringTransaction) {
+    await fetch("/api/recurring-transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rt),
+    });
     dispatch({ type: "add", recurringTransaction: rt });
   }
 
-  function removeRecurringTransaction(id: string) {
+  async function removeRecurringTransaction(id: string) {
+    await fetch(`/api/recurring-transactions/${id}`, { method: "DELETE" });
     dispatch({ type: "remove", id });
   }
 
-  function removeRecurringTransactionsByScenarioId(scenarioId: string) {
+  async function removeRecurringTransactionsByScenarioId(scenarioId: string) {
+    await fetch(`/api/recurring-transactions?scenarioId=${scenarioId}`, {
+      method: "DELETE",
+    });
     dispatch({ type: "removeByScenarioId", scenarioId });
   }
 
-  function updateRecurringTransaction(rt: RecurringTransaction) {
+  async function updateRecurringTransaction(rt: RecurringTransaction) {
+    await fetch(`/api/recurring-transactions/${rt.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rt),
+    });
     dispatch({ type: "update", recurringTransaction: rt });
   }
 
@@ -98,7 +113,7 @@ export function useRecurringTransactions(): RecurringTransactionContextValue {
   const ctx = useContext(RecurringTransactionContext);
   if (!ctx) {
     throw new Error(
-      "useRecurringTransactions must be used within RecurringTransactionProvider"
+      "useRecurringTransactions must be used within RecurringTransactionProvider",
     );
   }
   return ctx;

@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { SidebarMenuAction } from "@/components/ui/sidebar";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type EditAccountDialogProps = {
   account: Account;

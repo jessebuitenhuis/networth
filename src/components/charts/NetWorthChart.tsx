@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "recharts";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { getDefaultCurrency } from "@/lib/getLocale";

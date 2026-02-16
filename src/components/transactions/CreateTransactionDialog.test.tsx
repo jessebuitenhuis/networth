@@ -12,9 +12,9 @@ import { AccountProvider } from "@/accounts/AccountContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
-} from "@/context/RecurringTransactionContext";
+} from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
-import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
+import { TransactionProvider, useTransactions } from "@/transactions/TransactionContext";
 
 import { CreateTransactionDialog } from "./CreateTransactionDialog";
 

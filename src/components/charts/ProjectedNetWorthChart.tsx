@@ -12,9 +12,9 @@ import {
 } from "recharts";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { useGoals } from "@/goals/GoalContext";
 import { getGoalColor, getScenarioColor } from "@/lib/chartColors";
 import { addMonths, formatDate } from "@/lib/dateUtils";

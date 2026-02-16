@@ -5,12 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
-} from "@/context/RecurringTransactionContext";
+} from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
+} from "@/transactions/TransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
 
 import { EditScenarioDialog } from "./EditScenarioDialog";

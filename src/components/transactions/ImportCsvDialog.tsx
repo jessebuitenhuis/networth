@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { generateId } from "@/lib/generateId";
 import type { CsvColumnMapping } from "@/models/CsvColumnMapping.type";
 import { CsvImportStep } from "@/models/CsvImportStep";

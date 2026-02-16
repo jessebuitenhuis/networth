@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { generateId } from "@/lib/generateId";
 
 interface CreateAccountDialogProps {

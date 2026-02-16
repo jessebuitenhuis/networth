@@ -2,7 +2,7 @@
 
 import { AccountType } from "@/accounts/AccountType";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { NetWorthCard } from "./NetWorthCard";
 

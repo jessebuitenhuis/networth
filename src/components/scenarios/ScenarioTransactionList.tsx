@@ -4,9 +4,9 @@ import { EditRecurringTransactionDialog } from "@/components/transactions/EditRe
 import { EditTransactionDialog } from "@/components/transactions/EditTransactionDialog";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 import { getNextOccurrence } from "@/services/getNextOccurrence";

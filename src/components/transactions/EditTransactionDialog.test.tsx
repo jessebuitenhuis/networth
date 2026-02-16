@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach,describe, expect, it } from "vitest";
 
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 import type { Transaction } from "@/transactions/Transaction.type";
 
 import { EditTransactionDialog } from "./EditTransactionDialog";

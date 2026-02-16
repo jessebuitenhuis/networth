@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
@@ -8,7 +8,7 @@ import {
   RecurringTransactionProvider,
   recurringTransactionReducer,
   useRecurringTransactions,
-} from "../context/RecurringTransactionContext";
+} from "./RecurringTransactionContext";
 
 const rt1: RecurringTransaction = {
   id: "r1",
@@ -48,12 +48,7 @@ const rt4: RecurringTransaction = {
   scenarioId: "s1",
 };
 
-function mockFetch(data: RecurringTransaction[]) {
-  globalThis.fetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: () => Promise.resolve(data),
-  });
-}
+const mockFetch = vi.fn();
 
 describe("recurringTransactionReducer", () => {
   it("adds a recurring transaction", () => {
@@ -138,24 +133,19 @@ function TestConsumer() {
 
 describe("RecurringTransactionProvider", () => {
   beforeEach(() => {
-    mockFetch([]);
+    vi.stubGlobal("fetch", mockFetch);
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it("starts with empty recurring transactions", () => {
-    render(
-      <RecurringTransactionProvider>
-        <TestConsumer />
-      </RecurringTransactionProvider>,
-    );
-    expect(screen.getByTestId("count")).toHaveTextContent("0");
-  });
-
-  it("loads recurring transactions from API on mount", async () => {
-    mockFetch([rt1]);
+  it("fetches recurring transactions from API on mount", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [rt1],
+    });
 
     render(
       <RecurringTransactionProvider>
@@ -164,57 +154,51 @@ describe("RecurringTransactionProvider", () => {
     );
 
     expect(await screen.findByText("Salary")).toBeInTheDocument();
-    expect(globalThis.fetch).toHaveBeenCalledWith("/api/recurring-transactions");
+    expect(mockFetch).toHaveBeenCalledWith("/api/recurring-transactions");
   });
 
-  it("adds a recurring transaction and calls API", async () => {
-    render(
-      <RecurringTransactionProvider>
-        <TestConsumer />
-      </RecurringTransactionProvider>,
-    );
-
-    await act(() => screen.getByText("Add").click());
-
-    expect(screen.getByText("Salary")).toBeInTheDocument();
-    expect(screen.getByTestId("count")).toHaveTextContent("1");
-
-    await waitFor(() => {
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "/api/recurring-transactions",
-        expect.objectContaining({
-          method: "POST",
-          body: JSON.stringify(rt1),
-        }),
-      );
-    });
-  });
-
-  it("removes a recurring transaction and calls API", async () => {
-    mockFetch([rt1]);
+  it("starts with empty recurring transactions before API responds", () => {
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
     render(
       <RecurringTransactionProvider>
         <TestConsumer />
       </RecurringTransactionProvider>,
     );
-
-    await screen.findByText("Salary");
-
-    await act(() => screen.getByText("Remove").click());
 
     expect(screen.getByTestId("count")).toHaveTextContent("0");
-
-    await waitFor(() => {
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "/api/recurring-transactions/r1",
-        expect.objectContaining({ method: "DELETE" }),
-      );
-    });
   });
 
-  it("updates a recurring transaction and calls API", async () => {
-    mockFetch([rt1, rt2]);
+  it("calls POST /api/recurring-transactions on add", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
+      .mockResolvedValueOnce({ ok: true, json: async () => rt1 });
+
+    render(
+      <RecurringTransactionProvider>
+        <TestConsumer />
+      </RecurringTransactionProvider>,
+    );
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith("/api/recurring-transactions"),
+    );
+
+    await act(async () => screen.getByText("Add").click());
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/recurring-transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rt1),
+    });
+    expect(screen.getByText("Salary")).toBeInTheDocument();
+    expect(screen.getByTestId("count")).toHaveTextContent("1");
+  });
+
+  it("calls DELETE /api/recurring-transactions/:id on remove", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [rt1] })
+      .mockResolvedValueOnce({ ok: true });
 
     render(
       <RecurringTransactionProvider>
@@ -224,26 +208,50 @@ describe("RecurringTransactionProvider", () => {
 
     await screen.findByText("Salary");
 
-    await act(() => screen.getByText("Update").click());
+    await act(async () => screen.getByText("Remove").click());
 
+    expect(mockFetch).toHaveBeenCalledWith("/api/recurring-transactions/r1", {
+      method: "DELETE",
+    });
+    expect(screen.getByTestId("count")).toHaveTextContent("0");
+  });
+
+  it("calls PUT /api/recurring-transactions/:id on update", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [rt1, rt2] })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ...rt1, amount: 6000, description: "Updated" }),
+      });
+
+    render(
+      <RecurringTransactionProvider>
+        <TestConsumer />
+      </RecurringTransactionProvider>,
+    );
+
+    await screen.findByText("Salary");
+
+    await act(async () => screen.getByText("Update").click());
+
+    const updated = { ...rt1, amount: 6000, description: "Updated" };
+    expect(mockFetch).toHaveBeenCalledWith("/api/recurring-transactions/r1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated),
+    });
     expect(screen.getByText("Updated")).toBeInTheDocument();
     expect(screen.queryByText("Salary")).not.toBeInTheDocument();
     expect(screen.getByTestId("count")).toHaveTextContent("2");
-
-    const updated = { ...rt1, amount: 6000, description: "Updated" };
-    await waitFor(() => {
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "/api/recurring-transactions/r1",
-        expect.objectContaining({
-          method: "PUT",
-          body: JSON.stringify(updated),
-        }),
-      );
-    });
   });
 
-  it("removes all recurring transactions for a scenario and calls API", async () => {
-    mockFetch([rt1, rt2, rt3, rt4]);
+  it("calls DELETE /api/recurring-transactions?scenarioId on remove by scenario", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [rt1, rt2, rt3, rt4],
+      })
+      .mockResolvedValueOnce({ ok: true });
 
     render(
       <RecurringTransactionProvider>
@@ -253,20 +261,17 @@ describe("RecurringTransactionProvider", () => {
 
     await screen.findByText("Salary");
 
-    await act(() => screen.getByText("Remove By Scenario").click());
+    await act(async () => screen.getByText("Remove By Scenario").click());
 
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/recurring-transactions?scenarioId=s1",
+      { method: "DELETE" },
+    );
     expect(screen.getByTestId("count")).toHaveTextContent("2");
     expect(screen.getByText("Salary")).toBeInTheDocument();
     expect(screen.getByText("Rent")).toBeInTheDocument();
     expect(screen.queryByText("Scenario income")).not.toBeInTheDocument();
     expect(screen.queryByText("Scenario expense")).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        "/api/recurring-transactions?scenarioId=s1",
-        expect.objectContaining({ method: "DELETE" }),
-      );
-    });
   });
 
   it("throws when useRecurringTransactions is called outside provider", () => {

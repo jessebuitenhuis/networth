@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";

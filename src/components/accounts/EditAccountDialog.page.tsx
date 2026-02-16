@@ -7,7 +7,7 @@ import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
+} from "@/transactions/TransactionContext";
 
 import { EditAccountDialog } from "./EditAccountDialog";
 

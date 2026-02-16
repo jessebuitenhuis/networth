@@ -5,7 +5,7 @@ import { AccountProvider } from "@/accounts/AccountContext";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
+} from "@/transactions/TransactionContext";
 
 import { ImportCsvDialog } from "./ImportCsvDialog";
 

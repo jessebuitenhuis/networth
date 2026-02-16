@@ -10,7 +10,7 @@ import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { useAccounts } from "@/accounts/AccountContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import { getDefaultCurrency } from "@/lib/getLocale";
 import { computeBalance } from "@/services/computeBalance";

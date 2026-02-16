@@ -9,7 +9,7 @@ import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
 
 import { AppSidebar } from "./AppSidebar";

@@ -1,9 +1,9 @@
 "use client";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
 import { buildDisplayTransactions } from "@/services/buildDisplayTransactions";
