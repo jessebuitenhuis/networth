@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EditGoalDialogPage } from "./EditGoalDialog.page";
 import type { Goal } from "./Goal.type";
@@ -9,9 +10,16 @@ const goal: Goal = {
   targetAmount: 10000,
 };
 
+const mockFetch = vi.fn();
+
 describe("EditGoalDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.stubGlobal("fetch", mockFetch);
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
   });
 
   it("renders pencil trigger with correct aria-label", () => {
@@ -28,8 +36,11 @@ describe("EditGoalDialog", () => {
   });
 
   it("editing name and saving updates the goal", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal]));
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...goal, name: "FIRE Goal" }) });
     const page = EditGoalDialogPage.render();
+    await screen.findByText("Emergency Fund - 10000");
     await page.open();
     await page.clearAndFillName("FIRE Goal");
     await page.save();
@@ -38,8 +49,11 @@ describe("EditGoalDialog", () => {
   });
 
   it("editing target amount and saving updates the goal", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal]));
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...goal, targetAmount: 15000 }) });
     const page = EditGoalDialogPage.render();
+    await screen.findByText("Emergency Fund - 10000");
     await page.open();
     await page.clearAndFillTargetAmount("15000");
     await page.save();
@@ -47,8 +61,9 @@ describe("EditGoalDialog", () => {
   });
 
   it("empty name prevents submit", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal]));
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [goal] });
     const page = EditGoalDialogPage.render();
+    await screen.findByText("Emergency Fund - 10000");
     await page.open();
     await page.clearAndFillName("");
     await page.save();
@@ -65,8 +80,11 @@ describe("EditGoalDialog", () => {
   });
 
   it("confirming delete removes the goal", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal]));
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [goal] })
+      .mockResolvedValueOnce({ ok: true });
     const page = EditGoalDialogPage.render();
+    await screen.findByText("Emergency Fund - 10000");
     await page.open();
     await page.clickDelete();
     await page.confirmDelete();
@@ -74,8 +92,9 @@ describe("EditGoalDialog", () => {
   });
 
   it("resets form when dialog is reopened", async () => {
-    localStorage.setItem("goals", JSON.stringify([goal]));
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [goal] });
     const page = EditGoalDialogPage.render();
+    await screen.findByText("Emergency Fund - 10000");
     await page.open();
     await page.clearAndFillName("Changed");
     await page.pressEscape();
