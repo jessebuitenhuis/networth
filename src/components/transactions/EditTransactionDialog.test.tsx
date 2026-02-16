@@ -1,8 +1,9 @@
-import { act,render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach,describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
@@ -18,8 +19,11 @@ const mockTransaction: Transaction = {
 
 describe("EditTransactionDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem("transactions", JSON.stringify([mockTransaction]));
+    mockApiResponses({ transactions: [mockTransaction] });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("opens dialog with current values pre-populated", () => {
@@ -28,7 +32,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -45,7 +49,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -63,8 +67,12 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0]).toMatchObject({
+    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    );
+    expect(putCalls).toHaveLength(1);
+    const body = JSON.parse(putCalls[0][1]!.body as string);
+    expect(body).toMatchObject({
       id: "t1",
       amount: 1500,
       date: "2024-01-20",
@@ -79,7 +87,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -100,7 +108,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -117,7 +125,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -128,13 +136,13 @@ describe("EditTransactionDialog", () => {
     expect(confirmButton).toHaveClass("bg-destructive");
   });
 
-  it("removes transaction when confirming delete", () => {
+  it("removes transaction when confirming delete", async () => {
     render(
       <ScenarioProvider>
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -142,10 +150,12 @@ describe("EditTransactionDialog", () => {
 
     const deleteButtons = screen.getAllByText("Delete");
     const confirmButton = deleteButtons[deleteButtons.length - 1];
-    act(() => confirmButton.click());
+    await act(async () => confirmButton.click());
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored).toEqual([]);
+    const deleteCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions/t1" && init?.method === "DELETE",
+    );
+    expect(deleteCalls).toHaveLength(1);
   });
 
   it("returns to edit dialog when canceling delete", () => {
@@ -154,7 +164,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -175,7 +185,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     act(() => screen.getByLabelText("Edit Transaction").click());
@@ -203,7 +213,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -214,22 +224,27 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].description).toBe("Padded Description");
+    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    );
+    expect(putCalls).toHaveLength(1);
+    const body = JSON.parse(putCalls[0][1]!.body as string);
+    expect(body.description).toBe("Padded Description");
   });
 
   it("updates scenario when selecting a specific scenario", async () => {
     const user = userEvent.setup();
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "s1", name: "Test Scenario" }
-    ]));
+    mockApiResponses({
+      transactions: [mockTransaction],
+      scenarios: [{ id: "s1", name: "Test Scenario" }],
+    });
 
     render(
       <ScenarioProvider>
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -237,13 +252,17 @@ describe("EditTransactionDialog", () => {
     const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
     await user.click(scenarioTrigger);
 
-    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
+    const scenarioOption = await screen.findByRole("option", { name: "Test Scenario" });
     await user.click(scenarioOption);
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].scenarioId).toBe("s1");
+    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    );
+    expect(putCalls).toHaveLength(1);
+    const body = JSON.parse(putCalls[0][1]!.body as string);
+    expect(body.scenarioId).toBe("s1");
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {
@@ -253,7 +272,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -270,7 +289,7 @@ describe("EditTransactionDialog", () => {
         <TransactionProvider>
           <EditTransactionDialog transaction={mockTransaction} />
         </TransactionProvider>
-      </ScenarioProvider>
+      </ScenarioProvider>,
     );
 
     await user.click(screen.getByLabelText("Edit Transaction"));
@@ -282,15 +301,23 @@ describe("EditTransactionDialog", () => {
     await user.type(input, "Retirement Plan");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
-    // Verify scenario was created in storage
-    const scenarios = JSON.parse(localStorage.getItem("scenarios")!);
-    const createdScenario = scenarios.find((s: { name: string }) => s.name === "Retirement Plan");
-    expect(createdScenario).toBeDefined();
+    // Verify scenario was created via API
+    const scenarioPostCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/scenarios" && init?.method === "POST",
+    );
+    expect(scenarioPostCalls).toHaveLength(1);
+    const scenarioBody = JSON.parse(scenarioPostCalls[0][1]!.body as string);
+    expect(scenarioBody.name).toBe("Retirement Plan");
+    const createdScenarioId = scenarioBody.id;
 
     // Save transaction and verify scenario ID was set
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].scenarioId).toBe(createdScenario.id);
+    const putCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+      ([url, init]) => url === "/api/transactions/t1" && init?.method === "PUT",
+    );
+    expect(putCalls).toHaveLength(1);
+    const txBody = JSON.parse(putCalls[0][1]!.body as string);
+    expect(txBody.scenarioId).toBe(createdScenarioId);
   });
 });
