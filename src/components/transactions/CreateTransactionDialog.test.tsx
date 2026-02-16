@@ -13,7 +13,7 @@ import {
   RecurringTransactionProvider,
   useRecurringTransactions,
 } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider, useScenarios } from "@/context/ScenarioContext";
+import { ScenarioProvider, useScenarios } from "@/scenarios/ScenarioContext";
 import { TransactionProvider, useTransactions } from "@/context/TransactionContext";
 
 import { CreateTransactionDialog } from "./CreateTransactionDialog";

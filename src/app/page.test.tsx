@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { GoalProvider } from "@/goals/GoalContext";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";

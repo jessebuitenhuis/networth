@@ -2,7 +2,7 @@
 
 import { useAccounts } from "@/accounts/AccountContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";

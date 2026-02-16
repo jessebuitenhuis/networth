@@ -7,7 +7,7 @@ import { AccountType } from "@/accounts/AccountType";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";

@@ -2,14 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import { generateId } from "@/lib/generateId";
-import type { Scenario } from "@/scenarios/Scenario.type";
-import {
-  loadActiveScenarioId,
-  loadScenarios,
-  saveActiveScenarioId,
-  saveScenarios,
-} from "@/services/ScenarioStorage";
+import type { Scenario } from "./Scenario.type";
 
 type ScenarioState = {
   scenarios: Scenario[];
@@ -25,7 +18,7 @@ export type ScenarioAction =
 
 export function scenarioReducer(
   state: ScenarioState,
-  action: ScenarioAction
+  action: ScenarioAction,
 ): ScenarioState {
   switch (action.type) {
     case "add":
@@ -42,7 +35,7 @@ export function scenarioReducer(
       return {
         ...state,
         scenarios: state.scenarios.map((s) =>
-          s.id === action.id ? { ...s, name: action.name } : s
+          s.id === action.id ? { ...s, name: action.name } : s,
         ),
       };
     case "setActive":
@@ -61,10 +54,10 @@ export function scenarioReducer(
 type ScenarioContextValue = {
   scenarios: Scenario[];
   activeScenarioId: string | null;
-  addScenario: (scenario: Scenario) => void;
-  removeScenario: (id: string) => void;
-  updateScenario: (id: string, name: string) => void;
-  setActiveScenario: (id: string | null) => void;
+  addScenario: (scenario: Scenario) => Promise<void>;
+  removeScenario: (id: string) => Promise<void>;
+  updateScenario: (id: string, name: string) => Promise<void>;
+  setActiveScenario: (id: string | null) => Promise<void>;
   setScenarios: (scenarios: Scenario[]) => void;
 };
 
@@ -77,53 +70,46 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const loadedScenarios = loadScenarios();
-    const loadedActiveId = loadActiveScenarioId();
-
-    if (loadedScenarios.length === 0) {
-      const basePlan: Scenario = {
-        id: generateId(),
-        name: "Base Plan",
-      };
-      dispatch({
-        type: "set",
-        scenarios: [basePlan],
-        activeScenarioId: null,
-      });
-      saveScenarios([basePlan]);
-      saveActiveScenarioId(null);
-    } else {
-      dispatch({
-        type: "set",
-        scenarios: loadedScenarios,
-        activeScenarioId: loadedActiveId,
-      });
-    }
+    fetch("/api/scenarios")
+      .then((res) => res.json())
+      .then((data) =>
+        dispatch({
+          type: "set",
+          scenarios: data.scenarios,
+          activeScenarioId: data.activeScenarioId,
+        }),
+      );
   }, []);
 
-  useEffect(() => {
-    if (state.scenarios.length > 0) {
-      saveScenarios(state.scenarios);
-    }
-  }, [state.scenarios]);
-
-  useEffect(() => {
-    saveActiveScenarioId(state.activeScenarioId);
-  }, [state.activeScenarioId]);
-
-  function addScenario(scenario: Scenario) {
+  async function addScenario(scenario: Scenario) {
+    await fetch("/api/scenarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(scenario),
+    });
     dispatch({ type: "add", scenario });
   }
 
-  function removeScenario(id: string) {
+  async function removeScenario(id: string) {
+    await fetch(`/api/scenarios/${id}`, { method: "DELETE" });
     dispatch({ type: "remove", id });
   }
 
-  function updateScenario(id: string, name: string) {
+  async function updateScenario(id: string, name: string) {
+    await fetch(`/api/scenarios/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
     dispatch({ type: "update", id, name });
   }
 
-  function setActiveScenario(id: string | null) {
+  async function setActiveScenario(id: string | null) {
+    await fetch("/api/scenarios/active", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenarioId: id }),
+    });
     dispatch({ type: "setActive", id });
   }
 
@@ -154,7 +140,6 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
 
 export function useScenarios(): ScenarioContextValue {
   const ctx = useContext(ScenarioContext);
-  // AGENT: Is this check needed? Is this not handled in useContext?
   if (!ctx) {
     throw new Error("useScenarios must be used within ScenarioProvider");
   }

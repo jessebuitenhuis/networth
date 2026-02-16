@@ -6,7 +6,7 @@ import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/context/TransactionContext";
 import type { Goal } from "@/goals/Goal.type";
 import { GoalProvider } from "@/goals/GoalContext";

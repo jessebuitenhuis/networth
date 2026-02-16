@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { AccountType } from "@/accounts/AccountType";
 import { useAccounts } from "@/accounts/AccountContext";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { useGoals } from "@/goals/GoalContext";
 import { addYears, formatDate } from "@/lib/dateUtils";

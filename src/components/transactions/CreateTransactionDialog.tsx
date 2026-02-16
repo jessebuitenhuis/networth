@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";

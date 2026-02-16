@@ -5,7 +5,7 @@ import {
   ScenarioProvider,
   scenarioReducer,
   useScenarios,
-} from "@/context/ScenarioContext";
+} from "@/scenarios/ScenarioContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
 
 const scenario1: Scenario = { id: "1", name: "Base Plan" };

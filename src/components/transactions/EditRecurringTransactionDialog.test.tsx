@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach,describe, expect, it } from "vitest";
 
 import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 

@@ -9,7 +9,7 @@ import { CreateTransactionDialog } from "@/components/transactions/CreateTransac
 import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
 import { useAccounts } from "@/accounts/AccountContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import { getDefaultCurrency } from "@/lib/getLocale";

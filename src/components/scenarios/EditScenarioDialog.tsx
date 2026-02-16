@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/context/TransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
 
