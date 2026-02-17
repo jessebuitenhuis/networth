@@ -1,4 +1,5 @@
 import { ChartPeriod } from "@/charts/ChartPeriod";
+import { getBrowserLocale } from "@/lib/getLocale";
 
 export type TickFormat = "weekday" | "dayMonth" | "monthYear";
 
@@ -34,10 +35,10 @@ export function formatTick(dateStr: string, format: TickFormat): string {
   const date = new Date(dateStr + "T00:00:00");
   switch (format) {
     case "weekday":
-      return date.toLocaleDateString(undefined, { weekday: "short" });
+      return date.toLocaleDateString(getBrowserLocale(), { weekday: "short" });
     case "dayMonth":
-      return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+      return date.toLocaleDateString(getBrowserLocale(), { day: "numeric", month: "short" });
     case "monthYear":
-      return date.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+      return date.toLocaleDateString(getBrowserLocale(), { month: "short", year: "2-digit" });
   }
 }

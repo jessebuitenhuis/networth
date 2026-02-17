@@ -9,7 +9,7 @@ import { computeNetWorthSeries } from "@/charts/computeNetWorthSeries";
 import type { DateRange } from "@/charts/DateRange.type";
 import { formatTick, getTickFormat } from "@/charts/formatXAxisTick";
 import { addMonths, formatDate } from "@/lib/dateUtils";
-import { getDefaultCurrency } from "@/lib/getLocale";
+import { getBrowserLocale, getDefaultCurrency } from "@/lib/getLocale";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 import { ChartLegend } from "./ChartLegend";
@@ -29,7 +29,7 @@ const HISTORICAL_PERIODS = [
 ];
 
 export function formatCurrency(value: number): string {
-  return value.toLocaleString(undefined, { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
+  return value.toLocaleString(getBrowserLocale(), { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
 }
 
 export function formatXAxisTick(value: string, tickFormat: ReturnType<typeof getTickFormat>): string {

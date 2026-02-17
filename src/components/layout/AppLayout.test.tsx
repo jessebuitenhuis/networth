@@ -148,8 +148,8 @@ describe("AppLayout", () => {
 
     renderWithProvider(testGroups, <p>Content</p>);
 
-    expect(await screen.findByText("US$1.5K")).toBeInTheDocument();
-    expect(screen.getByText("US$250K")).toBeInTheDocument();
+    expect(await screen.findByText("$1.5K")).toBeInTheDocument();
+    expect(screen.getByText("$250K")).toBeInTheDocument();
   });
 
   it("shows total net worth next to Accounts label", async () => {
@@ -177,7 +177,7 @@ describe("AppLayout", () => {
 
     renderWithProvider(testGroups, <p>Content</p>);
 
-    expect(await screen.findByText("US$4K")).toBeInTheDocument();
+    expect(await screen.findByText("$4K")).toBeInTheDocument();
   });
 
   it("renders New Account as a muted link at the bottom of account list", () => {

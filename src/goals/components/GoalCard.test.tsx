@@ -19,7 +19,7 @@ describe("GoalCard", () => {
 
   it("displays formatted target amount", () => {
     render(<GoalCard goal={goal} editAction={<button>Edit</button>} />);
-    expect(screen.getByText("US$10,000.00")).toBeInTheDocument();
+    expect(screen.getByText("$10,000.00")).toBeInTheDocument();
   });
 
   it("renders edit action", () => {

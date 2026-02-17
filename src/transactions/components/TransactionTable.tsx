@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent,TooltipTrigger } from "@/components/ui/tooltip";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
+import { getBrowserLocale } from "@/lib/getLocale";
 import { cn } from "@/lib/utils";
 import type { DisplayTransaction } from "@/transactions/DisplayTransaction.type";
 
@@ -154,7 +155,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
             className={cn("group", item.isProjected && "border-dashed")}
           >
             <TableCell className="text-left text-muted-foreground">
-              {new Date(item.date + "T00:00:00").toLocaleDateString()}
+              {new Date(item.date + "T00:00:00").toLocaleDateString(getBrowserLocale())}
             </TableCell>
             <TableCell className="text-left">
               <span

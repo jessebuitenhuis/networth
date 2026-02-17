@@ -66,13 +66,13 @@ describe("UpdateBalanceDialog", () => {
   it("shows calculated positive adjustment", async () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
-    expect(page.adjustmentDisplay).toHaveTextContent("+US$250.00");
+    expect(page.adjustmentDisplay).toHaveTextContent("+$250.00");
   });
 
   it("shows calculated negative adjustment", async () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("300");
-    expect(page.adjustmentDisplay).toHaveTextContent("-US$200.00");
+    expect(page.adjustmentDisplay).toHaveTextContent("-$200.00");
   });
 
   it("disables submit when adjustment is zero", async () => {

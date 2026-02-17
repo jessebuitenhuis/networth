@@ -39,15 +39,15 @@ function renderWithProviders(
 
 describe("formatCurrency", () => {
   it("formats positive amounts", () => {
-    expect(formatCurrency(1234)).toBe("US$1,234");
+    expect(formatCurrency(1234)).toBe("$1,234");
   });
 
   it("formats zero", () => {
-    expect(formatCurrency(0)).toBe("US$0");
+    expect(formatCurrency(0)).toBe("$0");
   });
 
   it("formats negative amounts", () => {
-    expect(formatCurrency(-5000)).toBe("-US$5,000");
+    expect(formatCurrency(-5000)).toBe("-$5,000");
   });
 });
 
@@ -70,11 +70,11 @@ describe("formatXAxisTick", () => {
 
 describe("formatYAxisValue", () => {
   it("formats positive values as currency", () => {
-    expect(formatYAxisValue(1000)).toBe("US$1,000");
+    expect(formatYAxisValue(1000)).toBe("$1,000");
   });
 
   it("formats negative values as currency", () => {
-    expect(formatYAxisValue(-500)).toBe("-US$500");
+    expect(formatYAxisValue(-500)).toBe("-$500");
   });
 });
 
@@ -97,11 +97,11 @@ describe("formatTooltipLabel", () => {
 
 describe("formatTooltipValue", () => {
   it("formats tooltip value as currency", () => {
-    expect(formatTooltipValue(2500)).toBe("US$2,500");
+    expect(formatTooltipValue(2500)).toBe("$2,500");
   });
 
   it("formats negative tooltip value as currency", () => {
-    expect(formatTooltipValue(-1500)).toBe("-US$1,500");
+    expect(formatTooltipValue(-1500)).toBe("-$1,500");
   });
 });
 

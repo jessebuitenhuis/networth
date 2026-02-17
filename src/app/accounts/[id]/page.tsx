@@ -7,7 +7,7 @@ import { UpdateBalanceDialog } from "@/accounts/components/UpdateBalanceDialog";
 import { computeBalance } from "@/accounts/computeBalance";
 import TopBar from "@/components/layout/TopBar";
 import { formatDate } from "@/lib/dateUtils";
-import { getDefaultCurrency } from "@/lib/getLocale";
+import { getBrowserLocale, getDefaultCurrency } from "@/lib/getLocale";
 import { ScenarioFilterSelect } from "@/scenarios/components/ScenarioFilterSelect";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 import { CreateTransactionDialog } from "@/transactions/components/CreateTransactionDialog";
@@ -82,7 +82,7 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
               {account.type} Balance
             </p>
             <p className="text-3xl font-bold">
-              {balance.toLocaleString(undefined, {
+              {balance.toLocaleString(getBrowserLocale(), {
                 style: "currency",
                 currency: getDefaultCurrency(),
               })}

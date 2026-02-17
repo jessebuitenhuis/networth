@@ -140,14 +140,14 @@ describe("AppSidebar", () => {
     const groups: NavGroup[] = [
       {
         label: "Accounts",
-        labelSuffix: "US$250K",
+        labelSuffix: "$250K",
         items: [],
       },
     ];
     renderWithProvider(groups);
 
     expect(screen.getByText("Accounts")).toBeInTheDocument();
-    expect(screen.getByText("US$250K")).toBeInTheDocument();
+    expect(screen.getByText("$250K")).toBeInTheDocument();
   });
 
   it("renders subtitle next to item title", () => {
@@ -158,7 +158,7 @@ describe("AppSidebar", () => {
           {
             title: "Checking",
             url: "/accounts/1",
-            subtitle: "US$1.5K",
+            subtitle: "$1.5K",
           },
         ],
       },
@@ -166,7 +166,7 @@ describe("AppSidebar", () => {
     renderWithProvider(groups);
 
     expect(screen.getByText("Checking")).toBeInTheDocument();
-    expect(screen.getByText("US$1.5K")).toBeInTheDocument();
+    expect(screen.getByText("$1.5K")).toBeInTheDocument();
   });
 
   it("renders footerAction below items", () => {

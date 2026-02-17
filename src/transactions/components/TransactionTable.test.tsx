@@ -55,7 +55,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString("en-US");
     expect(screen.getByText(formattedDate)).toBeInTheDocument();
   });
 
@@ -73,7 +73,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString("en-US");
     const dateCell = screen.getByText(formattedDate);
     expect(dateCell).toHaveClass("text-muted-foreground");
   });
@@ -143,7 +143,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const amount = screen.getByText("+US$1,000.00");
+    const amount = screen.getByText("+$1,000.00");
     expect(amount).toHaveClass("text-green-600");
   });
 
@@ -161,7 +161,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const amount = screen.getByText("-US$200.00");
+    const amount = screen.getByText("-$200.00");
     expect(amount).toHaveClass("text-red-600");
   });
 
@@ -179,7 +179,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const amount = screen.getByText("-US$200.00");
+    const amount = screen.getByText("-$200.00");
     expect(amount).toHaveClass("font-mono");
   });
 
@@ -270,7 +270,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString();
+    const formattedDate = new Date("2024-01-20T00:00:00").toLocaleDateString("en-US");
     const dateCell = screen.getByText(formattedDate).closest("td");
     expect(dateCell).toHaveClass("text-left");
   });
@@ -307,7 +307,7 @@ describe("TransactionTable", () => {
     ];
     render(<TransactionTable items={items} />);
 
-    const amountCell = screen.getByText("-US$200.00").closest("td");
+    const amountCell = screen.getByText("-$200.00").closest("td");
     expect(amountCell).toHaveClass("text-right");
   });
 
