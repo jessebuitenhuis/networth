@@ -1,21 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { scenarios, settings } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/scenarios/scenarioRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const {
+  ensureBasePlanExists,
+  getAllScenarios,
+  getActiveScenarioId,
+  createScenario,
+} = await import("@/scenarios/scenarioRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
-  testDb.delete(settings).run();
-  testDb.delete(scenarios).run();
+  vi.resetAllMocks();
 });
 
 describe("GET /api/scenarios", () => {
   it("auto-creates Base Plan when no scenarios exist", async () => {
+    vi.mocked(ensureBasePlanExists).mockReturnValue(undefined);
+    vi.mocked(getAllScenarios).mockReturnValue([{ id: "auto-1", name: "Base Plan" }]);
+    vi.mocked(getActiveScenarioId).mockReturnValue("auto-1");
+
     const response = await GET();
     const body = await response.json();
 
@@ -23,20 +27,16 @@ describe("GET /api/scenarios", () => {
     expect(body.scenarios).toHaveLength(1);
     expect(body.scenarios[0].name).toBe("Base Plan");
     expect(body.activeScenarioId).toBe(body.scenarios[0].id);
+    expect(ensureBasePlanExists).toHaveBeenCalled();
   });
 
   it("returns existing scenarios with active id", async () => {
-    testDb
-      .insert(scenarios)
-      .values([
-        { id: "s-1", name: "Base Plan" },
-        { id: "s-2", name: "Optimistic" },
-      ])
-      .run();
-    testDb
-      .insert(settings)
-      .values({ key: "activeScenarioId", value: "s-1" })
-      .run();
+    vi.mocked(ensureBasePlanExists).mockReturnValue(undefined);
+    vi.mocked(getAllScenarios).mockReturnValue([
+      { id: "s-1", name: "Base Plan" },
+      { id: "s-2", name: "Optimistic" },
+    ]);
+    vi.mocked(getActiveScenarioId).mockReturnValue("s-1");
 
     const response = await GET();
     const body = await response.json();
@@ -49,6 +49,8 @@ describe("GET /api/scenarios", () => {
 
 describe("POST /api/scenarios", () => {
   it("creates a scenario", async () => {
+    vi.mocked(createScenario).mockReturnValue({ id: "s-new", name: "Pessimistic" });
+
     const request = new Request("http://localhost/api/scenarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -59,9 +61,8 @@ describe("POST /api/scenarios", () => {
     const body = await response.json();
 
     expect(response.status).toBe(201);
-    expect(body).toEqual(
-      expect.objectContaining({ id: "s-new", name: "Pessimistic" }),
-    );
+    expect(body).toEqual(expect.objectContaining({ id: "s-new", name: "Pessimistic" }));
+    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic" });
   });
 
   it("returns 400 for missing required fields", async () => {

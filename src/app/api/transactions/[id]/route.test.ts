@@ -1,12 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { accounts, transactions } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/transactions/transactionRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getTransactionById, updateTransaction, deleteTransaction } =
+  await import("@/transactions/transactionRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -14,35 +11,34 @@ function makeParams(id: string) {
 }
 
 beforeEach(() => {
-  testDb.delete(transactions).run();
-  testDb.delete(accounts).run();
-  testDb
-    .insert(accounts)
-    .values({ id: "acc-1", name: "Checking", type: "Asset" })
-    .run();
-  testDb
-    .insert(transactions)
-    .values({
+  vi.resetAllMocks();
+});
+
+describe("PUT /api/transactions/[id]", () => {
+  it("updates an existing transaction", async () => {
+    vi.mocked(getTransactionById).mockReturnValue({
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
       date: "2025-01-01",
       description: "Initial",
-    })
-    .run();
-});
+      isProjected: null,
+      scenarioId: null,
+    });
+    vi.mocked(updateTransaction).mockReturnValue({
+      id: "t-1",
+      accountId: "acc-1",
+      amount: 250,
+      date: "2025-01-01",
+      description: "Updated",
+      isProjected: null,
+      scenarioId: null,
+    });
 
-describe("PUT /api/transactions/[id]", () => {
-  it("updates an existing transaction", async () => {
     const request = new Request("http://localhost/api/transactions/t-1", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        accountId: "acc-1",
-        amount: 250,
-        date: "2025-01-01",
-        description: "Updated",
-      }),
+      body: JSON.stringify({ accountId: "acc-1", amount: 250, date: "2025-01-01", description: "Updated" }),
     });
 
     const response = await PUT(request, makeParams("t-1"));
@@ -54,15 +50,12 @@ describe("PUT /api/transactions/[id]", () => {
   });
 
   it("returns 404 for non-existent transaction", async () => {
+    vi.mocked(getTransactionById).mockReturnValue(undefined);
+
     const request = new Request("http://localhost/api/transactions/missing", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        accountId: "acc-1",
-        amount: 100,
-        date: "2025-01-01",
-        description: "Ghost",
-      }),
+      body: JSON.stringify({ accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Ghost" }),
     });
 
     const response = await PUT(request, makeParams("missing"));
@@ -73,24 +66,30 @@ describe("PUT /api/transactions/[id]", () => {
 
 describe("DELETE /api/transactions/[id]", () => {
   it("deletes an existing transaction", async () => {
+    vi.mocked(getTransactionById).mockReturnValue({
+      id: "t-1",
+      accountId: "acc-1",
+      amount: 100,
+      date: "2025-01-01",
+      description: "Initial",
+      isProjected: null,
+      scenarioId: null,
+    });
+
     const response = await DELETE(
-      new Request("http://localhost/api/transactions/t-1", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/transactions/t-1", { method: "DELETE" }),
       makeParams("t-1"),
     );
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(transactions).all();
-    expect(rows).toHaveLength(0);
+    expect(deleteTransaction).toHaveBeenCalledWith("t-1");
   });
 
   it("returns 404 for non-existent transaction", async () => {
+    vi.mocked(getTransactionById).mockReturnValue(undefined);
+
     const response = await DELETE(
-      new Request("http://localhost/api/transactions/missing", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/transactions/missing", { method: "DELETE" }),
       makeParams("missing"),
     );
 

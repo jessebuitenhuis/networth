@@ -1,20 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { recurringTransactions } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const {
+  getAllRecurringTransactions,
+  createRecurringTransaction,
+  deleteRecurringTransactionsByScenarioId,
+} = await import("@/recurring-transactions/recurringTransactionRepository");
 const { GET, POST, DELETE } = await import("./route");
 
 beforeEach(() => {
-  testDb.delete(recurringTransactions).run();
+  vi.resetAllMocks();
 });
 
 describe("GET /api/recurring-transactions", () => {
   it("returns empty array when none exist", async () => {
+    vi.mocked(getAllRecurringTransactions).mockReturnValue([]);
+
     const response = await GET();
     const body = await response.json();
 
@@ -23,27 +25,10 @@ describe("GET /api/recurring-transactions", () => {
   });
 
   it("returns all recurring transactions", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values([
-        {
-          id: "rt-1",
-          accountId: "acc-1",
-          amount: 3000,
-          description: "Salary",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-        },
-        {
-          id: "rt-2",
-          accountId: "acc-1",
-          amount: -1200,
-          description: "Rent",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-        },
-      ])
-      .run();
+    vi.mocked(getAllRecurringTransactions).mockReturnValue([
+      { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null },
+      { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null },
+    ]);
 
     const response = await GET();
     const body = await response.json();
@@ -53,19 +38,9 @@ describe("GET /api/recurring-transactions", () => {
   });
 
   it("returns recurring transactions with optional fields", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values({
-        id: "rt-1",
-        accountId: "acc-1",
-        amount: 500,
-        description: "Bonus",
-        frequency: "Yearly",
-        startDate: "2025-01-01",
-        endDate: "2027-01-01",
-        scenarioId: "s-1",
-      })
-      .run();
+    vi.mocked(getAllRecurringTransactions).mockReturnValue([
+      { id: "rt-1", accountId: "acc-1", amount: 500, description: "Bonus", frequency: "Yearly", startDate: "2025-01-01", endDate: "2027-01-01", scenarioId: "s-1" },
+    ]);
 
     const response = await GET();
     const body = await response.json();
@@ -77,40 +52,36 @@ describe("GET /api/recurring-transactions", () => {
 
 describe("POST /api/recurring-transactions", () => {
   it("creates a recurring transaction", async () => {
-    const request = new Request(
-      "http://localhost/api/recurring-transactions",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "rt-new",
-          accountId: "acc-1",
-          amount: 2000,
-          description: "Paycheck",
-          frequency: "Monthly",
-          startDate: "2025-02-01",
-        }),
-      },
-    );
+    vi.mocked(createRecurringTransaction).mockReturnValue({
+      id: "rt-new",
+      accountId: "acc-1",
+      amount: 2000,
+      description: "Paycheck",
+      frequency: "Monthly",
+      startDate: "2025-02-01",
+      endDate: null,
+      scenarioId: null,
+    });
+
+    const request = new Request("http://localhost/api/recurring-transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "rt-new", accountId: "acc-1", amount: 2000, description: "Paycheck", frequency: "Monthly", startDate: "2025-02-01" }),
+    });
 
     const response = await POST(request);
     const body = await response.json();
 
     expect(response.status).toBe(201);
-    expect(body).toEqual(
-      expect.objectContaining({ id: "rt-new", amount: 2000 }),
-    );
+    expect(body).toEqual(expect.objectContaining({ id: "rt-new", amount: 2000 }));
   });
 
   it("returns 400 for missing required fields", async () => {
-    const request = new Request(
-      "http://localhost/api/recurring-transactions",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: 100 }),
-      },
-    );
+    const request = new Request("http://localhost/api/recurring-transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: 100 }),
+    });
 
     const response = await POST(request);
 
@@ -120,47 +91,19 @@ describe("POST /api/recurring-transactions", () => {
 
 describe("DELETE /api/recurring-transactions (bulk)", () => {
   it("deletes recurring transactions by scenarioId", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values([
-        {
-          id: "rt-1",
-          accountId: "acc-1",
-          amount: 100,
-          description: "Base",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-        },
-        {
-          id: "rt-2",
-          accountId: "acc-1",
-          amount: 200,
-          description: "Scenario",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-          scenarioId: "s-1",
-        },
-      ])
-      .run();
-
-    const url =
-      "http://localhost/api/recurring-transactions?scenarioId=s-1";
+    const url = "http://localhost/api/recurring-transactions?scenarioId=s-1";
     const request = new Request(url, { method: "DELETE" });
 
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(recurringTransactions).all();
-    expect(rows).toHaveLength(1);
-    expect(rows[0].id).toBe("rt-1");
+    expect(deleteRecurringTransactionsByScenarioId).toHaveBeenCalledWith("s-1");
   });
 
   it("returns 400 when no filter provided", async () => {
-    const request = new Request(
-      "http://localhost/api/recurring-transactions",
-      { method: "DELETE" },
-    );
+    const request = new Request("http://localhost/api/recurring-transactions", {
+      method: "DELETE",
+    });
 
     const response = await DELETE(request);
 

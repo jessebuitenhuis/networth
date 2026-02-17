@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { accounts } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/accounts/accountRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getAccountById, updateAccount, deleteAccount } = await import("@/accounts/accountRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -14,15 +10,24 @@ function makeParams(id: string) {
 }
 
 beforeEach(() => {
-  testDb.delete(accounts).run();
-  testDb
-    .insert(accounts)
-    .values({ id: "acc-1", name: "Checking", type: "Asset" })
-    .run();
+  vi.resetAllMocks();
 });
 
 describe("PUT /api/accounts/[id]", () => {
   it("updates an existing account", async () => {
+    vi.mocked(getAccountById).mockReturnValue({
+      id: "acc-1",
+      name: "Checking",
+      type: "Asset",
+      expectedReturnRate: null,
+    });
+    vi.mocked(updateAccount).mockReturnValue({
+      id: "acc-1",
+      name: "Updated Checking",
+      type: "Asset",
+      expectedReturnRate: null,
+    });
+
     const request = new Request("http://localhost/api/accounts/acc-1", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -37,14 +42,23 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("updates expectedReturnRate", async () => {
+    vi.mocked(getAccountById).mockReturnValue({
+      id: "acc-1",
+      name: "Checking",
+      type: "Asset",
+      expectedReturnRate: null,
+    });
+    vi.mocked(updateAccount).mockReturnValue({
+      id: "acc-1",
+      name: "Checking",
+      type: "Asset",
+      expectedReturnRate: 0.05,
+    });
+
     const request = new Request("http://localhost/api/accounts/acc-1", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Checking",
-        type: "Asset",
-        expectedReturnRate: 0.05,
-      }),
+      body: JSON.stringify({ name: "Checking", type: "Asset", expectedReturnRate: 0.05 }),
     });
 
     const response = await PUT(request, makeParams("acc-1"));
@@ -55,6 +69,8 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("returns 404 for non-existent account", async () => {
+    vi.mocked(getAccountById).mockReturnValue(undefined);
+
     const request = new Request("http://localhost/api/accounts/non-existent", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -69,22 +85,27 @@ describe("PUT /api/accounts/[id]", () => {
 
 describe("DELETE /api/accounts/[id]", () => {
   it("deletes an existing account", async () => {
+    vi.mocked(getAccountById).mockReturnValue({
+      id: "acc-1",
+      name: "Checking",
+      type: "Asset",
+      expectedReturnRate: null,
+    });
+
     const response = await DELETE(
       new Request("http://localhost/api/accounts/acc-1", { method: "DELETE" }),
       makeParams("acc-1"),
     );
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(accounts).all();
-    expect(rows).toHaveLength(0);
+    expect(deleteAccount).toHaveBeenCalledWith("acc-1");
   });
 
   it("returns 404 for non-existent account", async () => {
+    vi.mocked(getAccountById).mockReturnValue(undefined);
+
     const response = await DELETE(
-      new Request("http://localhost/api/accounts/non-existent", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/accounts/non-existent", { method: "DELETE" }),
       makeParams("non-existent"),
     );
 
