@@ -6,7 +6,7 @@ import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "rech
 import { useAccounts } from "@/accounts/AccountContext";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
-import { getDefaultCurrency } from "@/lib/getLocale";
+import { getBrowserLocale, getDefaultCurrency } from "@/lib/getLocale";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange.type";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
@@ -29,7 +29,7 @@ const HISTORICAL_PERIODS = [
 ];
 
 export function formatCurrency(value: number): string {
-  return value.toLocaleString(undefined, { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
+  return value.toLocaleString(getBrowserLocale(), { style: "currency", currency: getDefaultCurrency(), maximumFractionDigits: 0 });
 }
 
 export function formatXAxisTick(value: string, tickFormat: ReturnType<typeof getTickFormat>): string {

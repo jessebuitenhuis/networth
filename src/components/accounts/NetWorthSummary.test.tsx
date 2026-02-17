@@ -35,7 +35,7 @@ describe("NetWorthSummary", () => {
 
   it("displays $0.00 with no accounts", () => {
     renderWithProvider();
-    expect(screen.getByText("US$0.00")).toBeInTheDocument();
+    expect(screen.getByText("$0.00")).toBeInTheDocument();
   });
 
   it("displays sum of assets minus liabilities", async () => {
@@ -52,7 +52,7 @@ describe("NetWorthSummary", () => {
 
     renderWithProvider(accounts, transactions);
 
-    expect(await screen.findByText("US$6,500.00")).toBeInTheDocument();
+    expect(await screen.findByText("$6,500.00")).toBeInTheDocument();
   });
 
   it("displays negative net worth", async () => {
@@ -67,7 +67,7 @@ describe("NetWorthSummary", () => {
 
     renderWithProvider(accounts, transactions);
 
-    expect(await screen.findByText("-US$1,500.00")).toBeInTheDocument();
+    expect(await screen.findByText("-$1,500.00")).toBeInTheDocument();
   });
 
   it("has a heading", () => {

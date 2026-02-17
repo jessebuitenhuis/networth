@@ -3,6 +3,12 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, vi } from "vitest";
 
+// Pin locale so formatting functions produce deterministic output regardless of host system
+Object.defineProperty(navigator, "language", {
+  value: "en-US",
+  configurable: true,
+});
+
 afterEach(cleanup);
 
 const defaultFetchMock = async (url: string) => {

@@ -79,7 +79,7 @@ describe("AccountDetailPage", () => {
   it("shows current balance computed from transactions", async () => {
     renderPage("a1", { accounts, transactions });
 
-    expect(await screen.findByText("US$800.00")).toBeInTheDocument();
+    expect(await screen.findByText("$800.00")).toBeInTheDocument();
   });
 
   it("renders transaction list", async () => {
@@ -122,7 +122,7 @@ describe("AccountDetailPage", () => {
     ];
     renderPage("a1", { accounts, transactions: scenarioTransactions, scenarios });
 
-    expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("$1,000.00")).toBeInTheDocument();
 
     const filter = screen.getByRole("combobox", { name: "Scenario filter" });
     await user.click(filter);
@@ -130,7 +130,7 @@ describe("AccountDetailPage", () => {
     const scenario1Option = screen.getByRole("option", { name: "Scenario 1" });
     await user.click(scenario1Option);
 
-    expect(await screen.findByText("US$1,500.00")).toBeInTheDocument();
+    expect(await screen.findByText("$1,500.00")).toBeInTheDocument();
   });
 
   it("handles deleted scenario gracefully (falls back to baseline)", async () => {
@@ -146,6 +146,6 @@ describe("AccountDetailPage", () => {
     const filter = await screen.findByRole("combobox", { name: "Scenario filter" });
     expect(filter).toHaveTextContent("Baseline only");
 
-    expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("$1,000.00")).toBeInTheDocument();
   });
 });

@@ -10,9 +10,9 @@ describe("NetWorthCard", () => {
   });
 
   it.each([
-    [6500, "US$6,500.00"],
-    [-1500, "-US$1,500.00"],
-    [0, "US$0.00"],
+    [6500, "$6,500.00"],
+    [-1500, "-$1,500.00"],
+    [0, "$0.00"],
   ])("formats net worth %s as %s", (netWorth, expected) => {
     render(<NetWorthCard netWorth={netWorth} />);
     expect(screen.getByText(expected)).toBeInTheDocument();
