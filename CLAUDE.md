@@ -35,14 +35,14 @@ See `PRD.md` for full product requirements.
 
 ### Smart/Dumb Component Pattern
 
-- **Smart (container) components** live in `src/components/{feature}/` and consume React contexts directly. They hold state and logic.
+- **Smart (container) components** consume React contexts directly. They hold state and logic.
 - **Dumb (presentational) components** receive all data via props. No context usage, no side effects.
 - Example: `AccountList` (smart) uses `useAccounts()` context, passes data to `AccountListItem` (dumb).
 
 ### State Management
 
 - React Context + `useReducer` for all domain entities
-- Contexts defined in `src/context/` — `AccountContext`, `TransactionContext`, `RecurringTransactionContext`, `ScenarioContext`
+- Contexts defined in domain folders — `AccountContext`, `TransactionContext`, `RecurringTransactionContext`, `ScenarioContext`, `GoalContext`
 - Contexts fetch/mutate via Next.js API routes (server-side SQLite)
 
 ### Storage Layer
@@ -63,27 +63,27 @@ SQLite -> Drizzle ORM -> API routes -> Context providers -> Smart components -> 
 
 ```
 src/
-  accounts/         # Account domain types (Account.type.ts, AccountType.ts)
-  transactions/     # Transaction domain types (Transaction.type.ts)
-  recurring-transactions/  # Recurring transaction types + enums
-  scenarios/        # Scenario domain types (Scenario.type.ts)
-  goals/            # Goal domain: type, context, storage, components
+  accounts/         # Account domain: types, context, repository, services, components
+    components/     # Account UI components (AccountIcon, dialogs, NetWorthCard, etc.)
+  transactions/     # Transaction domain: types, context, repository, services, components
+    components/     # Transaction UI components (TransactionList, dialogs, etc.)
+    import/         # CSV import sub-domain: types, services, ImportCsvDialog
+  recurring-transactions/  # Recurring transaction domain: types, context, repository, services
+  scenarios/        # Scenario domain: types, context, repository
+    components/     # Scenario UI components (dialogs, pickers, etc.)
+  goals/            # Goal domain: types, context, repository, services
+    components/     # Goal UI components (GoalCard, GoalList, dialogs, progress, etc.)
+  charts/           # Chart domain: types, services, components
+    components/     # Chart UI components (NetWorthChart, PeriodPicker, legends, etc.)
   app/              # Next.js App Router pages
     api/            # API route handlers (CRUD for each entity)
-  components/       # UI components (smart + dumb)
-    accounts/       # Account-related components
-    charts/         # Net worth chart + legend + period picker
+  components/       # Shared UI components only
     layout/         # App shell (sidebar, layout wrapper)
-    scenarios/      # Scenario management components
-    transactions/   # Transaction-related components
-    shared/         # Reusable non-shadcn components (e.g. MultiSelectPicker)
+    shared/         # Reusable non-shadcn components (MultiSelectPicker, CurrencyInput, etc.)
     ui/             # shadcn/ui primitives (do not edit directly)
-  context/          # React context providers (AccountContext, TransactionContext)
   db/               # Database schema (Drizzle) and connection singleton
   hooks/            # Custom React hooks
-  lib/              # Pure utility functions
-  models/           # Shared TypeScript types and enums (non-domain-specific)
-  services/         # Computation logic (net worth series, projections, CSV)
+  lib/              # Generic utility functions (dateUtils, formatCurrency, generateId, etc.)
   test/             # Test setup and configuration
 ```
 
@@ -98,10 +98,10 @@ src/
 - Mock utilities in `src/test/mocks/` for non-universal mocks (ResizeObserver, Recharts warnings)
 - Use `it.each()` for parameterized tests (3+ cases with same structure)
 - Import sorting enforced via `eslint-plugin-simple-import-sort`; run `npm run format` to auto-fix
-- Domain types live in their own domain folders (`src/accounts/`, `src/transactions/`, etc.)
+- Domain types, context, repository, services, and components all live in their domain folder (`src/accounts/`, `src/transactions/`, etc.)
 - API routes handle persistence via Drizzle ORM; no direct DB access from client code
 - Use `generateId()` from `src/lib/generateId.ts` for all UUID generation
-- Smart components delegate data transformation to services (e.g. `buildDisplayTransactions`)
+- Smart components delegate data transformation to domain services (e.g. `buildDisplayTransactions`)
 - Reusable non-shadcn components go in `src/components/shared/`
 
 ## Known Issues

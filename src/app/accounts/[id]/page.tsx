@@ -3,17 +3,17 @@
 import { use } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { UpdateBalanceDialog } from "@/components/accounts/UpdateBalanceDialog";
+import { UpdateBalanceDialog } from "@/accounts/components/UpdateBalanceDialog";
+import { computeBalance } from "@/accounts/computeBalance";
 import TopBar from "@/components/layout/TopBar";
-import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelect";
-import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
-import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
-import { TransactionList } from "@/components/transactions/TransactionList";
 import { formatDate } from "@/lib/dateUtils";
 import { getDefaultCurrency } from "@/lib/getLocale";
+import { ScenarioFilterSelect } from "@/scenarios/components/ScenarioFilterSelect";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { computeBalance } from "@/services/computeBalance";
-import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
+import { CreateTransactionDialog } from "@/transactions/components/CreateTransactionDialog";
+import { TransactionList } from "@/transactions/components/TransactionList";
+import { filterTransactionsByScenario } from "@/transactions/filterTransactionsByScenario";
+import { ImportCsvDialog } from "@/transactions/import/ImportCsvDialog";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 type AccountDetailPageProps = {
