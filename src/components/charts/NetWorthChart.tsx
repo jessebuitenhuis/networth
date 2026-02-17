@@ -3,14 +3,14 @@
 import { useCallback, useState } from "react";
 import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "recharts";
 
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useAccounts } from "@/accounts/AccountContext";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { formatTick, getTickFormat } from "@/lib/formatXAxisTick";
 import { getDefaultCurrency } from "@/lib/getLocale";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange.type";
 import { computeNetWorthSeries } from "@/services/computeNetWorthSeries";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { ChartLegend } from "./ChartLegend";
 import { CustomDateRangePicker } from "./CustomDateRangePicker";

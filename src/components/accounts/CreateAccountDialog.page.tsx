@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider, useAccounts } from "@/context/AccountContext";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
+} from "@/transactions/TransactionContext";
 
 import { CreateAccountDialog } from "./CreateAccountDialog";
 

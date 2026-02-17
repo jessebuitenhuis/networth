@@ -5,7 +5,7 @@ import {
   MultiSelectPicker,
   type MultiSelectPickerItem,
 } from "@/components/shared/MultiSelectPicker";
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 type ScenarioPickerProps = {
   scenarios: Scenario[];

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -7,12 +7,14 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/",
 }));
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { AppLayout } from "./AppLayout";
 import type { NavGroup } from "./NavGroup.type";
@@ -36,12 +38,18 @@ function renderWithProvider(navGroups: NavGroup[], children: React.ReactNode) {
           </ScenarioProvider>
         </TransactionProvider>
       </AccountProvider>
-    </SidebarProvider>
+    </SidebarProvider>,
   );
 }
 
 describe("AppLayout", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockApiResponses();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it("renders children in main content area", () => {
     renderWithProvider(testGroups, <p>Page content</p>);
@@ -53,7 +61,7 @@ describe("AppLayout", () => {
     renderWithProvider(testGroups, <p>Content</p>);
 
     expect(
-      screen.getByRole("link", { name: "Dashboard" })
+      screen.getByRole("link", { name: "Dashboard" }),
     ).toBeInTheDocument();
   });
 
@@ -62,7 +70,7 @@ describe("AppLayout", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
+    mockApiResponses({ accounts });
 
     renderWithProvider(testGroups, <p>Content</p>);
 
@@ -75,7 +83,7 @@ describe("AppLayout", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
+    mockApiResponses({ accounts });
 
     renderWithProvider(testGroups, <p>Content</p>);
 
@@ -93,7 +101,7 @@ describe("AppLayout", () => {
     renderWithProvider(testGroups, <p>Content</p>);
 
     expect(
-      screen.getByRole("button", { name: /New Account/i })
+      screen.getByRole("button", { name: /New Account/i }),
     ).toBeInTheDocument();
   });
 
@@ -102,7 +110,7 @@ describe("AppLayout", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Credit Card", type: AccountType.Liability },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
+    mockApiResponses({ accounts });
 
     renderWithProvider(testGroups, <p>Content</p>);
 
@@ -120,14 +128,13 @@ describe("AppLayout", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    const transactions = [
+    const transactions: Transaction[] = [
       {
         id: "t1",
         accountId: "1",
         description: "Initial",
         amount: 1500,
         date: "2024-01-01",
-        scenarioIds: [],
       },
       {
         id: "t2",
@@ -135,11 +142,9 @@ describe("AppLayout", () => {
         description: "Initial",
         amount: 250000,
         date: "2024-01-01",
-        scenarioIds: [],
       },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+    mockApiResponses({ accounts, transactions });
 
     renderWithProvider(testGroups, <p>Content</p>);
 
@@ -152,14 +157,13 @@ describe("AppLayout", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Credit Card", type: AccountType.Liability },
     ];
-    const transactions = [
+    const transactions: Transaction[] = [
       {
         id: "t1",
         accountId: "1",
         description: "Initial",
         amount: 5000,
         date: "2024-01-01",
-        scenarioIds: [],
       },
       {
         id: "t2",
@@ -167,11 +171,9 @@ describe("AppLayout", () => {
         description: "Initial",
         amount: 1000,
         date: "2024-01-01",
-        scenarioIds: [],
       },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+    mockApiResponses({ accounts, transactions });
 
     renderWithProvider(testGroups, <p>Content</p>);
 

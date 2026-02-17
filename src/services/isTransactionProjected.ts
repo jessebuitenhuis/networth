@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/dateUtils";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 export function isTransactionProjected(
   transaction: Transaction,

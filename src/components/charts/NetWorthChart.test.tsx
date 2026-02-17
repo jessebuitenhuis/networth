@@ -2,13 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { AccountProvider } from "@/context/AccountContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import {
   formatCurrency,
@@ -26,8 +27,7 @@ function renderWithProviders(
   accounts: Account[] = [],
   transactions: Transaction[] = []
 ) {
-  localStorage.setItem("accounts", JSON.stringify(accounts));
-  localStorage.setItem("transactions", JSON.stringify(transactions));
+  mockApiResponses({ accounts, transactions });
   return render(
     <AccountProvider>
       <TransactionProvider>
@@ -106,7 +106,7 @@ describe("formatTooltipValue", () => {
 });
 
 describe("NetWorthChart", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => mockApiResponses());
 
   it("renders the period picker with 1M selected by default", () => {
     renderWithProviders();
@@ -159,25 +159,25 @@ describe("NetWorthChart", () => {
     expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
   });
 
-  it("renders legend with account names as buttons", () => {
+  it("renders legend with account names as buttons", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
     renderWithProviders(accounts);
 
-    expect(screen.getByRole("button", { name: "Checking" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Checking" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Savings" })).toBeInTheDocument();
   });
 
-  it("has all accounts enabled by default", () => {
+  it("has all accounts enabled by default", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
     renderWithProviders(accounts);
 
-    expect(screen.getByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -188,6 +188,7 @@ describe("NetWorthChart", () => {
     ];
     renderWithProviders(accounts);
 
+    await screen.findByRole("button", { name: "Savings" });
     await userEvent.click(screen.getByRole("button", { name: "Savings" }));
 
     expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "false");
@@ -201,6 +202,7 @@ describe("NetWorthChart", () => {
     ];
     renderWithProviders(accounts);
 
+    await screen.findByRole("button", { name: "Savings" });
     await userEvent.click(screen.getByRole("button", { name: "Savings" }));
     await userEvent.click(screen.getByRole("button", { name: "Savings" }));
 

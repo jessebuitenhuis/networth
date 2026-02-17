@@ -1,4 +1,4 @@
-import { AccountType } from "@/models/AccountType";
+import { AccountType } from "@/accounts/AccountType";
 
 interface AccountIconProps {
   name: string;

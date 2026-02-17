@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Scenario } from "@/models/Scenario.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 type ScenarioSelectProps = {
   scenarios: Scenario[];

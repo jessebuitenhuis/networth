@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { AccountProvider, useAccounts } from "@/context/AccountContext";
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import {
   TransactionProvider,
   useTransactions,
-} from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+} from "@/transactions/TransactionContext";
 
 import { EditAccountDialog } from "./EditAccountDialog";
 

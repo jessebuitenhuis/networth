@@ -1,21 +1,22 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import type { Goal } from "@/goals/Goal.type";
 import { GoalProvider } from "@/goals/GoalContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import type { Scenario } from "@/models/Scenario.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { ProjectedNetWorthChart } from "./ProjectedNetWorthChart";
 
@@ -29,18 +30,9 @@ function renderWithProviders(
   scenarios: Scenario[] = [],
   selectedScenarioIds: Set<string> = new Set(),
   excludedAccountIds: Set<string> = new Set(),
-  goals: Goal[] = []
+  goals: Goal[] = [],
 ) {
-  localStorage.setItem("accounts", JSON.stringify(accounts));
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  localStorage.setItem("recurringTransactions", JSON.stringify(recurringTransactions));
-  if (scenarios.length > 0) {
-    localStorage.setItem("scenarios", JSON.stringify(scenarios));
-  }
-  if (goals.length > 0) {
-    localStorage.setItem("goals", JSON.stringify(goals));
-  }
-  localStorage.removeItem("activeScenarioId");
+  mockApiResponses({ accounts, transactions, recurringTransactions, scenarios, goals });
 
   return render(
     <AccountProvider>
@@ -56,12 +48,18 @@ function renderWithProviders(
           </RecurringTransactionProvider>
         </ScenarioProvider>
       </TransactionProvider>
-    </AccountProvider>
+    </AccountProvider>,
   );
 }
 
 describe("ProjectedNetWorthChart", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockApiResponses();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it("renders with 1M selected by default", () => {
     renderWithProviders();
@@ -135,7 +133,7 @@ describe("ProjectedNetWorthChart", () => {
     expect(screen.getByText("Baseline")).toBeInTheDocument();
   });
 
-  it("renders scenario legend when scenario is selected", () => {
+  it("renders scenario legend when scenario is selected", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -146,8 +144,8 @@ describe("ProjectedNetWorthChart", () => {
 
     renderWithProviders(accounts, [], [], scenarios, selectedScenarioIds);
 
+    expect(await screen.findByText("Optimistic")).toBeInTheDocument();
     expect(screen.getByText("Baseline")).toBeInTheDocument();
-    expect(screen.getByText("Optimistic")).toBeInTheDocument();
   });
 
   it("filters accounts based on excludedAccountIds prop", () => {
@@ -236,7 +234,7 @@ describe("ProjectedNetWorthChart", () => {
     expect(screen.getByText("Baseline")).toBeInTheDocument();
   });
 
-  it("renders multiple scenarios in legend when multiple selected", () => {
+  it("renders multiple scenarios in legend when multiple selected", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -248,12 +246,12 @@ describe("ProjectedNetWorthChart", () => {
 
     renderWithProviders(accounts, [], [], scenarios, selectedScenarioIds);
 
+    expect(await screen.findByText("Optimistic")).toBeInTheDocument();
     expect(screen.getByText("Baseline")).toBeInTheDocument();
-    expect(screen.getByText("Optimistic")).toBeInTheDocument();
     expect(screen.getByText("Pessimistic")).toBeInTheDocument();
   });
 
-  it("renders goal names in legend when goals exist", () => {
+  it("renders goal names in legend when goals exist", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
@@ -264,7 +262,7 @@ describe("ProjectedNetWorthChart", () => {
 
     renderWithProviders(accounts, [], [], [], new Set(), new Set(), goals);
 
-    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
+    expect(await screen.findByText("Emergency Fund")).toBeInTheDocument();
     expect(screen.getByText("House Down Payment")).toBeInTheDocument();
   });
 

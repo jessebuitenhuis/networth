@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { AccountPicker } from "@/components/charts/AccountPicker";
 import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
 import TopBar from "@/components/layout/TopBar";
@@ -10,12 +11,17 @@ import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenari
 import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
 import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
 import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
-import { useAccounts } from "@/context/AccountContext";
-import { useScenarios } from "@/context/ScenarioContext";
+import { generateId } from "@/lib/generateId";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 export default function PlanningPage() {
   const { accounts } = useAccounts();
-  const { scenarios } = useScenarios();
+  const { scenarios, addScenario, setActiveScenario } = useScenarios();
+  const { transactions, addTransaction } = useTransactions();
+  const { recurringTransactions, addRecurringTransaction } =
+    useRecurringTransactions();
 
   // AGENT: should this and the handleScenarioToggle, handleAccountToggle, etc etc. be handled in two hooks?
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<Set<string>>(new Set());
@@ -45,10 +51,6 @@ export default function PlanningPage() {
     });
   }
 
-  function handleScenarioDuplicate(newId: string) {
-    setSelectedScenarioIds((prev) => new Set(prev).add(newId));
-  }
-
   function handleScenarioDelete(id: string) {
     setSelectedScenarioIds((prev) => {
       const next = new Set(prev);
@@ -59,6 +61,34 @@ export default function PlanningPage() {
 
   function handleClearAllScenarios() {
     setSelectedScenarioIds(new Set());
+  }
+
+  function handleCreateScenario(name: string) {
+    const scenarioId = generateId();
+    addScenario({ id: scenarioId, name });
+    setActiveScenario(scenarioId);
+    handleScenarioToggle(scenarioId);
+  }
+
+  function handleDuplicateScenario(sourceScenarioId: string) {
+    return (name: string) => {
+      const newScenarioId = generateId();
+      addScenario({ id: newScenarioId, name });
+
+      transactions
+        .filter((t) => t.scenarioId === sourceScenarioId)
+        .forEach((t) => {
+          addTransaction({ ...t, id: generateId(), scenarioId: newScenarioId });
+        });
+
+      recurringTransactions
+        .filter((rt) => rt.scenarioId === sourceScenarioId)
+        .forEach((rt) => {
+          addRecurringTransaction({ ...rt, id: generateId(), scenarioId: newScenarioId });
+        });
+
+      setSelectedScenarioIds((prev) => new Set(prev).add(newScenarioId));
+    };
   }
 
   // AGENT: should the ScenarioPicker, EditScenarioDialog and DuplicateScenarioDialog be encapsulated in a component?
@@ -76,7 +106,10 @@ export default function PlanningPage() {
               renderActions={(scenario) => (
                 <>
                   <EditScenarioDialog scenario={scenario} onDelete={handleScenarioDelete} />
-                  <DuplicateScenarioDialog scenarioId={scenario.id} onDuplicate={handleScenarioDuplicate} />
+                  <DuplicateScenarioDialog
+                    scenarioName={scenario.name}
+                    onSubmit={handleDuplicateScenario(scenario.id)}
+                  />
                 </>
               )}
             />
@@ -85,7 +118,7 @@ export default function PlanningPage() {
               excludedIds={excludedAccountIds}
               onToggle={handleAccountToggle}
             />
-            <CreateScenarioDialog onCreate={handleScenarioToggle} />
+            <CreateScenarioDialog onSubmit={handleCreateScenario} />
           </>
         }
       />

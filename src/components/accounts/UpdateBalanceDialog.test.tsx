@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Transaction } from "@/models/Transaction.type";
 import { suppressRadixDialogWarnings } from "@/test/mocks/suppressRadixDialogWarnings";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { UpdateBalanceDialogPage } from "./UpdateBalanceDialog.page";
 
@@ -20,7 +20,6 @@ const withBalance500 = [createTransaction()];
 
 describe("UpdateBalanceDialog", () => {
   beforeEach(() => {
-    localStorage.clear();
     vi.setSystemTime(new Date("2024-01-15"));
   });
 
@@ -88,32 +87,43 @@ describe("UpdateBalanceDialog", () => {
     expect(page.submitButton).not.toBeDisabled();
   });
 
-  it("creates adjustment transaction on submit", async () => {
+  it("calls onSave with adjustment transaction on submit", async () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.submit();
-    expect(page.transactionsList).toHaveTextContent("Balance adjustment - 250");
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accountId: "a1",
+        amount: 250,
+        description: "Balance adjustment",
+      }),
+    );
   });
 
-  it("creates negative adjustment transaction", async () => {
+  it("calls onSave with negative adjustment transaction", async () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("300");
     await page.submit();
-    expect(page.transactionsList).toHaveTextContent("Balance adjustment - -200");
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accountId: "a1",
+        amount: -200,
+      }),
+    );
   });
 
   it("created transaction has no scenarioId (baseline)", async () => {
     const page = await UpdateBalanceDialogPage.renderAndOpen({ transactions: withBalance500 });
     await page.clearAndFillNewValue("750");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Balance adjustment" }),
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.description === "Balance adjustment"
-    );
-    expect(adjustmentTx).toBeDefined();
-    expect(adjustmentTx.scenarioId).toBeUndefined();
+    const savedTransaction = page.onSave.mock.calls[0][0];
+    expect(savedTransaction.scenarioId).toBeUndefined();
   });
 
   it("uses custom description when edited", async () => {
@@ -121,7 +131,10 @@ describe("UpdateBalanceDialog", () => {
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("Bank reconciliation");
     await page.submit();
-    expect(page.transactionsList).toHaveTextContent("Bank reconciliation - 250");
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Bank reconciliation" }),
+    );
   });
 
   it("uses custom date when edited", async () => {
@@ -129,13 +142,10 @@ describe("UpdateBalanceDialog", () => {
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDate("2024-01-20");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ date: "2024-01-20" }),
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.description === "Balance adjustment"
-    );
-    expect(adjustmentTx.date).toBe("2024-01-20");
   });
 
   it("trims whitespace from description", async () => {
@@ -143,13 +153,10 @@ describe("UpdateBalanceDialog", () => {
     await page.clearAndFillNewValue("750");
     await page.clearAndFillDescription("  Reconcile  ");
     await page.submit();
-    const savedTransactions = JSON.parse(
-      localStorage.getItem("transactions") || "[]"
+
+    expect(page.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Reconcile" }),
     );
-    const adjustmentTx = savedTransactions.find(
-      (t: Transaction) => t.amount === 250
-    );
-    expect(adjustmentTx.description).toBe("Reconcile");
   });
 
   it("closes dialog after submit", async () => {
@@ -169,7 +176,6 @@ describe("UpdateBalanceDialog", () => {
     await page.open();
     expect(page.newValueInput).toHaveValue("0");
     expect(page.descriptionInput).toHaveValue("Balance adjustment");
-    expect(page.currentBalanceDisplay).toHaveTextContent("$750.00");
   });
 
   it("recalculates current balance when date changes to past", async () => {

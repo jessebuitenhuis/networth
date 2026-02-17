@@ -29,7 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
 import type { CsvColumnMapping } from "@/models/CsvColumnMapping.type";
 import { CsvImportStep } from "@/models/CsvImportStep";
@@ -37,6 +36,7 @@ import type { CsvParseResult } from "@/models/CsvParseResult.type";
 import { DateFormat } from "@/models/DateFormat";
 import { buildTransactionsFromCsv } from "@/services/buildTransactionsFromCsv";
 import { parseCsvText } from "@/services/parseCsvText";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type ImportCsvDialogProps = {
   accountId: string;

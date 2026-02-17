@@ -8,6 +8,7 @@ See `PRD.md` for full product requirements.
 
 - **Framework**: Next.js 16 (App Router, `src/` directory)
 - **Language**: TypeScript (strict mode)
+- **Database**: SQLite via better-sqlite3 + Drizzle ORM
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui (Radix primitives)
 - **Charts**: Recharts
@@ -42,25 +43,33 @@ See `PRD.md` for full product requirements.
 
 - React Context + `useReducer` for all domain entities
 - Contexts defined in `src/context/` — `AccountContext`, `TransactionContext`, `RecurringTransactionContext`, `ScenarioContext`
-- All persist to `localStorage` via services in `src/services/`
+- Contexts fetch/mutate via Next.js API routes (server-side SQLite)
 
 ### Storage Layer
 
-- `localStorage`-based with an abstraction layer (`AccountStorage`, `TransactionStorage`, `RecurringTransactionStorage`, `ScenarioStorage`)
-- Storage keys: `"accounts"`, `"transactions"`, `"recurringTransactions"`, `"scenarios"`, `"activeScenarioId"`
-- Designed for future migration to a server-backed solution
+- **Database**: SQLite file at `DATABASE_PATH` env var or `data/networth.db`
+- **ORM**: Drizzle ORM with schema in `src/db/schema.ts`
+- **Connection**: Singleton in `src/db/connection.ts` (WAL mode, auto-creates tables)
+- **API routes**: `src/app/api/{entity}/route.ts` — CRUD endpoints consumed by contexts
+- Tables: `accounts`, `transactions`, `recurring_transactions`, `scenarios`, `goals`, `settings`
 
 ### Data Flow
 
 ```
-localStorage -> Storage services -> Context providers -> Smart components -> Dumb components
+SQLite -> Drizzle ORM -> API routes -> Context providers -> Smart components -> Dumb components
 ```
 
 ## Directory Structure
 
 ```
 src/
+  accounts/         # Account domain types (Account.type.ts, AccountType.ts)
+  transactions/     # Transaction domain types (Transaction.type.ts)
+  recurring-transactions/  # Recurring transaction types + enums
+  scenarios/        # Scenario domain types (Scenario.type.ts)
+  goals/            # Goal domain: type, context, storage, components
   app/              # Next.js App Router pages
+    api/            # API route handlers (CRUD for each entity)
   components/       # UI components (smart + dumb)
     accounts/       # Account-related components
     charts/         # Net worth chart + legend + period picker
@@ -70,10 +79,11 @@ src/
     shared/         # Reusable non-shadcn components (e.g. MultiSelectPicker)
     ui/             # shadcn/ui primitives (do not edit directly)
   context/          # React context providers (AccountContext, TransactionContext)
+  db/               # Database schema (Drizzle) and connection singleton
   hooks/            # Custom React hooks
   lib/              # Pure utility functions
-  models/           # TypeScript types and enums
-  services/         # Storage and computation logic
+  models/           # Shared TypeScript types and enums (non-domain-specific)
+  services/         # Computation logic (net worth series, projections, CSV)
   test/             # Test setup and configuration
 ```
 
@@ -88,7 +98,8 @@ src/
 - Mock utilities in `src/test/mocks/` for non-universal mocks (ResizeObserver, Recharts warnings)
 - Use `it.each()` for parameterized tests (3+ cases with same structure)
 - Import sorting enforced via `eslint-plugin-simple-import-sort`; run `npm run format` to auto-fix
-- Storage services use function exports (not classes), with SSR guards and try/catch
+- Domain types live in their own domain folders (`src/accounts/`, `src/transactions/`, etc.)
+- API routes handle persistence via Drizzle ORM; no direct DB access from client code
 - Use `generateId()` from `src/lib/generateId.ts` for all UUID generation
 - Smart components delegate data transformation to services (e.g. `buildDisplayTransactions`)
 - Reusable non-shadcn components go in `src/components/shared/`

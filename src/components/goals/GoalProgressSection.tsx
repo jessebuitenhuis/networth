@@ -2,17 +2,17 @@
 
 import { useMemo } from "react";
 
-import { useAccounts } from "@/context/AccountContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
+import { useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { useGoals } from "@/goals/GoalContext";
 import { addYears, formatDate } from "@/lib/dateUtils";
-import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { computeGoalProgress } from "@/services/computeGoalProgress";
 import { computeProjectedSeries } from "@/services/computeProjectedSeries";
 import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { GoalProgressCard } from "./GoalProgressCard";
 

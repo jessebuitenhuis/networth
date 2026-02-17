@@ -1,10 +1,10 @@
+import type { Account } from "@/accounts/Account.type";
+import { AccountType } from "@/accounts/AccountType";
 import { addDays, addMonths, endOfMonth, formatDate, toSunday } from "@/lib/dateUtils";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
 import { ChartPeriod } from "@/models/ChartPeriod";
 import type { DateRange } from "@/models/DateRange.type";
 import type { NetWorthDataPoint } from "@/models/NetWorthDataPoint.type";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { accumulateNetWorth } from "./accumulateNetWorth";
 

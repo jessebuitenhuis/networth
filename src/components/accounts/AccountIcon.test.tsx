@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect,it } from "vitest";
 
-import { AccountType } from "@/models/AccountType";
+import { AccountType } from "@/accounts/AccountType";
 
 import { AccountIcon } from "./AccountIcon";
 

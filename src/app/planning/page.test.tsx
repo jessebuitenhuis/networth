@@ -1,25 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
 import { GoalProvider } from "@/goals/GoalContext";
-import { AccountType } from "@/models/AccountType";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import PlanningPage from "./page";
 
-// AGENT: there's a util function for this. Use it here and check if this happens in more places
 vi.stubGlobal(
   "ResizeObserver",
   class {
     observe() {}
     unobserve() {}
     disconnect() {}
-  }
+  },
 );
 
 function renderPage() {
@@ -36,19 +37,24 @@ function renderPage() {
           </ScenarioProvider>
         </TransactionProvider>
       </AccountProvider>
-    </SidebarProvider>
+    </SidebarProvider>,
   );
 }
 
 describe("PlanningPage", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockApiResponses();
+  });
 
-  // AGENT: the it(renders the...) tests here use a lot of duplication. Should this be done with it.each() or asserting multiple items in one go? Also check other test cases that follow the same pattern in this and other files.
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("renders the Planning heading", () => {
     renderPage();
 
     expect(
-      screen.getByRole("heading", { name: "Planning" })
+      screen.getByRole("heading", { name: "Planning" }),
     ).toBeInTheDocument();
   });
 
@@ -62,7 +68,7 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /scenarios/i })
+      screen.getByRole("button", { name: /scenarios/i }),
     ).toBeInTheDocument();
   });
 
@@ -70,7 +76,7 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /accounts/i })
+      screen.getByRole("button", { name: /accounts/i }),
     ).toBeInTheDocument();
   });
 
@@ -78,19 +84,19 @@ describe("PlanningPage", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /new scenario/i })
+      screen.getByRole("button", { name: /new scenario/i }),
     ).toBeInTheDocument();
   });
 
   it("toggles scenario selection when checkbox is clicked", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "scenario-1", name: "Optimistic" }
-    ]));
+    mockApiResponses({
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+    });
 
     renderPage();
 
-    // Initially shows 0 selected
-    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+    // Wait for scenario data to load
+    await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Open picker and click scenario
     await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
@@ -101,14 +107,14 @@ describe("PlanningPage", () => {
   });
 
   it("toggles account filter when checkbox is clicked", async () => {
-    localStorage.setItem("accounts", JSON.stringify([
-      { id: "acc-1", name: "Checking", type: AccountType.Asset }
-    ]));
+    mockApiResponses({
+      accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
+    });
 
     renderPage();
 
-    // Initially shows 1 account (all included)
-    expect(screen.getByRole("button", { name: "Accounts (1)" })).toBeInTheDocument();
+    // Wait for account data to load
+    await screen.findByRole("button", { name: "Accounts (1)" });
 
     // Open picker and toggle account off
     await userEvent.click(screen.getByRole("button", { name: "Accounts (1)" }));
@@ -118,13 +124,83 @@ describe("PlanningPage", () => {
     expect(screen.getByRole("button", { name: "Accounts (0)" })).toBeInTheDocument();
   });
 
-  it("clears all scenarios when Deselect all is clicked", async () => {
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "scenario-1", name: "Optimistic" },
-      { id: "scenario-2", name: "Conservative" }
-    ]));
+  it("creates scenario and auto-selects it", async () => {
+    mockApiResponses();
 
     renderPage();
+
+    await userEvent.click(screen.getByRole("button", { name: /new scenario/i }));
+    await userEvent.type(screen.getByLabelText(/name/i), "My Scenario");
+    await userEvent.click(screen.getByRole("button", { name: /create$/i }));
+
+    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+  });
+
+  it("removes deleted scenario from selection", async () => {
+    mockApiResponses({
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+    });
+
+    renderPage();
+
+    await screen.findByRole("button", { name: "Scenarios (0)" });
+
+    // Open picker, select the scenario, then click edit (popover stays open)
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+    await userEvent.click(screen.getByLabelText("Edit Scenario"));
+
+    // Click delete in the edit dialog
+    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    // Confirm delete in the alert dialog
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    await userEvent.click(deleteButtons[deleteButtons.length - 1]);
+
+    // Scenario should be removed from selection
+    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+  });
+
+  it("duplicates scenario with transactions and auto-selects the copy", async () => {
+    mockApiResponses({
+      accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+      transactions: [
+        { id: "t-1", accountId: "acc-1", amount: 500, date: "2024-06-01", description: "Bonus", scenarioId: "scenario-1" },
+      ],
+      recurringTransactions: [
+        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Monthly", frequency: RecurrenceFrequency.Monthly, startDate: "2024-01-01", scenarioId: "scenario-1" },
+      ],
+    });
+
+    renderPage();
+
+    await screen.findByRole("button", { name: "Scenarios (0)" });
+
+    // Open picker to render the duplicate button
+    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(screen.getByLabelText("Duplicate Scenario"));
+
+    // Submit duplicate dialog with pre-filled name
+    expect(screen.getByLabelText(/name/i)).toHaveValue("Optimistic (Copy)");
+    await userEvent.click(screen.getByRole("button", { name: /duplicate$/i }));
+
+    // New scenario should be auto-selected
+    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+  });
+
+  it("clears all scenarios when Deselect all is clicked", async () => {
+    mockApiResponses({
+      scenarios: [
+        { id: "scenario-1", name: "Optimistic" },
+        { id: "scenario-2", name: "Conservative" },
+      ],
+    });
+
+    renderPage();
+
+    // Wait for scenario data to load
+    await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Select two scenarios
     await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));

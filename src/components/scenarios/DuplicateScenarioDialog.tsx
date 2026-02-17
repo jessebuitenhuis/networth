@@ -13,33 +13,25 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
-import { generateId } from "@/lib/generateId";
 
 type DuplicateScenarioDialogProps = {
-  scenarioId: string;
-  onDuplicate?: (newId: string) => void;
+  scenarioName?: string;
+  onSubmit: (name: string) => void;
 };
 
 export function DuplicateScenarioDialog({
-  scenarioId,
-  onDuplicate,
+  scenarioName,
+  onSubmit,
 }: DuplicateScenarioDialogProps) {
-  const { scenarios, addScenario } = useScenarios();
-  const { transactions, addTransaction } = useTransactions();
-  const { recurringTransactions, addRecurringTransaction } =
-    useRecurringTransactions();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
 
-  const scenario = scenarios.find((s) => s.id === scenarioId);
-
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
-    if (open && scenario) {
-      setName(`${scenario.name} (Copy)`);
+    if (open && scenarioName) {
+      setName(`${scenarioName} (Copy)`);
+    } else if (open) {
+      setName("");
     }
   }
 
@@ -48,36 +40,7 @@ export function DuplicateScenarioDialog({
     const trimmedName = name.trim();
     if (!trimmedName) return;
 
-    const newScenarioId = generateId();
-
-    addScenario({
-      id: newScenarioId,
-      name: trimmedName,
-    });
-
-    // Copy transactions
-    transactions
-      .filter((t) => t.scenarioId === scenarioId)
-      .forEach((t) => {
-        addTransaction({
-          ...t,
-          id: generateId(),
-          scenarioId: newScenarioId,
-        });
-      });
-
-    // Copy recurring transactions
-    recurringTransactions
-      .filter((rt) => rt.scenarioId === scenarioId)
-      .forEach((rt) => {
-        addRecurringTransaction({
-          ...rt,
-          id: generateId(),
-          scenarioId: newScenarioId,
-        });
-      });
-
-    onDuplicate?.(newScenarioId);
+    onSubmit(trimmedName);
     setIsOpen(false);
   }
 
@@ -92,6 +55,7 @@ export function DuplicateScenarioDialog({
           size="icon"
           variant="ghost"
           className="h-6 w-6"
+          aria-label="Duplicate Scenario"
           onClick={handleTriggerClick}
         >
           <Copy className="h-4 w-4" />

@@ -1,10 +1,8 @@
-import { act,render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach,describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { EditTransactionDialog } from "./EditTransactionDialog";
 
@@ -16,20 +14,22 @@ const mockTransaction: Transaction = {
   description: "Test transaction",
 };
 
-describe("EditTransactionDialog", () => {
-  beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem("transactions", JSON.stringify([mockTransaction]));
-  });
+function renderDialog(overrides: Partial<React.ComponentProps<typeof EditTransactionDialog>> = {}) {
+  const props = {
+    transaction: mockTransaction,
+    scenarios: [],
+    onSave: vi.fn(),
+    onDelete: vi.fn(),
+    onCreateScenario: vi.fn(),
+    ...overrides,
+  };
+  render(<EditTransactionDialog {...props} />);
+  return props;
+}
 
+describe("EditTransactionDialog", () => {
   it("opens dialog with current values pre-populated", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
@@ -38,15 +38,9 @@ describe("EditTransactionDialog", () => {
     expect(screen.getByLabelText("Description")).toHaveValue("Test transaction");
   });
 
-  it("updates transaction when saving with new values", async () => {
+  it("calls onSave with updated transaction when saving", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -63,24 +57,19 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0]).toMatchObject({
-      id: "t1",
-      amount: 1500,
-      date: "2024-01-20",
-      description: "Updated transaction",
-    });
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "t1",
+        amount: 1500,
+        date: "2024-01-20",
+        description: "Updated transaction",
+      }),
+    );
   });
 
   it("prevents submit when amount is 0", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -90,18 +79,12 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
+    expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText("Amount")).toBeInTheDocument();
   });
 
   it("closes edit dialog before showing delete confirmation", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -112,13 +95,7 @@ describe("EditTransactionDialog", () => {
   });
 
   it("delete confirmation button uses destructive variant", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -128,34 +105,21 @@ describe("EditTransactionDialog", () => {
     expect(confirmButton).toHaveClass("bg-destructive");
   });
 
-  it("removes transaction when confirming delete", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+  it("calls onDelete with transaction id when confirming delete", async () => {
+    const { onDelete } = renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
 
     const deleteButtons = screen.getAllByText("Delete");
     const confirmButton = deleteButtons[deleteButtons.length - 1];
-    act(() => confirmButton.click());
+    await act(async () => confirmButton.click());
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored).toEqual([]);
+    expect(onDelete).toHaveBeenCalledWith("t1");
   });
 
   it("returns to edit dialog when canceling delete", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
     act(() => screen.getByText("Delete").click());
@@ -170,13 +134,7 @@ describe("EditTransactionDialog", () => {
   });
 
   it("resets form when reopening dialog", () => {
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     act(() => screen.getByLabelText("Edit Transaction").click());
 
@@ -198,13 +156,7 @@ describe("EditTransactionDialog", () => {
 
   it("trims whitespace from description when saving", async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -214,47 +166,35 @@ describe("EditTransactionDialog", () => {
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].description).toBe("Padded Description");
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Padded Description" }),
+    );
   });
 
-  it("updates scenario when selecting a specific scenario", async () => {
+  it("calls onSave with scenarioId when selecting a scenario", async () => {
     const user = userEvent.setup();
-    localStorage.setItem("scenarios", JSON.stringify([
-      { id: "s1", name: "Test Scenario" }
-    ]));
-
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave } = renderDialog({
+      scenarios: [{ id: "s1", name: "Test Scenario" }],
+    });
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
     const scenarioTrigger = screen.getByRole("combobox", { name: "Scenario" });
     await user.click(scenarioTrigger);
 
-    const scenarioOption = screen.getByRole("option", { name: "Test Scenario" });
+    const scenarioOption = await screen.findByRole("option", { name: "Test Scenario" });
     await user.click(scenarioOption);
 
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].scenarioId).toBe("s1");
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: "s1" }),
+    );
   });
 
   it('shows "Create new scenario..." option in scenario dropdown', async () => {
     const user = userEvent.setup();
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
     await user.click(screen.getByRole("combobox", { name: "Scenario" }));
@@ -264,14 +204,7 @@ describe("EditTransactionDialog", () => {
 
   it("creates scenario inline and auto-selects it", async () => {
     const user = userEvent.setup();
-
-    render(
-      <ScenarioProvider>
-        <TransactionProvider>
-          <EditTransactionDialog transaction={mockTransaction} />
-        </TransactionProvider>
-      </ScenarioProvider>
-    );
+    const { onSave, onCreateScenario } = renderDialog();
 
     await user.click(screen.getByLabelText("Edit Transaction"));
 
@@ -282,15 +215,15 @@ describe("EditTransactionDialog", () => {
     await user.type(input, "Retirement Plan");
     await user.click(screen.getByRole("button", { name: /create/i }));
 
-    // Verify scenario was created in storage
-    const scenarios = JSON.parse(localStorage.getItem("scenarios")!);
-    const createdScenario = scenarios.find((s: { name: string }) => s.name === "Retirement Plan");
-    expect(createdScenario).toBeDefined();
+    expect(onCreateScenario).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Retirement Plan" }),
+    );
+    const createdScenarioId = onCreateScenario.mock.calls[0][0].id;
 
-    // Save transaction and verify scenario ID was set
     await user.click(screen.getByText("Save"));
 
-    const stored = JSON.parse(localStorage.getItem("transactions")!);
-    expect(stored[0].scenarioId).toBe(createdScenario.id);
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ scenarioId: createdScenarioId }),
+    );
   });
 });

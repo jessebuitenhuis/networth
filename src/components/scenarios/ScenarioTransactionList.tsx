@@ -1,31 +1,29 @@
 "use client";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { EditRecurringTransactionDialog } from "@/components/transactions/EditRecurringTransactionDialog";
 import { EditTransactionDialog } from "@/components/transactions/EditTransactionDialog";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
-import { useAccounts } from "@/context/AccountContext";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import type { DisplayTransaction } from "@/models/DisplayTransaction.type";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { getNextOccurrence } from "@/services/getNextOccurrence";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type ScenarioTransactionListProps = {
   selectedScenarioIds: Set<string>;
 };
 
 export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransactionListProps) {
-  const { transactions } = useTransactions();
-  const { recurringTransactions } = useRecurringTransactions();
-  const { scenarios } = useScenarios();
+  const { transactions, updateTransaction, removeTransaction } = useTransactions();
+  const { recurringTransactions, updateRecurringTransaction, removeRecurringTransaction } =
+    useRecurringTransactions();
+  const { scenarios, addScenario } = useScenarios();
   const { accounts } = useAccounts();
 
   const today = formatDate(new Date());
 
-  // Filter logic:
-  // - If selectedScenarioIds is empty: show only baseline transactions (no scenarioId)
-  // - Otherwise: show baseline + union of all selected scenario transactions
   const transactionItems: DisplayTransaction[] = transactions
     .filter((t) => {
       if (selectedScenarioIds.size === 0) {
@@ -45,7 +43,15 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
         isProjected: tx.isProjected || false,
         isRecurring: false,
         scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
-        editAction: <EditTransactionDialog transaction={tx} />,
+        editAction: (
+          <EditTransactionDialog
+            transaction={tx}
+            scenarios={scenarios}
+            onSave={updateTransaction}
+            onDelete={removeTransaction}
+            onCreateScenario={addScenario}
+          />
+        ),
       };
     });
 
@@ -70,7 +76,15 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
         isProjected: true,
         isRecurring: true,
         scenarioName: rt.scenarioId ? scenarios.find(s => s.id === rt.scenarioId)?.name : undefined,
-        editAction: <EditRecurringTransactionDialog recurringTransaction={rt} />,
+        editAction: (
+          <EditRecurringTransactionDialog
+            recurringTransaction={rt}
+            scenarios={scenarios}
+            onSave={updateRecurringTransaction}
+            onDelete={removeRecurringTransaction}
+            onCreateScenario={addScenario}
+          />
+        ),
       };
       return item;
     })

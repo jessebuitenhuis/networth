@@ -4,6 +4,9 @@ import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import type { Account } from "@/accounts/Account.type";
+import { useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import {
   AlertDialog,
@@ -33,10 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarMenuAction } from "@/components/ui/sidebar";
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type EditAccountDialogProps = {
   account: Account;

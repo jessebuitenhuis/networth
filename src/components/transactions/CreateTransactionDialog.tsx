@@ -22,11 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { useScenarios } from "@/scenarios/ScenarioContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { ScenarioSelect } from "./ScenarioSelect";
 

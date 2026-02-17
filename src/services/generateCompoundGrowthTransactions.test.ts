@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Transaction } from "@/models/Transaction.type";
+import { Transaction } from "@/transactions/Transaction.type";
 
 import { generateCompoundGrowthTransactions } from "./generateCompoundGrowthTransactions";
 

@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRecurringTransactions } from "@/context/RecurringTransactionContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
-import type { Scenario } from "@/models/Scenario.type";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
+import { useScenarios } from "@/scenarios/ScenarioContext";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type EditScenarioDialogProps = {
   scenario: Scenario;

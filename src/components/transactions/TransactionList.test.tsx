@@ -1,15 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { AccountProvider } from "@/accounts/AccountContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
-import type { Scenario } from "@/models/Scenario.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { TransactionList } from "./TransactionList";
 
@@ -26,19 +27,12 @@ function renderWithProvider(
   initialScenarios: Scenario[] = [],
   activeScenarioId?: string | null
 ) {
-  localStorage.setItem("transactions", JSON.stringify(initialTransactions));
-  localStorage.setItem(
-    "recurringTransactions",
-    JSON.stringify(initialRecurring)
-  );
-  localStorage.setItem("scenarios", JSON.stringify(initialScenarios));
-  if (activeScenarioId !== undefined) {
-    if (activeScenarioId === null) {
-      localStorage.removeItem("activeScenarioId");
-    } else {
-      localStorage.setItem("activeScenarioId", activeScenarioId);
-    }
-  }
+  mockApiResponses({
+    transactions: initialTransactions,
+    recurringTransactions: initialRecurring,
+    scenarios: initialScenarios,
+    activeScenarioId: activeScenarioId ?? null,
+  });
   return render(
     <TooltipProvider>
       <AccountProvider>
@@ -55,7 +49,7 @@ function renderWithProvider(
 }
 
 describe("TransactionList", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => mockApiResponses());
 
   it("shows empty message when no transactions", () => {
     renderWithProvider("a1");

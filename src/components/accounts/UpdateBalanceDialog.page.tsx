@@ -1,69 +1,64 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
-import { AccountProvider } from "@/context/AccountContext";
-import {
-  TransactionProvider,
-  useTransactions,
-} from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import type { Transaction } from "@/models/Transaction.type";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 import { UpdateBalanceDialog } from "./UpdateBalanceDialog";
 
-const defaultAccount: Account = {
-  id: "a1",
-  name: "Checking",
-  type: AccountType.Asset,
-};
-
 interface RenderOptions {
-  account?: Account;
   transactions?: Transaction[];
 }
 
-function TestHarness({ accountId }: { accountId: string }) {
-  const { transactions } = useTransactions();
+function TestHarness({
+  accountId,
+  transactions,
+  onSave,
+}: {
+  accountId: string;
+  transactions: Transaction[];
+  onSave: (transaction: Transaction) => void;
+}) {
   return (
     <div>
-      <UpdateBalanceDialog accountId={accountId} />
-      <ul data-testid="transactions">
-        {transactions.map((t) => (
-          <li key={t.id}>
-            {t.description} - {t.amount}
-          </li>
-        ))}
-      </ul>
+      <UpdateBalanceDialog
+        accountId={accountId}
+        transactions={transactions}
+        onSave={onSave}
+      />
     </div>
   );
 }
 
 export class UpdateBalanceDialogPage {
-  private constructor(private _user: ReturnType<typeof userEvent.setup>) {}
+  private constructor(
+    private _user: ReturnType<typeof userEvent.setup>,
+    private _onSave: ReturnType<typeof vi.fn>,
+  ) {}
 
   static render(options: RenderOptions = {}) {
-    const account = options.account ?? defaultAccount;
     const transactions = options.transactions ?? [];
-
-    localStorage.setItem("accounts", JSON.stringify([account]));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+    const onSave = vi.fn();
 
     const user = userEvent.setup();
     render(
-      <AccountProvider>
-        <TransactionProvider>
-          <TestHarness accountId={account.id} />
-        </TransactionProvider>
-      </AccountProvider>
+      <TestHarness
+        accountId="a1"
+        transactions={transactions}
+        onSave={onSave}
+      />,
     );
-    return new UpdateBalanceDialogPage(user);
+    return new UpdateBalanceDialogPage(user, onSave);
   }
 
   static async renderAndOpen(options: RenderOptions = {}) {
     const page = this.render(options);
     await page.open();
     return page;
+  }
+
+  get onSave() {
+    return this._onSave;
   }
 
   get triggerButton() {
@@ -100,10 +95,6 @@ export class UpdateBalanceDialogPage {
 
   get submitButton() {
     return screen.getByRole("button", { name: "Update Balance" });
-  }
-
-  get transactionsList() {
-    return screen.getByTestId("transactions");
   }
 
   async open() {

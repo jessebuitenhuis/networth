@@ -1,6 +1,6 @@
 import { addMonths, addYears, formatDate } from "@/lib/dateUtils";
-import { RecurrenceFrequency } from "@/models/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/models/RecurringTransaction.type";
+import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
+import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 
 export function* iterateOccurrenceDates(
   recurring: RecurringTransaction

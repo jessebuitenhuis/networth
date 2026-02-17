@@ -1,15 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import type { Goal } from "@/goals/Goal.type";
 import { GoalProvider } from "@/goals/GoalContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import type { Transaction } from "@/models/Transaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import { GoalProgressSection } from "./GoalProgressSection";
 
@@ -18,12 +19,7 @@ function renderWithProviders(
   transactions: Transaction[] = [],
   goals: Goal[] = []
 ) {
-  localStorage.setItem("accounts", JSON.stringify(accounts));
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  localStorage.setItem("recurringTransactions", JSON.stringify([]));
-  localStorage.setItem("scenarios", JSON.stringify([]));
-  localStorage.setItem("activeScenarioId", JSON.stringify(null));
-  localStorage.setItem("goals", JSON.stringify(goals));
+  mockApiResponses({ accounts, transactions, goals });
 
   return render(
     <AccountProvider>
@@ -41,27 +37,27 @@ function renderWithProviders(
 }
 
 describe("GoalProgressSection", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => mockApiResponses());
 
   it("renders nothing when there are no goals", () => {
     const { container } = renderWithProviders();
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders section heading when goals exist", () => {
+  it("renders section heading when goals exist", async () => {
     const goals: Goal[] = [{ id: "1", name: "Goal 1", targetAmount: 10000 }];
     renderWithProviders([], [], goals);
-    expect(screen.getByText("Goal Progress")).toBeInTheDocument();
+    expect(await screen.findByText("Goal Progress")).toBeInTheDocument();
   });
 
-  it("renders goal progress cards", () => {
+  it("renders goal progress cards", async () => {
     const goals: Goal[] = [
       { id: "g1", name: "Emergency Fund", targetAmount: 10000 },
       { id: "g2", name: "Vacation", targetAmount: 5000 },
     ];
     renderWithProviders([], [], goals);
 
-    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
+    expect(await screen.findByText("Emergency Fund")).toBeInTheDocument();
     expect(screen.getByText("Vacation")).toBeInTheDocument();
   });
 
@@ -82,7 +78,7 @@ describe("GoalProgressSection", () => {
     expect(await screen.findByText("Achieved!")).toBeInTheDocument();
   });
 
-  it("displays not projected message when no projection available", () => {
+  it("displays not projected message when no projection available", async () => {
     const accounts: Account[] = [
       { id: "1", name: "Savings", type: AccountType.Asset },
     ];
@@ -93,7 +89,7 @@ describe("GoalProgressSection", () => {
 
     renderWithProviders(accounts, transactions, goals);
 
-    expect(screen.getByText("Not projected within 50 years")).toBeInTheDocument();
+    expect(await screen.findByText("Not projected within 50 years")).toBeInTheDocument();
   });
 
   it("correctly calculates net worth with liabilities", async () => {

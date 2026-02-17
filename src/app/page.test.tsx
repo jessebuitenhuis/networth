@@ -2,14 +2,15 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { AccountProvider } from "@/accounts/AccountContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
 import { GoalProvider } from "@/goals/GoalContext";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import Home from "./page";
 
@@ -35,7 +36,9 @@ function renderPage() {
 }
 
 describe("Dashboard", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    mockApiResponses();
+  });
 
   describe("when no accounts exist", () => {
     it("renders the page heading", () => {
@@ -74,10 +77,9 @@ describe("Dashboard", () => {
 
   describe("when accounts exist", () => {
     beforeEach(() => {
-      localStorage.setItem(
-        "accounts",
-        JSON.stringify([{ id: "1", name: "Checking", type: "Asset" }])
-      );
+      mockApiResponses({
+        accounts: [{ id: "1", name: "Checking", type: "Asset" }],
+      });
     });
 
     it("renders the page heading", () => {
@@ -87,33 +89,35 @@ describe("Dashboard", () => {
       );
     });
 
-    it("renders net worth summary", () => {
+    it("renders net worth summary", async () => {
       renderPage();
-      expect(screen.getByText("Net Worth")).toBeInTheDocument();
+      expect(await screen.findByText("Net Worth")).toBeInTheDocument();
     });
 
-    it("renders the net worth chart", () => {
+    it("renders the net worth chart", async () => {
       renderPage();
-      expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
+      expect(await screen.findByTestId("net-worth-chart")).toBeInTheDocument();
     });
 
-    it("does not render empty state CTA", () => {
+    it("does not render empty state CTA", async () => {
       renderPage();
+      await screen.findByText("Net Worth");
       expect(screen.queryByText("Welcome to Net Worth Tracker")).not.toBeInTheDocument();
     });
 
-    it("does not render goal section when no goals exist", () => {
+    it("does not render goal section when no goals exist", async () => {
       renderPage();
+      await screen.findByText("Net Worth");
       expect(screen.queryByText("Goal Progress")).not.toBeInTheDocument();
     });
 
-    it("renders goal section when goals exist", () => {
-      localStorage.setItem(
-        "goals",
-        JSON.stringify([{ id: "g1", name: "Retirement", targetAmount: 100000 }])
-      );
+    it("renders goal section when goals exist", async () => {
+      mockApiResponses({
+        accounts: [{ id: "1", name: "Checking", type: "Asset" }],
+        goals: [{ id: "g1", name: "Retirement", targetAmount: 100000 }],
+      });
       renderPage();
-      expect(screen.getByText("Goal Progress")).toBeInTheDocument();
+      expect(await screen.findByText("Goal Progress")).toBeInTheDocument();
       expect(screen.getByText("Retirement")).toBeInTheDocument();
     });
   });

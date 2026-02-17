@@ -2,19 +2,19 @@
 
 import { use } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
 import { UpdateBalanceDialog } from "@/components/accounts/UpdateBalanceDialog";
 import TopBar from "@/components/layout/TopBar";
 import { ScenarioFilterSelect } from "@/components/scenarios/ScenarioFilterSelect";
 import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
 import { ImportCsvDialog } from "@/components/transactions/ImportCsvDialog";
 import { TransactionList } from "@/components/transactions/TransactionList";
-import { useAccounts } from "@/context/AccountContext";
-import { useScenarios } from "@/context/ScenarioContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { formatDate } from "@/lib/dateUtils";
 import { getDefaultCurrency } from "@/lib/getLocale";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { computeBalance } from "@/services/computeBalance";
 import { filterTransactionsByScenario } from "@/services/filterTransactionsByScenario";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 type AccountDetailPageProps = {
   // AGENT: Why is this either a promise or not a promise? Can we choose one?
@@ -25,7 +25,7 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
   const resolvedParams =
     params instanceof Promise ? use(params) : params;
   const { accounts } = useAccounts();
-  const { transactions } = useTransactions();
+  const { transactions, addTransaction } = useTransactions();
   const { scenarios, activeScenarioId, setActiveScenario } = useScenarios();
 
   // AGENT: Can we export a findAccount from useAccounts instead of doing this inline?
@@ -90,7 +90,7 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
           </div>
           <div className="flex gap-2">
             <CreateTransactionDialog accountId={account.id} />
-            <UpdateBalanceDialog accountId={account.id} />
+            <UpdateBalanceDialog accountId={account.id} transactions={transactions} onSave={addTransaction} />
             <ImportCsvDialog accountId={account.id} />
           </div>
           <TransactionList accountId={account.id} />

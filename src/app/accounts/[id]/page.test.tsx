@@ -2,19 +2,20 @@ import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Account } from "@/accounts/Account.type";
+import { AccountProvider } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AccountProvider } from "@/context/AccountContext";
-import { RecurringTransactionProvider } from "@/context/RecurringTransactionContext";
-import { ScenarioProvider } from "@/context/ScenarioContext";
-import { TransactionProvider } from "@/context/TransactionContext";
-import type { Account } from "@/models/Account.type";
-import { AccountType } from "@/models/AccountType";
-import type { Scenario } from "@/models/Scenario.type";
-import type { Transaction } from "@/models/Transaction.type";
+import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
+import type { Scenario } from "@/scenarios/Scenario.type";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
+import type { Transaction } from "@/transactions/Transaction.type";
+import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import AccountDetailPage from "./page";
 
@@ -33,19 +34,19 @@ const transactions: Transaction[] = [
 
 function renderPage(
   id: string,
-  activeScenarioId?: string | null,
-  scenarios: Scenario[] = []
+  opts: {
+    accounts?: Account[];
+    transactions?: Transaction[];
+    scenarios?: Scenario[];
+    activeScenarioId?: string | null;
+  } = {}
 ) {
-  if (scenarios.length > 0) {
-    localStorage.setItem("scenarios", JSON.stringify(scenarios));
-  }
-  if (activeScenarioId !== undefined) {
-    if (activeScenarioId === null) {
-      localStorage.removeItem("activeScenarioId");
-    } else {
-      localStorage.setItem("activeScenarioId", activeScenarioId);
-    }
-  }
+  mockApiResponses({
+    accounts: opts.accounts ?? [],
+    transactions: opts.transactions ?? [],
+    scenarios: opts.scenarios ?? [],
+    activeScenarioId: opts.activeScenarioId ?? null,
+  });
   return render(
     <TooltipProvider>
       <SidebarProvider>
@@ -65,40 +66,31 @@ function renderPage(
 
 describe("AccountDetailPage", () => {
   beforeEach(() => {
-    localStorage.clear();
-    // AGENT: should this be a re-usable util function?
+    mockApiResponses();
     vi.stubGlobal("crypto", { randomUUID: () => "test-uuid" });
   });
 
   it("shows account name as heading", async () => {
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    renderPage("a1");
+    renderPage("a1", { accounts, transactions });
 
     expect(await screen.findByRole("heading", { name: "Checking" })).toBeInTheDocument();
   });
 
   it("shows current balance computed from transactions", async () => {
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    renderPage("a1");
+    renderPage("a1", { accounts, transactions });
 
     expect(await screen.findByText("US$800.00")).toBeInTheDocument();
   });
 
   it("renders transaction list", async () => {
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    renderPage("a1");
+    renderPage("a1", { accounts, transactions });
 
     expect(await screen.findByText("Opening balance")).toBeInTheDocument();
     expect(screen.getByText("Groceries")).toBeInTheDocument();
   });
 
   it("renders add transaction dialog trigger", async () => {
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify([]));
-    renderPage("a1");
+    renderPage("a1", { accounts });
 
     expect(await screen.findByRole("button", { name: "Add Transaction" })).toBeInTheDocument();
   });
@@ -109,16 +101,13 @@ describe("AccountDetailPage", () => {
     expect(screen.getByText("Account not found")).toBeInTheDocument();
   });
 
-  it("shows scenario filter in TopBar with 'Baseline only' default", () => {
-    // AGENT: description does not exist in type Scenario. I see an error in my IDE, why do you not see this? Fix this, but also the root cause so this error is clear (run tsc?)
+  it("shows scenario filter in TopBar with 'Baseline only' default", async () => {
     const scenarios: Scenario[] = [
       { id: "s1", name: "Scenario 1", description: "" },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    renderPage("a1", null, scenarios);
+    renderPage("a1", { accounts, transactions, scenarios });
 
-    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
+    const filter = await screen.findByRole("combobox", { name: "Scenario filter" });
     expect(filter).toHaveTextContent("Baseline only");
   });
 
@@ -131,9 +120,7 @@ describe("AccountDetailPage", () => {
       { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
       { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Scenario tx", scenarioId: "s1" },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(scenarioTransactions));
-    renderPage("a1", null, scenarios);
+    renderPage("a1", { accounts, transactions: scenarioTransactions, scenarios });
 
     expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();
 
@@ -154,11 +141,9 @@ describe("AccountDetailPage", () => {
       { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
       { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Deleted scenario tx", scenarioId: "deleted" },
     ];
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-    localStorage.setItem("transactions", JSON.stringify(scenarioTransactions));
-    renderPage("a1", "deleted", scenarios);
+    renderPage("a1", { accounts, transactions: scenarioTransactions, scenarios, activeScenarioId: "deleted" });
 
-    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
+    const filter = await screen.findByRole("combobox", { name: "Scenario filter" });
     expect(filter).toHaveTextContent("Baseline only");
 
     expect(await screen.findByText("US$1,000.00")).toBeInTheDocument();

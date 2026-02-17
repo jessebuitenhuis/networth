@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { CurrencyInput } from "@/components/currency-input/CurrencyInput";
 import { PercentageInput } from "@/components/percentage-input/PercentageInput";
 import { Button } from "@/components/ui/button";
@@ -26,10 +28,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { generateId } from "@/lib/generateId";
-import { AccountType } from "@/models/AccountType";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 interface CreateAccountDialogProps {
   trigger?: React.ReactNode;

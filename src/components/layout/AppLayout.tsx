@@ -3,14 +3,14 @@
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
+import { AccountType } from "@/accounts/AccountType";
 import { AccountIcon } from "@/components/accounts/AccountIcon";
 import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
 import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useAccounts } from "@/context/AccountContext";
-import { useTransactions } from "@/context/TransactionContext";
 import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
-import { AccountType } from "@/models/AccountType";
+import { useTransactions } from "@/transactions/TransactionContext";
 
 import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup.type";
