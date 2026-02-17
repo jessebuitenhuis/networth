@@ -3,16 +3,16 @@
 import { useState } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { AccountPicker } from "@/components/charts/AccountPicker";
-import { ProjectedNetWorthChart } from "@/components/charts/ProjectedNetWorthChart";
+import { AccountPicker } from "@/charts/components/AccountPicker";
+import { ProjectedNetWorthChart } from "@/charts/components/ProjectedNetWorthChart";
 import TopBar from "@/components/layout/TopBar";
-import { CreateScenarioDialog } from "@/components/scenarios/CreateScenarioDialog";
-import { DuplicateScenarioDialog } from "@/components/scenarios/DuplicateScenarioDialog";
-import { EditScenarioDialog } from "@/components/scenarios/EditScenarioDialog";
-import { ScenarioPicker } from "@/components/scenarios/ScenarioPicker";
-import { ScenarioTransactionList } from "@/components/scenarios/ScenarioTransactionList";
 import { generateId } from "@/lib/generateId";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { CreateScenarioDialog } from "@/scenarios/components/CreateScenarioDialog";
+import { DuplicateScenarioDialog } from "@/scenarios/components/DuplicateScenarioDialog";
+import { EditScenarioDialog } from "@/scenarios/components/EditScenarioDialog";
+import { ScenarioPicker } from "@/scenarios/components/ScenarioPicker";
+import { ScenarioTransactionList } from "@/scenarios/components/ScenarioTransactionList";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
 

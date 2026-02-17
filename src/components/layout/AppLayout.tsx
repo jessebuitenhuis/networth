@@ -5,9 +5,9 @@ import { useMemo } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { AccountIcon } from "@/components/accounts/AccountIcon";
-import { CreateAccountDialog } from "@/components/accounts/CreateAccountDialog";
-import { EditAccountDialog } from "@/components/accounts/EditAccountDialog";
+import { AccountIcon } from "@/accounts/components/AccountIcon";
+import { CreateAccountDialog } from "@/accounts/components/CreateAccountDialog";
+import { EditAccountDialog } from "@/accounts/components/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
 import { useTransactions } from "@/transactions/TransactionContext";

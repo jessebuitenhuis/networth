@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 
+import { computeBalance } from "@/accounts/computeBalance";
 import { formatDate } from "@/lib/dateUtils";
-import { computeBalance } from "@/services/computeBalance";
 
 import type { Transaction } from "./Transaction.type";
 
