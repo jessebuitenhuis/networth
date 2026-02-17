@@ -1,21 +1,18 @@
-import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { accounts } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/accounts/accountRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getAllAccounts, createAccount } = await import("@/accounts/accountRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
-  testDb.delete(accounts).run();
+  vi.resetAllMocks();
 });
 
 describe("GET /api/accounts", () => {
   it("returns empty array when no accounts exist", async () => {
+    vi.mocked(getAllAccounts).mockReturnValue([]);
+
     const response = await GET();
     const body = await response.json();
 
@@ -24,13 +21,10 @@ describe("GET /api/accounts", () => {
   });
 
   it("returns all accounts", async () => {
-    testDb
-      .insert(accounts)
-      .values([
-        { id: "1", name: "Checking", type: "Asset" },
-        { id: "2", name: "Mortgage", type: "Liability" },
-      ])
-      .run();
+    vi.mocked(getAllAccounts).mockReturnValue([
+      { id: "1", name: "Checking", type: "Asset", expectedReturnRate: null },
+      { id: "2", name: "Mortgage", type: "Liability", expectedReturnRate: null },
+    ]);
 
     const response = await GET();
     const body = await response.json();
@@ -40,20 +34,15 @@ describe("GET /api/accounts", () => {
     expect(body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: "1", name: "Checking", type: "Asset" }),
-        expect.objectContaining({
-          id: "2",
-          name: "Mortgage",
-          type: "Liability",
-        }),
+        expect.objectContaining({ id: "2", name: "Mortgage", type: "Liability" }),
       ]),
     );
   });
 
   it("returns accounts with expectedReturnRate", async () => {
-    testDb
-      .insert(accounts)
-      .values({ id: "1", name: "Stocks", type: "Asset", expectedReturnRate: 0.07 })
-      .run();
+    vi.mocked(getAllAccounts).mockReturnValue([
+      { id: "1", name: "Stocks", type: "Asset", expectedReturnRate: 0.07 },
+    ]);
 
     const response = await GET();
     const body = await response.json();
@@ -64,14 +53,17 @@ describe("GET /api/accounts", () => {
 
 describe("POST /api/accounts", () => {
   it("creates an account and returns it", async () => {
+    vi.mocked(createAccount).mockReturnValue({
+      id: "new-1",
+      name: "Savings",
+      type: "Asset",
+      expectedReturnRate: null,
+    });
+
     const request = new Request("http://localhost/api/accounts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: "new-1",
-        name: "Savings",
-        type: "Asset",
-      }),
+      body: JSON.stringify({ id: "new-1", name: "Savings", type: "Asset" }),
     });
 
     const response = await POST(request);
@@ -81,21 +73,26 @@ describe("POST /api/accounts", () => {
     expect(body).toEqual(
       expect.objectContaining({ id: "new-1", name: "Savings", type: "Asset" }),
     );
-
-    const rows = testDb.select().from(accounts).where(eq(accounts.id, "new-1")).all();
-    expect(rows).toHaveLength(1);
+    expect(createAccount).toHaveBeenCalledWith({
+      id: "new-1",
+      name: "Savings",
+      type: "Asset",
+      expectedReturnRate: undefined,
+    });
   });
 
   it("creates an account with expectedReturnRate", async () => {
+    vi.mocked(createAccount).mockReturnValue({
+      id: "new-2",
+      name: "Index Fund",
+      type: "Asset",
+      expectedReturnRate: 0.1,
+    });
+
     const request = new Request("http://localhost/api/accounts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: "new-2",
-        name: "Index Fund",
-        type: "Asset",
-        expectedReturnRate: 0.1,
-      }),
+      body: JSON.stringify({ id: "new-2", name: "Index Fund", type: "Asset", expectedReturnRate: 0.1 }),
     });
 
     const response = await POST(request);

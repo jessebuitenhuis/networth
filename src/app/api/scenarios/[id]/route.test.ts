@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { scenarios } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/scenarios/scenarioRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getScenarioById, updateScenario, deleteScenario } = await import("@/scenarios/scenarioRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -14,15 +10,14 @@ function makeParams(id: string) {
 }
 
 beforeEach(() => {
-  testDb.delete(scenarios).run();
-  testDb
-    .insert(scenarios)
-    .values({ id: "s-1", name: "Base Plan" })
-    .run();
+  vi.resetAllMocks();
 });
 
 describe("PUT /api/scenarios/[id]", () => {
   it("updates an existing scenario", async () => {
+    vi.mocked(getScenarioById).mockReturnValue({ id: "s-1", name: "Base Plan" });
+    vi.mocked(updateScenario).mockReturnValue({ id: "s-1", name: "Updated Plan" });
+
     const request = new Request("http://localhost/api/scenarios/s-1", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -37,6 +32,8 @@ describe("PUT /api/scenarios/[id]", () => {
   });
 
   it("returns 404 for non-existent scenario", async () => {
+    vi.mocked(getScenarioById).mockReturnValue(undefined);
+
     const request = new Request("http://localhost/api/scenarios/missing", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -51,22 +48,22 @@ describe("PUT /api/scenarios/[id]", () => {
 
 describe("DELETE /api/scenarios/[id]", () => {
   it("deletes an existing scenario", async () => {
+    vi.mocked(getScenarioById).mockReturnValue({ id: "s-1", name: "Base Plan" });
+
     const response = await DELETE(
       new Request("http://localhost/api/scenarios/s-1", { method: "DELETE" }),
       makeParams("s-1"),
     );
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(scenarios).all();
-    expect(rows).toHaveLength(0);
+    expect(deleteScenario).toHaveBeenCalledWith("s-1");
   });
 
   it("returns 404 for non-existent scenario", async () => {
+    vi.mocked(getScenarioById).mockReturnValue(undefined);
+
     const response = await DELETE(
-      new Request("http://localhost/api/scenarios/missing", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/scenarios/missing", { method: "DELETE" }),
       makeParams("missing"),
     );
 

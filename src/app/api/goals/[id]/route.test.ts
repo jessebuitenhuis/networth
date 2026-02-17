@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { goals } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/goals/goalRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getGoalById, updateGoal, deleteGoal } = await import("@/goals/goalRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -14,15 +10,14 @@ function makeParams(id: string) {
 }
 
 beforeEach(() => {
-  testDb.delete(goals).run();
-  testDb
-    .insert(goals)
-    .values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000 })
-    .run();
+  vi.resetAllMocks();
 });
 
 describe("PUT /api/goals/[id]", () => {
   it("updates an existing goal", async () => {
+    vi.mocked(getGoalById).mockReturnValue({ id: "g-1", name: "Emergency Fund", targetAmount: 10000 });
+    vi.mocked(updateGoal).mockReturnValue({ id: "g-1", name: "Updated Fund", targetAmount: 15000 });
+
     const request = new Request("http://localhost/api/goals/g-1", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -38,6 +33,8 @@ describe("PUT /api/goals/[id]", () => {
   });
 
   it("returns 404 for non-existent goal", async () => {
+    vi.mocked(getGoalById).mockReturnValue(undefined);
+
     const request = new Request("http://localhost/api/goals/missing", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -52,18 +49,20 @@ describe("PUT /api/goals/[id]", () => {
 
 describe("DELETE /api/goals/[id]", () => {
   it("deletes an existing goal", async () => {
+    vi.mocked(getGoalById).mockReturnValue({ id: "g-1", name: "Emergency Fund", targetAmount: 10000 });
+
     const response = await DELETE(
       new Request("http://localhost/api/goals/g-1", { method: "DELETE" }),
       makeParams("g-1"),
     );
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(goals).all();
-    expect(rows).toHaveLength(0);
+    expect(deleteGoal).toHaveBeenCalledWith("g-1");
   });
 
   it("returns 404 for non-existent goal", async () => {
+    vi.mocked(getGoalById).mockReturnValue(undefined);
+
     const response = await DELETE(
       new Request("http://localhost/api/goals/missing", { method: "DELETE" }),
       makeParams("missing"),

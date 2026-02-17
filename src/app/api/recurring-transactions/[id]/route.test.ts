@@ -1,12 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { recurringTransactions } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
+vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
-const testDb = createTestDb();
-
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
+const { getRecurringTransactionById, updateRecurringTransaction, deleteRecurringTransaction } =
+  await import("@/recurring-transactions/recurringTransactionRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -14,36 +11,37 @@ function makeParams(id: string) {
 }
 
 beforeEach(() => {
-  testDb.delete(recurringTransactions).run();
-  testDb
-    .insert(recurringTransactions)
-    .values({
+  vi.resetAllMocks();
+});
+
+describe("PUT /api/recurring-transactions/[id]", () => {
+  it("updates an existing recurring transaction", async () => {
+    vi.mocked(getRecurringTransactionById).mockReturnValue({
       id: "rt-1",
       accountId: "acc-1",
       amount: 3000,
       description: "Salary",
       frequency: "Monthly",
       startDate: "2025-01-01",
-    })
-    .run();
-});
+      endDate: null,
+      scenarioId: null,
+    });
+    vi.mocked(updateRecurringTransaction).mockReturnValue({
+      id: "rt-1",
+      accountId: "acc-1",
+      amount: 3500,
+      description: "Salary (raise)",
+      frequency: "Monthly",
+      startDate: "2025-01-01",
+      endDate: null,
+      scenarioId: null,
+    });
 
-describe("PUT /api/recurring-transactions/[id]", () => {
-  it("updates an existing recurring transaction", async () => {
-    const request = new Request(
-      "http://localhost/api/recurring-transactions/rt-1",
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId: "acc-1",
-          amount: 3500,
-          description: "Salary (raise)",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-        }),
-      },
-    );
+    const request = new Request("http://localhost/api/recurring-transactions/rt-1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accountId: "acc-1", amount: 3500, description: "Salary (raise)", frequency: "Monthly", startDate: "2025-01-01" }),
+    });
 
     const response = await PUT(request, makeParams("rt-1"));
     const body = await response.json();
@@ -54,20 +52,13 @@ describe("PUT /api/recurring-transactions/[id]", () => {
   });
 
   it("returns 404 for non-existent recurring transaction", async () => {
-    const request = new Request(
-      "http://localhost/api/recurring-transactions/missing",
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId: "acc-1",
-          amount: 100,
-          description: "Ghost",
-          frequency: "Monthly",
-          startDate: "2025-01-01",
-        }),
-      },
-    );
+    vi.mocked(getRecurringTransactionById).mockReturnValue(undefined);
+
+    const request = new Request("http://localhost/api/recurring-transactions/missing", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accountId: "acc-1", amount: 100, description: "Ghost", frequency: "Monthly", startDate: "2025-01-01" }),
+    });
 
     const response = await PUT(request, makeParams("missing"));
 
@@ -77,24 +68,31 @@ describe("PUT /api/recurring-transactions/[id]", () => {
 
 describe("DELETE /api/recurring-transactions/[id]", () => {
   it("deletes an existing recurring transaction", async () => {
+    vi.mocked(getRecurringTransactionById).mockReturnValue({
+      id: "rt-1",
+      accountId: "acc-1",
+      amount: 3000,
+      description: "Salary",
+      frequency: "Monthly",
+      startDate: "2025-01-01",
+      endDate: null,
+      scenarioId: null,
+    });
+
     const response = await DELETE(
-      new Request("http://localhost/api/recurring-transactions/rt-1", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/recurring-transactions/rt-1", { method: "DELETE" }),
       makeParams("rt-1"),
     );
 
     expect(response.status).toBe(204);
-
-    const rows = testDb.select().from(recurringTransactions).all();
-    expect(rows).toHaveLength(0);
+    expect(deleteRecurringTransaction).toHaveBeenCalledWith("rt-1");
   });
 
   it("returns 404 for non-existent recurring transaction", async () => {
+    vi.mocked(getRecurringTransactionById).mockReturnValue(undefined);
+
     const response = await DELETE(
-      new Request("http://localhost/api/recurring-transactions/missing", {
-        method: "DELETE",
-      }),
+      new Request("http://localhost/api/recurring-transactions/missing", { method: "DELETE" }),
       makeParams("missing"),
     );
 

@@ -1,0 +1,146 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { recurringTransactions } from "@/db/schema";
+import { createTestDb } from "@/test/createTestDb";
+
+const testDb = createTestDb();
+vi.mock("@/db/connection", () => ({ db: testDb }));
+
+const {
+  getAllRecurringTransactions,
+  getRecurringTransactionById,
+  createRecurringTransaction,
+  updateRecurringTransaction,
+  deleteRecurringTransaction,
+  deleteRecurringTransactionsByScenarioId,
+} = await import("./recurringTransactionRepository");
+
+beforeEach(() => {
+  testDb.delete(recurringTransactions).run();
+});
+
+describe("getAllRecurringTransactions", () => {
+  it("returns empty array when none exist", () => {
+    expect(getAllRecurringTransactions()).toEqual([]);
+  });
+
+  it("returns all recurring transactions when populated", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values([
+        { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" },
+        { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01" },
+      ])
+      .run();
+
+    expect(getAllRecurringTransactions()).toHaveLength(2);
+  });
+});
+
+describe("getRecurringTransactionById", () => {
+  it("returns the matching recurring transaction", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .run();
+
+    const result = getRecurringTransactionById("rt-1");
+    expect(result).toEqual(expect.objectContaining({ id: "rt-1", description: "Salary" }));
+  });
+
+  it("returns undefined for non-existent id", () => {
+    expect(getRecurringTransactionById("non-existent")).toBeUndefined();
+  });
+});
+
+describe("createRecurringTransaction", () => {
+  it("inserts and returns the created recurring transaction with all fields", () => {
+    const result = createRecurringTransaction({
+      id: "rt-1",
+      accountId: "acc-1",
+      amount: 3000,
+      description: "Salary",
+      frequency: "Monthly",
+      startDate: "2025-01-01",
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: "rt-1",
+        accountId: "acc-1",
+        amount: 3000,
+        description: "Salary",
+        frequency: "Monthly",
+        startDate: "2025-01-01",
+        endDate: null,
+        scenarioId: null,
+      }),
+    );
+  });
+
+  it("stores optional endDate and scenarioId when provided", () => {
+    const result = createRecurringTransaction({
+      id: "rt-1",
+      accountId: "acc-1",
+      amount: 500,
+      description: "Bonus",
+      frequency: "Yearly",
+      startDate: "2025-01-01",
+      endDate: "2027-01-01",
+      scenarioId: "s-1",
+    });
+
+    expect(result.endDate).toBe("2027-01-01");
+    expect(result.scenarioId).toBe("s-1");
+  });
+});
+
+describe("updateRecurringTransaction", () => {
+  it("modifies and returns the updated recurring transaction", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .run();
+
+    const result = updateRecurringTransaction("rt-1", {
+      accountId: "acc-1",
+      amount: 3500,
+      description: "Salary (raise)",
+      frequency: "Monthly",
+      startDate: "2025-01-01",
+    });
+
+    expect(result.amount).toBe(3500);
+    expect(result.description).toBe("Salary (raise)");
+  });
+});
+
+describe("deleteRecurringTransaction", () => {
+  it("removes the recurring transaction", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .run();
+
+    deleteRecurringTransaction("rt-1");
+    expect(getAllRecurringTransactions()).toHaveLength(0);
+  });
+});
+
+describe("deleteRecurringTransactionsByScenarioId", () => {
+  it("deletes only matching recurring transactions, leaves others", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values([
+        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Base", frequency: "Monthly", startDate: "2025-01-01" },
+        { id: "rt-2", accountId: "acc-1", amount: 200, description: "Scenario", frequency: "Monthly", startDate: "2025-01-01", scenarioId: "s-1" },
+      ])
+      .run();
+
+    deleteRecurringTransactionsByScenarioId("s-1");
+
+    const remaining = getAllRecurringTransactions();
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].id).toBe("rt-1");
+  });
+});
