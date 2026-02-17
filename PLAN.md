@@ -1,142 +1,253 @@
-# Plan: Unit Test Repositories + Decouple Route Tests
+# Domain-Driven Folder Restructure
 
 ## Context
 
-The previous commit extracted a repository layer from API route handlers, but:
-1. The repositories have no unit tests
-2. The route tests still mock `@/db/connection` (an implementation detail of the repositories) and use `createTestDb()` to set up/verify DB state directly
+The codebase currently mixes domain-driven folders (`src/accounts/`, `src/transactions/`, etc.) with technical-concern folders (`src/services/`, `src/models/`, `src/components/{domain}/`). This restructure moves all domain-specific code into its domain folder, leaving only truly shared utilities in `src/lib/`, `src/components/shared/`, and `src/components/layout/`.
 
-This creates tight coupling — route tests break if the repository changes its storage mechanism. The fix: add repository unit tests (with real DB via `createTestDb`), then refactor route tests to mock the repository module instead.
+## Target Structure
 
-## Part 1: Add Repository Unit Tests (5 new files)
+```
+src/
+  accounts/
+    Account.type.ts                     # existing
+    AccountType.ts                      # existing
+    AccountContext.tsx (+test)           # existing
+    accountRepository.ts (+test)        # existing
+    computeBalance.ts (+test)           # from services/
+    components/
+      AccountIcon.tsx (+test)           # from components/accounts/
+      CreateAccountDialog.tsx (+page,test)
+      EditAccountDialog.tsx (+page,test)
+      EmptyDashboard.tsx (+test)
+      NetWorthCard.tsx (+test)
+      NetWorthSummary.tsx (+test)
+      UpdateBalanceDialog.tsx (+page,test)
 
-Each repository gets a co-located test file using the existing `createTestDb()` pattern. These are the only tests that should know about the database.
+  transactions/
+    Transaction.type.ts                 # existing
+    TransactionContext.tsx (+test)       # existing
+    transactionRepository.ts (+test)    # existing
+    DisplayTransaction.type.ts          # from models/
+    buildDisplayTransactions.ts (+test) # from services/
+    filterTransactionsByScenario.ts (+test)
+    isTransactionProjected.ts (+test)
+    generateCompoundGrowthTransactions.ts (+test)
+    components/
+      CreateTransactionDialog.tsx (+test)  # from components/transactions/
+      EditTransactionDialog.tsx (+test)
+      EditRecurringTransactionDialog.tsx (+test)
+      ScenarioSelect.tsx (+test)
+      TransactionList.tsx (+test)
+      TransactionTable.tsx (+test)
+    import/
+      CsvColumnMapping.type.ts          # from models/
+      CsvImportStep.ts
+      CsvParseResult.type.ts
+      CsvSkippedRow.type.ts
+      DateFormat.ts
+      parseCsvText.ts (+test)           # from services/
+      buildTransactionsFromCsv.ts (+test)
+      ImportCsvDialog.tsx (+page,test)   # from components/transactions/
 
-### Files to create
+  recurring-transactions/
+    RecurrenceFrequency.ts              # existing
+    RecurringTransaction.type.ts        # existing
+    RecurringTransactionContext.tsx (+test) # existing
+    recurringTransactionRepository.ts (+test) # existing
+    createProjectedTransaction.ts (+test)  # from services/
+    iterateOccurrenceDates.ts (+test)
+    generateOccurrences.ts (+test)
+    getNextOccurrence.ts (+test)
 
-| File | Functions to test |
+  scenarios/
+    Scenario.type.ts                    # existing
+    ScenarioContext.tsx (+test)          # existing
+    scenarioRepository.ts (+test)       # existing
+    components/
+      CreateScenarioDialog.tsx (+test)  # from components/scenarios/
+      DuplicateScenarioDialog.tsx (+test)
+      EditScenarioDialog.tsx (+test)
+      ScenarioFilterSelect.tsx (+test)
+      ScenarioPicker.tsx (+test)
+      ScenarioTransactionList.tsx (+test)
+
+  goals/
+    Goal.type.ts                        # existing
+    GoalContext.tsx (+test)              # existing
+    goalRepository.ts (+test)           # existing
+    GoalProgress.type.ts                # from models/
+    computeGoalProgress.ts (+test)      # from services/
+    components/                         # NEW subfolder (moves existing flat components)
+      GoalCard.tsx (+test)              # existing, move to subfolder
+      GoalList.tsx (+test)              # existing, move to subfolder
+      CreateGoalDialog.tsx (+page,test) # existing, move to subfolder
+      EditGoalDialog.tsx (+page,test)   # existing, move to subfolder
+      GoalProgressCard.tsx (+test)      # from components/goals/
+      GoalProgressSection.tsx (+test)   # from components/goals/
+
+  charts/                               # NEW domain folder
+    ChartPeriod.ts                      # from models/
+    DateRange.type.ts                   # from models/
+    NetWorthDataPoint.type.ts           # from models/
+    MultiSeriesDataPoint.type.ts        # from models/
+    chartColors.ts (+test)              # from lib/
+    formatXAxisTick.ts (+test)          # from lib/
+    accumulateNetWorth.ts (+test)       # from services/
+    computeNetWorthSeries.ts (+test)    # from services/
+    computeProjectedSeries.ts (+test)   # from services/
+    mergeProjectedSeries.ts (+test)     # from services/
+    components/
+      AccountPicker.tsx (+test)         # from components/charts/
+      ChartLegend.tsx (+test)
+      CustomDateRangePicker.tsx (+test)
+      NetWorthChart.tsx (+test)
+      PeriodPicker.tsx (+test)
+      ProjectedNetWorthChart.tsx (+test)
+      ScenarioLegend.tsx (+test)
+
+  lib/                                  # only generic utilities remain
+    utils.ts
+    generateId.ts (+test)
+    dateUtils.ts (+test)
+    getLocale.ts (+test)
+    localeNumber.ts (+test)
+    formatCurrency.ts (+test)
+    formatSignedCurrency.ts (+test)
+    formatCompactCurrency.ts (+test)
+
+  components/
+    ui/          # shadcn - UNCHANGED
+    layout/      # UNCHANGED
+    shared/      # consolidate shared form components here
+      MultiSelectPicker.tsx (+test)     # existing
+      CurrencyInput.tsx (+test)         # from components/currency-input/
+      PercentageInput.tsx               # from components/percentage-input/
+
+  app/           # UNCHANGED (Next.js convention)
+  db/            # UNCHANGED
+  hooks/         # UNCHANGED (use-mobile.ts)
+  test/          # UNCHANGED
+```
+
+## Key Design Decisions
+
+1. **`computeBalance` -> accounts/** — conceptually "what is this account's balance?" even though it operates on Transaction[]. TransactionContext importing from accounts is fine (transactions already reference accounts via accountId).
+
+2. **`generateCompoundGrowthTransactions` -> transactions/** — produces Transaction[] objects. Only consumed by `computeProjectedSeries` (charts), which can import cross-domain.
+
+3. **`filterTransactionsByScenario` -> transactions/** — generic filter but operates on transaction-shaped data. Has no domain imports of its own.
+
+4. **`ImportCsvDialog` -> transactions/import/** — co-located with CSV types and services since it's the UI for the CSV import sub-domain.
+
+5. **goals/components/ subfolder** — for consistency with other domains and to keep root under 10 source files. Moves existing flat goal components into subfolder.
+
+6. **Import style** — use `@/` absolute imports everywhere (consistent with existing code). No switch to relative imports.
+
+## Placement Summary
+
+| Source | Destination |
 |---|---|
-| `src/accounts/accountRepository.test.ts` | `getAllAccounts`, `getAccountById`, `createAccount`, `updateAccount`, `deleteAccount` |
-| `src/transactions/transactionRepository.test.ts` | `getAllTransactions`, `getTransactionById`, `createTransaction`, `createTransactions`, `updateTransaction`, `deleteTransaction`, `deleteTransactionsByAccountId`, `deleteTransactionsByScenarioId` |
-| `src/recurring-transactions/recurringTransactionRepository.test.ts` | `getAllRecurringTransactions`, `getRecurringTransactionById`, `createRecurringTransaction`, `updateRecurringTransaction`, `deleteRecurringTransaction`, `deleteRecurringTransactionsByScenarioId` |
-| `src/scenarios/scenarioRepository.test.ts` | `getAllScenarios`, `getScenarioById`, `createScenario`, `updateScenario`, `deleteScenario`, `getActiveScenarioId`, `setActiveScenarioId`, `ensureBasePlanExists` |
-| `src/goals/goalRepository.test.ts` | `getAllGoals`, `getGoalById`, `createGoal`, `updateGoal`, `deleteGoal` |
+| `src/services/computeBalance` | `src/accounts/computeBalance` |
+| `src/components/accounts/*` | `src/accounts/components/*` |
+| `src/services/{buildDisplayTransactions,filterTransactionsByScenario,isTransactionProjected,generateCompoundGrowthTransactions}` | `src/transactions/` |
+| `src/models/DisplayTransaction.type` | `src/transactions/DisplayTransaction.type` |
+| `src/components/transactions/{Create,Edit,ScenarioSelect,TransactionList,TransactionTable}*` | `src/transactions/components/` |
+| `src/components/transactions/ImportCsvDialog*` | `src/transactions/import/` |
+| `src/services/{parseCsvText,buildTransactionsFromCsv}` | `src/transactions/import/` |
+| `src/models/{CsvColumnMapping,CsvImportStep,CsvParseResult,CsvSkippedRow,DateFormat}*` | `src/transactions/import/` |
+| `src/services/{createProjectedTransaction,iterateOccurrenceDates,generateOccurrences,getNextOccurrence}` | `src/recurring-transactions/` |
+| `src/components/scenarios/*` | `src/scenarios/components/` |
+| `src/services/computeGoalProgress` | `src/goals/computeGoalProgress` |
+| `src/models/GoalProgress.type` | `src/goals/GoalProgress.type` |
+| `src/goals/{GoalCard,GoalList,Create,Edit}*` | `src/goals/components/` |
+| `src/components/goals/*` | `src/goals/components/` |
+| `src/models/{ChartPeriod,DateRange,NetWorthDataPoint,MultiSeriesDataPoint}*` | `src/charts/` |
+| `src/lib/{chartColors,formatXAxisTick}*` | `src/charts/` |
+| `src/services/{accumulateNetWorth,computeNetWorthSeries,computeProjectedSeries,mergeProjectedSeries}` | `src/charts/` |
+| `src/components/charts/*` | `src/charts/components/` |
+| `src/components/currency-input/*` | `src/components/shared/` |
+| `src/components/percentage-input/*` | `src/components/shared/` |
 
-### Test structure (same pattern for all)
+## Implementation Steps
 
-```typescript
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb } from "@/test/createTestDb";
+### Step 1: Create directory structure
+Create all new directories: `src/charts/`, `src/charts/components/`, `src/accounts/components/`, `src/transactions/components/`, `src/transactions/import/`, `src/scenarios/components/`, `src/goals/components/`.
 
-const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
+### Step 2: Move files with `git mv`
+Move all files at once using `git mv`. This preserves git history and is a pure rename — no content changes yet.
 
-// Dynamic import AFTER mock
-const { getAllAccounts, getAccountById, createAccount, ... } =
-  await import("./accountRepository");
+### Step 3: Fix all imports
+Global search-and-replace for each import path change. Key rewrites:
 
-beforeEach(() => {
-  testDb.delete(accounts).run();
-});
-```
-
-### What each test covers
-
-- **getAll**: returns `[]` when empty, returns all rows when populated
-- **getById**: returns the matching row, returns `undefined` for non-existent id
-- **create**: inserts and returns the created row with all fields (including optional fields normalized to `null`)
-- **update**: modifies and returns the updated row
-- **delete**: removes the row (verify via `getAll` returning fewer items)
-- **Bulk deletes** (transactions/recurring): only deletes matching rows, leaves others
-- **Scenario-specific**: `getActiveScenarioId` returns `null` when unset / returns the value; `setActiveScenarioId` inserts and upserts; `ensureBasePlanExists` creates "Base Plan" when empty, no-ops when scenarios exist (mock `generateId` via `vi.mock("@/lib/generateId")`)
-
-## Part 2: Refactor Route Tests to Mock Repositories (11 files)
-
-### Pattern change
-
-**Before** (mocks DB, tests through entire stack):
-```typescript
-import { accounts } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-
-beforeEach(() => {
-  testDb.delete(accounts).run();
-  testDb.insert(accounts).values({...}).run();
-});
-
-// Assertions verify DB state directly:
-const rows = testDb.select().from(accounts).all();
-```
-
-**After** (mocks repository, tests route logic only):
-```typescript
-vi.mock("@/accounts/accountRepository");
-
-const { getAllAccounts, createAccount, ... } =
-  await import("@/accounts/accountRepository");
-const { GET, POST } = await import("./route");
-
-beforeEach(() => {
-  vi.resetAllMocks();
-});
-
-// Setup via mock return values:
-vi.mocked(getAllAccounts).mockReturnValue([
-  { id: "1", name: "Checking", type: "Asset", expectedReturnRate: null },
-]);
-
-// Assertions verify repository was called correctly:
-expect(createAccount).toHaveBeenCalledWith({ id: "new-1", name: "Savings", type: "Asset" });
-```
-
-### Files to refactor
-
-| Route test file | Repository mock |
+| Old import path | New import path |
 |---|---|
-| `src/app/api/accounts/route.test.ts` | `@/accounts/accountRepository` |
-| `src/app/api/accounts/[id]/route.test.ts` | `@/accounts/accountRepository` |
-| `src/app/api/transactions/route.test.ts` | `@/transactions/transactionRepository` |
-| `src/app/api/transactions/[id]/route.test.ts` | `@/transactions/transactionRepository` |
-| `src/app/api/recurring-transactions/route.test.ts` | `@/recurring-transactions/recurringTransactionRepository` |
-| `src/app/api/recurring-transactions/[id]/route.test.ts` | `@/recurring-transactions/recurringTransactionRepository` |
-| `src/app/api/goals/route.test.ts` | `@/goals/goalRepository` |
-| `src/app/api/goals/[id]/route.test.ts` | `@/goals/goalRepository` |
-| `src/app/api/scenarios/route.test.ts` | `@/scenarios/scenarioRepository` |
-| `src/app/api/scenarios/[id]/route.test.ts` | `@/scenarios/scenarioRepository` |
-| `src/app/api/scenarios/active/route.test.ts` | `@/scenarios/scenarioRepository` |
+| `@/services/computeBalance` | `@/accounts/computeBalance` |
+| `@/components/accounts/X` | `@/accounts/components/X` |
+| `@/services/buildDisplayTransactions` | `@/transactions/buildDisplayTransactions` |
+| `@/services/filterTransactionsByScenario` | `@/transactions/filterTransactionsByScenario` |
+| `@/services/isTransactionProjected` | `@/transactions/isTransactionProjected` |
+| `@/services/generateCompoundGrowthTransactions` | `@/transactions/generateCompoundGrowthTransactions` |
+| `@/models/DisplayTransaction.type` | `@/transactions/DisplayTransaction.type` |
+| `@/components/transactions/X` | `@/transactions/components/X` |
+| `@/services/parseCsvText` | `@/transactions/import/parseCsvText` |
+| `@/services/buildTransactionsFromCsv` | `@/transactions/import/buildTransactionsFromCsv` |
+| `@/models/CsvColumnMapping.type` | `@/transactions/import/CsvColumnMapping.type` |
+| `@/models/CsvImportStep` | `@/transactions/import/CsvImportStep` |
+| `@/models/CsvParseResult.type` | `@/transactions/import/CsvParseResult.type` |
+| `@/models/CsvSkippedRow.type` | `@/transactions/import/CsvSkippedRow.type` |
+| `@/models/DateFormat` | `@/transactions/import/DateFormat` |
+| `@/services/createProjectedTransaction` | `@/recurring-transactions/createProjectedTransaction` |
+| `@/services/iterateOccurrenceDates` | `@/recurring-transactions/iterateOccurrenceDates` |
+| `@/services/generateOccurrences` | `@/recurring-transactions/generateOccurrences` |
+| `@/services/getNextOccurrence` | `@/recurring-transactions/getNextOccurrence` |
+| `@/components/scenarios/X` | `@/scenarios/components/X` |
+| `@/services/computeGoalProgress` | `@/goals/computeGoalProgress` |
+| `@/models/GoalProgress.type` | `@/goals/GoalProgress.type` |
+| `@/components/goals/X` | `@/goals/components/X` |
+| `@/goals/GoalCard` | `@/goals/components/GoalCard` |
+| `@/goals/GoalList` | `@/goals/components/GoalList` |
+| `@/goals/CreateGoalDialog` | `@/goals/components/CreateGoalDialog` |
+| `@/goals/EditGoalDialog` | `@/goals/components/EditGoalDialog` |
+| `@/models/ChartPeriod` | `@/charts/ChartPeriod` |
+| `@/models/DateRange.type` | `@/charts/DateRange.type` |
+| `@/models/NetWorthDataPoint.type` | `@/charts/NetWorthDataPoint.type` |
+| `@/models/MultiSeriesDataPoint.type` | `@/charts/MultiSeriesDataPoint.type` |
+| `@/lib/chartColors` | `@/charts/chartColors` |
+| `@/lib/formatXAxisTick` | `@/charts/formatXAxisTick` |
+| `@/services/accumulateNetWorth` | `@/charts/accumulateNetWorth` |
+| `@/services/computeNetWorthSeries` | `@/charts/computeNetWorthSeries` |
+| `@/services/computeProjectedSeries` | `@/charts/computeProjectedSeries` |
+| `@/services/mergeProjectedSeries` | `@/charts/mergeProjectedSeries` |
+| `@/components/charts/X` | `@/charts/components/X` |
+| `@/components/currency-input/CurrencyInput` | `@/components/shared/CurrencyInput` |
+| `@/components/percentage-input/PercentageInput` | `@/components/shared/PercentageInput` |
 
-### Key changes per test
+Also fix relative imports within moved files (e.g. `./generateCompoundGrowthTransactions` in `computeProjectedSeries.ts` becomes `@/transactions/generateCompoundGrowthTransactions` since they're now in different domains).
 
-- **Remove**: `createTestDb`, `@/db/schema` imports, `testDb` variable, all `testDb.insert/delete/select` calls
-- **Add**: `vi.mock("@/{domain}/{repo}")`, import repo functions, `vi.mocked()` for setup
-- **beforeEach**: `vi.resetAllMocks()` instead of DB cleanup
-- **Setup**: `vi.mocked(fn).mockReturnValue(data)` instead of DB inserts
-- **Assertions**: `expect(fn).toHaveBeenCalledWith(args)` instead of DB queries
-- **GET tests**: Mock the getAll/getById to return test data, assert response body matches
-- **POST tests**: Mock the create function to return the created object, assert it was called with correct args
-- **PUT tests**: Mock getById (for existence check) + update function
-- **DELETE tests**: Mock getById (for existence check) + delete function
-- **404 tests**: Mock getById to return `undefined`
+### Step 4: Delete empty directories
+Remove: `src/services/`, `src/models/`, `src/components/accounts/`, `src/components/transactions/`, `src/components/scenarios/`, `src/components/charts/`, `src/components/goals/`, `src/components/currency-input/`, `src/components/percentage-input/`.
 
-### Scenarios route special cases
+### Step 5: Update documentation
+- Update `CLAUDE.md` directory structure section
+- Delete stale CLAUDE.md files in removed directories (`src/services/CLAUDE.md`, `src/models/CLAUDE.md`, `src/components/CLAUDE.md`)
+- Update `MEMORY.md` references
 
-- `GET /api/scenarios`: mock `ensureBasePlanExists`, `getAllScenarios`, `getActiveScenarioId`
-- `PUT /api/scenarios/active`: mock `setActiveScenarioId`
+### Step 6: Run `npm run format` to fix import sorting
 
-## Execution order
+### Step 7: Run `npm run verify:quiet` to confirm everything passes
 
-1. Write all 5 repository test files first (Part 1)
-2. Run tests to confirm they pass
-3. Refactor all 11 route test files (Part 2)
-4. Run full verify
+### Step 8: Verify dev server with `npm run dev:check`
 
-## Verification
+## Subagent Strategy
 
-```bash
-npm run verify
-```
+Spawn one `general-purpose` subagent per domain to execute steps 2-3 in sequence:
+1. **accounts** subagent
+2. **transactions** subagent (includes import/ sub-domain)
+3. **recurring-transactions** subagent
+4. **scenarios** subagent
+5. **goals** subagent
+6. **charts** subagent
+7. **shared-components** subagent
+8. **cleanup** subagent (delete dirs, update docs, format, verify)
 
-This runs lint + build + tests with 95% coverage threshold. All existing test behaviors should be preserved — same test names, same assertions on HTTP status codes and response bodies. The only change is what layer is mocked.
+Domains can run in parallel since each subagent handles its own git mv + import rewrites. The cleanup subagent runs last after all domains are done.
