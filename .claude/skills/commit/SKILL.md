@@ -8,7 +8,7 @@ agent: Basher
 
 Your ONLY job is to verify the build, test and lint and create a well formatted conventional git commit.
 
-All information is in this prompt, you don't have to rerun the scripts.
+All information is in this prompt, you don't have to rerun the scripts. You may run `git diff <file>` if you need the full diff of a specific file.
 
 ## 1. Format
 
@@ -27,5 +27,5 @@ All information is in this prompt, you don't have to rerun the scripts.
 Create a verifed, well formatted conventional git commit.
 
 - `git status`: !`git status`
-- `git diff`: !`git diff`
+- `git diff --stat`: !`git diff --stat`
 - `git log --oneline -n 5`: !`git log --oneline -n 5`
