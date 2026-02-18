@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Helper for SKILL.md !` commands: runs a command and strips ANSI escape codes
-// Usage: node run-no-ansi.js <command> [args...]
+// Usage: node run-no-ansi.mjs <command> [args...]
 import { execSync } from "child_process";
 const cmd = process.argv.slice(2).join(" ");
 const strip = (s) => s.replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
