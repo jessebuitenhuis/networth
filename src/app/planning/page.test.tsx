@@ -99,11 +99,15 @@ describe("PlanningPage", () => {
     await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Open picker and click scenario
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    );
     await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
 
     // Should update to 1 selected
-    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (1)" }),
+    ).toBeInTheDocument();
   });
 
   it("toggles account filter when checkbox is clicked", async () => {
@@ -121,7 +125,9 @@ describe("PlanningPage", () => {
     await userEvent.click(screen.getByRole("checkbox", { name: "Checking" }));
 
     // Should update to 0 accounts
-    expect(screen.getByRole("button", { name: "Accounts (0)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Accounts (0)" }),
+    ).toBeInTheDocument();
   });
 
   it("creates scenario and auto-selects it", async () => {
@@ -129,11 +135,15 @@ describe("PlanningPage", () => {
 
     renderPage();
 
-    await userEvent.click(screen.getByRole("button", { name: /new scenario/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /new scenario/i }),
+    );
     await userEvent.type(screen.getByLabelText(/name/i), "My Scenario");
     await userEvent.click(screen.getByRole("button", { name: /create$/i }));
 
-    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (1)" }),
+    ).toBeInTheDocument();
   });
 
   it("removes deleted scenario from selection", async () => {
@@ -146,7 +156,9 @@ describe("PlanningPage", () => {
     await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Open picker, select the scenario, then click edit (popover stays open)
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    );
     await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
     await userEvent.click(screen.getByLabelText("Edit Scenario"));
 
@@ -158,7 +170,9 @@ describe("PlanningPage", () => {
     await userEvent.click(deleteButtons[deleteButtons.length - 1]);
 
     // Scenario should be removed from selection
-    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    ).toBeInTheDocument();
   });
 
   it("duplicates scenario with transactions and auto-selects the copy", async () => {
@@ -166,10 +180,25 @@ describe("PlanningPage", () => {
       accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
       transactions: [
-        { id: "t-1", accountId: "acc-1", amount: 500, date: "2024-06-01", description: "Bonus", scenarioId: "scenario-1" },
+        {
+          id: "t-1",
+          accountId: "acc-1",
+          amount: 500,
+          date: "2024-06-01",
+          description: "Bonus",
+          scenarioId: "scenario-1",
+        },
       ],
       recurringTransactions: [
-        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Monthly", frequency: RecurrenceFrequency.Monthly, startDate: "2024-01-01", scenarioId: "scenario-1" },
+        {
+          id: "rt-1",
+          accountId: "acc-1",
+          amount: 100,
+          description: "Monthly",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-1",
+        },
       ],
     });
 
@@ -178,7 +207,9 @@ describe("PlanningPage", () => {
     await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Open picker to render the duplicate button
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    );
     await userEvent.click(screen.getByLabelText("Duplicate Scenario"));
 
     // Submit duplicate dialog with pre-filled name
@@ -186,7 +217,9 @@ describe("PlanningPage", () => {
     await userEvent.click(screen.getByRole("button", { name: /duplicate$/i }));
 
     // New scenario should be auto-selected
-    expect(screen.getByRole("button", { name: "Scenarios (1)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (1)" }),
+    ).toBeInTheDocument();
   });
 
   it("clears all scenarios when Deselect all is clicked", async () => {
@@ -203,16 +236,24 @@ describe("PlanningPage", () => {
     await screen.findByRole("button", { name: "Scenarios (0)" });
 
     // Select two scenarios
-    await userEvent.click(screen.getByRole("button", { name: "Scenarios (0)" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    );
     await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Conservative" }));
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Conservative" }),
+    );
 
-    expect(screen.getByRole("button", { name: "Scenarios (2)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (2)" }),
+    ).toBeInTheDocument();
 
     // Click Deselect all
     await userEvent.click(screen.getByRole("button", { name: "Deselect all" }));
 
     // Should clear selection
-    expect(screen.getByRole("button", { name: "Scenarios (0)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Scenarios (0)" }),
+    ).toBeInTheDocument();
   });
 });
