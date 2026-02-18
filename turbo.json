@@ -1,16 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "package.json",
-    "package-lock.json",
-    "tsconfig.json"
-  ],
+  "globalDependencies": ["package.json", "package-lock.json", "tsconfig.json"],
   "tasks": {
-    "lint": {
+    "_lint": {
       "inputs": ["src/**", "eslint.config.mjs"],
       "outputs": []
     },
-    "build": {
+    "_build": {
       "inputs": [
         "src/**",
         "public/**",
@@ -20,7 +16,7 @@
       ],
       "outputs": [".next/**"]
     },
-    "test": {
+    "_test": {
       "inputs": ["src/**", "vitest.config.ts"],
       "outputs": []
     },

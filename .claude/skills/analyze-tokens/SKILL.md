@@ -3,6 +3,7 @@ name: analyze-tokens
 description: Analyze Claude Code session token usage patterns and identify optimization opportunities
 allowed-tools: Bash, Read, Write, Glob
 argument-hint: "[optional: specific focus area or hypothesis to test]"
+disable-model-invocation: true
 ---
 
 # Token Usage Analysis Skill
@@ -12,6 +13,7 @@ Analyze recent Claude Code sessions to identify token usage patterns and optimiz
 ## What This Skill Does
 
 Runs a Python analysis script against recent session `.jsonl` files to:
+
 - Identify the largest tool outputs (Read, Bash, Task, etc.)
 - Detect patterns like test/coverage outputs, verify runs, duplicate file reads
 - Calculate token costs and potential savings
@@ -24,6 +26,7 @@ Runs a Python analysis script against recent session `.jsonl` files to:
 ```
 
 Examples:
+
 - `/analyze-tokens` — full analysis of 5 most recent sessions
 - `/analyze-tokens verify outputs` — focus on npm run verify patterns
 - `/analyze-tokens test coverage` — focus on test/coverage outputs
@@ -62,6 +65,7 @@ After analyzing all sessions, create a summary report that includes:
 | Duplicate reads | X/5 | ~X,XXX | HIGH/MED/LOW |
 
 **Top 3 Optimization Opportunities:**
+
 1. [Most impactful pattern] — potential savings: ~X,XXX tokens/session
 2. [Second pattern] — potential savings: ~X,XXX tokens/session
 3. [Third pattern] — potential savings: ~X,XXX tokens/session
@@ -72,6 +76,7 @@ Deep dive into the specific area requested, with examples from the sessions.
 ### 4. Optional: Generate recommendations
 
 If optimization opportunities are found, suggest specific actions:
+
 - Script changes (new npm scripts, wrapper scripts)
 - Skill modifications (update `!` backtick commands)
 - Memory guidance (add to MEMORY.md)
