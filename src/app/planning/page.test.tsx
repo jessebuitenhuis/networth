@@ -72,7 +72,7 @@ describe("PlanningPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the account picker", () => {
+  it("renders the Account picker", () => {
     renderPage();
 
     expect(
