@@ -4,6 +4,7 @@ description: Creates a well-formated conventional git commit
 context: fork
 allowed-tools: Bash(git *), Bash(sed *), Bash(node *)
 agent: Basher
+disable-model-invocation: true
 ---
 
 Your ONLY job is to verify the build, test and lint and create a well formatted conventional git commit.
