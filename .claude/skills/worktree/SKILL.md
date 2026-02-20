@@ -2,7 +2,6 @@
 name: worktree
 description: Create, work in, merge, and remove git worktrees
 allowed-tools: Bash, Read
-argument-hint: ""
 ---
 
 # Git Worktree Workflow
@@ -49,6 +48,7 @@ git branch -d <branch-name>
 ```
 
 If not in the main repo directory:
+
 ```bash
 git -C <main-repo-path> worktree remove .worktrees/<name>
 git -C <main-repo-path> branch -d <branch-name>
