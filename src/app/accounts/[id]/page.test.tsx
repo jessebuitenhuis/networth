@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
@@ -54,7 +55,9 @@ function renderPage(
           <TransactionProvider>
             <ScenarioProvider>
               <RecurringTransactionProvider>
-                <AccountDetailPage params={{ id }} />
+                <CategoryProvider>
+                  <AccountDetailPage params={{ id }} />
+                </CategoryProvider>
               </RecurringTransactionProvider>
             </ScenarioProvider>
           </TransactionProvider>

@@ -21,7 +21,8 @@ export function createTestDb() {
       date TEXT NOT NULL,
       description TEXT NOT NULL,
       is_projected INTEGER,
-      scenario_id TEXT
+      scenario_id TEXT,
+      category_id TEXT
     );
 
     CREATE TABLE recurring_transactions (
@@ -32,7 +33,14 @@ export function createTestDb() {
       frequency TEXT NOT NULL,
       start_date TEXT NOT NULL,
       end_date TEXT,
-      scenario_id TEXT
+      scenario_id TEXT,
+      category_id TEXT
+    );
+
+    CREATE TABLE categories (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      parent_category_id TEXT
     );
 
     CREATE TABLE scenarios (

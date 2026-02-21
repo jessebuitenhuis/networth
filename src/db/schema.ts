@@ -15,6 +15,7 @@ export const transactions = sqliteTable("transactions", {
   description: text("description").notNull(),
   isProjected: integer("is_projected", { mode: "boolean" }),
   scenarioId: text("scenario_id"),
+  categoryId: text("category_id"),
 });
 
 export const recurringTransactions = sqliteTable("recurring_transactions", {
@@ -26,6 +27,13 @@ export const recurringTransactions = sqliteTable("recurring_transactions", {
   startDate: text("start_date").notNull(),
   endDate: text("end_date"),
   scenarioId: text("scenario_id"),
+  categoryId: text("category_id"),
+});
+
+export const categories = sqliteTable("categories", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  parentCategoryId: text("parent_category_id"),
 });
 
 export const scenarios = sqliteTable("scenarios", {

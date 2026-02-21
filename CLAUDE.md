@@ -24,8 +24,18 @@ src/
     layout/         # App shell (sidebar, layout wrapper)
     shared/         # Reusable non-shadcn components (MultiSelectPicker, CurrencyInput, etc.)
     ui/             # shadcn/ui primitives (do not edit directly)
+  categories/       # Category domain: types, context, repository, components
+    components/     # Category UI components (CategoryList, CategorySelect, dialogs, etc.)
   db/               # Database schema (Drizzle) and connection singleton
   hooks/            # Custom React hooks
-  lib/              # Generic utility functions (dateUtils, formatCurrency, generateId, etc.)
+  lib/              # Generic utility functions (dateUtils, formatCurrency, generateId, tree utils, etc.)
   test/             # Test setup and configuration
 ```
+
+## Architecture Preferences
+
+- **One export per file** — Each file should export a single function, type, or component. This keeps files focused and imports explicit.
+- **Single Responsibility Principle** — Each component or function should do one thing well. If a component handles both viewing and creating, split it into separate components.
+- **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
+- **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
+- **DialogFooterActions** — Use the shared `DialogFooterActions` component (`src/components/shared/DialogFooterActions.tsx`) for consistent Cancel/Submit button groups in dialog forms.

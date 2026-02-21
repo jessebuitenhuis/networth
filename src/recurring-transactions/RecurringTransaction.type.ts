@@ -9,4 +9,5 @@ export type RecurringTransaction = {
   startDate: string;
   endDate?: string;
   scenarioId?: string;
+  categoryId?: string;
 };

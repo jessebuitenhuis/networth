@@ -25,6 +25,7 @@ export function createRecurringTransaction({
   startDate,
   endDate,
   scenarioId,
+  categoryId,
 }: {
   id: string;
   accountId: string;
@@ -34,6 +35,7 @@ export function createRecurringTransaction({
   startDate: string;
   endDate?: string | null;
   scenarioId?: string | null;
+  categoryId?: string | null;
 }) {
   db.insert(recurringTransactions)
     .values({
@@ -45,6 +47,7 @@ export function createRecurringTransaction({
       startDate,
       endDate: endDate ?? null,
       scenarioId: scenarioId ?? null,
+      categoryId: categoryId ?? null,
     })
     .run();
 
@@ -61,6 +64,7 @@ export function updateRecurringTransaction(
     startDate,
     endDate,
     scenarioId,
+    categoryId,
   }: {
     accountId: string;
     amount: number;
@@ -69,6 +73,7 @@ export function updateRecurringTransaction(
     startDate: string;
     endDate?: string | null;
     scenarioId?: string | null;
+    categoryId?: string | null;
   },
 ) {
   db.update(recurringTransactions)
@@ -80,6 +85,7 @@ export function updateRecurringTransaction(
       startDate,
       endDate: endDate ?? null,
       scenarioId: scenarioId ?? null,
+      categoryId: categoryId ?? null,
     })
     .where(eq(recurringTransactions.id, id))
     .run();

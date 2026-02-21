@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
 import {
-  deleteRecurringTransaction,
-  getRecurringTransactionById,
-  updateRecurringTransaction,
-} from "@/recurring-transactions/recurringTransactionRepository";
+  deleteCategory,
+  getCategoryById,
+  updateCategory,
+} from "@/categories/categoryRepository";
 
 export async function PUT(
   request: Request,
@@ -14,21 +14,15 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getRecurringTransactionById(id);
+    const existing = getCategoryById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateRecurringTransaction(id, {
-      accountId: body.accountId,
-      amount: body.amount,
-      description: body.description,
-      frequency: body.frequency,
-      startDate: body.startDate,
-      endDate: body.endDate,
-      scenarioId: body.scenarioId,
-      categoryId: body.categoryId,
+    const updated = updateCategory(id, {
+      name: body.name,
+      parentCategoryId: body.parentCategoryId,
     });
 
     return NextResponse.json(updated);
@@ -43,13 +37,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getRecurringTransactionById(id);
+  const existing = getCategoryById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteRecurringTransaction(id);
+  deleteCategory(id);
 
   return new NextResponse(null, { status: 204 });
 }
