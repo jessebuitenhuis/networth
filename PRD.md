@@ -2,10 +2,34 @@
 
 ## Summary
 
-A single-user personal finance app that replaces spreadsheet-based net worth tracking and financial planning. Users manage multiple financial accounts, record transactions manually, and project their future net worth using recurring planned transactions and automatic investment return modeling. The app supports multiple planning scenarios (e.g. optimistic vs. conservative) so users can compare different financial futures and track progress toward financial goals. An interactive chart visualizes net worth over time with toggleable account visibility. Data is stored in SQLite with an abstracted storage layer to allow future migration to PostgreSQL.
+A personal finance app that combines day-to-day financial tracking with forward-looking scenario planning — something no competitor does well in a single product. Users manage accounts, organize transactions with categories, set budgets, and project their future net worth using recurring transactions and automatic investment return modeling. The app supports multiple planning scenarios (e.g. optimistic vs. conservative) so users can compare different financial futures and track progress toward financial goals. An interactive chart visualizes net worth over time with toggleable account visibility.
+
+The app is manual-first by design: users enter transactions and account values directly, keeping full control of their data without sharing bank credentials. Bank sync (Plaid/GoCardless) is on the long-term roadmap as an optional convenience layer but is out of scope during prototyping.
+
+## Vision & Positioning
+
+The personal finance market has split into two camps: **budgeting-first** apps (YNAB, Monarch, Copilot) that treat net worth as a secondary report, and **wealth-tracking-first** apps (Empower, Kubera) that skip budgeting entirely. No product genuinely excels at both.
+
+This app occupies the whitespace between them: a **planning-first** personal finance tool. It differentiates on:
+
+1. **Accessible scenario planning** — Multi-scenario overlays on a timeline chart. Simpler than Empower's Monte Carlo simulations, more affordable than Kubera's $249/yr Fast Forward. The only app where "what if I change jobs in 2 years?" is a first-class interaction.
+2. **Manual-first with future bank sync** — Privacy-respecting by default. Users don't need to trust a third-party aggregator to get started. Bank sync will be added later as an optional accelerator, not a prerequisite.
+3. **Full tracking + full planning** — Categories, budgeting, and transaction management on one side; recurring transactions, compound growth modeling, scenario comparison, and goal projections on the other.
+
+### Competitive Context
+
+| Capability | This App | YNAB ($109/yr) | Monarch ($99/yr) | Empower (free) | Kubera ($249/yr) |
+|---|---|---|---|---|---|
+| Scenario planning | Multi-scenario overlay | None | Partial (forecast) | Monte Carlo | Fast Forward |
+| Budgeting | Planned (basic) | Best-in-class | Strong | Basic | None |
+| Manual entry | Core workflow | Encouraged | Supported | Limited | Core workflow |
+| Bank sync | Future | Yes | Yes | Yes | Yes |
+| Compound growth modeling | Per-account return rates | None | None | None | Rules-based |
+| Goal tracking | Yes (with projections) | Yes | Yes | Retirement only | None |
 
 ## Key Features
 
+### Core (built)
 - **Account management** — Create and manage any number of financial accounts (checking, savings, investments, mortgage, etc.) with optional expected return rates for investment accounts
 - **Manual transactions** — Record actual transactions against accounts with locale-aware currency formatting
 - **Value-based entry** — Enter the current value of an account and let the app calculate the adjustment transaction automatically
@@ -14,8 +38,17 @@ A single-user personal finance app that replaces spreadsheet-based net worth tra
 - **Multiple scenarios** — Create, compare, and overlay different financial plans side by side
 - **Financial goals** — Set net worth targets and track progress toward milestones like financial independence
 - **Net worth chart** — Interactive time-series chart with per-account toggle, flexible period selection, scenario comparison, and goal lines
-- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering and planning views
+
+### Core (planned — needed to validate the full product concept)
+- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering, budgeting, and planning views
+- **Basic budgeting** — Set monthly spending targets per category and track actual spending against them. Not envelope-style (YNAB) — simpler category-vs-actual tracking that complements the planning features
+- **More recurring frequencies** — Weekly, bi-weekly, and quarterly in addition to monthly and yearly, to model real-world financial rhythms accurately
 - **Life events timeline** — Chronological view of recurring transactions showing when income and expenses start and end across life milestones
+- **Assets & liabilities breakdown** — Total assets and total liabilities shown separately on the dashboard alongside net worth
+
+### Future (needed before going to market, out of scope for prototyping)
+- **Data export** — CSV export of transactions, accounts, balances, and net worth history. Required for user trust and data portability
+- **Bank sync** — Optional Plaid/GoCardless integration to auto-import transactions. Manual entry remains the primary workflow; sync is a convenience layer
 - **SQLite storage** — Data persists locally in SQLite with an abstraction layer for future PostgreSQL migration
 
 ## UX Principles
@@ -55,6 +88,8 @@ A single-user personal finance app that replaces spreadsheet-based net worth tra
 | 13  | As a user, I want to edit and delete scenarios from the UI so I can refine or remove plans that are no longer relevant.                                                                                                                                                             | Done    |
 | 14  | As a user, I want my selected scenario to persist globally so it stays selected when I navigate between pages.                                                                                                                                                                      | Done    |
 | 30  | As a user, I want to see a timeline of my recurring transactions — grouped and labeled by category — so I can understand how my income and expenses shift at major life milestones like starting a pension, paying off a mortgage, or changing jobs.                                 | Planned |
+| 35  | As a user, I want to create recurring transactions with weekly, bi-weekly, and quarterly frequencies (in addition to monthly and yearly), so I can accurately model real-world financial rhythms like bi-weekly paychecks or quarterly tax payments.                                   | Planned |
+| 36  | As a user, I want to apply an inflation rate to a scenario, so my projected expenses grow over time and my future net worth projections are more realistic.                                                                                                                          | Planned |
 
 ### Seeing my progress
 
@@ -69,6 +104,7 @@ A single-user personal finance app that replaces spreadsheet-based net worth tra
 | 21  | As a user, I want to select a scenario on the account detail page (single-select, default: "Baseline only") so I can see baseline transactions plus that scenario's transactions.                                                                                                                                                                                                                                                                                                                                         | Done    |
 | 22  | As a user, I want to see the total net worth next to "Accounts" in the sidebar and each account's balance next to its name (in abbreviated format like "100K"), so I can get a quick financial overview without navigating into each account. The "New Account" action should become a muted link at the bottom of the account list to make room.                                                                                                                                                                         | Done    |
 | 31  | As a user, I want to see my total assets and total liabilities broken out separately on the dashboard alongside my net worth, so I understand my financial position at a glance rather than a single combined number.                                                                                                                                                                                                                                                                                                    | Planned |
+| 37  | As a user, I want to see a scenario comparison summary that shows key metrics side by side (projected net worth at 1yr, 5yr, 10yr; goal achievement dates; total income vs expenses), so I can compare scenarios with numbers, not just chart lines.                                                                                                                                                                                                                                                                    | Planned |
 
 ### Financial goals
 
@@ -77,6 +113,20 @@ A single-user personal finance app that replaces spreadsheet-based net worth tra
 | 23  | As a user, I want to set net worth goals (e.g., "Emergency fund: 10K", "FIRE: 500K") so I have clear financial targets to work toward.                                                                                                                                  | Done    |
 | 24  | As a user, I want to see my goals as horizontal lines on the planning chart, so I can visually see when different scenarios are projected to reach each goal.                                                                                                           | Done    |
 | 25  | As a user, I want to see goal progress on the dashboard as cards showing percentage complete and projected achievement date under the current scenario (e.g., "FIRE — 30% complete, 12 years to go"), so I have a motivating at-a-glance view of my financial progress. | Done    |
+
+### Budgeting
+
+| ID  | User Story                                                                                                                                                                                                                                                                                                                                                                     | Status  |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| 38  | As a user, I want to set monthly spending targets for each transaction category, so I can track whether my actual spending stays within plan. This should be simple category-vs-actual tracking (not envelope-style zero-based budgeting), showing a progress bar per category for the current month.                                                                           | Planned |
+| 39  | As a user, I want to see a monthly budget summary on the dashboard showing total budgeted vs total spent, so I get a quick sense of whether I'm on track this month without navigating to a dedicated budget page.                                                                                                                                                            | Planned |
+
+### Data portability
+
+| ID  | User Story                                                                                                                                                                                                                  | Status  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| 40  | As a user, I want to export my transactions, account balances, and net worth history as CSV files, so I can back up my data, analyze it in a spreadsheet, or migrate to another tool. This is essential for user trust.     | Future  |
+| 41  | As a user, I want to optionally connect my bank accounts to auto-import transactions, so I don't have to enter every transaction by hand. Manual entry should remain the primary workflow; bank sync is a convenience layer. | Future  |
 
 ### Storage
 

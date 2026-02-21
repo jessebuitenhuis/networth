@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -16,9 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    # Skip CI if PR is not up to date with base branch
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft)
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
