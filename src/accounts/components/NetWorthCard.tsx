@@ -7,9 +7,15 @@ import { formatCurrency } from "@/lib/formatCurrency";
 
 type NetWorthCardProps = {
   netWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
 };
 
-export function NetWorthCard({ netWorth }: NetWorthCardProps) {
+export function NetWorthCard({
+  netWorth,
+  totalAssets,
+  totalLiabilities,
+}: NetWorthCardProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,6 +34,24 @@ export function NetWorthCard({ netWorth }: NetWorthCardProps) {
         <p className="text-3xl font-bold">
           {mounted ? formatCurrency(netWorth) : "..."}
         </p>
+        <div className="mt-4 flex gap-6">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Total Assets
+            </h3>
+            <p className="text-lg font-semibold text-green-600">
+              {mounted ? formatCurrency(totalAssets) : "..."}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Total Liabilities
+            </h3>
+            <p className="text-lg font-semibold text-red-600">
+              {mounted ? formatCurrency(totalLiabilities) : "..."}
+            </p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
