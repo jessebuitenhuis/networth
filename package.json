@@ -20,7 +20,8 @@
     "format": "eslint --fix src/",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "setup": "npm install"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
