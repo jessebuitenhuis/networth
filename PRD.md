@@ -2,7 +2,7 @@
 
 ## Summary
 
-A personal finance app that combines day-to-day financial tracking with forward-looking scenario planning — something no competitor does well in a single product. Users manage accounts across multiple currencies, organize transactions with categories, set budgets, and project their future net worth using recurring transactions and automatic investment return modeling. The app supports multiple planning scenarios (e.g. optimistic vs. conservative) so users can compare different financial futures and track progress toward financial goals. An interactive chart visualizes net worth over time with toggleable account visibility.
+A personal finance app that combines day-to-day financial tracking with forward-looking scenario planning — something no competitor does well in a single product. Users manage accounts, organize transactions with categories, set budgets, and project their future net worth using recurring transactions and automatic investment return modeling. The app supports multiple planning scenarios (e.g. optimistic vs. conservative) so users can compare different financial futures and track progress toward financial goals. An interactive chart visualizes net worth over time with toggleable account visibility.
 
 The app is manual-first by design: users enter transactions and account values directly, keeping full control of their data without sharing bank credentials. Bank sync (Plaid/GoCardless) is on the long-term roadmap as an optional convenience layer but is out of scope during prototyping.
 
@@ -13,16 +13,14 @@ The personal finance market has split into two camps: **budgeting-first** apps (
 This app occupies the whitespace between them: a **planning-first** personal finance tool. It differentiates on:
 
 1. **Accessible scenario planning** — Multi-scenario overlays on a timeline chart. Simpler than Empower's Monte Carlo simulations, more affordable than Kubera's $249/yr Fast Forward. The only app where "what if I change jobs in 2 years?" is a first-class interaction.
-2. **Multi-currency support** — Only Kubera ($249/yr) offers real multi-currency tracking among commercial apps. YNAB, Monarch, Copilot, and Empower are all single-currency or US/CA-only. This app targets the underserved international mid-market.
-3. **Manual-first with future bank sync** — Privacy-respecting by default. Users don't need to trust a third-party aggregator to get started. Bank sync will be added later as an optional accelerator, not a prerequisite.
-4. **Full tracking + full planning** — Categories, budgeting, and transaction management on one side; recurring transactions, compound growth modeling, scenario comparison, and goal projections on the other.
+2. **Manual-first with future bank sync** — Privacy-respecting by default. Users don't need to trust a third-party aggregator to get started. Bank sync will be added later as an optional accelerator, not a prerequisite.
+3. **Full tracking + full planning** — Categories, budgeting, and transaction management on one side; recurring transactions, compound growth modeling, scenario comparison, and goal projections on the other.
 
 ### Competitive Context
 
 | Capability | This App | YNAB ($109/yr) | Monarch ($99/yr) | Empower (free) | Kubera ($249/yr) |
 |---|---|---|---|---|---|
 | Scenario planning | Multi-scenario overlay | None | Partial (forecast) | Monte Carlo | Fast Forward |
-| Multi-currency | Planned | None | None | None | 100+ currencies |
 | Budgeting | Planned (basic) | Best-in-class | Strong | Basic | None |
 | Manual entry | Core workflow | Encouraged | Supported | Limited | Core workflow |
 | Bank sync | Future | Yes | Yes | Yes | Yes |
@@ -44,7 +42,6 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 ### Core (planned — needed to validate the full product concept)
 - **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering, budgeting, and planning views
 - **Basic budgeting** — Set monthly spending targets per category and track actual spending against them. Not envelope-style (YNAB) — simpler category-vs-actual tracking that complements the planning features
-- **Multi-currency accounts** — Each account has its own currency. Net worth is consolidated to a user-selected base currency using exchange rates. Transactions display in their account's currency. The chart and dashboard show consolidated values. This fills the biggest gap in the mid-market (only Kubera offers this at $249/yr)
 - **More recurring frequencies** — Weekly, bi-weekly, and quarterly in addition to monthly and yearly, to model real-world financial rhythms accurately
 - **Life events timeline** — Chronological view of recurring transactions showing when income and expenses start and end across life milestones
 - **Assets & liabilities breakdown** — Total assets and total liabilities shown separately on the dashboard alongside net worth
@@ -78,9 +75,6 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 | 7   | As a user, I want to import transactions from a bank statement CSV file, so I can quickly catch up on transaction history instead of entering each transaction by hand. The import should let me map CSV columns to transaction fields (date, amount, description).                                                                                                                                                                                                                           | Done    |
 | 28  | As a user, I want to assign categories to transactions and recurring transactions so I can organize my finances by type. Categories should be user-defined and hierarchical (e.g. Housing > Mortgage, Housing > Maintenance, Income > Salary), so I can create a taxonomy that matches my personal financial structure.                                                                                                                                                                       | Planned |
 | 29  | As a user, I want to search and filter transactions within an account so I can quickly find specific entries. I should be able to filter by description text, date range, amount, and category.                                                                                                                                                                                                                                                                                              | Planned |
-| 32  | As a user, I want each account to have its own currency (e.g. USD, EUR, GBP), so I can accurately track finances held in different countries or denominations. When I create or edit an account, I should be able to select a currency from a searchable list of ISO 4217 currencies.                                                                                                                                                                                                       | Planned |
-| 33  | As a user, I want to set a base currency for my dashboard, so all net worth totals, chart values, and goal progress are shown in a single consolidated currency. Exchange rates should be applied automatically.                                                                                                                                                                                                                                                                             | Planned |
-| 34  | As a user, I want transactions to display in their account's native currency, but the account balance in the sidebar and dashboard should show the converted value in my base currency, so I can understand both the local and consolidated value at a glance.                                                                                                                                                                                                                               | Planned |
 
 ### Planning my future
 
