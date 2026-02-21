@@ -6,7 +6,7 @@ import { emptyFilters, type TransactionFilters } from "@/transactions/Transactio
 
 import { TransactionFilterBar } from "./TransactionFilterBar";
 
-function renderFilterBar(
+function createFilterBarPage(
   overrides: Partial<{
     filters: TransactionFilters;
     onChange: (filters: TransactionFilters) => void;
@@ -14,141 +14,125 @@ function renderFilterBar(
     totalCount: number;
   }> = {}
 ) {
+  const user = userEvent.setup();
+  const onChange = overrides.onChange ?? vi.fn();
   const props = {
     filters: emptyFilters,
-    onChange: vi.fn(),
+    onChange,
     resultCount: 10,
     totalCount: 10,
     ...overrides,
   };
-  return { ...render(<TransactionFilterBar {...props} />), onChange: props.onChange };
+  const result = render(<TransactionFilterBar {...props} />);
+
+  return {
+    ...result,
+    onChange,
+    searchInput: () => screen.getByLabelText("Search transactions"),
+    toggleFiltersButton: () => screen.getByLabelText("Toggle filters"),
+    clearFiltersButton: () => screen.getByLabelText("Clear filters"),
+    fromDateInput: () => screen.getByLabelText("From date"),
+    toDateInput: () => screen.getByLabelText("To date"),
+    minAmountInput: () => screen.getByLabelText("Min amount"),
+    maxAmountInput: () => screen.getByLabelText("Max amount"),
+    expandFilters: () => user.click(screen.getByLabelText("Toggle filters")),
+    type: user.type,
+    click: user.click,
+  };
 }
 
 describe("TransactionFilterBar", () => {
-  it("renders search input", () => {
-    renderFilterBar();
-    expect(screen.getByLabelText("Search transactions")).toBeInTheDocument();
-  });
-
-  it("renders filter toggle button", () => {
-    renderFilterBar();
-    expect(screen.getByLabelText("Toggle filters")).toBeInTheDocument();
+  it("renders search input and filter toggle button", () => {
+    const page = createFilterBarPage();
+    expect(page.searchInput()).toBeInTheDocument();
+    expect(page.toggleFiltersButton()).toBeInTheDocument();
   });
 
   it("does not show advanced filters by default", () => {
-    renderFilterBar();
+    createFilterBarPage();
     expect(screen.queryByLabelText("From date")).not.toBeInTheDocument();
   });
 
   it("shows advanced filters when toggle is clicked", async () => {
-    const user = userEvent.setup();
-    renderFilterBar();
+    const page = createFilterBarPage();
 
-    await user.click(screen.getByLabelText("Toggle filters"));
+    await page.expandFilters();
 
-    expect(screen.getByLabelText("From date")).toBeInTheDocument();
-    expect(screen.getByLabelText("To date")).toBeInTheDocument();
-    expect(screen.getByLabelText("Min amount")).toBeInTheDocument();
-    expect(screen.getByLabelText("Max amount")).toBeInTheDocument();
+    expect(page.fromDateInput()).toBeInTheDocument();
+    expect(page.toDateInput()).toBeInTheDocument();
+    expect(page.minAmountInput()).toBeInTheDocument();
+    expect(page.maxAmountInput()).toBeInTheDocument();
   });
 
   it("hides advanced filters when toggle is clicked again", async () => {
-    const user = userEvent.setup();
-    renderFilterBar();
+    const page = createFilterBarPage();
 
-    await user.click(screen.getByLabelText("Toggle filters"));
-    expect(screen.getByLabelText("From date")).toBeInTheDocument();
+    await page.expandFilters();
+    expect(page.fromDateInput()).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("Toggle filters"));
+    await page.click(page.toggleFiltersButton());
     expect(screen.queryByLabelText("From date")).not.toBeInTheDocument();
   });
 
   it("calls onChange when typing in search input", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar();
+    const page = createFilterBarPage();
 
-    await user.type(screen.getByLabelText("Search transactions"), "g");
+    await page.type(page.searchInput(), "g");
 
-    expect(onChange).toHaveBeenCalledWith({
+    expect(page.onChange).toHaveBeenCalledWith({
       ...emptyFilters,
       description: "g",
     });
   });
 
-  it("calls onChange when setting date from", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar();
+  it.each([
+    { field: "From date", filterKey: "dateFrom", value: "2024-01-15" },
+    { field: "To date", filterKey: "dateTo", value: "2024-12-31" },
+    { field: "Min amount", filterKey: "amountMin", value: "5" },
+    { field: "Max amount", filterKey: "amountMax", value: "9" },
+  ] as const)(
+    "calls onChange when setting $field",
+    async ({ field, filterKey, value }) => {
+      const page = createFilterBarPage();
 
-    await user.click(screen.getByLabelText("Toggle filters"));
-    await user.type(screen.getByLabelText("From date"), "2024-01-15");
+      await page.expandFilters();
+      await page.type(screen.getByLabelText(field), value);
 
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ dateFrom: "2024-01-15" })
-    );
-  });
-
-  it("calls onChange when setting date to", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar();
-
-    await user.click(screen.getByLabelText("Toggle filters"));
-    await user.type(screen.getByLabelText("To date"), "2024-12-31");
-
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ dateTo: "2024-12-31" })
-    );
-  });
-
-  it("calls onChange when setting min amount", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar();
-
-    await user.click(screen.getByLabelText("Toggle filters"));
-    await user.type(screen.getByLabelText("Min amount"), "100");
-
-    expect(onChange).toHaveBeenCalled();
-  });
-
-  it("calls onChange when setting max amount", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar();
-
-    await user.click(screen.getByLabelText("Toggle filters"));
-    await user.type(screen.getByLabelText("Max amount"), "500");
-
-    expect(onChange).toHaveBeenCalled();
-  });
+      expect(page.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ [filterKey]: value })
+      );
+    }
+  );
 
   it("does not show clear button when no filters active", () => {
-    renderFilterBar();
+    createFilterBarPage();
     expect(screen.queryByLabelText("Clear filters")).not.toBeInTheDocument();
   });
 
   it("shows clear button when filters are active", () => {
-    renderFilterBar({
+    const page = createFilterBarPage({
       filters: { ...emptyFilters, description: "test" },
     });
-    expect(screen.getByLabelText("Clear filters")).toBeInTheDocument();
+    expect(page.clearFiltersButton()).toBeInTheDocument();
   });
 
   it("clears all filters when clear button is clicked", async () => {
-    const user = userEvent.setup();
-    const { onChange } = renderFilterBar({
+    const page = createFilterBarPage({
       filters: { ...emptyFilters, description: "test" },
     });
 
-    await user.click(screen.getByLabelText("Clear filters"));
+    await page.click(page.clearFiltersButton());
 
-    expect(onChange).toHaveBeenCalledWith(emptyFilters);
+    expect(page.onChange).toHaveBeenCalledWith(emptyFilters);
   });
 
   it("does not show result count when no filters active", () => {
-    renderFilterBar({ resultCount: 5, totalCount: 10 });
+    createFilterBarPage({ resultCount: 5, totalCount: 10 });
     expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
   });
 
   it("shows result count when filters are active", () => {
-    renderFilterBar({
+    createFilterBarPage({
       filters: { ...emptyFilters, description: "test" },
       resultCount: 3,
       totalCount: 10,
@@ -157,9 +141,9 @@ describe("TransactionFilterBar", () => {
   });
 
   it("displays current search value", () => {
-    renderFilterBar({
+    const page = createFilterBarPage({
       filters: { ...emptyFilters, description: "groceries" },
     });
-    expect(screen.getByLabelText("Search transactions")).toHaveValue("groceries");
+    expect(page.searchInput()).toHaveValue("groceries");
   });
 });
