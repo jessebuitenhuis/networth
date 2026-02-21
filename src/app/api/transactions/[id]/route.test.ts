@@ -24,6 +24,7 @@ describe("PUT /api/transactions/[id]", () => {
       description: "Initial",
       isProjected: null,
       scenarioId: null,
+      categoryId: null,
     });
     vi.mocked(updateTransaction).mockReturnValue({
       id: "t-1",
@@ -33,6 +34,7 @@ describe("PUT /api/transactions/[id]", () => {
       description: "Updated",
       isProjected: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const request = new Request("http://localhost/api/transactions/t-1", {
@@ -74,6 +76,7 @@ describe("DELETE /api/transactions/[id]", () => {
       description: "Initial",
       isProjected: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const response = await DELETE(

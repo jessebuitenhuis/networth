@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Category } from "@/categories/Category.type";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { generateId } from "@/lib/generateId";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import type { Transaction } from "@/transactions/Transaction.type";
@@ -33,17 +35,21 @@ import { ScenarioSelect } from "./ScenarioSelect";
 type EditTransactionDialogProps = {
   transaction: Transaction;
   scenarios: Scenario[];
+  categories: Category[];
   onSave: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
   onCreateScenario: (scenario: { id: string; name: string }) => void;
+  onCreateCategory: (category: Category) => void;
 };
 
 export function EditTransactionDialog({
   transaction,
   scenarios,
+  categories,
   onSave,
   onDelete,
   onCreateScenario,
+  onCreateCategory,
 }: EditTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -53,12 +59,16 @@ export function EditTransactionDialog({
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
     transaction.scenarioId || "none"
   );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    transaction.categoryId || "none"
+  );
 
   function resetForm() {
     setAmount(transaction.amount);
     setDate(transaction.date);
     setDescription(transaction.description);
     setSelectedScenarioId(transaction.scenarioId || "none");
+    setSelectedCategoryId(transaction.categoryId || "none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -71,6 +81,7 @@ export function EditTransactionDialog({
       date,
       description: description.trim(),
       scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
+      categoryId: selectedCategoryId === "none" ? undefined : selectedCategoryId,
     });
     setIsOpen(false);
   }
@@ -88,6 +99,12 @@ export function EditTransactionDialog({
   function handleCreateScenario(name: string): string {
     const id = generateId();
     onCreateScenario({ id, name });
+    return id;
+  }
+
+  function handleCreateCategory(name: string, parentCategoryId?: string): string {
+    const id = generateId();
+    onCreateCategory({ id, name, parentCategoryId });
     return id;
   }
 
@@ -151,6 +168,12 @@ export function EditTransactionDialog({
                 aria-label="Description"
               />
             </div>
+            <CategorySelect
+              categories={categories}
+              value={selectedCategoryId}
+              onValueChange={setSelectedCategoryId}
+              onCreateCategory={handleCreateCategory}
+            />
             <ScenarioSelect
               scenarios={scenarios}
               value={selectedScenarioId}

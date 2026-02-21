@@ -28,8 +28,8 @@ describe("GET /api/transactions", () => {
 
   it("returns all transactions", async () => {
     vi.mocked(getAllTransactions).mockReturnValue([
-      { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", isProjected: null, scenarioId: null },
-      { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal", isProjected: null, scenarioId: null },
+      { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", isProjected: null, scenarioId: null, categoryId: null },
+      { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal", isProjected: null, scenarioId: null, categoryId: null },
     ]);
 
     const response = await GET();
@@ -41,7 +41,7 @@ describe("GET /api/transactions", () => {
 
   it("returns transactions with optional fields", async () => {
     vi.mocked(getAllTransactions).mockReturnValue([
-      { id: "t-1", accountId: "acc-1", amount: 200, date: "2025-06-01", description: "Projected", isProjected: true, scenarioId: "scenario-1" },
+      { id: "t-1", accountId: "acc-1", amount: 200, date: "2025-06-01", description: "Projected", isProjected: true, scenarioId: "scenario-1", categoryId: null },
     ]);
 
     const response = await GET();
@@ -62,6 +62,7 @@ describe("POST /api/transactions", () => {
       description: "Paycheck",
       isProjected: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const request = new Request("http://localhost/api/transactions", {
@@ -79,8 +80,8 @@ describe("POST /api/transactions", () => {
 
   it("creates a batch of transactions", async () => {
     vi.mocked(createTransactions).mockReturnValue([
-      { id: "t-b1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Batch 1", isProjected: null, scenarioId: null },
-      { id: "t-b2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Batch 2", isProjected: null, scenarioId: null },
+      { id: "t-b1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Batch 1", isProjected: null, scenarioId: null, categoryId: null },
+      { id: "t-b2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Batch 2", isProjected: null, scenarioId: null, categoryId: null },
     ]);
 
     const request = new Request("http://localhost/api/transactions", {

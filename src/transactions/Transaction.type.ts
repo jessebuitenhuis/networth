@@ -6,4 +6,5 @@ export type Transaction = {
   description: string;
   isProjected?: boolean;
   scenarioId?: string;
+  categoryId?: string;
 };

@@ -7,5 +7,6 @@ export type DisplayTransaction = {
   isProjected: boolean;
   isRecurring: boolean;
   scenarioName?: string;
+  categoryName?: string;
   editAction: React.ReactNode;
 };

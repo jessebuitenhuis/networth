@@ -26,8 +26,8 @@ describe("GET /api/recurring-transactions", () => {
 
   it("returns all recurring transactions", async () => {
     vi.mocked(getAllRecurringTransactions).mockReturnValue([
-      { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null },
-      { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null },
+      { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null, categoryId: null },
+      { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null, categoryId: null },
     ]);
 
     const response = await GET();
@@ -39,7 +39,7 @@ describe("GET /api/recurring-transactions", () => {
 
   it("returns recurring transactions with optional fields", async () => {
     vi.mocked(getAllRecurringTransactions).mockReturnValue([
-      { id: "rt-1", accountId: "acc-1", amount: 500, description: "Bonus", frequency: "Yearly", startDate: "2025-01-01", endDate: "2027-01-01", scenarioId: "s-1" },
+      { id: "rt-1", accountId: "acc-1", amount: 500, description: "Bonus", frequency: "Yearly", startDate: "2025-01-01", endDate: "2027-01-01", scenarioId: "s-1", categoryId: null },
     ]);
 
     const response = await GET();
@@ -61,6 +61,7 @@ describe("POST /api/recurring-transactions", () => {
       startDate: "2025-02-01",
       endDate: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const request = new Request("http://localhost/api/recurring-transactions", {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical,Repeat } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical, Tag, Repeat } from "lucide-react";
 import { useMemo,useState } from "react";
 
 import {
@@ -21,7 +21,7 @@ type TransactionTableProps = {
   items: DisplayTransaction[];
 };
 
-type SortColumn = "date" | "description" | "account" | "amount" | null;
+type SortColumn = "date" | "description" | "account" | "category" | "amount" | null;
 type SortDirection = "asc" | "desc";
 
 function SortIcon({
@@ -71,6 +71,10 @@ export function TransactionTable({ items }: TransactionTableProps) {
         case "account":
           aVal = a.accountName.toLowerCase();
           bVal = b.accountName.toLowerCase();
+          break;
+        case "category":
+          aVal = (a.categoryName || "").toLowerCase();
+          bVal = (b.categoryName || "").toLowerCase();
           break;
         case "amount":
           aVal = a.amount;
@@ -133,6 +137,19 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </div>
           </TableHead>
           <TableHead
+            className="w-[160px] text-left cursor-pointer select-none"
+            onClick={() => handleSort("category")}
+          >
+            <div className="flex items-center gap-1">
+              Category
+              <SortIcon
+                column="category"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+              />
+            </div>
+          </TableHead>
+          <TableHead
             className="w-[140px] text-right cursor-pointer select-none"
             onClick={() => handleSort("amount")}
           >
@@ -185,6 +202,14 @@ export function TransactionTable({ items }: TransactionTableProps) {
             </TableCell>
             <TableCell className="text-left text-muted-foreground">
               {item.accountName}
+            </TableCell>
+            <TableCell className="text-left text-muted-foreground">
+              {item.categoryName && (
+                <span className="inline-flex items-center gap-1 text-xs">
+                  <Tag className="h-3 w-3" />
+                  {item.categoryName}
+                </span>
+              )}
             </TableCell>
             <TableCell className="text-right">
               <span

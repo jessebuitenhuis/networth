@@ -27,6 +27,7 @@ export async function PUT(
       description: body.description,
       isProjected: body.isProjected ?? null,
       scenarioId: body.scenarioId ?? null,
+      categoryId: body.categoryId ?? null,
     });
 
     return NextResponse.json(updated);
