@@ -3,6 +3,8 @@
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 
+import type { Category } from "@/categories/Category.type";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import {
   AlertDialog,
@@ -31,8 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Category } from "@/categories/Category.type";
-import { CategorySelect } from "@/categories/components/CategorySelect";
 import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";

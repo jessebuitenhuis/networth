@@ -1,7 +1,7 @@
 "use client";
 
-import { CreateCategoryDialog } from "@/categories/components/CreateCategoryDialog";
 import { CategoryList } from "@/categories/components/CategoryList";
+import { CreateCategoryDialog } from "@/categories/components/CreateCategoryDialog";
 import TopBar from "@/components/layout/TopBar";
 
 export default function CategoriesPage() {

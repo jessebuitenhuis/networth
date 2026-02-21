@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical, Tag, Repeat } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical, Repeat, Tag } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import {

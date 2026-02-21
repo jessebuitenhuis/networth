@@ -8,7 +8,6 @@ import type { TreeNode } from "@/lib/TreeNode.type";
 
 import type { Category } from "../Category.type";
 import { useCategories } from "../CategoryContext";
-
 import { EditCategoryDialog } from "./EditCategoryDialog";
 
 function CategoryItem({

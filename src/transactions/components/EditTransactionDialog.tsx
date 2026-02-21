@@ -3,6 +3,8 @@
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 
+import type { Category } from "@/categories/Category.type";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import {
   AlertDialog,
@@ -24,8 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Category } from "@/categories/Category.type";
-import { CategorySelect } from "@/categories/components/CategorySelect";
 import { generateId } from "@/lib/generateId";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import type { Transaction } from "@/transactions/Transaction.type";

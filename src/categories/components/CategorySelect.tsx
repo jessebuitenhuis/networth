@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { buildFlatTree } from "@/lib/buildFlatTree";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { buildFlatTree } from "@/lib/buildFlatTree";
 
 import type { Category } from "../Category.type";
-
 import { CreateCategoryInline } from "./CreateCategoryInline";
 
 type CategorySelectProps = {

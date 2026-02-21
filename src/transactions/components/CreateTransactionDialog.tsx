@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { useCategories } from "@/categories/CategoryContext";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,8 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCategories } from "@/categories/CategoryContext";
-import { CategorySelect } from "@/categories/components/CategorySelect";
 import { generateId } from "@/lib/generateId";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
