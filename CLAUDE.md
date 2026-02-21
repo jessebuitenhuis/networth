@@ -39,3 +39,11 @@ src/
 - **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
 - **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
 - **DialogFooterActions** — Use the shared `DialogFooterActions` component (`src/components/shared/DialogFooterActions.tsx`) for consistent Cancel/Submit button groups in dialog forms.
+
+## Pull Requests
+
+Before creating a PR, ensure the target branch is up to date. Fetch and rebase:
+```bash
+git fetch origin main
+git rebase origin/main
+```

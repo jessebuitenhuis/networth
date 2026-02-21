@@ -20,6 +20,10 @@
       "inputs": ["src/**", "vitest.config.ts"],
       "outputs": []
     },
+    "_smoke": {
+      "inputs": ["src/**", "scripts/smoke-test.sh"],
+      "outputs": []
+    },
     "test:coverage": {
       "inputs": ["src/**", "vitest.config.ts"],
       "outputs": ["coverage/**"]
