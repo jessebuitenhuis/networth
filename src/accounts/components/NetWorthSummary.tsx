@@ -10,10 +10,23 @@ export function NetWorthSummary() {
   const { accounts } = useAccounts();
   const { getBalance } = useTransactions();
 
-  const netWorth = accounts.reduce((sum, a) => {
-    const balance = getBalance(a.id);
-    return a.type === AccountType.Asset ? sum + balance : sum - balance;
-  }, 0);
+  let totalAssets = 0;
+  let totalLiabilities = 0;
 
-  return <NetWorthCard netWorth={netWorth} />;
+  for (const a of accounts) {
+    const balance = getBalance(a.id);
+    if (a.type === AccountType.Asset) {
+      totalAssets += balance;
+    } else {
+      totalLiabilities += balance;
+    }
+  }
+
+  return (
+    <NetWorthCard
+      netWorth={totalAssets - totalLiabilities}
+      totalAssets={totalAssets}
+      totalLiabilities={totalLiabilities}
+    />
+  );
 }
