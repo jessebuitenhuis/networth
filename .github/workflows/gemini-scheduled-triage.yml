@@ -36,7 +36,7 @@ jobs:
       pull-requests: 'read'
     outputs:
       available_labels: '${{ steps.get_labels.outputs.available_labels }}'
-      triaged_issues: '${{ env.TRIAGED_ISSUES }}'
+      triaged_issues: '${{ steps.export_outputs.outputs.triaged_issues }}'
     steps:
       - name: 'Get repository labels'
         id: 'get_labels'
@@ -128,6 +128,11 @@ jobs:
               }
             }
           prompt: '/gemini-scheduled-triage'
+
+      - name: 'Export outputs'
+        id: 'export_outputs'
+        run: |-
+          echo "triaged_issues=${TRIAGED_ISSUES}" >> "${GITHUB_OUTPUT}"
 
   label:
     runs-on: 'ubuntu-latest'
