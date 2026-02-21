@@ -2,7 +2,6 @@ import "./globals.css";
 
 import { LayoutDashboard, Tag, Target, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { AccountProvider } from "@/accounts/AccountContext";
@@ -14,16 +13,6 @@ import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Net Worth",
@@ -53,7 +42,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
       >
         <SidebarProvider defaultOpen={defaultOpen}>
           <AccountProvider>

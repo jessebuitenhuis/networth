@@ -1,0 +1,143 @@
+"use client";
+
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  emptyFilters,
+  type TransactionFilters,
+} from "@/transactions/TransactionFilters.type";
+
+import { hasActiveFilters } from "../filterDisplayTransactions";
+
+type TransactionFilterBarProps = {
+  filters: TransactionFilters;
+  onChange: (filters: TransactionFilters) => void;
+  resultCount: number;
+  totalCount: number;
+};
+
+export function TransactionFilterBar({
+  filters,
+  onChange,
+  resultCount,
+  totalCount,
+}: TransactionFilterBarProps) {
+  const [expanded, setExpanded] = useState(false);
+  const active = hasActiveFilters(filters);
+  const hasAdvancedFilters =
+    filters.dateFrom !== "" ||
+    filters.dateTo !== "" ||
+    filters.amountMin !== "" ||
+    filters.amountMax !== "";
+
+  const updateFilter = (key: keyof TransactionFilters, value: string) => {
+    onChange({ ...filters, [key]: value });
+  };
+
+  const clearFilters = () => {
+    onChange(emptyFilters);
+    setExpanded(false);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search transactions..."
+            aria-label="Search transactions"
+            value={filters.description}
+            onChange={(e) => updateFilter("description", e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button
+          type="button"
+          variant={hasAdvancedFilters ? "default" : "outline"}
+          size="icon"
+          onClick={() => setExpanded(!expanded)}
+          aria-label="Toggle filters"
+          aria-expanded={expanded}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+        </Button>
+        {active && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={clearFilters}
+            aria-label="Clear filters"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {expanded && (
+        <div className="grid grid-cols-2 gap-3 rounded-lg border p-3 sm:grid-cols-4">
+          <div className="space-y-1">
+            <Label htmlFor="filter-date-from" className="text-xs">
+              From date
+            </Label>
+            <Input
+              id="filter-date-from"
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => updateFilter("dateFrom", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="filter-date-to" className="text-xs">
+              To date
+            </Label>
+            <Input
+              id="filter-date-to"
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => updateFilter("dateTo", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="filter-amount-min" className="text-xs">
+              Min amount
+            </Label>
+            <Input
+              id="filter-amount-min"
+              type="number"
+              step="any"
+              placeholder="Min"
+              value={filters.amountMin}
+              onChange={(e) => updateFilter("amountMin", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="filter-amount-max" className="text-xs">
+              Max amount
+            </Label>
+            <Input
+              id="filter-amount-max"
+              type="number"
+              step="any"
+              placeholder="Max"
+              value={filters.amountMax}
+              onChange={(e) => updateFilter("amountMax", e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
+      {active && (
+        <p className="text-sm text-muted-foreground">
+          Showing {resultCount} of {totalCount} transactions
+        </p>
+      )}
+    </div>
+  );
+}
