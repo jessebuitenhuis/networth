@@ -14,8 +14,9 @@
     "_lint": "eslint",
     "test": "TURBO_NO_UPDATE_NOTIFIER=true turbo run _test --output-logs errors-only",
     "_test": "vitest run --reporter=dot",
+    "_smoke": "bash scripts/smoke-test.sh",
     "test:coverage": "vitest run --coverage --coverage.skipFull",
-    "verify": "TURBO_NO_UPDATE_NOTIFIER=true turbo run _lint _build _test --output-logs errors-only",
+    "verify": "TURBO_NO_UPDATE_NOTIFIER=true turbo run _lint _build _test _smoke --output-logs errors-only",
     "format": "eslint --fix src/",
     "db:studio": "drizzle-kit studio",
     "seed": "node scripts/seed.js"
