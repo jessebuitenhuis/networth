@@ -30,6 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { buildFlatTree } from "@/lib/buildFlatTree";
+import { getDescendantIds } from "@/lib/getDescendantIds";
 
 import type { Category } from "../Category.type";
 import { useCategories } from "../CategoryContext";
@@ -37,62 +39,6 @@ import { useCategories } from "../CategoryContext";
 type EditCategoryDialogProps = {
   category: Category;
 };
-
-function getDescendantIds(
-  categoryId: string,
-  categories: Category[],
-): Set<string> {
-  const ids = new Set<string>();
-  const childrenMap = new Map<string, Category[]>();
-
-  for (const cat of categories) {
-    if (cat.parentCategoryId) {
-      const children = childrenMap.get(cat.parentCategoryId) || [];
-      children.push(cat);
-      childrenMap.set(cat.parentCategoryId, children);
-    }
-  }
-
-  function walk(id: string) {
-    ids.add(id);
-    const children = childrenMap.get(id) || [];
-    children.forEach((child) => walk(child.id));
-  }
-
-  walk(categoryId);
-  return ids;
-}
-
-function buildFlatTree(categories: Category[]) {
-  const childrenMap = new Map<string, Category[]>();
-  const roots: Category[] = [];
-
-  for (const cat of categories) {
-    if (cat.parentCategoryId) {
-      const children = childrenMap.get(cat.parentCategoryId) || [];
-      children.push(cat);
-      childrenMap.set(cat.parentCategoryId, children);
-    } else {
-      roots.push(cat);
-    }
-  }
-
-  const result: (Category & { depth: number })[] = [];
-
-  function walk(node: Category, depth: number) {
-    result.push({ ...node, depth });
-    const children = childrenMap.get(node.id) || [];
-    children
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .forEach((child) => walk(child, depth + 1));
-  }
-
-  roots
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach((root) => walk(root, 0));
-
-  return result;
-}
 
 export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
   const { categories, updateCategory, removeCategory } = useCategories();

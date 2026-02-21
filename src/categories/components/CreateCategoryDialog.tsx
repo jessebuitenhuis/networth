@@ -20,41 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
+import { buildFlatTree } from "@/lib/buildFlatTree";
 import { generateId } from "@/lib/generateId";
 
-import type { Category } from "../Category.type";
 import { useCategories } from "../CategoryContext";
-
-function buildFlatTree(categories: Category[]) {
-  const childrenMap = new Map<string, Category[]>();
-  const roots: Category[] = [];
-
-  for (const cat of categories) {
-    if (cat.parentCategoryId) {
-      const children = childrenMap.get(cat.parentCategoryId) || [];
-      children.push(cat);
-      childrenMap.set(cat.parentCategoryId, children);
-    } else {
-      roots.push(cat);
-    }
-  }
-
-  const result: (Category & { depth: number })[] = [];
-
-  function walk(node: Category, depth: number) {
-    result.push({ ...node, depth });
-    const children = childrenMap.get(node.id) || [];
-    children
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .forEach((child) => walk(child, depth + 1));
-  }
-
-  roots
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach((root) => walk(root, 0));
-
-  return result;
-}
 
 export function CreateCategoryDialog() {
   const { categories, addCategory } = useCategories();
@@ -134,18 +104,11 @@ export function CreateCategoryDialog() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Add Category
-            </Button>
-          </div>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Add Category"
+            submitDisabled={!name.trim()}
+          />
         </form>
       </DialogContent>
     </Dialog>

@@ -3,43 +3,19 @@
 import { useMemo } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { buildTree } from "@/lib/buildTree";
+import type { TreeNode } from "@/lib/TreeNode.type";
 
 import type { Category } from "../Category.type";
 import { useCategories } from "../CategoryContext";
 
 import { EditCategoryDialog } from "./EditCategoryDialog";
 
-type CategoryNode = Category & { children: CategoryNode[] };
-
-function buildTree(categories: Category[]): CategoryNode[] {
-  const childrenMap = new Map<string, Category[]>();
-  const roots: Category[] = [];
-
-  for (const cat of categories) {
-    if (cat.parentCategoryId) {
-      const children = childrenMap.get(cat.parentCategoryId) || [];
-      children.push(cat);
-      childrenMap.set(cat.parentCategoryId, children);
-    } else {
-      roots.push(cat);
-    }
-  }
-
-  function toNode(cat: Category): CategoryNode {
-    const children = (childrenMap.get(cat.id) || [])
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map(toNode);
-    return { ...cat, children };
-  }
-
-  return roots.sort((a, b) => a.name.localeCompare(b.name)).map(toNode);
-}
-
 function CategoryItem({
   node,
   depth,
 }: {
-  node: CategoryNode;
+  node: TreeNode<Category>;
   depth: number;
 }) {
   return (

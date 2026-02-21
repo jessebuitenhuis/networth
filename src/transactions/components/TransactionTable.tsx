@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical, Tag, Repeat } from "lucide-react";
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Table,
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tooltip, TooltipContent,TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatSignedCurrency } from "@/lib/formatSignedCurrency";
 import { getBrowserLocale } from "@/lib/getLocale";
 import { cn } from "@/lib/utils";
@@ -21,16 +21,55 @@ type TransactionTableProps = {
   items: DisplayTransaction[];
 };
 
-type SortColumn = "date" | "description" | "account" | "category" | "amount" | null;
 type SortDirection = "asc" | "desc";
+
+type ColumnDefinition = {
+  key: string;
+  label: string;
+  headerClassName: string;
+  getSortValue: (item: DisplayTransaction) => string | number;
+};
+
+const sortableColumns: ColumnDefinition[] = [
+  {
+    key: "date",
+    label: "Date",
+    headerClassName: "w-[120px] text-left",
+    getSortValue: (item) => item.date,
+  },
+  {
+    key: "description",
+    label: "Description",
+    headerClassName: "w-[40%] text-left",
+    getSortValue: (item) => item.description.toLowerCase(),
+  },
+  {
+    key: "account",
+    label: "Account",
+    headerClassName: "w-[180px] text-left",
+    getSortValue: (item) => item.accountName.toLowerCase(),
+  },
+  {
+    key: "category",
+    label: "Category",
+    headerClassName: "w-[160px] text-left",
+    getSortValue: (item) => (item.categoryName || "").toLowerCase(),
+  },
+  {
+    key: "amount",
+    label: "Amount",
+    headerClassName: "w-[140px] text-right",
+    getSortValue: (item) => item.amount,
+  },
+];
 
 function SortIcon({
   column,
   sortColumn,
   sortDirection,
 }: {
-  column: SortColumn;
-  sortColumn: SortColumn;
+  column: string;
+  sortColumn: string | null;
   sortDirection: SortDirection;
 }) {
   if (sortColumn !== column) return <ArrowUpDown className="h-3 w-3" />;
@@ -42,10 +81,10 @@ function SortIcon({
 }
 
 export function TransactionTable({ items }: TransactionTableProps) {
-  const [sortColumn, setSortColumn] = useState<SortColumn>("date");
+  const [sortColumn, setSortColumn] = useState<string | null>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  const handleSort = (column: SortColumn) => {
+  const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -54,114 +93,42 @@ export function TransactionTable({ items }: TransactionTableProps) {
     }
   };
 
-  const sortedItems = useMemo(() => {
-    const sorted = [...items].sort((a, b) => {
-      let aVal: string | number;
-      let bVal: string | number;
+  const activeColumnDef = sortableColumns.find((c) => c.key === sortColumn);
 
-      switch (sortColumn) {
-        case "date":
-          aVal = a.date;
-          bVal = b.date;
-          break;
-        case "description":
-          aVal = a.description.toLowerCase();
-          bVal = b.description.toLowerCase();
-          break;
-        case "account":
-          aVal = a.accountName.toLowerCase();
-          bVal = b.accountName.toLowerCase();
-          break;
-        case "category":
-          aVal = (a.categoryName || "").toLowerCase();
-          bVal = (b.categoryName || "").toLowerCase();
-          break;
-        case "amount":
-          aVal = a.amount;
-          bVal = b.amount;
-          break;
-        default:
-          return 0;
-      }
+  const sortedItems = useMemo(() => {
+    if (!activeColumnDef) return items;
+
+    return [...items].sort((a, b) => {
+      const aVal = activeColumnDef.getSortValue(a);
+      const bVal = activeColumnDef.getSortValue(b);
 
       if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
       if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-
-    return sorted;
-  }, [items, sortColumn, sortDirection]);
+  }, [items, activeColumnDef, sortDirection]);
 
   return (
     <div className="w-full overflow-x-auto">
       <Table className="table-fixed">
         <TableHeader>
         <TableRow className="hover:bg-transparent">
-          <TableHead
-            className="w-[120px] text-left cursor-pointer select-none"
-            onClick={() => handleSort("date")}
-          >
-            <div className="flex items-center gap-1">
-              Date
-              <SortIcon
-                column="date"
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-              />
-            </div>
-          </TableHead>
-          <TableHead
-            className="w-[40%] text-left cursor-pointer select-none"
-            onClick={() => handleSort("description")}
-          >
-            <div className="flex items-center gap-1">
-              Description
-              <SortIcon
-                column="description"
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-              />
-            </div>
-          </TableHead>
-          <TableHead
-            className="w-[180px] text-left cursor-pointer select-none"
-            onClick={() => handleSort("account")}
-          >
-            <div className="flex items-center gap-1">
-              Account
-              <SortIcon
-                column="account"
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-              />
-            </div>
-          </TableHead>
-          <TableHead
-            className="w-[160px] text-left cursor-pointer select-none"
-            onClick={() => handleSort("category")}
-          >
-            <div className="flex items-center gap-1">
-              Category
-              <SortIcon
-                column="category"
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-              />
-            </div>
-          </TableHead>
-          <TableHead
-            className="w-[140px] text-right cursor-pointer select-none"
-            onClick={() => handleSort("amount")}
-          >
-            <div className="flex items-center justify-end gap-1">
-              Amount
-              <SortIcon
-                column="amount"
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-              />
-            </div>
-          </TableHead>
+          {sortableColumns.map((col) => (
+            <TableHead
+              key={col.key}
+              className={cn(col.headerClassName, "cursor-pointer select-none")}
+              onClick={() => handleSort(col.key)}
+            >
+              <div className={cn("flex items-center gap-1", col.key === "amount" && "justify-end")}>
+                {col.label}
+                <SortIcon
+                  column={col.key}
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                />
+              </div>
+            </TableHead>
+          ))}
           <TableHead className="w-[100px] text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
