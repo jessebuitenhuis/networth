@@ -29,7 +29,8 @@ sqlite.exec(`
     date TEXT NOT NULL,
     description TEXT NOT NULL,
     is_projected INTEGER,
-    scenario_id TEXT
+    scenario_id TEXT,
+    category_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS recurring_transactions (
@@ -40,7 +41,14 @@ sqlite.exec(`
     frequency TEXT NOT NULL,
     start_date TEXT NOT NULL,
     end_date TEXT,
-    scenario_id TEXT
+    scenario_id TEXT,
+    category_id TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    parent_category_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS scenarios (
@@ -59,5 +67,17 @@ sqlite.exec(`
     value TEXT
   );
 `);
+
+// Migrate existing tables to add category_id column if missing
+try {
+  sqlite.exec(`ALTER TABLE transactions ADD COLUMN category_id TEXT`);
+} catch {
+  // Column already exists
+}
+try {
+  sqlite.exec(`ALTER TABLE recurring_transactions ADD COLUMN category_id TEXT`);
+} catch {
+  // Column already exists
+}
 
 export const db = drizzle(sqlite, { schema });

@@ -25,6 +25,7 @@ describe("PUT /api/recurring-transactions/[id]", () => {
       startDate: "2025-01-01",
       endDate: null,
       scenarioId: null,
+      categoryId: null,
     });
     vi.mocked(updateRecurringTransaction).mockReturnValue({
       id: "rt-1",
@@ -35,6 +36,7 @@ describe("PUT /api/recurring-transactions/[id]", () => {
       startDate: "2025-01-01",
       endDate: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const request = new Request("http://localhost/api/recurring-transactions/rt-1", {
@@ -77,6 +79,7 @@ describe("DELETE /api/recurring-transactions/[id]", () => {
       startDate: "2025-01-01",
       endDate: null,
       scenarioId: null,
+      categoryId: null,
     });
 
     const response = await DELETE(

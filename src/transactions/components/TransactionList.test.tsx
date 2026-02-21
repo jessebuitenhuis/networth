@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { AccountProvider } from "@/accounts/AccountContext";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
@@ -39,7 +40,9 @@ function renderWithProvider(
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <TransactionList accountId={accountId} />
+              <CategoryProvider>
+                <TransactionList accountId={accountId} />
+              </CategoryProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>

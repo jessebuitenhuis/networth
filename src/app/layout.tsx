@@ -1,10 +1,11 @@
 import "./globals.css";
 
-import { LayoutDashboard, Target, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Tag, Target, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { AccountProvider } from "@/accounts/AccountContext";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import type { NavGroup } from "@/components/layout/NavGroup.type";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -25,6 +26,7 @@ const navGroups: NavGroup[] = [
       { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
       { title: "Planning", url: "/planning", icon: <TrendingUp /> },
       { title: "Goals", url: "/goals", icon: <Target /> },
+      { title: "Categories", url: "/categories", icon: <Tag /> },
     ],
   },
 ];
@@ -48,7 +50,9 @@ export default async function RootLayout({
               <ScenarioProvider>
                 <RecurringTransactionProvider>
                   <GoalProvider>
-                    <AppLayout navGroups={navGroups}>{children}</AppLayout>
+                    <CategoryProvider>
+                      <AppLayout navGroups={navGroups}>{children}</AppLayout>
+                    </CategoryProvider>
                   </GoalProvider>
                 </RecurringTransactionProvider>
               </ScenarioProvider>

@@ -18,9 +18,11 @@ function renderDialog(overrides: Partial<React.ComponentProps<typeof EditTransac
   const props = {
     transaction: mockTransaction,
     scenarios: [],
+    categories: [],
     onSave: vi.fn(),
     onDelete: vi.fn(),
     onCreateScenario: vi.fn(),
+    onCreateCategory: vi.fn(),
     ...overrides,
   };
   render(<EditTransactionDialog {...props} />);

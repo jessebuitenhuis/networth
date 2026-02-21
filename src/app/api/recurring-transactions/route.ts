@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       startDate: body.startDate,
       endDate: body.endDate,
       scenarioId: body.scenarioId,
+      categoryId: body.categoryId,
     });
 
     return NextResponse.json(created, { status: 201 });
