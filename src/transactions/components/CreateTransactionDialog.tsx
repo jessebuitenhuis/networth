@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { useCategories } from "@/categories/CategoryContext";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,6 +42,7 @@ export function CreateTransactionDialog({
   const { addTransaction } = useTransactions();
   const { addRecurringTransaction } = useRecurringTransactions();
   const { scenarios, addScenario } = useScenarios();
+  const { categories, addCategory } = useCategories();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(
@@ -52,6 +55,7 @@ export function CreateTransactionDialog({
   );
   const [endDate, setEndDate] = useState("");
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("none");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
 
   function resetForm() {
     setAmount(0);
@@ -60,6 +64,7 @@ export function CreateTransactionDialog({
     setFrequency(RecurrenceFrequency.Monthly);
     setEndDate("");
     setSelectedScenarioId("none");
+    setSelectedCategoryId("none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -76,6 +81,7 @@ export function CreateTransactionDialog({
         startDate: date,
         endDate: endDate || undefined,
         scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
+        categoryId: selectedCategoryId === "none" ? undefined : selectedCategoryId,
       });
     } else {
       addTransaction({
@@ -85,6 +91,7 @@ export function CreateTransactionDialog({
         date,
         description: description.trim(),
         scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
+        categoryId: selectedCategoryId === "none" ? undefined : selectedCategoryId,
       });
     }
 
@@ -95,6 +102,12 @@ export function CreateTransactionDialog({
   function handleCreateScenario(name: string): string {
     const id = generateId();
     addScenario({ id, name });
+    return id;
+  }
+
+  function handleCreateCategory(name: string, parentCategoryId?: string): string {
+    const id = generateId();
+    addCategory({ id, name, parentCategoryId });
     return id;
   }
 
@@ -144,6 +157,12 @@ export function CreateTransactionDialog({
               placeholder="e.g. Groceries"
             />
           </div>
+          <CategorySelect
+            categories={categories}
+            value={selectedCategoryId}
+            onValueChange={setSelectedCategoryId}
+            onCreateCategory={handleCreateCategory}
+          />
           <ScenarioSelect
             scenarios={scenarios}
             value={selectedScenarioId}

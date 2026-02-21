@@ -24,6 +24,7 @@ export function createTransaction(data: {
   description: string;
   isProjected?: boolean | null;
   scenarioId?: string | null;
+  categoryId?: string | null;
 }) {
   db.insert(transactions)
     .values({
@@ -34,6 +35,7 @@ export function createTransaction(data: {
       description: data.description,
       isProjected: data.isProjected ?? null,
       scenarioId: data.scenarioId ?? null,
+      categoryId: data.categoryId ?? null,
     })
     .run();
 
@@ -48,6 +50,7 @@ export function createTransactions(items: {
   description: string;
   isProjected?: boolean | null;
   scenarioId?: string | null;
+  categoryId?: string | null;
 }[]) {
   for (const item of items) {
     db.insert(transactions)
@@ -59,6 +62,7 @@ export function createTransactions(items: {
         description: item.description,
         isProjected: item.isProjected ?? null,
         scenarioId: item.scenarioId ?? null,
+        categoryId: item.categoryId ?? null,
       })
       .run();
   }
@@ -78,6 +82,7 @@ export function updateTransaction(id: string, data: {
   description: string;
   isProjected?: boolean | null;
   scenarioId?: string | null;
+  categoryId?: string | null;
 }) {
   db.update(transactions)
     .set({
@@ -87,6 +92,7 @@ export function updateTransaction(id: string, data: {
       description: data.description,
       isProjected: data.isProjected ?? null,
       scenarioId: data.scenarioId ?? null,
+      categoryId: data.categoryId ?? null,
     })
     .where(eq(transactions.id, id))
     .run();

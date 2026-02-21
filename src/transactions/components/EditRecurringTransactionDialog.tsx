@@ -3,6 +3,8 @@
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 
+import type { Category } from "@/categories/Category.type";
+import { CategorySelect } from "@/categories/components/CategorySelect";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import {
   AlertDialog,
@@ -41,17 +43,21 @@ import { ScenarioSelect } from "./ScenarioSelect";
 type EditRecurringTransactionDialogProps = {
   recurringTransaction: RecurringTransaction;
   scenarios: Scenario[];
+  categories: Category[];
   onSave: (rt: RecurringTransaction) => void;
   onDelete: (id: string) => void;
   onCreateScenario: (scenario: { id: string; name: string }) => void;
+  onCreateCategory: (category: Category) => void;
 };
 
 export function EditRecurringTransactionDialog({
   recurringTransaction,
   scenarios,
+  categories,
   onSave,
   onDelete,
   onCreateScenario,
+  onCreateCategory,
 }: EditRecurringTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -67,6 +73,9 @@ export function EditRecurringTransactionDialog({
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
     recurringTransaction.scenarioId || "none"
   );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    recurringTransaction.categoryId || "none"
+  );
 
   function resetForm() {
     setAmount(recurringTransaction.amount);
@@ -75,6 +84,7 @@ export function EditRecurringTransactionDialog({
     setStartDate(recurringTransaction.startDate);
     setEndDate(recurringTransaction.endDate || "");
     setSelectedScenarioId(recurringTransaction.scenarioId || "none");
+    setSelectedCategoryId(recurringTransaction.categoryId || "none");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -89,6 +99,7 @@ export function EditRecurringTransactionDialog({
       startDate,
       endDate: endDate || undefined,
       scenarioId: selectedScenarioId === "none" ? undefined : selectedScenarioId,
+      categoryId: selectedCategoryId === "none" ? undefined : selectedCategoryId,
     });
     setIsOpen(false);
   }
@@ -106,6 +117,12 @@ export function EditRecurringTransactionDialog({
   function handleCreateScenario(name: string): string {
     const id = generateId();
     onCreateScenario({ id, name });
+    return id;
+  }
+
+  function handleCreateCategory(name: string, parentCategoryId?: string): string {
+    const id = generateId();
+    onCreateCategory({ id, name, parentCategoryId });
     return id;
   }
 
@@ -150,6 +167,12 @@ export function EditRecurringTransactionDialog({
                 aria-label="Description"
               />
             </div>
+            <CategorySelect
+              categories={categories}
+              value={selectedCategoryId}
+              onValueChange={setSelectedCategoryId}
+              onCreateCategory={handleCreateCategory}
+            />
             <ScenarioSelect
               scenarios={scenarios}
               value={selectedScenarioId}

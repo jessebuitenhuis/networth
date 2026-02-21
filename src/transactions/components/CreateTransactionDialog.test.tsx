@@ -9,6 +9,7 @@ mockResizeObserver();
 suppressActWarnings();
 
 import { AccountProvider } from "@/accounts/AccountContext";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import {
   RecurringTransactionProvider,
   useRecurringTransactions,
@@ -58,7 +59,9 @@ function renderDialog(accountId = "a1") {
       <TransactionProvider>
         <ScenarioProvider>
           <RecurringTransactionProvider>
-            <TestHarness accountId={accountId} />
+            <CategoryProvider>
+              <TestHarness accountId={accountId} />
+            </CategoryProvider>
           </RecurringTransactionProvider>
         </ScenarioProvider>
       </TransactionProvider>

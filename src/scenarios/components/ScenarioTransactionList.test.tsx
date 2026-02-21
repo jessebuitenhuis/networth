@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
@@ -31,7 +32,9 @@ function renderWithProviders(
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <ScenarioTransactionList selectedScenarioIds={selectedScenarioIds} />
+              <CategoryProvider>
+                <ScenarioTransactionList selectedScenarioIds={selectedScenarioIds} />
+              </CategoryProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>

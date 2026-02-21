@@ -23,9 +23,11 @@ function renderDialog(
   const props = {
     recurringTransaction: mockRecurringTransaction,
     scenarios: [],
+    categories: [],
     onSave: vi.fn(),
     onDelete: vi.fn(),
     onCreateScenario: vi.fn(),
+    onCreateCategory: vi.fn(),
     ...overrides,
   };
   render(<EditRecurringTransactionDialog {...props} />);

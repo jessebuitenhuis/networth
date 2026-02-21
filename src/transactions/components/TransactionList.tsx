@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
+import { useCategories } from "@/categories/CategoryContext";
+import { getCategoryPath } from "@/categories/getCategoryPath";
 import { formatDate } from "@/lib/dateUtils";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
@@ -30,6 +32,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
     useRecurringTransactions();
   const { accounts } = useAccounts();
   const { scenarios, activeScenarioId, addScenario } = useScenarios();
+  const { categories, addCategory } = useCategories();
   const [filters, setFilters] = useState<TransactionFilters>(emptyFilters);
 
   const today = formatDate(new Date());
@@ -46,26 +49,34 @@ export function TransactionList({ accountId }: TransactionListProps) {
     today
   );
 
-  const allItems: DisplayTransaction[] = dataItems.map((item) => ({
-    ...item,
-    editAction: item.sourceRecurringTransaction ? (
-      <EditRecurringTransactionDialog
-        recurringTransaction={item.sourceRecurringTransaction}
-        scenarios={scenarios}
-        onSave={updateRecurringTransaction}
-        onDelete={removeRecurringTransaction}
-        onCreateScenario={addScenario}
-      />
-    ) : item.sourceTransaction ? (
-      <EditTransactionDialog
-        transaction={item.sourceTransaction}
-        scenarios={scenarios}
-        onSave={updateTransaction}
-        onDelete={removeTransaction}
-        onCreateScenario={addScenario}
-      />
-    ) : null,
-  }));
+  const allItems: DisplayTransaction[] = dataItems.map((item) => {
+    const categoryId = item.sourceTransaction?.categoryId || item.sourceRecurringTransaction?.categoryId;
+    return {
+      ...item,
+      categoryName: categoryId ? getCategoryPath(categoryId, categories) : undefined,
+      editAction: item.sourceRecurringTransaction ? (
+        <EditRecurringTransactionDialog
+          recurringTransaction={item.sourceRecurringTransaction}
+          scenarios={scenarios}
+          categories={categories}
+          onSave={updateRecurringTransaction}
+          onDelete={removeRecurringTransaction}
+          onCreateScenario={addScenario}
+          onCreateCategory={addCategory}
+        />
+      ) : item.sourceTransaction ? (
+        <EditTransactionDialog
+          transaction={item.sourceTransaction}
+          scenarios={scenarios}
+          categories={categories}
+          onSave={updateTransaction}
+          onDelete={removeTransaction}
+          onCreateScenario={addScenario}
+          onCreateCategory={addCategory}
+        />
+      ) : null,
+    };
+  });
 
   const filteredItems = useMemo(
     () => filterDisplayTransactions(allItems, filters),

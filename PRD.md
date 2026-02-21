@@ -134,3 +134,13 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | 26  | As a user, I want my data stored in a SQLite database so I don't lose my accounts and transactions when clearing browser data. The storage layer should be abstracted so the app can migrate to PostgreSQL for production use later.                                                                 | Partial |
 | 27  | As a developer, I want a seed data script (`npm run seed`) that populates the database with realistic sample data (multiple accounts, transactions, recurring transactions, scenarios, and a default category hierarchy), so I can quickly test the app without manual data entry. Each git worktree should have isolated storage. | Planned |
+
+## Technical Backlog
+
+Architectural improvements and refactoring tasks to maintain code quality over time.
+
+| ID  | Description | Status |
+| --- | --- | --- |
+| T1 | Adopt `DialogFooterActions` across all remaining dialogs (accounts, goals, scenarios, import) for consistent Cancel/Submit button groups | Planned |
+| T2 | Migrate remaining switch-based sorting/filtering logic to data-driven column definitions (Open/Closed Principle) | Planned |
+| T3 | Audit all domain components for SRP violations and split mixed view/create components | Planned |

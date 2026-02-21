@@ -1,6 +1,8 @@
 "use client";
 
 import { useAccounts } from "@/accounts/AccountContext";
+import { useCategories } from "@/categories/CategoryContext";
+import { getCategoryPath } from "@/categories/getCategoryPath";
 import { formatDate } from "@/lib/dateUtils";
 import { getNextOccurrence } from "@/recurring-transactions/getNextOccurrence";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
@@ -21,6 +23,7 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
     useRecurringTransactions();
   const { scenarios, addScenario } = useScenarios();
   const { accounts } = useAccounts();
+  const { categories, addCategory } = useCategories();
 
   const today = formatDate(new Date());
 
@@ -43,13 +46,16 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
         isProjected: tx.isProjected || false,
         isRecurring: false,
         scenarioName: tx.scenarioId ? scenarios.find(s => s.id === tx.scenarioId)?.name : undefined,
+        categoryName: tx.categoryId ? getCategoryPath(tx.categoryId, categories) : undefined,
         editAction: (
           <EditTransactionDialog
             transaction={tx}
             scenarios={scenarios}
+            categories={categories}
             onSave={updateTransaction}
             onDelete={removeTransaction}
             onCreateScenario={addScenario}
+            onCreateCategory={addCategory}
           />
         ),
       };
@@ -76,13 +82,16 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
         isProjected: true,
         isRecurring: true,
         scenarioName: rt.scenarioId ? scenarios.find(s => s.id === rt.scenarioId)?.name : undefined,
+        categoryName: rt.categoryId ? getCategoryPath(rt.categoryId, categories) : undefined,
         editAction: (
           <EditRecurringTransactionDialog
             recurringTransaction={rt}
             scenarios={scenarios}
+            categories={categories}
             onSave={updateRecurringTransaction}
             onDelete={removeRecurringTransaction}
             onCreateScenario={addScenario}
+            onCreateCategory={addCategory}
           />
         ),
       };

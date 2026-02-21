@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { GoalProvider } from "@/goals/GoalContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
@@ -31,7 +32,9 @@ function renderPage() {
           <ScenarioProvider>
             <RecurringTransactionProvider>
               <GoalProvider>
-                <PlanningPage />
+                <CategoryProvider>
+                  <PlanningPage />
+                </CategoryProvider>
               </GoalProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
