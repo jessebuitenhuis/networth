@@ -17,7 +17,8 @@
     "test:coverage": "vitest run --coverage --coverage.skipFull",
     "verify": "TURBO_NO_UPDATE_NOTIFIER=true turbo run _lint _build _test --output-logs errors-only",
     "format": "eslint --fix src/",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "seed": "node scripts/seed.js"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
