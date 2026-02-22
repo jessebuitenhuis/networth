@@ -34,8 +34,8 @@ jobs:
       ANTHROPIC_AUTH_TOKEN: ${{ secrets.ZAI_AUTH_TOKEN }}
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       id-token: write
 
     steps:
