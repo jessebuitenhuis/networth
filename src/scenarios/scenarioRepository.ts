@@ -17,15 +17,15 @@ export function getScenarioById(id: string) {
   return row;
 }
 
-export function createScenario({ id, name }: { id: string; name: string }) {
-  db.insert(scenarios).values({ id, name }).run();
+export function createScenario({ id, name, inflationRate }: { id: string; name: string; inflationRate?: number }) {
+  db.insert(scenarios).values({ id, name, inflationRate: inflationRate ?? null }).run();
 
   return getScenarioById(id)!;
 }
 
-export function updateScenario(id: string, { name }: { name: string }) {
+export function updateScenario(id: string, { name, inflationRate }: { name: string; inflationRate?: number }) {
   db.update(scenarios)
-    .set({ name })
+    .set({ name, inflationRate: inflationRate ?? null })
     .where(eq(scenarios.id, id))
     .run();
 

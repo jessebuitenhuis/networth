@@ -39,6 +39,7 @@ export const categories = sqliteTable("categories", {
 export const scenarios = sqliteTable("scenarios", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  inflationRate: real("inflation_rate"),
 });
 
 export const goals = sqliteTable("goals", {

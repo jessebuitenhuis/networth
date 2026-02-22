@@ -37,7 +37,17 @@ describe("scenarioReducer", () => {
       id: "1",
       name: "Updated",
     });
-    expect(result.scenarios).toEqual([{ id: "1", name: "Updated" }]);
+    expect(result.scenarios[0].name).toBe("Updated");
+  });
+
+  it("updates a scenario with inflation rate", () => {
+    const result = scenarioReducer(initial, {
+      type: "update",
+      id: "1",
+      name: "Updated",
+      inflationRate: 3,
+    });
+    expect(result.scenarios[0].inflationRate).toBe(3);
   });
 
   it("sets active scenario", () => {

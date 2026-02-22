@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createScenario({ id: body.id, name: body.name });
+    const created = createScenario({ id: body.id, name: body.name, inflationRate: body.inflationRate });
 
     return NextResponse.json(created, { status: 201 });
   } catch {

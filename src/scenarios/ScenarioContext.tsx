@@ -12,7 +12,7 @@ type ScenarioState = {
 export type ScenarioAction =
   | { type: "add"; scenario: Scenario }
   | { type: "remove"; id: string }
-  | { type: "update"; id: string; name: string }
+  | { type: "update"; id: string; name: string; inflationRate?: number }
   | { type: "setActive"; id: string | null }
   | { type: "init"; scenarios: Scenario[]; activeScenarioId: string | null };
 
@@ -35,7 +35,7 @@ export function scenarioReducer(
       return {
         ...state,
         scenarios: state.scenarios.map((s) =>
-          s.id === action.id ? { ...s, name: action.name } : s,
+          s.id === action.id ? { ...s, name: action.name, inflationRate: action.inflationRate } : s,
         ),
       };
     case "setActive":
@@ -56,7 +56,7 @@ type ScenarioContextValue = {
   activeScenarioId: string | null;
   addScenario: (scenario: Scenario) => Promise<void>;
   removeScenario: (id: string) => Promise<void>;
-  updateScenario: (id: string, name: string) => Promise<void>;
+  updateScenario: (id: string, name: string, inflationRate?: number) => Promise<void>;
   setActiveScenario: (id: string | null) => Promise<void>;
 };
 
@@ -94,13 +94,13 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "remove", id });
   }
 
-  async function updateScenario(id: string, name: string) {
+  async function updateScenario(id: string, name: string, inflationRate?: number) {
     await fetch(`/api/scenarios/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, inflationRate }),
     });
-    dispatch({ type: "update", id, name });
+    dispatch({ type: "update", id, name, inflationRate });
   }
 
   async function setActiveScenario(id: string | null) {
