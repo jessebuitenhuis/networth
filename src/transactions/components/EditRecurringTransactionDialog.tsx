@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Category } from "@/categories/Category.type";
 import { CategorySelect } from "@/categories/components/CategorySelect";
@@ -33,7 +33,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 import { generateId } from "@/lib/generateId";
+import { RECURRENCE_FREQUENCY_OPTIONS } from "@/recurring-transactions/frequencyOptions";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import type { Scenario } from "@/scenarios/Scenario.type";
@@ -60,7 +62,6 @@ export function EditRecurringTransactionDialog({
   onCreateCategory,
 }: EditRecurringTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(recurringTransaction.amount);
   const [description, setDescription] = useState(
     recurringTransaction.description
@@ -76,6 +77,20 @@ export function EditRecurringTransactionDialog({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
     recurringTransaction.categoryId || "none"
   );
+
+  const handleDelete = useCallback(() => {
+    onDelete(recurringTransaction.id);
+  }, [onDelete, recurringTransaction.id]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
 
   function resetForm() {
     setAmount(recurringTransaction.amount);
@@ -102,16 +117,6 @@ export function EditRecurringTransactionDialog({
       categoryId: selectedCategoryId === "none" ? undefined : selectedCategoryId,
     });
     setIsOpen(false);
-  }
-
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteOpen(true);
-  }
-
-  function handleDelete() {
-    onDelete(recurringTransaction.id);
-    setIsDeleteOpen(false);
   }
 
   function handleCreateScenario(name: string): string {
@@ -192,21 +197,11 @@ export function EditRecurringTransactionDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={RecurrenceFrequency.Weekly}>
-                    Weekly
-                  </SelectItem>
-                  <SelectItem value={RecurrenceFrequency.BiWeekly}>
-                    Bi-weekly
-                  </SelectItem>
-                  <SelectItem value={RecurrenceFrequency.Monthly}>
-                    Monthly
-                  </SelectItem>
-                  <SelectItem value={RecurrenceFrequency.Quarterly}>
-                    Quarterly
-                  </SelectItem>
-                  <SelectItem value={RecurrenceFrequency.Yearly}>
-                    Yearly
-                  </SelectItem>
+                  {RECURRENCE_FREQUENCY_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -249,13 +244,8 @@ export function EditRecurringTransactionDialog({
     </Dialog>
 
     <AlertDialog
-      open={isDeleteOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setIsDeleteOpen(false);
-          setIsOpen(true);
-        }
-      }}
+      open={isDeleteConfirmOpen}
+      onOpenChange={handleDeleteDialogOpenChange}
     >
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -267,7 +257,7 @@ export function EditRecurringTransactionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={handleDelete}>
+          <AlertDialogAction variant="destructive" onClick={confirmDelete}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,13 +1,14 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
-import { useGoals } from "@/goals/GoalContext";
+import type { Goal } from "@/goals/Goal.type";
 
 import { EditGoalDialog } from "./EditGoalDialog";
 import { GoalCard } from "./GoalCard";
 
-export function GoalList() {
-  const { goals } = useGoals();
+type GoalListProps = {
+  goals: Goal[];
+};
+
+export function GoalList({ goals }: GoalListProps) {
 
   if (goals.length === 0) {
     return (

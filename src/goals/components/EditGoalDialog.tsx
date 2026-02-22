@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import {
@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Goal } from "@/goals/Goal.type";
 import { useGoals } from "@/goals/GoalContext";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 
 type EditGoalDialogProps = {
   goal: Goal;
@@ -35,9 +36,23 @@ type EditGoalDialogProps = {
 export function EditGoalDialog({ goal, onDelete }: EditGoalDialogProps) {
   const { updateGoal, removeGoal } = useGoals();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(goal.name);
   const [targetAmount, setTargetAmount] = useState(goal.targetAmount);
+
+  const handleDelete = useCallback(() => {
+    removeGoal(goal.id);
+    onDelete?.(goal.id);
+  }, [removeGoal, goal.id, onDelete]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
 
   function resetForm() {
     setName(goal.name);
@@ -54,22 +69,6 @@ export function EditGoalDialog({ goal, onDelete }: EditGoalDialogProps) {
       targetAmount,
     });
     setIsOpen(false);
-  }
-
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteConfirmOpen(true);
-  }
-
-  function handleCancelDelete() {
-    setIsDeleteConfirmOpen(false);
-    setIsOpen(true);
-  }
-
-  function handleDelete() {
-    removeGoal(goal.id);
-    onDelete?.(goal.id);
-    setIsDeleteConfirmOpen(false);
   }
 
   function handleTriggerClick(e: React.MouseEvent) {
@@ -139,11 +138,7 @@ export function EditGoalDialog({ goal, onDelete }: EditGoalDialogProps) {
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -155,7 +150,7 @@ export function EditGoalDialog({ goal, onDelete }: EditGoalDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

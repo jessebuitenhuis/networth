@@ -12,20 +12,20 @@ export function parseCsvText(text: string): string[][] {
   for (const line of lines) {
     const row: string[] = [];
     let currentField = "";
-    let insideQuotes = false;
+    let isInsideQuotes = false;
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       const nextChar = line[i + 1];
 
       if (char === '"') {
-        if (insideQuotes && nextChar === '"') {
+        if (isInsideQuotes && nextChar === '"') {
           currentField += '"';
           i++;
         } else {
-          insideQuotes = !insideQuotes;
+          isInsideQuotes = !isInsideQuotes;
         }
-      } else if (char === "," && !insideQuotes) {
+      } else if (char === "," && !isInsideQuotes) {
         row.push(currentField);
         currentField = "";
       } else {

@@ -26,8 +26,8 @@ export function TransactionFilterBar({
   resultCount,
   totalCount,
 }: TransactionFilterBarProps) {
-  const [expanded, setExpanded] = useState(false);
-  const active = hasActiveFilters(filters);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isActive = hasActiveFilters(filters);
   const hasAdvancedFilters =
     filters.dateFrom !== "" ||
     filters.dateTo !== "" ||
@@ -40,7 +40,7 @@ export function TransactionFilterBar({
 
   const clearFilters = () => {
     onChange(emptyFilters);
-    setExpanded(false);
+    setIsExpanded(false);
   };
 
   return (
@@ -61,13 +61,13 @@ export function TransactionFilterBar({
           type="button"
           variant={hasAdvancedFilters ? "default" : "outline"}
           size="icon"
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => setIsExpanded(!isExpanded)}
           aria-label="Toggle filters"
-          aria-expanded={expanded}
+          aria-expanded={isExpanded}
         >
           <SlidersHorizontal className="h-4 w-4" />
         </Button>
-        {active && (
+        {isActive && (
           <Button
             type="button"
             variant="ghost"
@@ -80,7 +80,7 @@ export function TransactionFilterBar({
         )}
       </div>
 
-      {expanded && (
+      {isExpanded && (
         <div className="grid grid-cols-2 gap-3 rounded-lg border p-3 sm:grid-cols-4">
           <div className="space-y-1">
             <Label htmlFor="filter-date-from" className="text-xs">
@@ -133,7 +133,7 @@ export function TransactionFilterBar({
         </div>
       )}
 
-      {active && (
+      {isActive && (
         <p className="text-sm text-muted-foreground">
           Showing {resultCount} of {totalCount} transactions
         </p>

@@ -12,13 +12,14 @@ import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
 import {
-  formatCurrency,
+  formatChartCurrency as formatCurrency,
   formatTooltipLabel,
   formatTooltipValue,
   formatXAxisTick,
   formatYAxisValue,
-  NetWorthChart,
-} from "./NetWorthChart";
+} from "@/charts/chartFormatters";
+
+import { NetWorthChart } from "./NetWorthChart";
 
 mockResizeObserver();
 suppressRechartsWarnings();

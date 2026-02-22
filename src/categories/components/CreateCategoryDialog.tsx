@@ -107,7 +107,7 @@ export function CreateCategoryDialog() {
           <DialogFooterActions
             onCancel={() => setIsOpen(false)}
             submitLabel="Add Category"
-            submitDisabled={!name.trim()}
+            isSubmitDisabled={!name.trim()}
           />
         </form>
       </DialogContent>

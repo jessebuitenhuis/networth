@@ -14,7 +14,7 @@ describe("GoalList", () => {
   it("displays empty state when no goals exist", () => {
     render(
       <GoalProvider>
-        <GoalList />
+        <GoalList goals={[]} />
       </GoalProvider>,
     );
     expect(
@@ -25,36 +25,32 @@ describe("GoalList", () => {
   });
 
   it("renders goal cards when goals exist", async () => {
-    mockApiResponses({
-      goals: [
-        { id: "1", name: "Emergency Fund", targetAmount: 10000 },
-        { id: "2", name: "FIRE", targetAmount: 500000 },
-      ],
-    });
+    const goals = [
+      { id: "1", name: "Emergency Fund", targetAmount: 10000 },
+      { id: "2", name: "FIRE", targetAmount: 500000 },
+    ];
 
     render(
       <GoalProvider>
-        <GoalList />
+        <GoalList goals={goals} />
       </GoalProvider>,
     );
 
-    expect(await screen.findByText("Emergency Fund")).toBeInTheDocument();
+    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
     expect(screen.getByText("FIRE")).toBeInTheDocument();
   });
 
   it("renders edit dialog for each goal", async () => {
-    mockApiResponses({
-      goals: [{ id: "1", name: "Emergency Fund", targetAmount: 10000 }],
-    });
+    const goals = [{ id: "1", name: "Emergency Fund", targetAmount: 10000 }];
 
     render(
       <GoalProvider>
-        <GoalList />
+        <GoalList goals={goals} />
       </GoalProvider>,
     );
 
     expect(
-      await screen.findByRole("button", { name: "Edit Goal" }),
+      screen.getByRole("button", { name: "Edit Goal" }),
     ).toBeInTheDocument();
   });
 });
