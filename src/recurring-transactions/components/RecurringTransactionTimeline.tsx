@@ -10,6 +10,7 @@ import { ScenarioFilterSelect } from "@/scenarios/components/ScenarioFilterSelec
 import { filterTransactionsByScenario } from "@/transactions/filterTransactionsByScenario";
 
 import { buildRecurringTransactionGanttGroups } from "../buildRecurringTransactionGanttGroups";
+import { buildRecurringTransactionGanttItem } from "../buildRecurringTransactionGanttItem";
 import { useRecurringTransactions } from "../RecurringTransactionContext";
 
 export function RecurringTransactionTimeline() {
@@ -25,11 +26,14 @@ export function RecurringTransactionTimeline() {
     activeScenarioId,
   );
 
+  const itemsWithCategories = filtered.map((rt) => ({
+    item: buildRecurringTransactionGanttItem(rt, categories, accounts, scenarios),
+    categoryId: rt.categoryId,
+  }));
+
   const groups = buildRecurringTransactionGanttGroups(
-    filtered,
+    itemsWithCategories,
     categories,
-    accounts,
-    scenarios,
   );
 
   return (
