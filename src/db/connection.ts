@@ -85,13 +85,14 @@ function initDb(): BetterSQLite3Database<typeof schema> {
     // Column already exists
   }
 
+  try {
+    sqlite.exec(`ALTER TABLE scenarios ADD COLUMN inflation_rate REAL`);
+  } catch {
+    // Column already exists
+  }
+
   _db = drizzle(sqlite, { schema });
   return _db;
-}
-try {
-  sqlite.exec(`ALTER TABLE scenarios ADD COLUMN inflation_rate REAL`);
-} catch {
-  // Column already exists
 }
 
 export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
