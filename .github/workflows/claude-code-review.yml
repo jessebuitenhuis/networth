@@ -24,6 +24,10 @@ jobs:
       pull-requests: read
       issues: read
       id-token: write
+    env:
+      API_TIMEOUT_MS: 3000000
+      ANTHROPIC_BASE_URL: ${{ secrets.ZAI_BASE_URL }}
+      ANTHROPIC_AUTH_TOKEN: ${{ secrets.ZAI_AUTH_TOKEN }}
 
     steps:
       - name: Checkout repository
