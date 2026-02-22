@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { GanttChartAxis } from "./GanttChartAxis";
 import type { GanttChartGroup } from "./GanttChartGroup.type";
 import { GanttChartGroupSection } from "./GanttChartGroupSection";
@@ -10,6 +12,7 @@ type GanttChartProps = {
 };
 
 export function GanttChart({ groups, todayDate }: GanttChartProps) {
+  const [nowMs] = useState(() => Date.now());
   const allItems = groups.flatMap((g) => g.items);
 
   if (allItems.length === 0) {
@@ -18,7 +21,7 @@ export function GanttChart({ groups, todayDate }: GanttChartProps) {
 
   const startDates = allItems.map((item) => new Date(item.startDate).getTime());
   const endDates = allItems.map((item) =>
-    item.endDate ? new Date(item.endDate).getTime() : Date.now()
+    item.endDate ? new Date(item.endDate).getTime() : nowMs
   );
 
   const minMs = Math.min(...startDates);
@@ -34,7 +37,7 @@ export function GanttChart({ groups, todayDate }: GanttChartProps) {
 
   const todayMs = todayDate
     ? new Date(todayDate).getTime()
-    : Date.now();
+    : nowMs;
   const todayPercent = ((todayMs - boundsStartMs) / totalMs) * 100;
   const showToday = todayPercent > 0 && todayPercent < 100;
 
