@@ -1,0 +1,259 @@
+"use client";
+
+import { useMemo } from "react";
+
+import { useAccounts } from "@/accounts/AccountContext";
+import { getScenarioColor } from "@/charts/chartColors";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useGoals } from "@/goals/GoalContext";
+import { formatDate } from "@/lib/dateUtils";
+import { formatCurrency } from "@/lib/formatCurrency";
+import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { computeScenarioMetrics } from "@/scenarios/computeScenarioMetrics";
+import type { ScenarioComparisonMetrics } from "@/scenarios/ScenarioComparisonMetrics.type";
+import { useScenarios } from "@/scenarios/ScenarioContext";
+import { useTransactions } from "@/transactions/TransactionContext";
+
+type ScenarioComparisonSummaryProps = {
+  selectedScenarioIds: Set<string>;
+  excludedAccountIds: Set<string>;
+};
+
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function formatAchievementDate(date: string | null): string {
+  if (!date) return "Not projected";
+  const [year, month] = date.split("-");
+  return `${MONTHS[parseInt(month, 10) - 1]} ${year}`;
+}
+
+const NET_WORTH_ROWS = [
+  { label: "1 Year", key: "projectedNetWorth1yr" as const },
+  { label: "5 Years", key: "projectedNetWorth5yr" as const },
+  { label: "10 Years", key: "projectedNetWorth10yr" as const },
+];
+
+export function ScenarioComparisonSummary({
+  selectedScenarioIds,
+  excludedAccountIds,
+}: ScenarioComparisonSummaryProps) {
+  const { accounts } = useAccounts();
+  const { transactions } = useTransactions();
+  const { recurringTransactions } = useRecurringTransactions();
+  const { scenarios } = useScenarios();
+  const { goals } = useGoals();
+
+  const metricsColumns = useMemo(() => {
+    if (selectedScenarioIds.size < 1) return null;
+
+    const today = formatDate(new Date());
+    const filteredAccounts = accounts.filter(
+      (a) => !excludedAccountIds.has(a.id)
+    );
+
+    const baselineTransactions = transactions.filter((t) => !t.scenarioId);
+    const baselineRecurring = recurringTransactions.filter(
+      (rt) => !rt.scenarioId
+    );
+
+    const columns: ScenarioComparisonMetrics[] = [];
+
+    columns.push(
+      computeScenarioMetrics(
+        null,
+        "Baseline",
+        filteredAccounts,
+        baselineTransactions,
+        baselineRecurring,
+        goals,
+        today
+      )
+    );
+
+    for (const scenarioId of selectedScenarioIds) {
+      const scenario = scenarios.find((s) => s.id === scenarioId);
+      if (!scenario) continue;
+
+      const scenarioTransactions = transactions.filter(
+        (t) => !t.scenarioId || t.scenarioId === scenarioId
+      );
+      const scenarioRecurring = recurringTransactions.filter(
+        (rt) => !rt.scenarioId || rt.scenarioId === scenarioId
+      );
+
+      columns.push(
+        computeScenarioMetrics(
+          scenarioId,
+          scenario.name,
+          filteredAccounts,
+          scenarioTransactions,
+          scenarioRecurring,
+          goals,
+          today
+        )
+      );
+    }
+
+    return columns;
+  }, [
+    accounts,
+    transactions,
+    recurringTransactions,
+    scenarios,
+    goals,
+    selectedScenarioIds,
+    excludedAccountIds,
+  ]);
+
+  if (!metricsColumns) return null;
+
+  const scenarioIndexMap = new Map(scenarios.map((s, i) => [s.id, i]));
+  const hasGoals = goals.length > 0;
+
+  return (
+    <div className="rounded-lg border p-6 space-y-4">
+      <h2 className="text-sm font-medium text-muted-foreground">
+        Scenario Comparison
+      </h2>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="min-w-[160px]">Metric</TableHead>
+            {metricsColumns.map((col) => (
+              <TableHead
+                key={col.scenarioId ?? "baseline"}
+                className="text-right min-w-[120px]"
+                style={
+                  col.scenarioId
+                    ? { color: getScenarioColor(scenarioIndexMap.get(col.scenarioId) ?? 0) }
+                    : undefined
+                }
+              >
+                {col.scenarioName}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell
+              colSpan={metricsColumns.length + 1}
+              className="font-semibold text-xs text-muted-foreground uppercase tracking-wide bg-muted/30 py-1.5"
+            >
+              Projected Net Worth
+            </TableCell>
+          </TableRow>
+          {NET_WORTH_ROWS.map((row) => (
+            <TableRow key={row.key}>
+              <TableCell className="text-muted-foreground">
+                {row.label}
+              </TableCell>
+              {metricsColumns.map((col) => (
+                <TableCell
+                  key={col.scenarioId ?? "baseline"}
+                  className="text-right font-medium"
+                >
+                  {formatCurrency(col[row.key])}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+
+          {hasGoals && (
+            <>
+              <TableRow>
+                <TableCell
+                  colSpan={metricsColumns.length + 1}
+                  className="font-semibold text-xs text-muted-foreground uppercase tracking-wide bg-muted/30 py-1.5"
+                >
+                  Goal Achievement
+                </TableCell>
+              </TableRow>
+              {goals.map((goal) => (
+                <TableRow key={goal.id}>
+                  <TableCell className="text-muted-foreground">
+                    {goal.name}
+                  </TableCell>
+                  {metricsColumns.map((col) => {
+                    const achievement = col.goalAchievements.find(
+                      (ga) => ga.goalId === goal.id
+                    );
+                    return (
+                      <TableCell
+                        key={col.scenarioId ?? "baseline"}
+                        className="text-right font-medium"
+                      >
+                        {formatAchievementDate(
+                          achievement?.achievementDate ?? null
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </>
+          )}
+
+          <TableRow>
+            <TableCell
+              colSpan={metricsColumns.length + 1}
+              className="font-semibold text-xs text-muted-foreground uppercase tracking-wide bg-muted/30 py-1.5"
+            >
+              Income vs Expenses (10yr)
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="text-muted-foreground">
+              Total Income
+            </TableCell>
+            {metricsColumns.map((col) => (
+              <TableCell
+                key={col.scenarioId ?? "baseline"}
+                className="text-right font-medium text-emerald-600"
+              >
+                {formatCurrency(col.totalIncome)}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell className="text-muted-foreground">
+              Total Expenses
+            </TableCell>
+            {metricsColumns.map((col) => (
+              <TableCell
+                key={col.scenarioId ?? "baseline"}
+                className="text-right font-medium text-red-500"
+              >
+                {formatCurrency(col.totalExpenses)}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell className="text-muted-foreground">Net</TableCell>
+            {metricsColumns.map((col) => {
+              const net = col.totalIncome - col.totalExpenses;
+              return (
+                <TableCell
+                  key={col.scenarioId ?? "baseline"}
+                  className={`text-right font-semibold ${net >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                >
+                  {formatCurrency(net)}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
