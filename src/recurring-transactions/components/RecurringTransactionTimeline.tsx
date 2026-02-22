@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useAccounts } from "@/accounts/AccountContext";
 import { useCategories } from "@/categories/CategoryContext";
 import { GanttChart } from "@/components/shared/gantt-chart/GanttChart";
-import { useScenarios } from "@/scenarios/ScenarioContext";
 import { ScenarioFilterSelect } from "@/scenarios/components/ScenarioFilterSelect";
+import { useScenarios } from "@/scenarios/ScenarioContext";
 import { filterTransactionsByScenario } from "@/transactions/filterTransactionsByScenario";
 
 import { buildRecurringTransactionGanttGroups } from "../buildRecurringTransactionGanttGroups";
