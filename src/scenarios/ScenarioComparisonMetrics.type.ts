@@ -1,8 +1,4 @@
-export type GoalAchievement = {
-  goalId: string;
-  goalName: string;
-  achievementDate: string | null;
-};
+import type { GoalAchievement } from "./GoalAchievement.type";
 
 export type ScenarioComparisonMetrics = {
   scenarioId: string | null;

@@ -1,8 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-
-import { useAccounts } from "@/accounts/AccountContext";
 import { getScenarioColor } from "@/charts/chartColors";
 import {
   Table,
@@ -13,29 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useGoals } from "@/goals/GoalContext";
-import { formatDate } from "@/lib/dateUtils";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { computeScenarioMetrics } from "@/scenarios/computeScenarioMetrics";
-import type { ScenarioComparisonMetrics } from "@/scenarios/ScenarioComparisonMetrics.type";
 import { useScenarios } from "@/scenarios/ScenarioContext";
-import { useTransactions } from "@/transactions/TransactionContext";
 
-type ScenarioComparisonSummaryProps = {
-  selectedScenarioIds: Set<string>;
-  excludedAccountIds: Set<string>;
-};
-
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-function formatAchievementDate(date: string | null): string {
-  if (!date) return "Not projected";
-  const [year, month] = date.split("-");
-  return `${MONTHS[parseInt(month, 10) - 1]} ${year}`;
-}
+import { formatAchievementDate } from "./formatAchievementDate";
+import { useScenarioMetricsColumns } from "./useScenarioMetricsColumns";
 
 const NET_WORTH_ROWS = [
   { label: "1 Year", key: "projectedNetWorth1yr" as const },
@@ -46,74 +25,16 @@ const NET_WORTH_ROWS = [
 export function ScenarioComparisonSummary({
   selectedScenarioIds,
   excludedAccountIds,
-}: ScenarioComparisonSummaryProps) {
-  const { accounts } = useAccounts();
-  const { transactions } = useTransactions();
-  const { recurringTransactions } = useRecurringTransactions();
+}: {
+  selectedScenarioIds: Set<string>;
+  excludedAccountIds: Set<string>;
+}) {
   const { scenarios } = useScenarios();
   const { goals } = useGoals();
-
-  const metricsColumns = useMemo(() => {
-    if (selectedScenarioIds.size < 1) return null;
-
-    const today = formatDate(new Date());
-    const filteredAccounts = accounts.filter(
-      (a) => !excludedAccountIds.has(a.id)
-    );
-
-    const baselineTransactions = transactions.filter((t) => !t.scenarioId);
-    const baselineRecurring = recurringTransactions.filter(
-      (rt) => !rt.scenarioId
-    );
-
-    const columns: ScenarioComparisonMetrics[] = [];
-
-    columns.push(
-      computeScenarioMetrics(
-        null,
-        "Baseline",
-        filteredAccounts,
-        baselineTransactions,
-        baselineRecurring,
-        goals,
-        today
-      )
-    );
-
-    for (const scenarioId of selectedScenarioIds) {
-      const scenario = scenarios.find((s) => s.id === scenarioId);
-      if (!scenario) continue;
-
-      const scenarioTransactions = transactions.filter(
-        (t) => !t.scenarioId || t.scenarioId === scenarioId
-      );
-      const scenarioRecurring = recurringTransactions.filter(
-        (rt) => !rt.scenarioId || rt.scenarioId === scenarioId
-      );
-
-      columns.push(
-        computeScenarioMetrics(
-          scenarioId,
-          scenario.name,
-          filteredAccounts,
-          scenarioTransactions,
-          scenarioRecurring,
-          goals,
-          today
-        )
-      );
-    }
-
-    return columns;
-  }, [
-    accounts,
-    transactions,
-    recurringTransactions,
-    scenarios,
-    goals,
+  const metricsColumns = useScenarioMetricsColumns(
     selectedScenarioIds,
-    excludedAccountIds,
-  ]);
+    excludedAccountIds
+  );
 
   if (!metricsColumns) return null;
 
