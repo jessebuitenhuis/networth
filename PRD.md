@@ -21,7 +21,7 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 | Capability | This App | YNAB ($109/yr) | Monarch ($99/yr) | Empower (free) | Kubera ($249/yr) |
 |---|---|---|---|---|---|
 | Scenario planning | Multi-scenario overlay | None | Partial (forecast) | Monte Carlo | Fast Forward |
-| Budgeting | Planned (basic) | Best-in-class | Strong | Basic | None |
+| Budgeting | Per-scenario envelope budgets | Best-in-class | Strong | Basic | None |
 | Manual entry | Core workflow | Encouraged | Supported | Limited | Core workflow |
 | Bank sync | Future | Yes | Yes | Yes | Yes |
 | Compound growth modeling | Per-account return rates | None | None | None | Rules-based |
@@ -38,18 +38,21 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 - **Multiple scenarios** — Create, compare, and overlay different financial plans side by side
 - **Financial goals** — Set net worth targets and track progress toward milestones like financial independence
 - **Net worth chart** — Interactive time-series chart with per-account toggle, flexible period selection, scenario comparison, and goal lines
+- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering, budgeting, and planning views
+- **Recurring frequencies** — Weekly, bi-weekly, monthly, quarterly, and yearly recurring transactions to model real-world financial rhythms
+- **Inflation modeling** — Per-scenario inflation rate that automatically adjusts projected expenses over time
+- **Scenario comparison** — Side-by-side metrics table showing projected net worth, goal achievement dates, and income vs expenses across scenarios
+- **Assets & liabilities breakdown** — Total assets and total liabilities shown separately on the dashboard alongside net worth
+- **SQLite storage** — Data persists locally in SQLite with an abstraction layer for future PostgreSQL migration
 
 ### Core (planned — needed to validate the full product concept)
-- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering, budgeting, and planning views
-- **Basic budgeting** — Set monthly spending targets per category and track actual spending against them. Not envelope-style (YNAB) — simpler category-vs-actual tracking that complements the planning features
-- **More recurring frequencies** — Weekly, bi-weekly, and quarterly in addition to monthly and yearly, to model real-world financial rhythms accurately
+- **Envelope-style budgeting** — Set monthly spending budgets per category, tied to scenarios. Track actual spending against budgets with progress bars. Per-scenario budgets let you compare spending plans (e.g. "What if I cut my dining-out budget in half?")
+- **Cash flow analysis** — Monthly view of income vs expenses broken down by category, showing where money is going for both past (actual) and future (projected) months
 - **Life events timeline** — Chronological view of recurring transactions showing when income and expenses start and end across life milestones
-- **Assets & liabilities breakdown** — Total assets and total liabilities shown separately on the dashboard alongside net worth
 
 ### Future (needed before going to market, out of scope for prototyping)
 - **Data export** — CSV export of transactions, accounts, balances, and net worth history. Required for user trust and data portability
 - **Bank sync** — Optional Plaid/GoCardless integration to auto-import transactions. Manual entry remains the primary workflow; sync is a convenience layer
-- **SQLite storage** — Data persists locally in SQLite with an abstraction layer for future PostgreSQL migration
 
 ## UX Principles
 
@@ -88,8 +91,8 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 | 13  | As a user, I want to edit and delete scenarios from the UI so I can refine or remove plans that are no longer relevant.                                                                                                                                                             | Done    |
 | 14  | As a user, I want my selected scenario to persist globally so it stays selected when I navigate between pages.                                                                                                                                                                      | Done    |
 | 30  | As a user, I want to see a timeline of my recurring transactions — grouped and labeled by category — so I can understand how my income and expenses shift at major life milestones like starting a pension, paying off a mortgage, or changing jobs.                                 | Planned |
-| 35  | As a user, I want to create recurring transactions with weekly, bi-weekly, and quarterly frequencies (in addition to monthly and yearly), so I can accurately model real-world financial rhythms like bi-weekly paychecks or quarterly tax payments.                                   | Planned |
-| 36  | As a user, I want to apply an inflation rate to a scenario, so my projected expenses grow over time and my future net worth projections are more realistic.                                                                                                                          | Planned |
+| 35  | As a user, I want to create recurring transactions with weekly, bi-weekly, and quarterly frequencies (in addition to monthly and yearly), so I can accurately model real-world financial rhythms like bi-weekly paychecks or quarterly tax payments.                                   | Done    |
+| 36  | As a user, I want to apply an inflation rate to a scenario, so my projected expenses grow over time and my future net worth projections are more realistic.                                                                                                                          | Done    |
 
 ### Seeing my progress
 
@@ -104,7 +107,7 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 | 21  | As a user, I want to select a scenario on the account detail page (single-select, default: "Baseline only") so I can see baseline transactions plus that scenario's transactions.                                                                                                                                                                                                                                                                                                                                         | Done    |
 | 22  | As a user, I want to see the total net worth next to "Accounts" in the sidebar and each account's balance next to its name (in abbreviated format like "100K"), so I can get a quick financial overview without navigating into each account. The "New Account" action should become a muted link at the bottom of the account list to make room.                                                                                                                                                                         | Done    |
 | 31  | As a user, I want to see my total assets and total liabilities broken out separately on the dashboard alongside my net worth, so I understand my financial position at a glance rather than a single combined number.                                                                                                                                                                                                                                                                                                    | Done    |
-| 37  | As a user, I want to see a scenario comparison summary that shows key metrics side by side (projected net worth at 1yr, 5yr, 10yr; goal achievement dates; total income vs expenses), so I can compare scenarios with numbers, not just chart lines.                                                                                                                                                                                                                                                                    | Planned |
+| 37  | As a user, I want to see a scenario comparison summary that shows key metrics side by side (projected net worth at 1yr, 5yr, 10yr; goal achievement dates; total income vs expenses), so I can compare scenarios with numbers, not just chart lines.                                                                                                                                                                                                                                                                    | Done    |
 
 ### Financial goals
 
@@ -116,10 +119,11 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 
 ### Budgeting
 
-| ID  | User Story                                                                                                                                                                                                                                                                                                                                                                     | Status  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| 38  | As a user, I want to set monthly spending targets for each transaction category, so I can track whether my actual spending stays within plan. This should be simple category-vs-actual tracking (not envelope-style zero-based budgeting), showing a progress bar per category for the current month.                                                                           | Planned |
-| 39  | As a user, I want to see a monthly budget summary on the dashboard showing total budgeted vs total spent, so I get a quick sense of whether I'm on track this month without navigating to a dedicated budget page.                                                                                                                                                            | Planned |
+| ID  | User Story                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Status  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| 38  | As a user, I want to set monthly spending budgets per category, tied to a scenario, so I can define a spending plan for each scenario I create. Each scenario can have its own budget allocations (e.g. a "frugal" scenario with lower dining budget), and the Baseline scenario gets a default budget. Budgets reset monthly (no carryover), and I see progress bars showing spent vs budgeted per category for the current month.                                                                                                          | Planned |
+| 39  | As a user, I want to see a budget summary on the dashboard showing total budgeted vs total spent for the current month under the active scenario, with a quick visual indicator (on track / over budget), so I can assess my financial discipline at a glance.                                                                                                                                                                                                                   | Planned |
+| 42  | As a user, I want to view a monthly cash flow breakdown showing income vs expenses by category for any given month, so I can understand where my money is going. This should work for both past months (actual spending) and future months (projected from recurring transactions), helping me connect today's spending patterns with tomorrow's net worth trajectory.                                                                                                           | Planned |
 
 ### Data portability
 
@@ -132,7 +136,7 @@ This app occupies the whitespace between them: a **planning-first** personal fin
 
 | ID  | User Story                                                                                                                                                                                                                                                                                           | Status  |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| 26  | As a user, I want my data stored in a SQLite database so I don't lose my accounts and transactions when clearing browser data. The storage layer should be abstracted so the app can migrate to PostgreSQL for production use later.                                                                 | Partial |
+| 26  | As a user, I want my data stored in a SQLite database so I don't lose my accounts and transactions when clearing browser data. The storage layer should be abstracted so the app can migrate to PostgreSQL for production use later.                                                                 | Done    |
 | 27  | As a developer, I want a seed data script (`npm run seed`) that populates the database with realistic sample data (multiple accounts, transactions, recurring transactions, scenarios, and a default category hierarchy), so I can quickly test the app without manual data entry. Each git worktree should have isolated storage. | Done    |
 
 ## Technical Backlog
