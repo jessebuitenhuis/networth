@@ -10,17 +10,8 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
   claude-review:
-    # Skip review if PR is not up to date with base branch
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && !github.event.pull_request.draft)
-
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -28,14 +19,10 @@ jobs:
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
     runs-on: ubuntu-latest
-    env:
-      API_TIMEOUT_MS: 3000000
-      ANTHROPIC_BASE_URL: ${{ secrets.ZAI_BASE_URL }}
-      ANTHROPIC_AUTH_TOKEN: ${{ secrets.ZAI_AUTH_TOKEN }}
     permissions:
       contents: read
-      pull-requests: write
-      issues: write
+      pull-requests: read
+      issues: read
       id-token: write
 
     steps:
@@ -48,7 +35,7 @@ jobs:
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ZAI_AUTH_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
