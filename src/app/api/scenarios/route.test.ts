@@ -62,7 +62,24 @@ describe("POST /api/scenarios", () => {
 
     expect(response.status).toBe(201);
     expect(body).toEqual(expect.objectContaining({ id: "s-new", name: "Pessimistic" }));
-    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic" });
+    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic", inflationRate: undefined });
+  });
+
+  it("creates a scenario with inflation rate", async () => {
+    vi.mocked(createScenario).mockReturnValue({ id: "s-new", name: "High Inflation", inflationRate: 5 });
+
+    const request = new Request("http://localhost/api/scenarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "s-new", name: "High Inflation", inflationRate: 5 }),
+    });
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(body.inflationRate).toBe(5);
+    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "High Inflation", inflationRate: 5 });
   });
 
   it("returns 400 for missing required fields", async () => {

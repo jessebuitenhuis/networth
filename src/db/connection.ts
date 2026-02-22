@@ -79,5 +79,10 @@ try {
 } catch {
   // Column already exists
 }
+try {
+  sqlite.exec(`ALTER TABLE scenarios ADD COLUMN inflation_rate REAL`);
+} catch {
+  // Column already exists
+}
 
 export const db = drizzle(sqlite, { schema });

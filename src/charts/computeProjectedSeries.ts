@@ -10,6 +10,7 @@ import { generateCompoundGrowthTransactions } from "@/transactions/generateCompo
 import type { Transaction } from "@/transactions/Transaction.type";
 
 import { accumulateNetWorth } from "./accumulateNetWorth";
+import { applyInflation } from "./applyInflation";
 
 function generateProjectedDatePoints(
   period: ChartPeriod,
@@ -89,7 +90,8 @@ export function computeProjectedSeries(
   period: ChartPeriod,
   today: string = formatDate(new Date()),
   customRange?: DateRange,
-  recurringTransactions: RecurringTransaction[] = []
+  recurringTransactions: RecurringTransaction[] = [],
+  inflationRate: number = 0
 ): NetWorthDataPoint[] {
   const todayDate = new Date(today + "T00:00:00");
   const datePoints = generateProjectedDatePoints(period, todayDate, transactions, customRange);
@@ -116,6 +118,9 @@ export function computeProjectedSeries(
     const occurrences = generateOccurrences(rt, today, rangeEnd);
     for (const occ of occurrences) {
       if (occ.date > today) {
+        if (inflationRate > 0) {
+          occ.amount = applyInflation(occ.amount, today, occ.date, inflationRate);
+        }
         futureTx.push(occ);
       }
     }

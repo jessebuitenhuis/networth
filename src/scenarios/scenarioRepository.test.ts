@@ -59,6 +59,11 @@ describe("createScenario", () => {
     const result = createScenario({ id: "s-1", name: "Pessimistic" });
     expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Pessimistic" }));
   });
+
+  it("inserts and returns a scenario with inflation rate", () => {
+    const result = createScenario({ id: "s-1", name: "Inflation", inflationRate: 3.5 });
+    expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Inflation", inflationRate: 3.5 }));
+  });
 });
 
 describe("updateScenario", () => {
@@ -67,6 +72,20 @@ describe("updateScenario", () => {
 
     const result = updateScenario("s-1", { name: "Updated Plan" });
     expect(result.name).toBe("Updated Plan");
+  });
+
+  it("updates inflation rate", () => {
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan" }).run();
+
+    const result = updateScenario("s-1", { name: "Base Plan", inflationRate: 2.5 });
+    expect(result.inflationRate).toBe(2.5);
+  });
+
+  it("clears inflation rate when undefined", () => {
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", inflationRate: 3 }).run();
+
+    const result = updateScenario("s-1", { name: "Base Plan" });
+    expect(result.inflationRate).toBeNull();
   });
 });
 
