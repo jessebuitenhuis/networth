@@ -11,6 +11,7 @@ import { useRecurringTransactions } from "@/recurring-transactions/RecurringTran
 import { CreateScenarioDialog } from "@/scenarios/components/CreateScenarioDialog";
 import { DuplicateScenarioDialog } from "@/scenarios/components/DuplicateScenarioDialog";
 import { EditScenarioDialog } from "@/scenarios/components/EditScenarioDialog";
+import { ScenarioComparisonSummary } from "@/scenarios/components/ScenarioComparisonSummary";
 import { ScenarioPicker } from "@/scenarios/components/ScenarioPicker";
 import { ScenarioTransactionList } from "@/scenarios/components/ScenarioTransactionList";
 import { useScenarios } from "@/scenarios/ScenarioContext";
@@ -125,6 +126,10 @@ export default function PlanningPage() {
       />
       <div className="p-4 space-y-6">
         <ProjectedNetWorthChart
+          selectedScenarioIds={selectedScenarioIds}
+          excludedAccountIds={excludedAccountIds}
+        />
+        <ScenarioComparisonSummary
           selectedScenarioIds={selectedScenarioIds}
           excludedAccountIds={excludedAccountIds}
         />
