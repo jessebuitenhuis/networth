@@ -36,6 +36,10 @@ src/
 
 - **One export per file** — Each file should export a single function, type, or component. This keeps files focused and imports explicit.
 - **Single Responsibility Principle** — Each component or function should do one thing well. If a component handles both viewing and creating, split it into separate components.
+- **Small, focused functions** — Functions should be short and do one thing. If a function is getting long, extract named sub-functions. Each extracted function should live in its own file (one export per file).
+- **Named functions over comments** — Replace explanatory comments with clearly named functions. Code should read like a book without needing comments to explain intent (e.g. `findClosestNetWorthAtDate` instead of `// Assumes series is sorted ascending by date`).
+- **Limit nesting depth** — Limit nesting of control flow (for, if, while) to 1 level deep, or 2 when really needed. Flatten deeply nested logic using early returns, `.filter()/.flatMap()`, or by extracting inner logic into named functions.
+- **Separate data from rendering** — In React components, extract data-fetching and computation logic into custom hooks. Components should focus on rendering.
 - **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
 - **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
 - **DialogFooterActions** — Use the shared `DialogFooterActions` component (`src/components/shared/DialogFooterActions.tsx`) for consistent Cancel/Submit button groups in dialog forms.
