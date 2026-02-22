@@ -4,8 +4,8 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { AccountType } from "@/accounts/AccountType";
+import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { PercentageInput } from "@/components/shared/PercentageInput";
 import { Button } from "@/components/ui/button";

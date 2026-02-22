@@ -5,7 +5,6 @@ import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "rech
 
 import { useAccounts } from "@/accounts/AccountContext";
 import {
-  formatChartCurrency,
   formatTooltipLabel,
   formatTooltipValue,
   formatXAxisTick,

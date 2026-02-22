@@ -6,8 +6,8 @@ import { useCallback, useState } from "react";
 
 import type { Account } from "@/accounts/Account.type";
 import { useAccounts } from "@/accounts/AccountContext";
-import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { AccountType } from "@/accounts/AccountType";
+import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { PercentageInput } from "@/components/shared/PercentageInput";
 import {
   AlertDialog,
