@@ -32,22 +32,47 @@ src/
   test/             # Test setup and configuration
 ```
 
-## Architecture Preferences
-
-- **One export per file** — Each file should export a single function, type, or component. This keeps files focused and imports explicit.
-- **Single Responsibility Principle** — Each component or function should do one thing well. If a component handles both viewing and creating, split it into separate components.
-- **Small, focused functions** — Functions should be short and do one thing. If a function is getting long, extract named sub-functions. Each extracted function should live in its own file (one export per file).
-- **Named functions over comments** — Replace explanatory comments with clearly named functions. Code should read like a book without needing comments to explain intent (e.g. `findClosestNetWorthAtDate` instead of `// Assumes series is sorted ascending by date`).
-- **Limit nesting depth** — Limit nesting of control flow (for, if, while) to 1 level deep, or 2 when really needed. Flatten deeply nested logic using early returns, `.filter()/.flatMap()`, or by extracting inner logic into named functions.
-- **Separate data from rendering** — In React components, extract data-fetching and computation logic into custom hooks. Components should focus on rendering.
-- **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
-- **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
-- **DialogFooterActions** — Use the shared `DialogFooterActions` component (`src/components/shared/DialogFooterActions.tsx`) for consistent Cancel/Submit button groups in dialog forms.
-
 ## Pull Requests
 
 Before creating a PR, ensure the target branch is up to date. Fetch and rebase:
+
 ```bash
 git fetch origin main
 git rebase origin/main
 ```
+
+## Workflow
+
+- When implementing a user story from PRD.md, mark it as done when completed§
+
+## Coding Guidelines
+
+- Short names acceptable when context is clear
+- Prefix private members with `_`
+- Prefer short, clearly named method calls over comments
+- Limit code nesting to 1-2 levels
+- One type per file (class, type, interface, enum)
+- Boolean naming: `is*`, `has*`, `can*`
+- TDD workflow: write tests first, then implement
+- Page Object pattern (`*.page.tsx`) for dialog/form test infrastructure
+- Organize code by domain, not by technology (`src/accounts/`, `src/transactions/`, etc.)
+
+### Frontend development
+
+- Use constructor shorthand for parameter declaration when possible (`constructor(private _someVar: string) {}`)
+- Initialize class fields inline when possible (`private _map = new Map()` instead of in constructor)
+- Import sorting enforced via `eslint-plugin-simple-import-sort`; run `npm run format` to auto-fix
+- Use shadcn/ui components over native HTML elements
+- Use smart/dumb component pattern
+- Smart container components hold state and logic
+- Dumb presentational components communicate through props (no side effects)
+
+### Testing
+
+- Use `it.each()` for parameterized tests (3+ cases with same structure)
+
+### Principles
+
+- **Single Responsibility Principle** — Each component or function should do one thing well. If a component handles both viewing and creating, split it into separate components.
+- **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
+- **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
