@@ -1,9 +1,6 @@
-import { RecurrenceFrequency } from "./RecurrenceFrequency";
+import type { SelectOption } from "@/lib/SelectOption.type";
 
-export interface SelectOption<T extends string> {
-  value: T;
-  label: string;
-}
+import { RecurrenceFrequency } from "./RecurrenceFrequency";
 
 export const RECURRENCE_FREQUENCY_OPTIONS: SelectOption<RecurrenceFrequency>[] = [
   { value: RecurrenceFrequency.Weekly, label: "Weekly" },
