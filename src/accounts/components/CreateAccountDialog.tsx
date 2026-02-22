@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
+import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { AccountType } from "@/accounts/AccountType";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { PercentageInput } from "@/components/shared/PercentageInput";
@@ -117,8 +118,11 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={AccountType.Asset}>Asset</SelectItem>
-                <SelectItem value={AccountType.Liability}>Liability</SelectItem>
+                {ACCOUNT_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -16,10 +16,10 @@ export function NetWorthCard({
   totalAssets,
   totalLiabilities,
 }: NetWorthCardProps) {
-  const [mounted, setMounted] = useState(false);
+  const [isMounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Set mounted flag to avoid hydration mismatch with locale-dependent currency formatting.
+    // Set isMounted flag to avoid hydration mismatch with locale-dependent currency formatting.
     // Server renders with default locale, client needs to re-render with browser locale.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
@@ -32,7 +32,7 @@ export function NetWorthCard({
           Net Worth
         </h2>
         <p className="text-3xl font-bold">
-          {mounted ? formatCurrency(netWorth) : "..."}
+          {isMounted ? formatCurrency(netWorth) : "..."}
         </p>
         <div className="mt-4 flex gap-6">
           <div>
@@ -40,7 +40,7 @@ export function NetWorthCard({
               Total Assets
             </h3>
             <p className="text-lg font-semibold text-green-600">
-              {mounted ? formatCurrency(totalAssets) : "..."}
+              {isMounted ? formatCurrency(totalAssets) : "..."}
             </p>
           </div>
           <div>
@@ -48,7 +48,7 @@ export function NetWorthCard({
               Total Liabilities
             </h3>
             <p className="text-lg font-semibold text-red-600">
-              {mounted ? formatCurrency(totalLiabilities) : "..."}
+              {isMounted ? formatCurrency(totalLiabilities) : "..."}
             </p>
           </div>
         </div>

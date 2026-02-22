@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
   AlertDialog,
@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 import { buildFlatTree } from "@/lib/buildFlatTree";
 import { getDescendantIds } from "@/lib/getDescendantIds";
 
@@ -43,7 +44,6 @@ type EditCategoryDialogProps = {
 export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
   const { categories, updateCategory, removeCategory } = useCategories();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(category.name);
   const [parentCategoryId, setParentCategoryId] = useState(
     category.parentCategoryId || "none",
@@ -61,6 +61,20 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
     [categories, descendantIds],
   );
 
+  const handleDelete = useCallback(() => {
+    removeCategory(category.id);
+  }, [removeCategory, category.id]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
+
   function resetForm() {
     setName(category.name);
     setParentCategoryId(category.parentCategoryId || "none");
@@ -77,21 +91,6 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
         parentCategoryId === "none" ? undefined : parentCategoryId,
     });
     setIsOpen(false);
-  }
-
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteConfirmOpen(true);
-  }
-
-  function handleCancelDelete() {
-    setIsDeleteConfirmOpen(false);
-    setIsOpen(true);
-  }
-
-  function handleDelete() {
-    removeCategory(category.id);
-    setIsDeleteConfirmOpen(false);
   }
 
   function handleTriggerClick(e: React.MouseEvent) {
@@ -170,11 +169,7 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -186,7 +181,7 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

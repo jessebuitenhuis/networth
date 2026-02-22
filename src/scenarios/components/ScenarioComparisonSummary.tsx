@@ -8,23 +8,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useGoals } from "@/goals/GoalContext";
-import { useScenarios } from "@/scenarios/ScenarioContext";
+import type { Goal } from "@/goals/Goal.type";
+import type { Scenario } from "@/scenarios/Scenario.type";
 
 import { GoalAchievementRows } from "./GoalAchievementRows";
 import { IncomeExpenseRows } from "./IncomeExpenseRows";
 import { NetWorthRows } from "./NetWorthRows";
 import { useScenarioMetricsColumns } from "./useScenarioMetricsColumns";
 
+type ScenarioComparisonSummaryProps = {
+  selectedScenarioIds: Set<string>;
+  excludedAccountIds: Set<string>;
+  scenarios: Scenario[];
+  goals: Goal[];
+};
+
 export function ScenarioComparisonSummary({
   selectedScenarioIds,
   excludedAccountIds,
-}: {
-  selectedScenarioIds: Set<string>;
-  excludedAccountIds: Set<string>;
-}) {
-  const { scenarios } = useScenarios();
-  const { goals } = useGoals();
+  scenarios,
+  goals,
+}: ScenarioComparisonSummaryProps) {
   const metricsColumns = useScenarioMetricsColumns(
     selectedScenarioIds,
     excludedAccountIds

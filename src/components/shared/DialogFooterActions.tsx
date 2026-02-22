@@ -3,20 +3,20 @@ import { Button } from "@/components/ui/button";
 type DialogFooterActionsProps = {
   onCancel: () => void;
   submitLabel: string;
-  submitDisabled?: boolean;
+  isSubmitDisabled?: boolean;
 };
 
 export function DialogFooterActions({
   onCancel,
   submitLabel,
-  submitDisabled,
+  isSubmitDisabled,
 }: DialogFooterActionsProps) {
   return (
     <div className="flex justify-end gap-2">
       <Button type="button" variant="outline" onClick={onCancel}>
         Cancel
       </Button>
-      <Button type="submit" disabled={submitDisabled}>
+      <Button type="submit" disabled={isSubmitDisabled}>
         {submitLabel}
       </Button>
     </div>

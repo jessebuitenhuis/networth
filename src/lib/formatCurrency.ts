@@ -7,5 +7,3 @@ export function formatCurrency(amount: number): string {
   });
   return amount < 0 ? `-${formatted}` : formatted;
 }
-
-// a comment that should be committed for the test

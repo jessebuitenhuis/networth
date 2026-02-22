@@ -25,7 +25,7 @@ import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
-import { formatCurrency } from "./NetWorthChart";
+import { formatChartCurrency as formatCurrency } from "@/charts/chartFormatters";
 import { PeriodPicker } from "./PeriodPicker";
 import { ScenarioLegend } from "./ScenarioLegend";
 
