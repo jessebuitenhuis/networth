@@ -9,13 +9,13 @@ import TopBar from "@/components/layout/TopBar";
 import { useGoals } from "@/goals/GoalContext";
 import { generateId } from "@/lib/generateId";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { duplicateScenario } from "@/scenarios/duplicateScenario";
 import { CreateScenarioDialog } from "@/scenarios/components/CreateScenarioDialog";
 import { DuplicateScenarioDialog } from "@/scenarios/components/DuplicateScenarioDialog";
 import { EditScenarioDialog } from "@/scenarios/components/EditScenarioDialog";
 import { ScenarioComparisonSummary } from "@/scenarios/components/ScenarioComparisonSummary";
 import { ScenarioPicker } from "@/scenarios/components/ScenarioPicker";
 import { ScenarioTransactionList } from "@/scenarios/components/ScenarioTransactionList";
+import { duplicateScenario } from "@/scenarios/duplicateScenario";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
 

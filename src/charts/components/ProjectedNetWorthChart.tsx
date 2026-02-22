@@ -13,6 +13,7 @@ import {
 
 import { useAccounts } from "@/accounts/AccountContext";
 import { getGoalColor, getScenarioColor } from "@/charts/chartColors";
+import { formatChartCurrency as formatCurrency } from "@/charts/chartFormatters";
 import { ChartPeriod } from "@/charts/ChartPeriod";
 import { computeProjectedSeries } from "@/charts/computeProjectedSeries";
 import type { DateRange } from "@/charts/DateRange.type";
@@ -25,7 +26,6 @@ import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
-import { formatChartCurrency as formatCurrency } from "@/charts/chartFormatters";
 import { PeriodPicker } from "./PeriodPicker";
 import { ScenarioLegend } from "./ScenarioLegend";
 
