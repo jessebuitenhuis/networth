@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { LayoutDashboard, Tag, Target, TrendingUp } from "lucide-react";
+import { GanttChart as GanttChartIcon, LayoutDashboard, Tag, Target, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
@@ -25,6 +25,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
       { title: "Planning", url: "/planning", icon: <TrendingUp /> },
+      { title: "Timeline", url: "/timeline", icon: <GanttChartIcon /> },
       { title: "Goals", url: "/goals", icon: <Target /> },
       { title: "Categories", url: "/categories", icon: <Tag /> },
     ],
