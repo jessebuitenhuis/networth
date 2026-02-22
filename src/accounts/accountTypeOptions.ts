@@ -1,4 +1,4 @@
-import type { SelectOption } from "@/recurring-transactions/frequencyOptions";
+import type { SelectOption } from "@/lib/SelectOption.type";
 
 import { AccountType } from "./AccountType";
 
