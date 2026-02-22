@@ -74,7 +74,8 @@ export default function PlanningPage() {
   function handleDuplicateScenario(sourceScenarioId: string) {
     return (name: string) => {
       const newScenarioId = generateId();
-      addScenario({ id: newScenarioId, name });
+      const sourceScenario = scenarios.find((s) => s.id === sourceScenarioId);
+      addScenario({ id: newScenarioId, name, inflationRate: sourceScenario?.inflationRate });
 
       transactions
         .filter((t) => t.scenarioId === sourceScenarioId)

@@ -40,16 +40,21 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(scenario.name);
+  const [inflationRate, setInflationRate] = useState(
+    scenario.inflationRate?.toString() ?? ""
+  );
 
   function resetForm() {
     setName(scenario.name);
+    setInflationRate(scenario.inflationRate?.toString() ?? "");
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
 
-    updateScenario(scenario.id, name.trim());
+    const parsedRate = inflationRate ? parseFloat(inflationRate) : undefined;
+    updateScenario(scenario.id, name.trim(), parsedRate);
     setIsOpen(false);
   }
 
@@ -109,6 +114,23 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+            </div>
+            <div>
+              <Label htmlFor="edit-scenario-inflation" className="mb-2">
+                Annual Inflation Rate (%)
+              </Label>
+              <Input
+                id="edit-scenario-inflation"
+                type="number"
+                step="0.1"
+                min="0"
+                value={inflationRate}
+                onChange={(e) => setInflationRate(e.target.value)}
+                placeholder="e.g. 3"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Adjusts recurring transaction amounts in projections
+              </p>
             </div>
             <div className="flex justify-between">
               <Button

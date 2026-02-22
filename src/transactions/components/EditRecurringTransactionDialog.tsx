@@ -192,8 +192,17 @@ export function EditRecurringTransactionDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={RecurrenceFrequency.Weekly}>
+                    Weekly
+                  </SelectItem>
+                  <SelectItem value={RecurrenceFrequency.BiWeekly}>
+                    Bi-weekly
+                  </SelectItem>
                   <SelectItem value={RecurrenceFrequency.Monthly}>
                     Monthly
+                  </SelectItem>
+                  <SelectItem value={RecurrenceFrequency.Quarterly}>
+                    Quarterly
                   </SelectItem>
                   <SelectItem value={RecurrenceFrequency.Yearly}>
                     Yearly

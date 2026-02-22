@@ -224,6 +224,30 @@ describe("EditScenarioDialog", () => {
     expect(confirmButton).toHaveClass("bg-destructive");
   });
 
+  it("renders inflation rate input", async () => {
+    await openDialog();
+
+    expect(screen.getByLabelText("Annual Inflation Rate (%)")).toBeInTheDocument();
+  });
+
+  it("displays existing inflation rate value", async () => {
+    const scenarioWithInflation: Scenario = { id: "1", name: "Test Scenario", inflationRate: 3.5 };
+    await openDialog(scenarioWithInflation);
+
+    expect(screen.getByLabelText("Annual Inflation Rate (%)")).toHaveValue(3.5);
+  });
+
+  it("saves updated inflation rate", async () => {
+    mockApiResponses({ scenarios: [scenario], activeScenarioId: "1" });
+    const user = await openDialog();
+
+    await screen.findByText("Test Scenario");
+    await user.type(screen.getByLabelText("Annual Inflation Rate (%)"), "3");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("stops propagation on trigger click", async () => {
     const parentClickHandler = vi.fn();
     const user = userEvent.setup();

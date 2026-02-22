@@ -31,6 +31,24 @@ describe("PUT /api/scenarios/[id]", () => {
     expect(body.name).toBe("Updated Plan");
   });
 
+  it("updates scenario with inflation rate", async () => {
+    vi.mocked(getScenarioById).mockReturnValue({ id: "s-1", name: "Base Plan", inflationRate: null });
+    vi.mocked(updateScenario).mockReturnValue({ id: "s-1", name: "Base Plan", inflationRate: 3 });
+
+    const request = new Request("http://localhost/api/scenarios/s-1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Base Plan", inflationRate: 3 }),
+    });
+
+    const response = await PUT(request, makeParams("s-1"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.inflationRate).toBe(3);
+    expect(updateScenario).toHaveBeenCalledWith("s-1", { name: "Base Plan", inflationRate: 3 });
+  });
+
   it("returns 404 for non-existent scenario", async () => {
     vi.mocked(getScenarioById).mockReturnValue(undefined);
 

@@ -536,4 +536,116 @@ describe("computeProjectedSeries", () => {
       expect(end).toBeCloseTo(start - (200000 * 0.04), -3);
     });
   });
+
+  describe("inflation rate", () => {
+    it("recurring expenses grow with inflation rate", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [makeTx("1", 100000, "2024-01-01")];
+      const recurring: RecurringTransaction[] = [
+        {
+          id: "r1",
+          accountId: "1",
+          amount: -1000,
+          description: "Rent",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-06-20",
+        },
+      ];
+
+      const withoutInflation = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.OneYear,
+        TODAY,
+        undefined,
+        recurring,
+        0
+      );
+
+      const withInflation = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.OneYear,
+        TODAY,
+        undefined,
+        recurring,
+        10
+      );
+
+      // With inflation, expenses are larger so net worth should be lower
+      const endWithout = withoutInflation[withoutInflation.length - 1].netWorth;
+      const endWith = withInflation[withInflation.length - 1].netWorth;
+      expect(endWith).toBeLessThan(endWithout);
+    });
+
+    it("inflation rate 0 produces same results as no inflation", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const transactions = [makeTx("1", 50000, "2024-01-01")];
+      const recurring: RecurringTransaction[] = [
+        {
+          id: "r1",
+          accountId: "1",
+          amount: -500,
+          description: "Subscription",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-06-20",
+        },
+      ];
+
+      const withZero = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.ThreeMonths,
+        TODAY,
+        undefined,
+        recurring,
+        0
+      );
+
+      const withDefault = computeProjectedSeries(
+        accounts,
+        transactions,
+        ChartPeriod.ThreeMonths,
+        TODAY,
+        undefined,
+        recurring
+      );
+
+      expect(withZero).toEqual(withDefault);
+    });
+
+    it("inflation compounds over multiple occurrences", () => {
+      const accounts = [makeAccount("1", AccountType.Asset)];
+      const recurring: RecurringTransaction[] = [
+        {
+          id: "r1",
+          accountId: "1",
+          amount: -1000,
+          description: "Expense",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-06-20",
+        },
+      ];
+
+      const result = computeProjectedSeries(
+        accounts,
+        [],
+        ChartPeriod.ThreeMonths,
+        TODAY,
+        undefined,
+        recurring,
+        12
+      );
+
+      // First occurrence (June 20) should be slightly inflated
+      const afterFirst = result.find((p) => p.date === "2024-06-20")!;
+      // Second occurrence (July 20) should be more inflated
+      const afterSecond = result.find((p) => p.date === "2024-07-20")!;
+
+      // Net worth decreases more with each occurrence due to growing expenses
+      // After first: ~-1000 (slightly inflated)
+      // After second: first expense + second (more inflated) expense
+      expect(afterFirst.netWorth).toBeGreaterThan(afterSecond.netWorth - afterFirst.netWorth);
+    });
+  });
 });

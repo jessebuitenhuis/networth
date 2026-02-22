@@ -45,7 +45,8 @@ export function createTestDb() {
 
     CREATE TABLE scenarios (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      inflation_rate REAL
     );
 
     CREATE TABLE goals (

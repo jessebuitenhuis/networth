@@ -79,6 +79,7 @@ export function ProjectedNetWorthChart({
   seriesMap.set("baseline", baselineSeries);
 
   for (const scenarioId of selectedScenarioIds) {
+    const scenario = scenarios.find((s) => s.id === scenarioId);
     const scenarioTransactions = transactions.filter(
       (t) => !t.scenarioId || t.scenarioId === scenarioId
     );
@@ -91,7 +92,8 @@ export function ProjectedNetWorthChart({
       period,
       today,
       period === ChartPeriod.Custom ? customRange : undefined,
-      scenarioRecurringTransactions
+      scenarioRecurringTransactions,
+      scenario?.inflationRate ?? 0
     );
     seriesMap.set(`scenario_${scenarioId}`, scenarioSeries);
   }
