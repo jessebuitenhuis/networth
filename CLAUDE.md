@@ -1,10 +1,12 @@
 # Net Worth Tracker
 
-Personal finance app for tracking net worth across multiple accounts. Users manage accounts, record transactions, and visualize net worth over time via an interactive chart. See `PRD.md` for full product requirements.
+Personal finance app for tracking net worth across multiple accounts. Users manage accounts, record transactions, and visualize net worth over time via an interactive chart. See `PRD.md` for full product requirements and `docs/epics/` for detailed epic specifications.
 
 ## Directory Structure
 
 ```
+docs/
+  epics/            # Detailed epic specifications and implementation notes
 src/
   accounts/         # Account domain: types, context, repository, services, components
     components/     # Account UI components (AccountIcon, dialogs, NetWorthCard, etc.)
