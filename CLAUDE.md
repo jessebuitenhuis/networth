@@ -34,18 +34,10 @@ src/
   test/             # Test setup and configuration
 ```
 
-## Pull Requests
-
-Before creating a PR, ensure the target branch is up to date. Fetch and rebase:
-
-```bash
-git fetch origin main
-git rebase origin/main
-```
-
 ## Workflow
 
-- When implementing a user story from PRD.md, mark it as done when completed§
+- When implementing a user story from PRD.md or detail from an epic doc, mark it as done when completed
+- Before creating a PR, ensure the target branch is up to date (git fetch origin main, git rebase origin/main)
 
 ## Coding Guidelines
 
