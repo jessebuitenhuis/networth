@@ -8,43 +8,43 @@ The import flow should feel effortless for common bank exports. Users shouldn't 
 
 | Detail | Status |
 | --- | --- |
-| Fix missing margin between "Select CSV file" label and the file input | Planned |
-| Style the file input so it's clearly recognizable as a clickable button | Planned |
-| Enlarge the import modal so the sample data table fits without overflowing | Planned |
-| Constrain the sample data table to the modal width; only the table scrolls, inputs stay visible | Planned |
-| Same constraint applies to the preview table in the final import step | Planned |
-| Auto-detect column mappings using an expanded header lookup table (Dutch: Datum, Omschrijving, Bedrag; German: Betrag, Beschreibung; English: Date, Amount, Description; etc.) | Planned |
-| Auto-select date format based on browser locale, then validate against sample data — if the locale default doesn't parse correctly, try other formats and pick the best match | Planned |
-| Prevent the same CSV column from being mapped to multiple transaction fields | Planned |
-| Show a live mapping preview table below the column selects (columns: Date, Description, Amount) that updates as the user changes mappings, so they can verify the result before proceeding | Planned |
+| "Select CSV file" label has proper margin above the file input | Planned |
+| File input is clearly styled as a clickable button | Planned |
+| Import modal is wide enough for the sample data table to fit without overflowing | Planned |
+| Sample data table is constrained to modal width with its own scroll; mapping inputs remain visible above | Planned |
+| Preview table in the final import step has the same scroll constraint | Planned |
+| Column mappings are auto-detected from common header names across languages (Dutch: Datum, Omschrijving, Bedrag; German: Betrag, Beschreibung; English: Date, Amount, Description; etc.) | Planned |
+| Date format is pre-selected based on browser locale, then validated against sample data — if the locale default doesn't parse correctly, the best matching format is selected instead | Planned |
+| Each CSV column can only be mapped to one transaction field — duplicate mappings are prevented | Planned |
+| A live mapping preview table (Date, Description, Amount) sits below the column selects and updates as mappings change | Planned |
 
 ## Story 43: Dashboard Quick-Add Transaction (Planned)
 
-Users should be able to record a transaction without leaving the dashboard. Uses the existing transaction dialog with an added account selector.
+Users can record a transaction without leaving the dashboard. Uses the existing transaction dialog with an added account selector.
 
 | Detail | Status |
 | --- | --- |
-| Add an "Add Transaction" button to the dashboard | Planned |
-| Open the existing add transaction dialog, but include an account select field (since there's no account context) | Planned |
-| Account select defaults to no selection; user must pick an account | Planned |
+| Dashboard has an "Add Transaction" button | Planned |
+| Transaction dialog includes an account select field (no account context on dashboard) | Planned |
+| Account select has no default — user picks the account | Planned |
 
 ## Story 44: Contextual Transaction Columns (Planned)
 
-The transaction table should adapt to its context — showing the account column only when multiple accounts are displayed.
+The transaction table adapts to context — the account column is only visible when it adds information.
 
 | Detail | Status |
 | --- | --- |
-| Hide the "Account" column when the transaction list is shown for a single account (account detail page) | Planned |
-| Show the "Account" column when transactions from multiple accounts are displayed (e.g. planning tab) | Planned |
+| Account column is hidden when viewing a single account's transactions | Planned |
+| Account column is visible when transactions span multiple accounts (e.g. planning tab) | Planned |
 
 ## Story 45: Category Management (Planned)
 
-Managing the category hierarchy should feel direct and fast. Progressive disclosure keeps the UI clean.
+Managing the category hierarchy feels direct and fast. Progressive disclosure keeps the UI clean.
 
 | Detail | Status |
 | --- | --- |
-| Remove the Card wrapper around the category list — the page title is sufficient | Planned |
-| Remove the redundant "Categories" title inside the card | Planned |
-| Show edit and add-subcategory buttons only on hover over each category row | Planned |
-| Add a "+" button on each category to create a subcategory inline | Planned |
-| Support drag-and-drop to reparent categories (move a category under a different parent) — no reordering | Planned |
+| Category list has no Card wrapper — the page title is sufficient context | Planned |
+| No redundant "Categories" heading inside the list | Planned |
+| Edit and add-subcategory buttons are visible only on hover | Planned |
+| Each category has a "+" button to create a subcategory inline | Planned |
+| Categories can be dragged onto another category to reparent — no reordering | Planned |
