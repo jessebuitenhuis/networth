@@ -98,7 +98,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
       {filteredItems.length === 0 ? (
         <p className="text-muted-foreground">No transactions match the current filters.</p>
       ) : (
-        <TransactionTable items={filteredItems} />
+        <TransactionTable items={filteredItems} showAccountColumn={false} />
       )}
     </div>
   );

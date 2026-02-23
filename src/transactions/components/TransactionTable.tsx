@@ -19,6 +19,7 @@ import type { DisplayTransaction } from "@/transactions/DisplayTransaction.type"
 
 type TransactionTableProps = {
   items: DisplayTransaction[];
+  showAccountColumn?: boolean;
 };
 
 type SortDirection = "asc" | "desc";
@@ -80,9 +81,14 @@ function SortIcon({
   );
 }
 
-export function TransactionTable({ items }: TransactionTableProps) {
+export function TransactionTable({ items, showAccountColumn = true }: TransactionTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const columns = useMemo(
+    () => showAccountColumn ? sortableColumns : sortableColumns.filter((c) => c.key !== "account"),
+    [showAccountColumn]
+  );
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -93,7 +99,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
     }
   };
 
-  const activeColumnDef = sortableColumns.find((c) => c.key === sortColumn);
+  const activeColumnDef = columns.find((c) => c.key === sortColumn);
 
   const sortedItems = useMemo(() => {
     if (!activeColumnDef) return items;
@@ -113,7 +119,7 @@ export function TransactionTable({ items }: TransactionTableProps) {
       <Table className="table-fixed">
         <TableHeader>
         <TableRow className="hover:bg-transparent">
-          {sortableColumns.map((col) => (
+          {columns.map((col) => (
             <TableHead
               key={col.key}
               className={cn(col.headerClassName, "cursor-pointer select-none")}
@@ -167,9 +173,11 @@ export function TransactionTable({ items }: TransactionTableProps) {
                 </Tooltip>
               )}
             </TableCell>
-            <TableCell className="text-left text-muted-foreground">
-              {item.accountName}
-            </TableCell>
+            {showAccountColumn && (
+              <TableCell className="text-left text-muted-foreground">
+                {item.accountName}
+              </TableCell>
+            )}
             <TableCell className="text-left text-muted-foreground">
               {item.categoryName && (
                 <span className="inline-flex items-center gap-1 text-xs">
