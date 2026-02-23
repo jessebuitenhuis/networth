@@ -41,6 +41,8 @@ export function ScenarioPicker({
     [scenarioMap, renderActions]
   );
 
+  if (scenarios.length === 0) return null;
+
   return (
     <MultiSelectPicker
       label="Scenarios"

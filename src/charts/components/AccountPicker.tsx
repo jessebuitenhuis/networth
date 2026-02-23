@@ -27,6 +27,8 @@ export function AccountPicker({
     return included;
   }, [accounts, excludedIds]);
 
+  if (accounts.length < 2) return null;
+
   return (
     <MultiSelectPicker
       label="Accounts"
