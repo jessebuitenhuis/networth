@@ -652,6 +652,50 @@ describe("TransactionTable", () => {
     expect(await screen.findByRole("tooltip")).toHaveTextContent("Early Retirement");
   });
 
+  it("shows account column header by default", () => {
+    render(<TransactionTable items={[]} />);
+    expect(screen.getByRole("columnheader", { name: /Account/ })).toBeInTheDocument();
+  });
+
+  it("hides account column header when showAccountColumn is false", () => {
+    render(<TransactionTable items={[]} showAccountColumn={false} />);
+    expect(screen.queryByRole("columnheader", { name: /Account/ })).not.toBeInTheDocument();
+  });
+
+  it("hides account cell when showAccountColumn is false", () => {
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "Groceries",
+        accountName: "Checking",
+        date: "2024-01-20",
+        amount: -200,
+        isProjected: false,
+        isRecurring: false,
+        editAction: mockEditAction,
+      },
+    ];
+    render(<TransactionTable items={items} showAccountColumn={false} />);
+    expect(screen.queryByText("Checking")).not.toBeInTheDocument();
+  });
+
+  it("shows account cell when showAccountColumn is true", () => {
+    const items: DisplayTransaction[] = [
+      {
+        id: "1",
+        description: "Groceries",
+        accountName: "Checking",
+        date: "2024-01-20",
+        amount: -200,
+        isProjected: false,
+        isRecurring: false,
+        editAction: mockEditAction,
+      },
+    ];
+    render(<TransactionTable items={items} showAccountColumn={true} />);
+    expect(screen.getByText("Checking")).toBeInTheDocument();
+  });
+
   it("shows scenario icon alongside recurring badge when both apply", () => {
     const items: DisplayTransaction[] = [
       {

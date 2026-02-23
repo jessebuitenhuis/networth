@@ -28,14 +28,14 @@ Users can record a transaction without leaving the dashboard. Uses the existing 
 | Transaction dialog includes an account select field (no account context on dashboard) | Planned |
 | Account select has no default — user picks the account | Planned |
 
-## Story 44: Contextual Transaction Columns (Planned)
+## Story 44: Contextual Transaction Columns (Done)
 
 The transaction table adapts to context — the account column is only visible when it adds information.
 
 | Detail | Status |
 | --- | --- |
-| Account column is hidden when viewing a single account's transactions | Planned |
-| Account column is visible when transactions span multiple accounts (e.g. planning tab) | Planned |
+| Account column is hidden when viewing a single account's transactions | Done |
+| Account column is visible when transactions span multiple accounts (e.g. planning tab) | Done |
 
 ## Story 45: Category Management (Planned)
 
