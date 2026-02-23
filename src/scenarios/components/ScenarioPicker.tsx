@@ -22,8 +22,6 @@ export function ScenarioPicker({
   onClearAll,
   renderActions,
 }: ScenarioPickerProps) {
-  if (scenarios.length === 0) return null;
-
   const items = useMemo(
     () => scenarios.map((s) => ({ id: s.id, label: s.name })),
     [scenarios]
@@ -42,6 +40,8 @@ export function ScenarioPicker({
     },
     [scenarioMap, renderActions]
   );
+
+  if (scenarios.length === 0) return null;
 
   return (
     <MultiSelectPicker

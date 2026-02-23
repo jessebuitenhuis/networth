@@ -67,20 +67,47 @@ describe("PlanningPage", () => {
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
 
-  it("renders the scenario picker", () => {
+  it("renders the scenario picker when scenarios exist", async () => {
+    mockApiResponses({
+      scenarios: [{ id: "scenario-1", name: "Optimistic" }],
+    });
+
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /scenarios/i }),
+      await screen.findByRole("button", { name: /scenarios/i }),
     ).toBeInTheDocument();
   });
 
-  it("renders the Account picker", () => {
+  it("hides the scenario picker when no scenarios exist", () => {
     renderPage();
 
     expect(
-      screen.getByRole("button", { name: /accounts/i }),
+      screen.queryByRole("button", { name: /scenarios/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the Account picker when 2+ accounts exist", async () => {
+    mockApiResponses({
+      accounts: [
+        { id: "acc-1", name: "Checking", type: AccountType.Asset },
+        { id: "acc-2", name: "Savings", type: AccountType.Asset },
+      ],
+    });
+
+    renderPage();
+
+    expect(
+      await screen.findByRole("button", { name: /accounts/i }),
     ).toBeInTheDocument();
+  });
+
+  it("hides the Account picker when fewer than 2 accounts exist", () => {
+    renderPage();
+
+    expect(
+      screen.queryByRole("button", { name: /accounts/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders the create scenario button", () => {
@@ -115,21 +142,24 @@ describe("PlanningPage", () => {
 
   it("toggles account filter when checkbox is clicked", async () => {
     mockApiResponses({
-      accounts: [{ id: "acc-1", name: "Checking", type: AccountType.Asset }],
+      accounts: [
+        { id: "acc-1", name: "Checking", type: AccountType.Asset },
+        { id: "acc-2", name: "Savings", type: AccountType.Asset },
+      ],
     });
 
     renderPage();
 
     // Wait for account data to load
-    await screen.findByRole("button", { name: "Accounts (1)" });
+    await screen.findByRole("button", { name: "Accounts (2)" });
 
     // Open picker and toggle account off
-    await userEvent.click(screen.getByRole("button", { name: "Accounts (1)" }));
+    await userEvent.click(screen.getByRole("button", { name: "Accounts (2)" }));
     await userEvent.click(screen.getByRole("checkbox", { name: "Checking" }));
 
-    // Should update to 0 accounts
+    // Should update to 1 account
     expect(
-      screen.getByRole("button", { name: "Accounts (0)" }),
+      screen.getByRole("button", { name: "Accounts (1)" }),
     ).toBeInTheDocument();
   });
 
@@ -149,7 +179,7 @@ describe("PlanningPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("removes deleted scenario from selection", async () => {
+  it("hides scenario picker after deleting last scenario", async () => {
     mockApiResponses({
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
     });
@@ -172,10 +202,10 @@ describe("PlanningPage", () => {
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
     await userEvent.click(deleteButtons[deleteButtons.length - 1]);
 
-    // Scenario should be removed from selection
+    // Scenario picker should be hidden (no scenarios left)
     expect(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /scenarios/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("duplicates scenario with transactions and auto-selects the copy", async () => {
