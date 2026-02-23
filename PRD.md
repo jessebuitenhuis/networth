@@ -1,33 +1,32 @@
 # Net Worth Tracker — Product Requirements Document
 
-## Summary
+**Vision:** You deserve a clear view of your financial future.
 
-A personal finance app that combines day-to-day financial tracking with forward-looking scenario planning — something no competitor does well in a single product. Users manage accounts, organize transactions with categories, set budgets, and project their future net worth using recurring transactions and automatic investment return modeling. The app supports multiple planning scenarios (e.g. optimistic vs. conservative) so users can compare different financial futures and track progress toward financial goals. An interactive chart visualizes net worth over time with toggleable account visibility.
+**Mission:** We help people set meaningful financial goals and see which choices get them there.
 
-The app is manual-first by design: users enter transactions and account values directly, keeping full control of their data without sharing bank credentials. Bank sync (Plaid/GoCardless) is on the long-term roadmap as an optional convenience layer but is out of scope during prototyping.
+You have financial goals but no single place that helps you plan them clearly. We start with where you want to be — then give you the tools to model different paths, track your progress, and plan at your own pace and level of detail.
 
 Detailed epic specifications and implementation notes live in `docs/epics/`.
 
-## Vision & Positioning
+## Persona
 
-The personal finance market has split into two camps: **budgeting-first** apps (YNAB, Monarch, Copilot) that treat net worth as a secondary report, and **wealth-tracking-first** apps (Empower, Kubera) that skip budgeting entirely. No product genuinely excels at both.
+**Mark, 32, software developer**
 
-This app occupies the whitespace between them: a **planning-first** personal finance tool. It differentiates on:
+Financially literate, earns well, interested in personal finance and FIRE as a side hobby — not an obsession. He reads a few finance blogs, has a rough sense of his savings rate, and knows the basics of investing. He's not a finance professional, but he's past the "where does my money go?" stage.
 
-1. **Accessible scenario planning** — Multi-scenario overlays on a timeline chart. Simpler than Empower's Monte Carlo simulations, more affordable than Kubera's $249/yr Fast Forward. The only app where "what if I change jobs in 2 years?" is a first-class interaction.
-2. **Manual-first with future bank sync** — Privacy-respecting by default. Users don't need to trust a third-party aggregator to get started. Bank sync will be added later as an optional accelerator, not a prerequisite.
-3. **Full tracking + full planning** — Categories, budgeting, and transaction management on one side; recurring transactions, compound growth modeling, scenario comparison, and goal projections on the other.
+**His financial life:** He has a few investment accounts, a mortgage, some savings. He contributes to retirement monthly, invests in index funds, and has a loose plan to reach financial independence in his mid-40s. He doesn't budget down to the cent — he knows roughly what he spends and focuses on the big levers: income growth, savings rate, investment returns.
 
-### Competitive Context
+**The problem:** His financial picture is scattered. Some numbers live in a spreadsheet he updates sporadically, some in his head, some in his banking app. He has goals — pay off the mortgage early, hit a net worth milestone, maybe go part-time in five years — but he can't see them in one place. He can't easily answer "what if I increase my savings by 500/month?" or "what happens if returns are 6% instead of 8%?" without rebuilding his spreadsheet.
 
-| Capability | This App | YNAB ($109/yr) | Monarch ($99/yr) | Empower (free) | Kubera ($249/yr) |
-|---|---|---|---|---|---|
-| Scenario planning | Multi-scenario overlay | None | Partial (forecast) | Monte Carlo | Fast Forward |
-| Budgeting | Per-scenario envelope budgets | Best-in-class | Strong | Basic | None |
-| Manual entry | Core workflow | Encouraged | Supported | Limited | Core workflow |
-| Bank sync | Future | Yes | Yes | Yes | Yes |
-| Compound growth modeling | Per-account return rates | None | None | None | Rules-based |
-| Goal tracking | Yes (with projections) | Yes | Yes | Retirement only | None |
+**How he feels:** Not anxious — but not confident either. He knows he's doing OK, but "OK" is vague. He wants to *see* that he's on track. When he thinks about finances, there's a low-grade restlessness: the sense that he should have a clearer picture than he does.
+
+**His rhythm:** He opens a finance tool maybe twice a month. Once to update some numbers, once to look at the trajectory. He doesn't want daily homework. He wants to check in, see the picture, maybe tweak a scenario, and close the app feeling grounded.
+
+**Why competitors don't work:**
+- **YNAB** — He tried it. The zero-based budgeting felt like a part-time job. He doesn't need to assign every dollar when he already knows he's saving enough. It's focused on the micro, he needs the macro.
+- **Spreadsheets** — He's built a few. They work until they don't — formulas break, it's tedious to maintain, and comparing scenarios means duplicating entire sheets. He wants something that does what his spreadsheet does but better.
+- **Empower** — Good for seeing what he has, but it can't answer "what if?" Monte Carlo simulations feel like a black box. And it really wants him to talk to a financial advisor.
+- **Monarch** — Closest to what he wants, but the forecasting is shallow and it still leads with transaction categorization. He wants planning first, not tracking first.
 
 ## Key Features
 
