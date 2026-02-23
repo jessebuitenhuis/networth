@@ -37,7 +37,7 @@ src/
 ## Workflow
 
 - When implementing a user story from PRD.md or detail from an epic doc, mark it as done when completed
-- Before creating a PR, ensure the target branch is up to date (git fetch origin main, git rebase origin/main)
+- Branch is automatically rebased onto origin/main before each stop (via Stop hook in `.claude/settings.json`). If a rebase conflict occurs, resolve it before proceeding.
 
 ## Coding Guidelines
 

@@ -1,6 +1,18 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run rebase",
+            "timeout": 30,
+            "statusMessage": "Rebasing onto origin/main..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
