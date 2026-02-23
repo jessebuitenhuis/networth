@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
-import { BasePageObject } from "@/test/page/BasePageObject";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import { BasePageObject } from "@/test/page/BasePageObject";
 import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 

@@ -9,8 +9,8 @@ import type { RecurringTransaction } from "@/recurring-transactions/RecurringTra
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
-import { BasePageObject } from "@/test/page/BasePageObject";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
+import { BasePageObject } from "@/test/page/BasePageObject";
 import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
