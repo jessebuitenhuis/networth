@@ -19,6 +19,7 @@ src/
   goals/            # Goal domain: types, context, repository, services
     components/     # Goal UI components (GoalCard, GoalList, dialogs, progress, etc.)
   charts/           # Chart domain: types, services, components
+    planning/       # Planning chart sub-domain: date windows, date points, series computation
     components/     # Chart UI components (NetWorthChart, PeriodPicker, legends, etc.)
   app/              # Next.js App Router pages
     api/            # API route handlers (CRUD for each entity)
@@ -70,4 +71,5 @@ src/
 
 - **Single Responsibility Principle** — Each component or function should do one thing well. If a component handles both viewing and creating, split it into separate components. A file growing long (many imports, inline computation, or comments separating sections) is a signal to extract hooks, helpers, or sub-components.
 - **Open/Closed Principle** — Prefer data-driven patterns (e.g. column definition lists, configuration arrays) over switch statements or if/else chains. New behavior should be added by extending data, not modifying existing logic.
+- **Code should read like a book** — Each function should operate at a single level of abstraction. Flatten nested loops and conditionals by using guard clauses (`continue`/`return`), functional transforms (`.filter`, `.flatMap`), or by extracting inner logic into clearly named functions. If reading a function requires tracking more than 1-2 levels of indentation, refactor it.
 - **DRY shared logic** — Extract duplicated logic into `src/lib/` for generic utilities or `src/components/shared/` for reusable UI components. Domain-specific helpers belong in their domain folder.
