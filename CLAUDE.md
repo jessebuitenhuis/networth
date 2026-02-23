@@ -64,8 +64,7 @@ src/
 ### Testing
 
 - Use `it.each()` for parameterized tests (3+ cases with same structure)
-- Every dialog/form component must have a `*.page.tsx` page object — tests interact through the page object, never via raw `screen.getBy*` calls for user actions (clicks, typing, clearing). Assertions may still use `screen` or page object getters directly
-- Page object structure: private constructor with `_user`, static `render()` factory, `get` properties for elements, `query*()` for nullable lookups, `async` action methods returning `this` for chaining
+- Use page object pattern (`*.page.tsx`) to eliminate duplicated query and interaction logic across tests — when multiple tests repeat the same `screen.getBy*`, `user.click`, `user.type`, or `user.clear` sequences, extract them into a page object so tests read as intent, not mechanics
 
 ### Principles
 
