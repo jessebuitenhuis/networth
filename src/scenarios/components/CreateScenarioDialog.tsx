@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -66,18 +67,11 @@ export function CreateScenarioDialog({ onSubmit }: CreateScenarioDialogProps) {
               autoFocus
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Create
-            </Button>
-          </div>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Create"
+            isSubmitDisabled={!name.trim()}
+          />
         </form>
       </DialogContent>
     </Dialog>

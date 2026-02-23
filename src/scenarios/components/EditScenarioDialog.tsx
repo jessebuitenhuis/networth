@@ -3,6 +3,7 @@
 import { Pencil } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -134,16 +135,11 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
                 Adjusts recurring transaction amounts in projections
               </p>
             </div>
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-              <Button type="submit">Save</Button>
-            </div>
+            <DialogFooterActions
+              onCancel={() => setIsOpen(false)}
+              submitLabel="Save"
+              onDestructiveAction={handleDeleteClick}
+            />
           </form>
         </DialogContent>
       </Dialog>

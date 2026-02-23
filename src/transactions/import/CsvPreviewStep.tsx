@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import {
   Table,
   TableBody,
@@ -71,14 +71,13 @@ export function CsvPreviewStep({
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={onImport} disabled={!hasValidTransactions}>
-          Import
-        </Button>
-      </div>
+      <DialogFooterActions
+        onCancel={onBack}
+        cancelLabel="Back"
+        submitLabel="Import"
+        isSubmitDisabled={!hasValidTransactions}
+        onSubmit={onImport}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { computeBalance } from "@/accounts/computeBalance";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -131,18 +132,11 @@ export function UpdateBalanceDialog({
             />
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={adjustmentAmount === 0}>
-              Update Balance
-            </Button>
-          </div>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Update Balance"
+            isSubmitDisabled={adjustmentAmount === 0}
+          />
         </form>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -157,14 +157,13 @@ export function CsvMappingStep({
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={onNext} disabled={!isMappingValid}>
-          Next
-        </Button>
-      </div>
+      <DialogFooterActions
+        onCancel={onBack}
+        cancelLabel="Back"
+        submitLabel="Next"
+        isSubmitDisabled={!isMappingValid}
+        onSubmit={onNext}
+      />
     </div>
   );
 }

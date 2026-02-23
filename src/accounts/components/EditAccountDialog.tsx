@@ -8,6 +8,7 @@ import type { Account } from "@/accounts/Account.type";
 import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { PercentageInput } from "@/components/shared/PercentageInput";
 import {
   AlertDialog,
@@ -19,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -153,16 +153,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
                 onChange={setExpectedReturnRate}
               />
             </div>
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-              <Button type="submit">Save</Button>
-            </div>
+            <DialogFooterActions
+              onCancel={() => setIsOpen(false)}
+              submitLabel="Save"
+              onDestructiveAction={handleDeleteClick}
+            />
           </form>
         </DialogContent>
       </Dialog>

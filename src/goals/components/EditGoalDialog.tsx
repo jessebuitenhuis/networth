@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -122,16 +123,11 @@ export function EditGoalDialog({ goal, onDelete }: EditGoalDialogProps) {
                 showSignToggle={false}
               />
             </div>
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-              <Button type="submit">Save</Button>
-            </div>
+            <DialogFooterActions
+              onCancel={() => setIsOpen(false)}
+              submitLabel="Save"
+              onDestructiveAction={handleDeleteClick}
+            />
           </form>
         </DialogContent>
       </Dialog>

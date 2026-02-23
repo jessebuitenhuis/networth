@@ -152,7 +152,7 @@ Architectural improvements and refactoring tasks to maintain code quality over t
 
 | ID  | Description | Status |
 | --- | --- | --- |
-| T1 | Adopt `DialogFooterActions` across all remaining dialogs (accounts, goals, scenarios, import) for consistent Cancel/Submit button groups | Planned |
+| T1 | Adopt `DialogFooterActions` across all remaining dialogs (accounts, goals, scenarios, import) for consistent Cancel/Submit button groups | Done |
 | T2 | Migrate remaining switch-based sorting/filtering logic to data-driven column definitions (Open/Closed Principle) | Planned |
 | T3 | Audit all domain components for SRP violations and split mixed view/create components | Planned |
 | T4 | Adopt page object pattern (`*.page.tsx`) for all test files that interact with UI components — eliminate raw `screen.getBy*` + `user.click/type/clear` duplication in tests by routing all interactions through page objects | Planned |
