@@ -21,7 +21,10 @@ import { CsvMappingStep } from "@/transactions/import/CsvMappingStep";
 import type { CsvParseResult } from "@/transactions/import/CsvParseResult.type";
 import { CsvPreviewStep } from "@/transactions/import/CsvPreviewStep";
 import { CsvUploadStep } from "@/transactions/import/CsvUploadStep";
-import { DateFormat } from "@/transactions/import/DateFormat";
+import {
+  detectDateFormatFromData,
+  detectLocaleDateFormat,
+} from "@/transactions/import/detectDateFormat";
 import { parseCsvText } from "@/transactions/import/parseCsvText";
 import { useTransactions } from "@/transactions/TransactionContext";
 
@@ -40,7 +43,7 @@ export function ImportCsvDialog({ accountId }: ImportCsvDialogProps) {
     amountColumn: -1,
     descriptionColumn: -1,
   });
-  const [dateFormat, setDateFormat] = useState<DateFormat>(DateFormat.YYYY_MM_DD);
+  const [dateFormat, setDateFormat] = useState(detectLocaleDateFormat);
   const [parseResult, setParseResult] = useState<CsvParseResult>({
     transactions: [],
     skippedRows: [],
@@ -52,7 +55,7 @@ export function ImportCsvDialog({ accountId }: ImportCsvDialogProps) {
     setHeaders([]);
     setDataRows([]);
     setMapping({ dateColumn: -1, amountColumn: -1, descriptionColumn: -1 });
-    setDateFormat(DateFormat.YYYY_MM_DD);
+    setDateFormat(detectLocaleDateFormat());
     setParseResult({ transactions: [], skippedRows: [] });
     setFileError("");
   }
@@ -79,7 +82,10 @@ export function ImportCsvDialog({ accountId }: ImportCsvDialogProps) {
       setHeaders(headerRow);
       setDataRows(data);
       setFileError("");
-      setMapping(autoDetectColumns(headerRow));
+      const detectedMapping = autoDetectColumns(headerRow);
+      setMapping(detectedMapping);
+      const localeFormat = detectLocaleDateFormat();
+      setDateFormat(detectDateFormatFromData(data, detectedMapping.dateColumn, localeFormat));
       setStep(CsvImportStep.Mapping);
     };
     reader.readAsText(file);

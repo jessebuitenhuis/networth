@@ -43,98 +43,159 @@ export function CsvMappingStep({
   onBack,
   onNext,
 }: CsvMappingStepProps) {
+  const usedByDate = new Set(
+    [mapping.amountColumn, mapping.descriptionColumn].filter((i) => i >= 0),
+  );
+  const usedByAmount = new Set(
+    [mapping.dateColumn, mapping.descriptionColumn].filter((i) => i >= 0),
+  );
+  const usedByDescription = new Set(
+    [mapping.dateColumn, mapping.amountColumn].filter((i) => i >= 0),
+  );
+
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="date-column">Date Column</Label>
-        <Select
-          value={mapping.dateColumn >= 0 ? String(mapping.dateColumn) : ""}
-          onValueChange={(value) =>
-            onMappingChange({ ...mapping, dateColumn: Number(value) })
-          }
-        >
-          <SelectTrigger id="date-column">
-            <SelectValue placeholder="Select column" />
-          </SelectTrigger>
-          <SelectContent>
-            {headers.map((header, index) => (
-              <SelectItem key={index} value={String(index)}>
-                {header}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div>
+          <Label htmlFor="date-column">Date Column</Label>
+          <Select
+            value={mapping.dateColumn >= 0 ? String(mapping.dateColumn) : ""}
+            onValueChange={(value) =>
+              onMappingChange({ ...mapping, dateColumn: Number(value) })
+            }
+          >
+            <SelectTrigger id="date-column">
+              <SelectValue placeholder="Select column" />
+            </SelectTrigger>
+            <SelectContent>
+              {headers.map((header, index) => (
+                <SelectItem
+                  key={index}
+                  value={String(index)}
+                  disabled={usedByDate.has(index)}
+                >
+                  {header}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="amount-column">Amount Column</Label>
+          <Select
+            value={
+              mapping.amountColumn >= 0 ? String(mapping.amountColumn) : ""
+            }
+            onValueChange={(value) =>
+              onMappingChange({ ...mapping, amountColumn: Number(value) })
+            }
+          >
+            <SelectTrigger id="amount-column">
+              <SelectValue placeholder="Select column" />
+            </SelectTrigger>
+            <SelectContent>
+              {headers.map((header, index) => (
+                <SelectItem
+                  key={index}
+                  value={String(index)}
+                  disabled={usedByAmount.has(index)}
+                >
+                  {header}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="description-column">Description Column</Label>
+          <Select
+            value={
+              mapping.descriptionColumn >= 0
+                ? String(mapping.descriptionColumn)
+                : ""
+            }
+            onValueChange={(value) =>
+              onMappingChange({
+                ...mapping,
+                descriptionColumn: Number(value),
+              })
+            }
+          >
+            <SelectTrigger id="description-column">
+              <SelectValue placeholder="Select column" />
+            </SelectTrigger>
+            <SelectContent>
+              {headers.map((header, index) => (
+                <SelectItem
+                  key={index}
+                  value={String(index)}
+                  disabled={usedByDescription.has(index)}
+                >
+                  {header}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="date-format">Date Format</Label>
+          <Select
+            value={dateFormat}
+            onValueChange={(value) => onDateFormatChange(value as DateFormat)}
+          >
+            <SelectTrigger id="date-format">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DATE_FORMAT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div>
-        <Label htmlFor="amount-column">Amount Column</Label>
-        <Select
-          value={mapping.amountColumn >= 0 ? String(mapping.amountColumn) : ""}
-          onValueChange={(value) =>
-            onMappingChange({ ...mapping, amountColumn: Number(value) })
-          }
-        >
-          <SelectTrigger id="amount-column">
-            <SelectValue placeholder="Select column" />
-          </SelectTrigger>
-          <SelectContent>
-            {headers.map((header, index) => (
-              <SelectItem key={index} value={String(index)}>
-                {header}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="description-column">Description Column</Label>
-        <Select
-          value={
-            mapping.descriptionColumn >= 0
-              ? String(mapping.descriptionColumn)
-              : ""
-          }
-          onValueChange={(value) =>
-            onMappingChange({ ...mapping, descriptionColumn: Number(value) })
-          }
-        >
-          <SelectTrigger id="description-column">
-            <SelectValue placeholder="Select column" />
-          </SelectTrigger>
-          <SelectContent>
-            {headers.map((header, index) => (
-              <SelectItem key={index} value={String(index)}>
-                {header}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="date-format">Date Format</Label>
-        <Select
-          value={dateFormat}
-          onValueChange={(value) => onDateFormatChange(value as DateFormat)}
-        >
-          <SelectTrigger id="date-format">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {DATE_FORMAT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {isMappingValid && dataRows.length > 0 && (
+        <div>
+          <Label>Mapping Preview</Label>
+          <div className="mt-2 border rounded-md overflow-x-auto max-h-[200px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dataRows.slice(0, 3).map((row, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    <TableCell>
+                      {row[mapping.dateColumn] ?? ""}
+                    </TableCell>
+                    <TableCell>
+                      {row[mapping.amountColumn] ?? ""}
+                    </TableCell>
+                    <TableCell>
+                      {row[mapping.descriptionColumn] ?? ""}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
 
       {dataRows.length > 0 && (
         <div>
           <Label>Sample Data (first 3 rows)</Label>
-          <div className="mt-2 border rounded-md overflow-x-auto">
+          <div className="mt-2 border rounded-md overflow-x-auto max-h-[200px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>

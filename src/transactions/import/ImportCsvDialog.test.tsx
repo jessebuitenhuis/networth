@@ -20,10 +20,10 @@ describe("ImportCsvDialog", () => {
       expect(page.dialog).toBeInTheDocument();
     });
 
-    it("shows file input", async () => {
+    it("shows file chooser button", async () => {
       const page = ImportCsvDialogPage.render();
       await page.open();
-      expect(page.fileInput).toBeInTheDocument();
+      expect(page.chooseFileButton).toBeInTheDocument();
     });
 
     it("advances to mapping step after valid file upload", async () => {
@@ -55,6 +55,35 @@ describe("ImportCsvDialog", () => {
         expect(page.dateColumnSelect).toHaveTextContent("Date");
         expect(page.amountColumnSelect).toHaveTextContent("Amount");
         expect(page.descriptionColumnSelect).toHaveTextContent("Description");
+      });
+    });
+
+    it("auto-detects Dutch column names", async () => {
+      const page = ImportCsvDialogPage.render();
+      const csv = "Datum,Bedrag,Omschrijving\n2024-01-15,100.00,Boodschappen";
+      await page.open();
+      await page.uploadFile(csv);
+
+      await waitFor(() => {
+        expect(page.dateColumnSelect).toHaveTextContent("Datum");
+        expect(page.amountColumnSelect).toHaveTextContent("Bedrag");
+        expect(page.descriptionColumnSelect).toHaveTextContent("Omschrijving");
+      });
+    });
+
+    it("auto-detects German column names", async () => {
+      const page = ImportCsvDialogPage.render();
+      const csv =
+        "Buchungstag,Betrag,Verwendungszweck\n2024-01-15,100.00,Einkauf";
+      await page.open();
+      await page.uploadFile(csv);
+
+      await waitFor(() => {
+        expect(page.dateColumnSelect).toHaveTextContent("Buchungstag");
+        expect(page.amountColumnSelect).toHaveTextContent("Betrag");
+        expect(page.descriptionColumnSelect).toHaveTextContent(
+          "Verwendungszweck",
+        );
       });
     });
   });
@@ -98,7 +127,19 @@ describe("ImportCsvDialog", () => {
       await page.clickBack();
 
       await waitFor(() => {
-        expect(page.fileInput).toBeInTheDocument();
+        expect(page.chooseFileButton).toBeInTheDocument();
+      });
+    });
+
+    it("shows live mapping preview when all columns are mapped", async () => {
+      const page = ImportCsvDialogPage.render();
+      await page.open();
+      await page.uploadFile(validCsv);
+
+      await waitFor(() => {
+        expect(screen.getByText("Mapping Preview")).toBeInTheDocument();
+        // "Groceries" appears in both mapping preview and sample data
+        expect(screen.getAllByText("Groceries")).toHaveLength(2);
       });
     });
 
@@ -210,7 +251,7 @@ describe("ImportCsvDialog", () => {
       await page.open();
 
       await waitFor(() => {
-        expect(page.fileInput).toBeInTheDocument();
+        expect(page.chooseFileButton).toBeInTheDocument();
       });
     });
   });

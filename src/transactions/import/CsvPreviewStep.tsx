@@ -43,7 +43,7 @@ export function CsvPreviewStep({
       </div>
 
       {hasValidTransactions && (
-        <div className="border rounded-md">
+        <div className="border rounded-md overflow-x-auto max-h-[300px] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
