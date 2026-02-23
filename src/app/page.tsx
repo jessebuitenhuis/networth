@@ -8,7 +8,7 @@ import { NetWorthChart } from "@/charts/components/NetWorthChart";
 import TopBar from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { GoalProgressSection } from "@/goals/components/GoalProgressSection";
-import { DashboardAddTransactionDialog } from "@/transactions/components/DashboardAddTransactionDialog";
+import { CreateTransactionDialog } from "@/transactions/components/CreateTransactionDialog";
 
 export default function Home() {
   const { accounts } = useAccounts();
@@ -26,7 +26,7 @@ export default function Home() {
             />
           ) : (
             <>
-              <DashboardAddTransactionDialog />
+              <CreateTransactionDialog />
               <NetWorthSummary />
               <NetWorthChart />
               <GoalProgressSection />
