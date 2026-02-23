@@ -16,6 +16,7 @@ import { getGoalColor, getScenarioColor } from "@/charts/chartColors";
 import { formatChartCurrency as formatCurrency } from "@/charts/chartFormatters";
 import { ChartPeriod } from "@/charts/ChartPeriod";
 import { computeProjectedSeries } from "@/charts/computeProjectedSeries";
+import { computeYAxisConfig } from "@/charts/computeYAxisConfig";
 import type { DateRange } from "@/charts/DateRange.type";
 import { formatTick, getTickFormat } from "@/charts/formatXAxisTick";
 import { mergeProjectedSeries } from "@/charts/mergeProjectedSeries";
@@ -107,12 +108,11 @@ export function ProjectedNetWorthChart({
     const values = Object.values(point).filter((v) => typeof v === "number");
     return Math.max(max, ...values);
   }, 0);
-  const yAxisMax = Math.max(maxDataValue, maxGoalAmount);
   const minDataValue = data.reduce((min, point) => {
     const values = Object.values(point).filter((v) => typeof v === "number");
     return Math.min(min, ...values);
   }, 0);
-  const yAxisDomain = [Math.min(0, minDataValue), yAxisMax];
+  const yAxisConfig = computeYAxisConfig(minDataValue, Math.max(maxDataValue, maxGoalAmount));
 
   // Build legend entries
   const legendEntries = [
@@ -161,11 +161,13 @@ export function ProjectedNetWorthChart({
               tick={{ fontSize: 12 }}
             />
             <YAxis
-              domain={yAxisDomain}
+              domain={yAxisConfig.domain}
+              ticks={yAxisConfig.ticks}
               tickFormatter={formatCurrency}
               tick={{ fontSize: 12 }}
               width={80}
             />
+            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} />
             <Tooltip
               labelFormatter={(v) => formatTick(v as string, tickFormat)}
               formatter={(value) => formatCurrency(value as number)}

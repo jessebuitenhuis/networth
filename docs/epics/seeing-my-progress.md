@@ -8,9 +8,9 @@ The chart is the core visualization. It handles all data ranges — including ne
 
 | Detail | Status |
 | --- | --- |
-| Zero line is always visible on both dashboard and planning charts | Planned |
-| When values are negative, zero line is centered — equal visual weight above and below zero | Planned |
-| Y-axis tick values are rounded to even numbers (e.g. -338 becomes -350 or -400) for easy reading | Planned |
+| Zero line is always visible on both dashboard and planning charts | Done |
+| When values are negative, zero line is centered — equal visual weight above and below zero | Done |
+| Y-axis tick values are rounded to even numbers (e.g. -338 becomes -350 or -400) for easy reading | Done |
 
 ## Story 46: Planning Chart Navigation
 
