@@ -6,9 +6,38 @@ interface ColumnMatcher {
 }
 
 const COLUMN_MATCHERS: ColumnMatcher[] = [
-  { patterns: ["date", "transaction date", "timestamp"], field: "dateColumn" },
-  { patterns: ["amount", "value", "price", "debit", "credit"], field: "amountColumn" },
-  { patterns: ["description", "memo", "note", "details", "narrative"], field: "descriptionColumn" },
+  {
+    patterns: [
+      "date", "transaction date", "timestamp",
+      "datum", "boekdatum", "transactiedatum",           // Dutch
+      "buchungstag", "buchungsdatum", "valutadatum",     // German
+      "fecha",                                            // Spanish
+      "data",                                             // Italian/Portuguese
+    ],
+    field: "dateColumn",
+  },
+  {
+    patterns: [
+      "amount", "value", "price", "debit", "credit",
+      "bedrag", "af", "bij",                              // Dutch
+      "betrag", "umsatz", "soll", "haben",                // German
+      "monto", "importe",                                  // Spanish
+      "importo",                                           // Italian
+      "valor",                                             // Portuguese
+    ],
+    field: "amountColumn",
+  },
+  {
+    patterns: [
+      "description", "memo", "note", "details", "narrative",
+      "omschrijving", "naam / omschrijving", "mededelingen", // Dutch
+      "beschreibung", "verwendungszweck", "buchungstext",    // German
+      "descripción", "concepto",                              // Spanish
+      "descrizione",                                          // Italian
+      "descrição",                                            // Portuguese
+    ],
+    field: "descriptionColumn",
+  },
 ];
 
 export function autoDetectColumns(headers: string[]): CsvColumnMapping {

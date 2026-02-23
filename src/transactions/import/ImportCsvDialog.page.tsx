@@ -53,7 +53,11 @@ export class ImportCsvDialogPage {
   }
 
   get fileInput() {
-    return screen.getByLabelText(/Select CSV file/i);
+    return screen.getByTestId("csv-file-input");
+  }
+
+  get chooseFileButton() {
+    return screen.getByRole("button", { name: /Choose file/i });
   }
 
   get dateColumnSelect() {

@@ -8,15 +8,15 @@ The import flow should feel effortless for common bank exports. Users shouldn't 
 
 | Detail | Status |
 | --- | --- |
-| "Select CSV file" label has proper margin above the file input | Planned |
-| File input is clearly styled as a clickable button | Planned |
-| Import modal is wide enough for the sample data table to fit without overflowing | Planned |
-| Sample data table is constrained to modal width with its own scroll; mapping inputs remain visible above | Planned |
-| Preview table in the final import step has the same scroll constraint | Planned |
-| Column mappings are auto-detected from common header names across languages (Dutch: Datum, Omschrijving, Bedrag; German: Betrag, Beschreibung; English: Date, Amount, Description; etc.) | Planned |
-| Date format is pre-selected based on browser locale, then validated against sample data — if the locale default doesn't parse correctly, the best matching format is selected instead | Planned |
-| Each CSV column can only be mapped to one transaction field — duplicate mappings are prevented | Planned |
-| A live mapping preview table (Date, Description, Amount) sits below the column selects and updates as mappings change | Planned |
+| "Select CSV file" label has proper margin above the file input | Done |
+| File input is clearly styled as a clickable button | Done |
+| Import modal is wide enough for the sample data table to fit without overflowing | Done |
+| Sample data table is constrained to modal width with its own scroll; mapping inputs remain visible above | Done |
+| Preview table in the final import step has the same scroll constraint | Done |
+| Column mappings are auto-detected from common header names across languages (Dutch: Datum, Omschrijving, Bedrag; German: Betrag, Beschreibung; English: Date, Amount, Description; etc.) | Done |
+| Date format is pre-selected based on browser locale, then validated against sample data — if the locale default doesn't parse correctly, the best matching format is selected instead | Done |
+| Each CSV column can only be mapped to one transaction field — duplicate mappings are prevented | Done |
+| A live mapping preview table (Date, Description, Amount) sits below the column selects and updates as mappings change | Done |
 
 ## Story 43: Dashboard Quick-Add Transaction
 
