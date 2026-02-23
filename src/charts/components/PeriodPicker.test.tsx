@@ -97,4 +97,66 @@ describe("PeriodPicker", () => {
 
     expect(onSelect).toHaveBeenCalledWith(ChartPeriod.OneYear);
   });
+
+  it("does not render navigation arrows without callbacks", () => {
+    render(
+      <PeriodPicker
+        periods={PROJECTED}
+        selected={ChartPeriod.OneMonth}
+        onSelect={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: "Previous period" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next period" })).not.toBeInTheDocument();
+  });
+
+  it("renders navigation arrows when onPrevious and onNext are provided", () => {
+    render(
+      <PeriodPicker
+        periods={PROJECTED}
+        selected={ChartPeriod.OneMonth}
+        onSelect={vi.fn()}
+        onPrevious={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Previous period" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next period" })).toBeInTheDocument();
+  });
+
+  it("calls onPrevious when left arrow is clicked", async () => {
+    const onPrevious = vi.fn();
+    render(
+      <PeriodPicker
+        periods={PROJECTED}
+        selected={ChartPeriod.OneMonth}
+        onSelect={vi.fn()}
+        onPrevious={onPrevious}
+        onNext={vi.fn()}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Previous period" }));
+
+    expect(onPrevious).toHaveBeenCalledOnce();
+  });
+
+  it("calls onNext when right arrow is clicked", async () => {
+    const onNext = vi.fn();
+    render(
+      <PeriodPicker
+        periods={PROJECTED}
+        selected={ChartPeriod.OneMonth}
+        onSelect={vi.fn()}
+        onPrevious={vi.fn()}
+        onNext={onNext}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Next period" }));
+
+    expect(onNext).toHaveBeenCalledOnce();
+  });
 });
