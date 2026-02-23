@@ -2,11 +2,12 @@
 
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Account } from "@/accounts/Account.type";
 import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { PercentageInput } from "@/components/shared/PercentageInput";
 import {
   AlertDialog,
@@ -36,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarMenuAction } from "@/components/ui/sidebar";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 type EditAccountDialogProps = {
@@ -47,12 +49,27 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
   const { removeTransactionsByAccountId } = useTransactions();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(account.name);
   const [type, setType] = useState<AccountType>(account.type);
   const [expectedReturnRate, setExpectedReturnRate] = useState(
     account.expectedReturnRate?.toString() ?? ""
   );
+
+  const handleDelete = useCallback(() => {
+    removeTransactionsByAccountId(account.id);
+    removeAccount(account.id);
+    router.push("/");
+  }, [removeTransactionsByAccountId, removeAccount, account.id, router]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
 
   function resetForm() {
     setName(account.name);
@@ -71,23 +88,6 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
       expectedReturnRate: expectedReturnRate ? Number(expectedReturnRate) : undefined,
     });
     setIsOpen(false);
-  }
-
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteConfirmOpen(true);
-  }
-
-  function handleCancelDelete() {
-    setIsDeleteConfirmOpen(false);
-    setIsOpen(true);
-  }
-
-  function handleDelete() {
-    removeTransactionsByAccountId(account.id);
-    removeAccount(account.id);
-    setIsDeleteConfirmOpen(false);
-    router.push("/");
   }
 
   return (
@@ -132,10 +132,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={AccountType.Asset}>Asset</SelectItem>
-                  <SelectItem value={AccountType.Liability}>
-                    Liability
-                  </SelectItem>
+                  {ACCOUNT_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -168,11 +169,7 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -184,7 +181,7 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

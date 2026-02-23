@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
   AlertDialog,
@@ -23,7 +23,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { deleteScenarioCascade } from "@/scenarios/deleteScenarioCascade";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import { useScenarios } from "@/scenarios/ScenarioContext";
 import { useTransactions } from "@/transactions/TransactionContext";
@@ -38,11 +40,29 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
   const { removeTransactionsByScenarioId } = useTransactions();
   const { removeRecurringTransactionsByScenarioId } = useRecurringTransactions();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [name, setName] = useState(scenario.name);
   const [inflationRate, setInflationRate] = useState(
     scenario.inflationRate?.toString() ?? ""
   );
+
+  const handleDelete = useCallback(() => {
+    deleteScenarioCascade(scenario.id, {
+      removeTransactionsByScenarioId,
+      removeRecurringTransactionsByScenarioId,
+      removeScenario,
+    });
+    onDelete?.(scenario.id);
+  }, [removeTransactionsByScenarioId, removeRecurringTransactionsByScenarioId, removeScenario, scenario.id, onDelete]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
 
   function resetForm() {
     setName(scenario.name);
@@ -56,24 +76,6 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
     const parsedRate = inflationRate ? parseFloat(inflationRate) : undefined;
     updateScenario(scenario.id, name.trim(), parsedRate);
     setIsOpen(false);
-  }
-
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteConfirmOpen(true);
-  }
-
-  function handleCancelDelete() {
-    setIsDeleteConfirmOpen(false);
-    setIsOpen(true);
-  }
-
-  function handleDelete() {
-    removeTransactionsByScenarioId(scenario.id);
-    removeRecurringTransactionsByScenarioId(scenario.id);
-    removeScenario(scenario.id);
-    onDelete?.(scenario.id);
-    setIsDeleteConfirmOpen(false);
   }
 
   function handleTriggerClick(e: React.MouseEvent) {
@@ -148,11 +150,7 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
 
       <AlertDialog
         open={isDeleteConfirmOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -163,7 +161,7 @@ export function EditScenarioDialog({ scenario, onDelete }: EditScenarioDialogPro
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

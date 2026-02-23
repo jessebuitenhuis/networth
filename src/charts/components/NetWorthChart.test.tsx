@@ -5,20 +5,20 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Account } from "@/accounts/Account.type";
 import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
+import {
+  formatChartCurrency as formatCurrency,
+  formatTooltipLabel,
+  formatTooltipValue,
+  formatXAxisTick,
+  formatYAxisValue,
+} from "@/charts/chartFormatters";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import {
-  formatCurrency,
-  formatTooltipLabel,
-  formatTooltipValue,
-  formatXAxisTick,
-  formatYAxisValue,
-  NetWorthChart,
-} from "./NetWorthChart";
+import { NetWorthChart } from "./NetWorthChart";
 
 mockResizeObserver();
 suppressRechartsWarnings();

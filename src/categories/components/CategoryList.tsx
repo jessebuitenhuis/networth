@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -7,7 +5,6 @@ import { buildTree } from "@/lib/buildTree";
 import type { TreeNode } from "@/lib/TreeNode.type";
 
 import type { Category } from "../Category.type";
-import { useCategories } from "../CategoryContext";
 import { EditCategoryDialog } from "./EditCategoryDialog";
 
 function CategoryItem({
@@ -33,8 +30,11 @@ function CategoryItem({
   );
 }
 
-export function CategoryList() {
-  const { categories } = useCategories();
+type CategoryListProps = {
+  categories: Category[];
+};
+
+export function CategoryList({ categories }: CategoryListProps) {
   const tree = useMemo(() => buildTree(categories), [categories]);
 
   if (categories.length === 0) {

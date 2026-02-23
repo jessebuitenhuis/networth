@@ -1,5 +1,6 @@
 import type { Account } from "@/accounts/Account.type";
 import { getAccountColor } from "@/charts/chartColors";
+import { Button } from "@/components/ui/button";
 
 type ChartLegendProps = {
   accounts: Account[];
@@ -15,8 +16,10 @@ export function ChartLegend({ accounts, excludedIds, onToggle }: ChartLegendProp
       {accounts.map((account, index) => {
         const isIncluded = !excludedIds.has(account.id);
         return (
-          <button
+          <Button
             key={account.id}
+            variant="ghost"
+            size="sm"
             className={`flex items-center gap-1.5 text-sm ${isIncluded ? "" : "opacity-40"}`}
             aria-pressed={isIncluded}
             onClick={() => onToggle(account.id)}
@@ -27,7 +30,7 @@ export function ChartLegend({ accounts, excludedIds, onToggle }: ChartLegendProp
               style={{ backgroundColor: getAccountColor(index) }}
             />
             {account.name}
-          </button>
+          </Button>
         );
       })}
     </div>

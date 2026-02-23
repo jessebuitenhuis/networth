@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Category } from "@/categories/Category.type";
 import { CategorySelect } from "@/categories/components/CategorySelect";
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 import { generateId } from "@/lib/generateId";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import type { Transaction } from "@/transactions/Transaction.type";
@@ -52,7 +53,6 @@ export function EditTransactionDialog({
   onCreateCategory,
 }: EditTransactionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [amount, setAmount] = useState(transaction.amount);
   const [date, setDate] = useState(transaction.date);
   const [description, setDescription] = useState(transaction.description);
@@ -62,6 +62,20 @@ export function EditTransactionDialog({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
     transaction.categoryId || "none"
   );
+
+  const handleDelete = useCallback(() => {
+    onDelete(transaction.id);
+  }, [onDelete, transaction.id]);
+
+  const {
+    isDeleteConfirmOpen,
+    handleDeleteClick,
+    confirmDelete,
+    handleDeleteDialogOpenChange,
+  } = useDeleteConfirmation({
+    onDelete: handleDelete,
+    setIsEditDialogOpen: setIsOpen,
+  });
 
   function resetForm() {
     setAmount(transaction.amount);
@@ -86,16 +100,6 @@ export function EditTransactionDialog({
     setIsOpen(false);
   }
 
-  function handleDeleteClick() {
-    setIsOpen(false);
-    setIsDeleteOpen(true);
-  }
-
-  function handleDelete() {
-    onDelete(transaction.id);
-    setIsDeleteOpen(false);
-  }
-
   function handleCreateScenario(name: string): string {
     const id = generateId();
     onCreateScenario({ id, name });
@@ -106,13 +110,6 @@ export function EditTransactionDialog({
     const id = generateId();
     onCreateCategory({ id, name, parentCategoryId });
     return id;
-  }
-
-  function handleAlertDialogOpenChange(open: boolean) {
-    if (!open) {
-      setIsDeleteOpen(false);
-      setIsOpen(true);
-    }
   }
 
   return (
@@ -193,7 +190,7 @@ export function EditTransactionDialog({
           </form>
         </DialogContent>
       </Dialog>
-      <AlertDialog open={isDeleteOpen} onOpenChange={handleAlertDialogOpenChange}>
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={handleDeleteDialogOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
@@ -204,7 +201,7 @@ export function EditTransactionDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
