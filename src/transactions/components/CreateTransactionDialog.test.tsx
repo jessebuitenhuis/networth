@@ -236,7 +236,7 @@ describe("CreateTransactionDialog", () => {
       expect(page.accountSelect).toHaveTextContent("Select account");
     });
 
-    it("does not submit without selecting an account", async () => {
+    it("shows error when submitting without selecting an account", async () => {
       setupDashboardAccounts();
       const page = await CreateTransactionDialogPage.renderDashboard();
       await page.open();
@@ -245,6 +245,21 @@ describe("CreateTransactionDialog", () => {
       await page.submit();
 
       expect(page.transactionsList).toBeEmptyDOMElement();
+      expect(page.queryAccountError()).toBeInTheDocument();
+    });
+
+    it("clears account error when account is selected", async () => {
+      setupDashboardAccounts();
+      const page = await CreateTransactionDialogPage.renderDashboard();
+      await page.open();
+      await page.fillAmount("100");
+      await page.submit();
+
+      expect(page.queryAccountError()).toBeInTheDocument();
+
+      await page.selectAccount("Checking");
+
+      expect(page.queryAccountError()).not.toBeInTheDocument();
     });
 
     it("creates transaction with selected account", async () => {

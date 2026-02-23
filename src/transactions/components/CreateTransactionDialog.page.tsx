@@ -171,6 +171,10 @@ export class CreateTransactionDialogPage {
     return screen.queryByLabelText("End Date");
   }
 
+  queryAccountError() {
+    return screen.queryByText("Please select an account");
+  }
+
   // --- Actions ---
 
   async open() {
