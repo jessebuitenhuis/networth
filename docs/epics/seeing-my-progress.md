@@ -18,10 +18,10 @@ The planning chart connects past reality to future projections, and users can st
 
 | Detail | Status |
 | --- | --- |
-| Default view shows one period of history before today (e.g. 1W selected shows -1W to +1W centered on today) | Planned |
-| Historical portion shows actual recorded transactions, not projections | Planned |
-| Forward and backward arrow buttons step through time by one period increment (1W selected + next arrow = window moves one week forward) | Planned |
-| Arrow buttons are adjacent to the period picker | Planned |
+| Default view shows one period of history before today (e.g. 1W selected shows -1W to +1W centered on today) | Done |
+| Historical portion shows actual recorded transactions, not projections | Done |
+| Forward and backward arrow buttons step through time by one period increment (1W selected + next arrow = window moves one week forward) | Done |
+| Arrow buttons are adjacent to the period picker | Done |
 
 ## Story 47: Clean Pickers
 

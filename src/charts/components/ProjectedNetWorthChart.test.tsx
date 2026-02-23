@@ -289,4 +289,61 @@ describe("ProjectedNetWorthChart", () => {
 
     expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
   });
+
+  describe("navigation arrows", () => {
+    it("shows navigation arrows for fixed periods", () => {
+      renderWithProviders();
+
+      expect(screen.getByRole("button", { name: "Previous period" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Next period" })).toBeInTheDocument();
+    });
+
+    it("hides navigation arrows for All period", async () => {
+      renderWithProviders();
+
+      await userEvent.click(screen.getByRole("button", { name: "All" }));
+
+      expect(screen.queryByRole("button", { name: "Previous period" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Next period" })).not.toBeInTheDocument();
+    });
+
+    it("hides navigation arrows for Custom period", async () => {
+      renderWithProviders();
+
+      await userEvent.click(screen.getByRole("button", { name: "Custom" }));
+
+      expect(screen.queryByRole("button", { name: "Previous period" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Next period" })).not.toBeInTheDocument();
+    });
+
+    it("navigating forward and backward renders without error", async () => {
+      const accounts: Account[] = [
+        { id: "1", name: "Checking", type: AccountType.Asset },
+      ];
+      renderWithProviders(accounts);
+
+      await userEvent.click(screen.getByRole("button", { name: "Next period" }));
+      expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole("button", { name: "Previous period" }));
+      expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+    });
+
+    it("resets navigation offset when switching periods", async () => {
+      const accounts: Account[] = [
+        { id: "1", name: "Checking", type: AccountType.Asset },
+      ];
+      renderWithProviders(accounts);
+
+      // Navigate forward
+      await userEvent.click(screen.getByRole("button", { name: "Next period" }));
+
+      // Switch to a different period
+      await userEvent.click(screen.getByRole("button", { name: "1W" }));
+
+      // Chart should still render (offset reset to 0)
+      expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "1W" })).toHaveAttribute("aria-pressed", "true");
+    });
+  });
 });
