@@ -97,7 +97,7 @@ describe("EditAccountDialog", () => {
     await page.confirmDelete();
     expect(page.accountsList).toBeEmptyDOMElement();
     expect(page.txCount).toHaveTextContent("0");
-    expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledWith("/accounts");
   });
 
   it("resets form when dialog is reopened", async () => {

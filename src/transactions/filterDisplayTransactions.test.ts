@@ -12,26 +12,31 @@ const items: DisplayTransaction[] = [
     id: "1",
     description: "Groceries at Whole Foods",
     accountName: "Checking",
+    accountId: "acc1",
     date: "2024-01-15",
     amount: -200,
     isProjected: false,
     isRecurring: false,
+    categoryId: "cat1",
     editAction: null,
   },
   {
     id: "2",
     description: "Monthly Salary",
     accountName: "Checking",
+    accountId: "acc1",
     date: "2024-02-01",
     amount: 5000,
     isProjected: false,
     isRecurring: true,
+    categoryId: "cat2",
     editAction: null,
   },
   {
     id: "3",
     description: "Electric Bill",
     accountName: "Checking",
+    accountId: "acc1",
     date: "2024-01-20",
     amount: -150,
     isProjected: false,
@@ -42,10 +47,12 @@ const items: DisplayTransaction[] = [
     id: "4",
     description: "Freelance Payment",
     accountName: "Savings",
+    accountId: "acc2",
     date: "2024-03-10",
     amount: 1200,
     isProjected: false,
     isRecurring: false,
+    categoryId: "cat1",
     editAction: null,
   },
 ];
@@ -123,6 +130,35 @@ describe("filterDisplayTransactions", () => {
     expect(result.map((r) => r.id)).toEqual(expectedIds);
   });
 
+  it("filters by accountIds", () => {
+    const result = filterDisplayTransactions(items, { ...emptyFilters, accountIds: ["acc2"] });
+    expect(result.map((r) => r.id)).toEqual(["4"]);
+  });
+
+  it("returns all items when accountIds is empty", () => {
+    const result = filterDisplayTransactions(items, { ...emptyFilters, accountIds: [] });
+    expect(result).toHaveLength(4);
+  });
+
+  it("filters by categoryIds", () => {
+    const result = filterDisplayTransactions(items, { ...emptyFilters, categoryIds: ["cat1"] });
+    expect(result.map((r) => r.id)).toEqual(["1", "4"]);
+  });
+
+  it("returns all items when categoryIds is empty", () => {
+    const result = filterDisplayTransactions(items, { ...emptyFilters, categoryIds: [] });
+    expect(result).toHaveLength(4);
+  });
+
+  it("filters by both accountIds and categoryIds", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      accountIds: ["acc1"],
+      categoryIds: ["cat1"],
+    });
+    expect(result.map((r) => r.id)).toEqual(["1"]);
+  });
+
   it.each([
     { name: "amountMin", filters: { amountMin: "abc" } },
     { name: "amountMax", filters: { amountMax: "xyz" } },
@@ -161,5 +197,13 @@ describe("hasActiveFilters", () => {
     { field: "amountMax", value: "1000" },
   ] as const)("returns true when $field is set", ({ field, value }) => {
     expect(hasActiveFilters({ ...emptyFilters, [field]: value })).toBe(true);
+  });
+
+  it("returns true when accountIds is non-empty", () => {
+    expect(hasActiveFilters({ ...emptyFilters, accountIds: ["acc1"] })).toBe(true);
+  });
+
+  it("returns true when categoryIds is non-empty", () => {
+    expect(hasActiveFilters({ ...emptyFilters, categoryIds: ["cat1"] })).toBe(true);
   });
 });
