@@ -22,6 +22,7 @@
     "db:studio": "drizzle-kit studio",
     "seed": "node scripts/seed.js",
     "setup": "npm install",
+    "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "rebase": "git fetch origin main 2>/dev/null; git rebase origin/main 2>&1 || { git rebase --abort 2>/dev/null; echo 'Rebase onto origin/main failed. Please resolve conflicts and rebase.' >&2; exit 2; }"
   },
   "dependencies": {
