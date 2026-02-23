@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Line, LineChart, ResponsiveContainer,Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { useAccounts } from "@/accounts/AccountContext";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/charts/chartFormatters";
 import { ChartPeriod } from "@/charts/ChartPeriod";
 import { computeNetWorthSeries } from "@/charts/computeNetWorthSeries";
+import { computeYAxisConfig } from "@/charts/computeYAxisConfig";
 import type { DateRange } from "@/charts/DateRange.type";
 import { getTickFormat } from "@/charts/formatXAxisTick";
 import { addMonths, formatDate } from "@/lib/dateUtils";
@@ -60,6 +61,9 @@ export function NetWorthChart() {
     undefined,
     period === ChartPeriod.Custom ? customRange : undefined
   );
+  const minValue = data.reduce((min, p) => Math.min(min, p.netWorth), 0);
+  const maxValue = data.reduce((max, p) => Math.max(max, p.netWorth), 0);
+  const yAxisConfig = computeYAxisConfig(minValue, maxValue);
   const tickFormat = getTickFormat(period, data);
 
   const xAxisFormatter = useCallback((v: string) => formatXAxisTick(v, tickFormat), [tickFormat]);
@@ -83,11 +87,18 @@ export function NetWorthChart() {
         <ResponsiveContainer width="100%" height={256}>
           <LineChart key={chartKey} data={data}>
             <XAxis dataKey="date" tickFormatter={xAxisFormatter} tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={formatYAxisValue} tick={{ fontSize: 12 }} width={80} />
+            <YAxis
+              domain={yAxisConfig.domain}
+              ticks={yAxisConfig.ticks}
+              tickFormatter={formatYAxisValue}
+              tick={{ fontSize: 12 }}
+              width={80}
+            />
             <Tooltip
               labelFormatter={tooltipLabelFormatter}
               formatter={tooltipValueFormatter}
             />
+            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} />
             <Line
               type="monotone"
               dataKey="netWorth"
