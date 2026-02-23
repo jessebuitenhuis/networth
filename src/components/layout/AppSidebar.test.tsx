@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { NavGroup } from "./NavGroup.type";
 import { AppSidebarPage } from "./AppSidebar.page";
+import type { NavGroup } from "./NavGroup.type";
 
 const testGroups: NavGroup[] = [
   {
