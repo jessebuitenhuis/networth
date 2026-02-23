@@ -1,47 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Account } from "@/accounts/Account.type";
-import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { CategoryProvider } from "@/categories/CategoryContext";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
-import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import type { Scenario } from "@/scenarios/Scenario.type";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
-import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import { ScenarioTransactionList } from "./ScenarioTransactionList";
-
-function renderWithProviders(
-  accounts: Account[] = [],
-  transactions: Transaction[] = [],
-  recurringTransactions: RecurringTransaction[] = [],
-  scenarios: Scenario[] = [],
-  selectedScenarioIds: Set<string> = new Set(),
-) {
-  mockApiResponses({ accounts, transactions, recurringTransactions, scenarios });
-  return render(
-    <TooltipProvider>
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <CategoryProvider>
-                <ScenarioTransactionList selectedScenarioIds={selectedScenarioIds} />
-              </CategoryProvider>
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    </TooltipProvider>,
-  );
-}
+import { ScenarioTransactionListPage } from "./ScenarioTransactionList.page";
 
 describe("ScenarioTransactionList", () => {
   beforeEach(() => {
@@ -53,462 +17,389 @@ describe("ScenarioTransactionList", () => {
   });
 
   it("shows only transactions for active scenario", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-      { id: "scenario-2", name: "Optimistic" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Base salary",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "rt-2",
-        accountId: "1",
-        amount: 200,
-        description: "Bonus",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-2",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [
+        { id: "scenario-1", name: "Base Plan" },
+        { id: "scenario-2", name: "Optimistic" },
+      ],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "1",
+          amount: 100,
+          description: "Base salary",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-1",
+        },
+        {
+          id: "rt-2",
+          accountId: "1",
+          amount: 200,
+          description: "Bonus",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-2",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      new Set(["scenario-1"]),
-    );
-
-    expect(await screen.findByText(/Base salary/)).toBeInTheDocument();
-    expect(screen.queryByText(/Bonus/)).not.toBeInTheDocument();
+    expect(await page.findText(/Base salary/)).toBeInTheDocument();
+    expect(page.queryText(/Bonus/)).not.toBeInTheDocument();
   });
 
   it("shows transactions for active scenario", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 500,
-        date: "2024-06-01",
-        description: "Bonus payment",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: 500,
+          date: "2024-06-01",
+          description: "Bonus payment",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/Bonus payment/)).toBeInTheDocument();
+    expect(await page.findText(/Bonus payment/)).toBeInTheDocument();
   });
 
   it("shows empty state when no transactions", async () => {
-    const scenarios: Scenario[] = [{ id: "scenario-1", name: "Base Plan" }];
+    const page = ScenarioTransactionListPage.render({
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders([], [], [], scenarios, new Set(["scenario-1"]));
-
-    expect(
-      await screen.findByText(/no transactions yet/i),
-    ).toBeInTheDocument();
+    expect(await page.findText(/no transactions yet/i)).toBeInTheDocument();
   });
 
   it("deletes recurring transaction when delete is clicked", async () => {
-    const user = userEvent.setup();
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Salary",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "1",
+          amount: 100,
+          description: "Salary",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      new Set(["scenario-1"]),
-    );
+    await page.clickEditButton();
+    await page.clickDeleteButton();
+    await page.clickLastDeleteButton();
 
-    const editButton = await screen.findByRole("button", { name: /edit/i });
-    await user.click(editButton);
-
-    const deleteButton = screen.getByRole("button", { name: /delete/i });
-    await user.click(deleteButton);
-
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
-    const confirmButton = deleteButtons[deleteButtons.length - 1];
-    await user.click(confirmButton);
-
-    expect(screen.queryByText(/Salary/)).not.toBeInTheDocument();
+    expect(page.queryText(/Salary/)).not.toBeInTheDocument();
   });
 
   it("treats undefined scenarioId as default scenario", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Legacy transaction",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "1",
+          amount: 100,
+          description: "Legacy transaction",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      new Set(["scenario-1"]),
-    );
-
-    expect(await screen.findByText(/Legacy transaction/)).toBeInTheDocument();
+    expect(await page.findText(/Legacy transaction/)).toBeInTheDocument();
   });
 
   it("sorts transactions by date descending (newest first)", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 100,
-        date: "2024-01-15",
-        description: "Old transaction",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "t-2",
-        accountId: "1",
-        amount: 200,
-        date: "2024-06-15",
-        description: "Recent transaction",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "t-3",
-        accountId: "1",
-        amount: 150,
-        date: "2024-03-15",
-        description: "Middle transaction",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: 100,
+          date: "2024-01-15",
+          description: "Old transaction",
+          isProjected: true,
+          scenarioId: "scenario-1",
+        },
+        {
+          id: "t-2",
+          accountId: "1",
+          amount: 200,
+          date: "2024-06-15",
+          description: "Recent transaction",
+          isProjected: true,
+          scenarioId: "scenario-1",
+        },
+        {
+          id: "t-3",
+          accountId: "1",
+          amount: 150,
+          date: "2024-03-15",
+          description: "Middle transaction",
+          isProjected: true,
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    await screen.findByText(/Recent transaction/);
-    const items = screen.getAllByText(/transaction/);
+    await page.findText(/Recent transaction/);
+    const items = page.getAllByText(/transaction/);
     expect(items[0]).toHaveTextContent("Recent transaction");
     expect(items[1]).toHaveTextContent("Middle transaction");
     expect(items[2]).toHaveTextContent("Old transaction");
   });
 
   it("shows Unknown for transactions with unknown account", async () => {
-    const accounts: Account[] = [];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "unknown-account",
-        amount: 100,
-        date: "2024-06-15",
-        description: "Orphan transaction",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "unknown-account",
+          amount: 100,
+          date: "2024-06-15",
+          description: "Orphan transaction",
+          isProjected: true,
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/Orphan transaction/)).toBeInTheDocument();
+    expect(await page.findText(/Orphan transaction/)).toBeInTheDocument();
   });
 
   it("handles recurring transaction with no next occurrence", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Ended transaction",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2020-01-01",
-        endDate: "2020-12-31",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "1",
+          amount: 100,
+          description: "Ended transaction",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2020-01-01",
+          endDate: "2020-12-31",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(
-      accounts,
-      [],
-      recurringTransactions,
-      scenarios,
-      new Set(["scenario-1"]),
-    );
-
-    expect(
-      await screen.findByText(/no transactions yet/i),
-    ).toBeInTheDocument();
+    expect(await page.findText(/no transactions yet/i)).toBeInTheDocument();
   });
 
   it("includes baseline transactions (no scenarioId) in all scenarios", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-      { id: "scenario-2", name: "Alternative" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 100,
-        date: "2024-06-15",
-        description: "Baseline transaction",
-        isProjected: true,
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [
+        { id: "scenario-1", name: "Base Plan" },
+        { id: "scenario-2", name: "Alternative" },
+      ],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: 100,
+          date: "2024-06-15",
+          description: "Baseline transaction",
+          isProjected: true,
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-2"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-2"]));
-
-    expect(await screen.findByText(/Baseline transaction/)).toBeInTheDocument();
+    expect(await page.findText(/Baseline transaction/)).toBeInTheDocument();
   });
 
   it("shows Unknown for recurring transactions with unknown account", async () => {
-    const accounts: Account[] = [];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "unknown-account",
-        amount: 100,
-        description: "Orphan recurring",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "unknown-account",
+          amount: 100,
+          description: "Orphan recurring",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, [], recurringTransactions, scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/Orphan recurring/)).toBeInTheDocument();
+    expect(await page.findText(/Orphan recurring/)).toBeInTheDocument();
   });
 
   it("shows only baseline transactions when activeScenarioId is null", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 100,
-        date: "2024-06-15",
-        description: "Baseline transaction",
-      },
-      {
-        id: "t-2",
-        accountId: "1",
-        amount: 200,
-        date: "2024-06-16",
-        description: "Scenario transaction",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: 100,
+          date: "2024-06-15",
+          description: "Baseline transaction",
+        },
+        {
+          id: "t-2",
+          accountId: "1",
+          amount: 200,
+          date: "2024-06-16",
+          description: "Scenario transaction",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set());
-
-    expect(await screen.findByText(/Baseline transaction/)).toBeInTheDocument();
-    expect(screen.queryByText(/Scenario transaction/)).not.toBeInTheDocument();
+    expect(await page.findText(/Baseline transaction/)).toBeInTheDocument();
+    expect(page.queryText(/Scenario transaction/)).not.toBeInTheDocument();
   });
 
   it("shows only baseline recurring transactions when activeScenarioId is null", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const recurringTransactions: RecurringTransaction[] = [
-      {
-        id: "rt-1",
-        accountId: "1",
-        amount: 100,
-        description: "Baseline recurring",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-      },
-      {
-        id: "rt-2",
-        accountId: "1",
-        amount: 200,
-        description: "Scenario recurring",
-        frequency: RecurrenceFrequency.Monthly,
-        startDate: "2024-01-01",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      recurringTransactions: [
+        {
+          id: "rt-1",
+          accountId: "1",
+          amount: 100,
+          description: "Baseline recurring",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+        },
+        {
+          id: "rt-2",
+          accountId: "1",
+          amount: 200,
+          description: "Scenario recurring",
+          frequency: RecurrenceFrequency.Monthly,
+          startDate: "2024-01-01",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(),
+    });
 
-    renderWithProviders(accounts, [], recurringTransactions, scenarios, new Set());
-
-    expect(await screen.findByText(/Baseline recurring/)).toBeInTheDocument();
-    expect(screen.queryByText(/Scenario recurring/)).not.toBeInTheDocument();
+    expect(await page.findText(/Baseline recurring/)).toBeInTheDocument();
+    expect(page.queryText(/Scenario recurring/)).not.toBeInTheDocument();
   });
 
   it("shows all transactions regardless of isProjected flag", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Base Plan" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: 100,
-        date: "2024-01-15",
-        description: "Past transaction",
-        isProjected: false,
-        scenarioId: "scenario-1",
-      },
-      {
-        id: "t-2",
-        accountId: "1",
-        amount: 200,
-        date: "2024-06-15",
-        description: "Future transaction",
-        isProjected: true,
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Base Plan" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: 100,
+          date: "2024-01-15",
+          description: "Past transaction",
+          isProjected: false,
+          scenarioId: "scenario-1",
+        },
+        {
+          id: "t-2",
+          accountId: "1",
+          amount: 200,
+          date: "2024-06-15",
+          description: "Future transaction",
+          isProjected: true,
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/Past transaction/)).toBeInTheDocument();
+    expect(await page.findText(/Past transaction/)).toBeInTheDocument();
     expect(screen.getByText(/Future transaction/)).toBeInTheDocument();
   });
 
   it("shows scenario icon for scenario transactions", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Early Retirement" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: -30000,
-        date: "2024-06-15",
-        description: "New Car",
-        scenarioId: "scenario-1",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Early Retirement" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: -30000,
+          date: "2024-06-15",
+          description: "New Car",
+          scenarioId: "scenario-1",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/New Car/)).toBeInTheDocument();
-    expect(screen.getByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
+    expect(await page.findText(/New Car/)).toBeInTheDocument();
+    expect(await page.findScenarioLabel("Scenario: Early Retirement")).toBeInTheDocument();
   });
 
   it("does not show scenario icon for baseline transactions", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Early Retirement" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: -200,
-        date: "2024-06-15",
-        description: "Groceries",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Early Retirement" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: -200,
+          date: "2024-06-15",
+          description: "Groceries",
+        },
+      ],
+      selectedScenarioIds: new Set(["scenario-1"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["scenario-1"]));
-
-    expect(await screen.findByText(/Groceries/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+    expect(await page.findText(/Groceries/)).toBeInTheDocument();
+    expect(page.queryScenarioLabel(/^Scenario:/)).not.toBeInTheDocument();
   });
 
   it("does not show scenario icon for deleted scenario", async () => {
-    const accounts: Account[] = [
-      { id: "1", name: "Checking", type: AccountType.Asset },
-    ];
-    const scenarios: Scenario[] = [
-      { id: "scenario-1", name: "Early Retirement" },
-    ];
-    const transactions: Transaction[] = [
-      {
-        id: "t-1",
-        accountId: "1",
-        amount: -30000,
-        date: "2024-06-15",
-        description: "New Car",
-        scenarioId: "deleted-scenario-id",
-      },
-    ];
+    const page = ScenarioTransactionListPage.render({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      scenarios: [{ id: "scenario-1", name: "Early Retirement" }],
+      transactions: [
+        {
+          id: "t-1",
+          accountId: "1",
+          amount: -30000,
+          date: "2024-06-15",
+          description: "New Car",
+          scenarioId: "deleted-scenario-id",
+        },
+      ],
+      selectedScenarioIds: new Set(["deleted-scenario-id"]),
+    });
 
-    renderWithProviders(accounts, transactions, [], scenarios, new Set(["deleted-scenario-id"]));
-
-    expect(await screen.findByText(/New Car/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+    expect(await page.findText(/New Car/)).toBeInTheDocument();
+    expect(page.queryScenarioLabel(/^Scenario:/)).not.toBeInTheDocument();
   });
 });

@@ -1,11 +1,9 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
 
-import { ChartLegend } from "./ChartLegend";
+import { ChartLegendPage } from "./ChartLegend.page";
 
 const accounts: Account[] = [
   { id: "1", name: "Checking", type: AccountType.Asset },
@@ -15,21 +13,17 @@ const accounts: Account[] = [
 
 describe("ChartLegend", () => {
   it("renders a button for each account", () => {
-    render(
-      <ChartLegend accounts={accounts} excludedIds={new Set()} onToggle={vi.fn()} />
-    );
+    const page = ChartLegendPage.render({ accounts, excludedIds: new Set() });
 
-    expect(screen.getByRole("button", { name: "Checking" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Savings" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Credit Card" })).toBeInTheDocument();
+    expect(page.getButton("Checking")).toBeInTheDocument();
+    expect(page.getButton("Savings")).toBeInTheDocument();
+    expect(page.getButton("Credit Card")).toBeInTheDocument();
   });
 
   it("renders a colored dot for each account using getAccountColor", () => {
-    const { container } = render(
-      <ChartLegend accounts={accounts} excludedIds={new Set()} onToggle={vi.fn()} />
-    );
+    const page = ChartLegendPage.render({ accounts, excludedIds: new Set() });
 
-    const dots = container.querySelectorAll("[data-testid='legend-dot']");
+    const dots = page.legendDots;
     expect(dots).toHaveLength(3);
     expect((dots[0] as HTMLElement).style.backgroundColor).toBe("rgb(59, 130, 246)");
     expect((dots[1] as HTMLElement).style.backgroundColor).toBe("rgb(239, 68, 68)");
@@ -37,42 +31,32 @@ describe("ChartLegend", () => {
   });
 
   it("applies opacity-40 to excluded accounts", () => {
-    render(
-      <ChartLegend accounts={accounts} excludedIds={new Set(["2"])} onToggle={vi.fn()} />
-    );
+    const page = ChartLegendPage.render({ accounts, excludedIds: new Set(["2"]) });
 
-    const savingsButton = screen.getByRole("button", { name: "Savings" });
-    expect(savingsButton.className).toContain("opacity-40");
-    const checkingButton = screen.getByRole("button", { name: "Checking" });
-    expect(checkingButton.className).not.toContain("opacity-40");
+    expect(page.getButton("Savings").className).toContain("opacity-40");
+    expect(page.getButton("Checking").className).not.toContain("opacity-40");
   });
 
   it("marks included accounts as pressed", () => {
-    render(
-      <ChartLegend accounts={accounts} excludedIds={new Set(["2"])} onToggle={vi.fn()} />
-    );
+    const page = ChartLegendPage.render({ accounts, excludedIds: new Set(["2"]) });
 
-    expect(screen.getByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "Credit Card" })).toHaveAttribute("aria-pressed", "true");
+    expect(page.getButton("Checking")).toHaveAttribute("aria-pressed", "true");
+    expect(page.getButton("Savings")).toHaveAttribute("aria-pressed", "false");
+    expect(page.getButton("Credit Card")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("calls onToggle with the account id when clicked", async () => {
     const onToggle = vi.fn();
-    render(
-      <ChartLegend accounts={accounts} excludedIds={new Set()} onToggle={onToggle} />
-    );
+    const page = ChartLegendPage.render({ accounts, excludedIds: new Set(), onToggle });
 
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    await page.clickButton("Savings");
 
     expect(onToggle).toHaveBeenCalledWith("2");
   });
 
   it("renders nothing when accounts array is empty", () => {
-    const { container } = render(
-      <ChartLegend accounts={[]} excludedIds={new Set()} onToggle={vi.fn()} />
-    );
+    const page = ChartLegendPage.render({ accounts: [], excludedIds: new Set() });
 
-    expect(container).toBeEmptyDOMElement();
+    expect(page.container).toBeEmptyDOMElement();
   });
 });

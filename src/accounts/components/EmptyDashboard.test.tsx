@@ -1,23 +1,20 @@
-import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { EmptyDashboard } from "./EmptyDashboard";
+import { EmptyDashboardPage } from "./EmptyDashboard.page";
 
 describe("EmptyDashboard", () => {
   it("renders welcome heading", () => {
-    render(<EmptyDashboard createAccountTrigger={<button>Test</button>} />);
-    expect(screen.getByText("Welcome to Net Worth Tracker")).toBeInTheDocument();
+    const page = EmptyDashboardPage.render();
+    expect(page.heading).toBeInTheDocument();
   });
 
   it("renders description", () => {
-    render(<EmptyDashboard createAccountTrigger={<button>Test</button>} />);
-    expect(
-      screen.getByText(/create your first account to start tracking/i)
-    ).toBeInTheDocument();
+    const page = EmptyDashboardPage.render();
+    expect(page.description).toBeInTheDocument();
   });
 
   it("renders create account trigger", () => {
-    render(<EmptyDashboard createAccountTrigger={<button>Create Account</button>} />);
-    expect(screen.getByRole("button", { name: "Create Account" })).toBeInTheDocument();
+    const page = EmptyDashboardPage.render(<button>Create Account</button>);
+    expect(page.getButton("Create Account")).toBeInTheDocument();
   });
 });

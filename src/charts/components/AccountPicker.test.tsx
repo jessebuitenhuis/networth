@@ -1,11 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
 import { AccountType } from "@/accounts/AccountType";
 
-import { AccountPicker } from "./AccountPicker";
+import { AccountPickerPage } from "./AccountPicker.page";
 
 const mockAccounts: Account[] = [
   { id: "1", name: "Checking", type: AccountType.Asset },
@@ -16,60 +15,43 @@ const mockAccounts: Account[] = [
 describe("AccountPicker", () => {
   it("renders button with 'Accounts (N)' showing included count", () => {
     const excludedIds = new Set(["2"]);
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds,
+      onToggle: vi.fn(),
+    });
 
-    expect(
-      screen.getByRole("button", { name: "Accounts (2)" })
-    ).toBeInTheDocument();
+    expect(page.triggerButton(2)).toBeInTheDocument();
   });
 
   it("shows total count when none excluded", () => {
-    const excludedIds = new Set<string>();
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
-    expect(
-      screen.getByRole("button", { name: "Accounts (3)" })
-    ).toBeInTheDocument();
+    expect(page.triggerButton(3)).toBeInTheDocument();
   });
 
   it("shows 0 when all accounts excluded", () => {
-    const excludedIds = new Set(["1", "2", "3"]);
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds: new Set(["1", "2", "3"]),
+      onToggle: vi.fn(),
+    });
 
-    expect(
-      screen.getByRole("button", { name: "Accounts (0)" })
-    ).toBeInTheDocument();
+    expect(page.triggerButton(0)).toBeInTheDocument();
   });
 
   it("opening popover shows account checkboxes", async () => {
-    const excludedIds = new Set<string>();
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Accounts (3)" }));
+    await page.open(3);
 
     expect(screen.getByRole("checkbox", { name: "Checking" })).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Savings" })).toBeInTheDocument();
@@ -78,77 +60,63 @@ describe("AccountPicker", () => {
 
   it("checkboxes reflect excludedIds prop (checked = included)", async () => {
     const excludedIds = new Set(["2"]);
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds,
+      onToggle: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Accounts (2)" }));
+    await page.open(2);
 
-    expect(screen.getByRole("checkbox", { name: "Checking" })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Savings" })).not.toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Credit Card" })).toBeChecked();
+    expect(page.checkbox("Checking")).toBeChecked();
+    expect(page.checkbox("Savings")).not.toBeChecked();
+    expect(page.checkbox("Credit Card")).toBeChecked();
   });
 
   it("renders nothing when fewer than 2 accounts exist", () => {
-    const { container } = render(
-      <AccountPicker
-        accounts={[{ id: "1", name: "Checking", type: AccountType.Asset }]}
-        excludedIds={new Set<string>()}
-        onToggle={vi.fn()}
-      />
-    );
+    const { container } = AccountPickerPage.renderAndGetContainer({
+      accounts: [{ id: "1", name: "Checking", type: AccountType.Asset }],
+      excludedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders nothing when no accounts exist", () => {
-    const { container } = render(
-      <AccountPicker
-        accounts={[]}
-        excludedIds={new Set<string>()}
-        onToggle={vi.fn()}
-      />
-    );
+    const { container } = AccountPickerPage.renderAndGetContainer({
+      accounts: [],
+      excludedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders when exactly 2 accounts exist", () => {
-    render(
-      <AccountPicker
-        accounts={[
-          { id: "1", name: "Checking", type: AccountType.Asset },
-          { id: "2", name: "Savings", type: AccountType.Asset },
-        ]}
-        excludedIds={new Set<string>()}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: [
+        { id: "1", name: "Checking", type: AccountType.Asset },
+        { id: "2", name: "Savings", type: AccountType.Asset },
+      ],
+      excludedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
-    expect(
-      screen.getByRole("button", { name: "Accounts (2)" })
-    ).toBeInTheDocument();
+    expect(page.triggerButton(2)).toBeInTheDocument();
   });
 
   it("clicking checkbox calls onToggle with correct id", async () => {
     const onToggle = vi.fn();
-    const excludedIds = new Set<string>();
-    render(
-      <AccountPicker
-        accounts={mockAccounts}
-        excludedIds={excludedIds}
-        onToggle={onToggle}
-      />
-    );
+    const page = AccountPickerPage.render({
+      accounts: mockAccounts,
+      excludedIds: new Set<string>(),
+      onToggle,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Accounts (3)" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Savings" }));
+    await page.open(3);
+    await page.toggleCheckbox("Savings");
 
     expect(onToggle).toHaveBeenCalledWith("2");
   });
-
 });

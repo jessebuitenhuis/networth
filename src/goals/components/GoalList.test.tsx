@@ -1,10 +1,8 @@
-import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { GoalProvider } from "@/goals/GoalContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 
-import { GoalList } from "./GoalList";
+import { GoalListPage } from "./GoalList.page";
 
 describe("GoalList", () => {
   beforeEach(() => {
@@ -12,13 +10,9 @@ describe("GoalList", () => {
   });
 
   it("displays empty state when no goals exist", () => {
-    render(
-      <GoalProvider>
-        <GoalList goals={[]} />
-      </GoalProvider>,
-    );
+    const page = GoalListPage.render([]);
     expect(
-      screen.getByText(
+      page.getByText(
         /no goals yet\. add a goal to start tracking your financial targets\./i,
       ),
     ).toBeInTheDocument();
@@ -30,27 +24,19 @@ describe("GoalList", () => {
       { id: "2", name: "FIRE", targetAmount: 500000 },
     ];
 
-    render(
-      <GoalProvider>
-        <GoalList goals={goals} />
-      </GoalProvider>,
-    );
+    const page = GoalListPage.render(goals);
 
-    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
-    expect(screen.getByText("FIRE")).toBeInTheDocument();
+    expect(page.getByText("Emergency Fund")).toBeInTheDocument();
+    expect(page.getByText("FIRE")).toBeInTheDocument();
   });
 
   it("renders edit dialog for each goal", async () => {
     const goals = [{ id: "1", name: "Emergency Fund", targetAmount: 10000 }];
 
-    render(
-      <GoalProvider>
-        <GoalList goals={goals} />
-      </GoalProvider>,
-    );
+    const page = GoalListPage.render(goals);
 
     expect(
-      screen.getByRole("button", { name: "Edit Goal" }),
+      page.getByRole("button", { name: "Edit Goal" }),
     ).toBeInTheDocument();
   });
 });

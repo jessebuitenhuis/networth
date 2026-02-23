@@ -1,10 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ChartPeriod } from "@/charts/ChartPeriod";
 
-import { PeriodPicker } from "./PeriodPicker";
+import { PeriodPickerPage } from "./PeriodPicker.page";
 
 const HISTORICAL = [
   ChartPeriod.OneWeek,
@@ -30,132 +28,103 @@ const PROJECTED = [
 
 describe("PeriodPicker", () => {
   it("renders only the provided periods", () => {
-    render(
-      <PeriodPicker
-        periods={PROJECTED}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: PROJECTED,
+      selected: ChartPeriod.OneMonth,
+    });
 
-    expect(screen.getByRole("button", { name: "1W" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "1M" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "3M" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "6M" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "1Y" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Custom" })).toBeInTheDocument();
+    expect(page.periodButton("1W")).toBeInTheDocument();
+    expect(page.periodButton("1M")).toBeInTheDocument();
+    expect(page.periodButton("3M")).toBeInTheDocument();
+    expect(page.periodButton("6M")).toBeInTheDocument();
+    expect(page.periodButton("1Y")).toBeInTheDocument();
+    expect(page.periodButton("All")).toBeInTheDocument();
+    expect(page.periodButton("Custom")).toBeInTheDocument();
     // MTD and YTD should NOT be present
-    expect(screen.queryByRole("button", { name: "MTD" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "YTD" })).not.toBeInTheDocument();
+    expect(page.queryPeriodButton("MTD")).not.toBeInTheDocument();
+    expect(page.queryPeriodButton("YTD")).not.toBeInTheDocument();
   });
 
   it("renders all historical periods", () => {
-    render(
-      <PeriodPicker
-        periods={HISTORICAL}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: HISTORICAL,
+      selected: ChartPeriod.OneMonth,
+    });
 
-    expect(screen.getByRole("button", { name: "MTD" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "YTD" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(9);
+    expect(page.periodButton("MTD")).toBeInTheDocument();
+    expect(page.periodButton("YTD")).toBeInTheDocument();
+    expect(page.allButtons()).toHaveLength(9);
   });
 
   it("marks the selected period as pressed", () => {
-    render(
-      <PeriodPicker
-        periods={HISTORICAL}
-        selected={ChartPeriod.ThreeMonths}
-        onSelect={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: HISTORICAL,
+      selected: ChartPeriod.ThreeMonths,
+    });
 
-    expect(screen.getByRole("button", { name: "3M" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-    expect(screen.getByRole("button", { name: "1W" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+    expect(page.periodButton("3M")).toHaveAttribute("aria-pressed", "true");
+    expect(page.periodButton("1W")).toHaveAttribute("aria-pressed", "false");
   });
 
   it("calls onSelect with the clicked period", async () => {
     const onSelect = vi.fn();
-    render(
-      <PeriodPicker
-        periods={HISTORICAL}
-        selected={ChartPeriod.OneMonth}
-        onSelect={onSelect}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: HISTORICAL,
+      selected: ChartPeriod.OneMonth,
+      onSelect,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "1Y" }));
+    await page.selectPeriod("1Y");
 
     expect(onSelect).toHaveBeenCalledWith(ChartPeriod.OneYear);
   });
 
   it("does not render navigation arrows without callbacks", () => {
-    render(
-      <PeriodPicker
-        periods={PROJECTED}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: PROJECTED,
+      selected: ChartPeriod.OneMonth,
+    });
 
-    expect(screen.queryByRole("button", { name: "Previous period" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Next period" })).not.toBeInTheDocument();
+    expect(page.queryPreviousButton()).not.toBeInTheDocument();
+    expect(page.queryNextButton()).not.toBeInTheDocument();
   });
 
   it("renders navigation arrows when onPrevious and onNext are provided", () => {
-    render(
-      <PeriodPicker
-        periods={PROJECTED}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-        onPrevious={vi.fn()}
-        onNext={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: PROJECTED,
+      selected: ChartPeriod.OneMonth,
+      onPrevious: vi.fn(),
+      onNext: vi.fn(),
+    });
 
-    expect(screen.getByRole("button", { name: "Previous period" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Next period" })).toBeInTheDocument();
+    expect(page.previousButton).toBeInTheDocument();
+    expect(page.nextButton).toBeInTheDocument();
   });
 
   it("calls onPrevious when left arrow is clicked", async () => {
     const onPrevious = vi.fn();
-    render(
-      <PeriodPicker
-        periods={PROJECTED}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-        onPrevious={onPrevious}
-        onNext={vi.fn()}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: PROJECTED,
+      selected: ChartPeriod.OneMonth,
+      onPrevious,
+      onNext: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Previous period" }));
+    await page.clickPrevious();
 
     expect(onPrevious).toHaveBeenCalledOnce();
   });
 
   it("calls onNext when right arrow is clicked", async () => {
     const onNext = vi.fn();
-    render(
-      <PeriodPicker
-        periods={PROJECTED}
-        selected={ChartPeriod.OneMonth}
-        onSelect={vi.fn()}
-        onPrevious={vi.fn()}
-        onNext={onNext}
-      />
-    );
+    const page = PeriodPickerPage.render({
+      periods: PROJECTED,
+      selected: ChartPeriod.OneMonth,
+      onPrevious: vi.fn(),
+      onNext,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Next period" }));
+    await page.clickNext();
 
     expect(onNext).toHaveBeenCalledOnce();
   });

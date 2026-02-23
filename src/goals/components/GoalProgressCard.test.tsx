@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { GoalProgress } from "@/goals/GoalProgress.type";
 
 import { GoalProgressCard } from "./GoalProgressCard";
+import { GoalProgressCardPage } from "./GoalProgressCard.page";
 
 describe("GoalProgressCard", () => {
   const mockProgress: GoalProgress = {
@@ -16,29 +17,28 @@ describe("GoalProgressCard", () => {
   };
 
   it("displays goal name", () => {
-    render(<GoalProgressCard progress={mockProgress} colorIndex={0} />);
-    expect(screen.getByText("Retirement Fund")).toBeInTheDocument();
+    const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
+    expect(page.getByText("Retirement Fund")).toBeInTheDocument();
   });
 
   it("displays percentage complete", () => {
-    render(<GoalProgressCard progress={mockProgress} colorIndex={0} />);
-    expect(screen.getByText("45% complete")).toBeInTheDocument();
+    const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
+    expect(page.getByText("45% complete")).toBeInTheDocument();
   });
 
   it("displays time estimate", () => {
-    render(<GoalProgressCard progress={mockProgress} colorIndex={0} />);
-    expect(screen.getByText("5 years to go")).toBeInTheDocument();
+    const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
+    expect(page.getByText("5 years to go")).toBeInTheDocument();
   });
 
   it("renders progress bar with correct value", () => {
-    render(<GoalProgressCard progress={mockProgress} colorIndex={0} />);
-    const progressBar = screen.getByRole("progressbar");
-    expect(progressBar).toHaveAttribute("aria-valuenow", "45");
+    const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
+    expect(page.progressBar).toHaveAttribute("aria-valuenow", "45");
   });
 
   it("applies goal color to title", () => {
-    render(<GoalProgressCard progress={mockProgress} colorIndex={0} />);
-    const title = screen.getByText("Retirement Fund");
+    const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
+    const title = page.getByText("Retirement Fund");
     expect(title).toHaveStyle({ color: "#f59e0b" });
   });
 
@@ -49,9 +49,9 @@ describe("GoalProgressCard", () => {
       isAchieved: true,
       timeEstimate: "Achieved!",
     };
-    render(<GoalProgressCard progress={achievedProgress} colorIndex={0} />);
-    expect(screen.getByText("Achieved!")).toBeInTheDocument();
-    expect(screen.getByText("100% complete")).toBeInTheDocument();
+    const page = GoalProgressCardPage.render({ progress: achievedProgress, colorIndex: 0 });
+    expect(page.getByText("Achieved!")).toBeInTheDocument();
+    expect(page.getByText("100% complete")).toBeInTheDocument();
   });
 
   it("uses different colors for different indices", () => {
