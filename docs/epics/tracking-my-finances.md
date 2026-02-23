@@ -18,7 +18,7 @@ The import flow should feel effortless for common bank exports. Users shouldn't 
 | Each CSV column can only be mapped to one transaction field — duplicate mappings are prevented | Planned |
 | A live mapping preview table (Date, Description, Amount) sits below the column selects and updates as mappings change | Planned |
 
-## Story 43: Dashboard Quick-Add Transaction (Done)
+## Story 43: Dashboard Quick-Add Transaction
 
 Users can record a transaction without leaving the dashboard. Uses the existing transaction dialog with an added account selector.
 
