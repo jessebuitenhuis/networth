@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
+import { useAccounts } from "@/accounts/AccountContext";
+import { AccountSelect } from "@/accounts/components/AccountSelect";
 import { useCategories } from "@/categories/CategoryContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,17 +26,19 @@ import { CreateOneTimeTransactionForm } from "./CreateOneTimeTransactionForm";
 import { CreateRecurringTransactionForm } from "./CreateRecurringTransactionForm";
 
 type CreateTransactionDialogProps = {
-  accountId: string;
+  accountId?: string;
 };
 
 export function CreateTransactionDialog({
   accountId,
 }: CreateTransactionDialogProps) {
+  const { accounts } = useAccounts();
   const { addTransaction } = useTransactions();
   const { addRecurringTransaction } = useRecurringTransactions();
   const { scenarios, addScenario } = useScenarios();
   const { categories, addCategory } = useCategories();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedAccountId, setSelectedAccountId] = useState("none");
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(
     () => new Date().toISOString().split("T")[0]
@@ -44,7 +48,11 @@ export function CreateTransactionDialog({
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("none");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
 
+  const isAccountPicker = !accountId;
+  const effectiveAccountId = accountId ?? selectedAccountId;
+
   function resetForm() {
+    setSelectedAccountId("none");
     setAmount(0);
     setDescription("");
     setIsRecurring(false);
@@ -69,10 +77,10 @@ export function CreateTransactionDialog({
 
   function handleOneTimeSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (amount === 0) return;
+    if (amount === 0 || effectiveAccountId === "none") return;
     addTransaction({
       id: generateId(),
-      accountId,
+      accountId: effectiveAccountId,
       amount,
       date,
       description: description.trim(),
@@ -84,10 +92,10 @@ export function CreateTransactionDialog({
   }
 
   function handleRecurringSubmit(frequency: RecurrenceFrequency, endDate: string | undefined) {
-    if (amount === 0) return;
+    if (amount === 0 || effectiveAccountId === "none") return;
     addRecurringTransaction({
       id: generateId(),
-      accountId,
+      accountId: effectiveAccountId,
       amount,
       description: description.trim(),
       frequency,
@@ -129,6 +137,13 @@ export function CreateTransactionDialog({
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
         </DialogHeader>
+        {isAccountPicker && (
+          <AccountSelect
+            accounts={accounts}
+            value={selectedAccountId}
+            onValueChange={setSelectedAccountId}
+          />
+        )}
         <div className="flex items-center gap-2 mb-4">
           <Checkbox
             id="tx-recurring"
