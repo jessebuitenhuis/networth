@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { AccountProvider } from "@/accounts/AccountContext";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { GoalProvider } from "@/goals/GoalContext";
 import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
@@ -24,9 +25,11 @@ function renderPage() {
         <TransactionProvider>
           <ScenarioProvider>
             <RecurringTransactionProvider>
-              <GoalProvider>
-                <Home />
-              </GoalProvider>
+              <CategoryProvider>
+                <GoalProvider>
+                  <Home />
+                </GoalProvider>
+              </CategoryProvider>
             </RecurringTransactionProvider>
           </ScenarioProvider>
         </TransactionProvider>
