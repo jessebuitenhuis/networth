@@ -28,41 +28,73 @@ Financially literate, earns well, interested in personal finance and FIRE as a s
 - **Empower** — Good for seeing what he has, but it can't answer "what if?" Monte Carlo simulations feel like a black box. And it really wants him to talk to a financial advisor.
 - **Monarch** — Closest to what he wants, but the forecasting is shallow and it still leads with transaction categorization. He wants planning first, not tracking first.
 
+## App Hierarchy
+
+The app is organized around two frames: **Planning** (where am I going) and **Tracking** (where am I). Planning comes first — that's the core premise.
+
+### Home `/`
+
+Unified dashboard blending current position and trajectory. Shows:
+- Net worth summary with per-account/type breakdown
+- Goal progress cards
+- Trajectory preview
+- Budget summary (future)
+
+### Planning (sidebar section)
+
+Higher-level, forward-looking features — scenarios, goals, budgets.
+
+- **Projections** `/planning` — Scenario chart, comparison table, scenario management (inline), "What if" tweak wizard
+- **Goals** `/goals` — Goal management with progress tracking
+- **Budget** `/budget` — Envelope budgeting per category per scenario
+
+### Tracking (sidebar section)
+
+Operational, day-to-day financial reality — transactions, accounts, reports.
+
+- **Transactions** `/transactions` — Unified view across all accounts with collapsible "Planned" section for recurring/future transactions
+- **Accounts** `/accounts` — Single page listing all accounts, click through to account detail
+- **Reports** `/reports` — Spending trends, net worth history, income vs expenses
+
 ## Key Features
 
-### Core (built)
-- **Account management** — Create and manage any number of financial accounts (checking, savings, investments, mortgage, etc.) with optional expected return rates for investment accounts
-- **Manual transactions** — Record actual transactions against accounts with locale-aware currency formatting
-- **Value-based entry** — Enter the current value of an account and let the app calculate the adjustment transaction automatically
-- **CSV import** — Import bank statement CSVs to quickly catch up on transaction history
+### Home
+
+- **Net worth summary** — Total net worth with assets and liabilities broken out separately, plus per-account/type breakdown
+- **Goal progress** — Cards showing percentage complete and projected achievement date (e.g., "FIRE — 30% complete, 12 years to go")
+- **Trajectory preview** — Quick view of projected net worth trajectory under the active scenario
+- **Budget summary** — Total budgeted vs total spent for the current month with on-track/over-budget indicator *(planned)*
+
+### Planning
+
 - **Future projections** — Enter expected future transactions (one-off or recurring) to forecast net worth, with automatic compound growth for accounts with expected returns
-- **Multiple scenarios** — Create, compare, and overlay different financial plans side by side
-- **Financial goals** — Set net worth targets and track progress toward milestones like financial independence
-- **Net worth chart** — Interactive time-series chart with per-account toggle, flexible period selection, scenario comparison, and goal lines
-- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage) to organize transactions and power filtering, budgeting, and planning views
-- **Recurring frequencies** — Weekly, bi-weekly, monthly, quarterly, and yearly recurring transactions to model real-world financial rhythms
-- **Inflation modeling** — Per-scenario inflation rate that automatically adjusts projected expenses over time
+- **Multiple scenarios** — Create, compare, duplicate, and overlay different financial plans side by side. Scenarios are managed inline on the Projections page
+- **"What if" wizard** — Quick scenario tweaks (e.g., "save 500 more per month", "returns drop to 6%") with instant projection updates *(planned)*
 - **Scenario comparison** — Side-by-side metrics table showing projected net worth, goal achievement dates, and income vs expenses across scenarios
-- **Assets & liabilities breakdown** — Total assets and total liabilities shown separately on the dashboard alongside net worth
+- **Net worth chart** — Interactive time-series chart with per-account toggle, flexible period selection, scenario comparison, goal lines, and navigation through time
+- **Inflation modeling** — Per-scenario inflation rate that automatically adjusts projected expenses over time
+- **Financial goals** — Set net worth targets and track progress toward milestones like financial independence, shown as horizontal lines on the projection chart
+- **Envelope-style budgeting** — Set monthly spending budgets per category, tied to scenarios. Per-scenario budgets let you compare spending plans *(planned)*
+
+### Tracking
+
+- **Unified transactions** — All transactions across all accounts in one view, with filtering by account, category, date, and description. Collapsible "Planned" section shows recurring and future transactions *(planned)*
+- **Account management** — Create and manage financial accounts (checking, savings, investments, mortgage, etc.) with optional expected return rates
+- **Manual transactions** — Record transactions with locale-aware currency formatting and +/- toggle
+- **Value-based entry** — Enter current account value and let the app calculate the adjustment transaction
+- **CSV import** — Import bank statement CSVs with intelligent column mapping and date format detection
+- **Recurring transactions** — Weekly, bi-weekly, monthly, quarterly, and yearly recurring transactions to model real-world financial rhythms
+- **Transaction categories** — User-defined hierarchical categories (e.g. Housing > Mortgage), managed inline wherever categories are used
+- **Reports** — Spending trends, net worth history, income vs expenses over time *(planned)*
+
+### Infrastructure
+
 - **SQLite storage** — Data persists locally in SQLite with an abstraction layer for future PostgreSQL migration
 
-### Core (planned — needed to validate the full product concept)
-- **Envelope-style budgeting** — Set monthly spending budgets per category, tied to scenarios. Track actual spending against budgets with progress bars. Per-scenario budgets let you compare spending plans (e.g. "What if I cut my dining-out budget in half?")
-- **Cash flow analysis** — Monthly view of income vs expenses broken down by category, showing where money is going for both past (actual) and future (projected) months
-- **Life events timeline** — Chronological view of recurring transactions showing when income and expenses start and end across life milestones
+### Future (out of scope for prototyping)
 
-### Future (needed before going to market, out of scope for prototyping)
-- **Data export** — CSV export of transactions, accounts, balances, and net worth history. Required for user trust and data portability
-- **Bank sync** — Optional Plaid/GoCardless integration to auto-import transactions. Manual entry remains the primary workflow; sync is a convenience layer
-
-## UX Principles
-
-- **Always a clear next step** — Every page surfaces its most important action prominently (e.g., a primary button in the header), so users always know what they can do next. Empty states guide users toward getting started rather than showing a blank screen.
-- **Clean when irrelevant** — Controls and pickers are hidden when they have no options, so the interface never feels cluttered or confusing.
-- **Safe destructive actions** — Deleting or removing data always requires explicit confirmation with a clearly distinguishable warning, so users don't accidentally lose work.
-- **Focused interactions** — Only one dialog is shown at a time, so users aren't overwhelmed with stacked interfaces.
-- **Locale-aware formatting** — Currency values are formatted according to the user's browser locale, so amounts feel natural and readable.
-- **Descriptive actions** — Buttons describe what they do (e.g., "Add Account", "Save Transaction") instead of generic labels, so users know exactly what will happen.
+- **Data export** — CSV export of transactions, accounts, balances, and net worth history
+- **Bank sync** — Optional Plaid/GoCardless integration to auto-import transactions
 
 ## User Stories
 
