@@ -6,6 +6,8 @@ A personal finance app that combines day-to-day financial tracking with forward-
 
 The app is manual-first by design: users enter transactions and account values directly, keeping full control of their data without sharing bank credentials. Bank sync (Plaid/GoCardless) is on the long-term roadmap as an optional convenience layer but is out of scope during prototyping.
 
+Detailed epic specifications and implementation notes live in `docs/epics/`.
+
 ## Vision & Positioning
 
 The personal finance market has split into two camps: **budgeting-first** apps (YNAB, Monarch, Copilot) that treat net worth as a secondary report, and **wealth-tracking-first** apps (Empower, Kubera) that skip budgeting entirely. No product genuinely excels at both.
