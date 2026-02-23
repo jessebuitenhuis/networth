@@ -45,4 +45,14 @@ describe("AccountSelect", () => {
 
     expect(page.queryOption(/none/i)).not.toBeInTheDocument();
   });
+
+  it("shows error message when hasError is true", () => {
+    const page = AccountSelectPage.render({ hasError: true });
+    expect(page.queryError()).toBeInTheDocument();
+  });
+
+  it("does not show error message by default", () => {
+    const page = AccountSelectPage.render();
+    expect(page.queryError()).not.toBeInTheDocument();
+  });
 });

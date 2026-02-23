@@ -47,9 +47,15 @@ export function CreateTransactionDialog({
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("none");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
+  const [hasAccountError, setHasAccountError] = useState(false);
 
   const isAccountPicker = !accountId;
   const effectiveAccountId = accountId ?? selectedAccountId;
+
+  function handleAccountChange(value: string) {
+    setSelectedAccountId(value);
+    setHasAccountError(false);
+  }
 
   function resetForm() {
     setSelectedAccountId("none");
@@ -58,6 +64,7 @@ export function CreateTransactionDialog({
     setIsRecurring(false);
     setSelectedScenarioId("none");
     setSelectedCategoryId("none");
+    setHasAccountError(false);
   }
 
   function handleCreateScenario(name: string): string {
@@ -77,7 +84,11 @@ export function CreateTransactionDialog({
 
   function handleOneTimeSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (amount === 0 || effectiveAccountId === "none") return;
+    if (isAccountPicker && effectiveAccountId === "none") {
+      setHasAccountError(true);
+      return;
+    }
+    if (amount === 0) return;
     addTransaction({
       id: generateId(),
       accountId: effectiveAccountId,
@@ -92,7 +103,11 @@ export function CreateTransactionDialog({
   }
 
   function handleRecurringSubmit(frequency: RecurrenceFrequency, endDate: string | undefined) {
-    if (amount === 0 || effectiveAccountId === "none") return;
+    if (isAccountPicker && effectiveAccountId === "none") {
+      setHasAccountError(true);
+      return;
+    }
+    if (amount === 0) return;
     addRecurringTransaction({
       id: generateId(),
       accountId: effectiveAccountId,
@@ -141,7 +156,8 @@ export function CreateTransactionDialog({
           <AccountSelect
             accounts={accounts}
             value={selectedAccountId}
-            onValueChange={setSelectedAccountId}
+            onValueChange={handleAccountChange}
+            hasError={hasAccountError}
           />
         )}
         <div className="flex items-center gap-2 mb-4">
