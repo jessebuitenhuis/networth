@@ -5,7 +5,7 @@ import { ChartPeriod } from "@/charts/ChartPeriod";
 import { computeDateWindow } from "./computeDateWindow";
 
 describe("computeDateWindow", () => {
-  const today = new Date("2026-02-23T00:00:00");
+  const today = new Date("2026-02-23T12:00:00");
 
   it("returns one period back and one period forward for offset=0", () => {
     const { start, end } = computeDateWindow(ChartPeriod.OneWeek, 0, today);
