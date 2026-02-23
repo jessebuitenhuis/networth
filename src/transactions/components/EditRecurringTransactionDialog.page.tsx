@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
+import type { Category } from "@/categories/Category.type";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import type { Scenario } from "@/scenarios/Scenario.type";
@@ -60,10 +61,10 @@ export class EditRecurringTransactionDialogPage extends BasePageObject {
         recurringTransaction={options.recurringTransaction ?? defaultRecurringTransaction}
         scenarios={options.scenarios ?? []}
         categories={[]}
-        onSave={onSave}
-        onDelete={onDelete}
-        onCreateScenario={onCreateScenario}
-        onCreateCategory={onCreateCategory}
+        onSave={onSave as (rt: RecurringTransaction) => void}
+        onDelete={onDelete as (id: string) => void}
+        onCreateScenario={onCreateScenario as (s: { id: string; name: string }) => void}
+        onCreateCategory={onCreateCategory as (c: Category) => void}
       />,
     );
 
