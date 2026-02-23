@@ -15,13 +15,9 @@ import { useAccounts } from "@/accounts/AccountContext";
 import { getGoalColor, getScenarioColor } from "@/charts/chartColors";
 import { formatChartCurrency as formatCurrency } from "@/charts/chartFormatters";
 import { ChartPeriod } from "@/charts/ChartPeriod";
-import { computePlanningChartSeries } from "@/charts/computePlanningChartSeries";
-import { computeProjectedSeries } from "@/charts/computeProjectedSeries";
-import { computeYAxisConfig } from "@/charts/computeYAxisConfig";
 import type { DateRange } from "@/charts/DateRange.type";
-import { formatTick, getTickFormat } from "@/charts/formatXAxisTick";
-import { mergeProjectedSeries } from "@/charts/mergeProjectedSeries";
-import type { NetWorthDataPoint } from "@/charts/NetWorthDataPoint.type";
+import { formatTick } from "@/charts/formatXAxisTick";
+import { useProjectedChartData } from "@/charts/useProjectedChartData";
 import { useGoals } from "@/goals/GoalContext";
 import { addMonths, formatDate } from "@/lib/dateUtils";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
@@ -41,14 +37,6 @@ const PROJECTED_PERIODS = [
   ChartPeriod.All,
   ChartPeriod.Custom,
 ];
-
-const NAVIGABLE_PERIODS = new Set([
-  ChartPeriod.OneWeek,
-  ChartPeriod.OneMonth,
-  ChartPeriod.ThreeMonths,
-  ChartPeriod.SixMonths,
-  ChartPeriod.OneYear,
-]);
 
 type ProjectedNetWorthChartProps = {
   selectedScenarioIds: Set<string>;
@@ -71,112 +59,30 @@ export function ProjectedNetWorthChart({
   const defaultEnd = formatDate(addMonths(new Date(), 3));
   const [customRange, setCustomRange] = useState<DateRange>({ start: today, end: defaultEnd });
 
-  const isNavigable = NAVIGABLE_PERIODS.has(period);
-
   const handlePeriodSelect = useCallback((newPeriod: ChartPeriod) => {
     setPeriod(newPeriod);
     setOffset(0);
   }, []);
-
   const handlePrevious = useCallback(() => setOffset((o) => o - 1), []);
   const handleNext = useCallback(() => setOffset((o) => o + 1), []);
 
-  const chartKey = `${period}-${offset}-${customRange.start}-${customRange.end}-${Array.from(selectedScenarioIds).join(",")}`;
-
   const filteredAccounts = accounts.filter((a) => !excludedAccountIds.has(a.id));
 
-  const seriesMap = new Map<string, NetWorthDataPoint[]>();
+  const { data, tickFormat, hasTodayLine, isNavigable, yAxisConfig, legendEntries } =
+    useProjectedChartData({
+      accounts: filteredAccounts,
+      transactions,
+      recurringTransactions,
+      scenarios,
+      goals,
+      selectedScenarioIds,
+      period,
+      offset,
+      today,
+      customRange,
+    });
 
-  const baselineTransactions = transactions.filter((t) => !t.scenarioId);
-  const baselineRecurringTransactions = recurringTransactions.filter(
-    (rt) => !rt.scenarioId
-  );
-
-  const baselineSeries = isNavigable
-    ? computePlanningChartSeries(
-        filteredAccounts,
-        baselineTransactions,
-        period,
-        offset,
-        today,
-        baselineRecurringTransactions
-      )
-    : computeProjectedSeries(
-        filteredAccounts,
-        baselineTransactions,
-        period,
-        today,
-        period === ChartPeriod.Custom ? customRange : undefined,
-        baselineRecurringTransactions
-      );
-  seriesMap.set("baseline", baselineSeries);
-
-  for (const scenarioId of selectedScenarioIds) {
-    const scenario = scenarios.find((s) => s.id === scenarioId);
-    const scenarioTransactions = transactions.filter(
-      (t) => !t.scenarioId || t.scenarioId === scenarioId
-    );
-    const scenarioRecurringTransactions = recurringTransactions.filter(
-      (rt) => !rt.scenarioId || rt.scenarioId === scenarioId
-    );
-
-    const scenarioSeries = isNavigable
-      ? computePlanningChartSeries(
-          filteredAccounts,
-          scenarioTransactions,
-          period,
-          offset,
-          today,
-          scenarioRecurringTransactions,
-          scenario?.inflationRate ?? 0
-        )
-      : computeProjectedSeries(
-          filteredAccounts,
-          scenarioTransactions,
-          period,
-          today,
-          period === ChartPeriod.Custom ? customRange : undefined,
-          scenarioRecurringTransactions,
-          scenario?.inflationRate ?? 0
-        );
-    seriesMap.set(`scenario_${scenarioId}`, scenarioSeries);
-  }
-
-  const data = mergeProjectedSeries(seriesMap);
-  const tickFormat = getTickFormat(period, baselineSeries);
-
-  // Determine if today falls within the visible window
-  const hasTodayLine =
-    isNavigable &&
-    baselineSeries.length > 0 &&
-    baselineSeries[0].date <= today &&
-    baselineSeries[baselineSeries.length - 1].date >= today;
-
-  // Calculate Y-axis domain to include goal target amounts
-  const maxGoalAmount = goals.length > 0 ? Math.max(...goals.map((g) => g.targetAmount)) : 0;
-  const allNumericValues = data.flatMap((point) => Object.values(point).filter((v): v is number => typeof v === "number"));
-  const maxDataValue = allNumericValues.length > 0 ? Math.max(...allNumericValues) : 0;
-  const minDataValue = allNumericValues.length > 0 ? Math.min(...allNumericValues) : 0;
-  const yAxisConfig = computeYAxisConfig(minDataValue, Math.max(maxDataValue, maxGoalAmount));
-
-  // Build legend entries
-  const legendEntries = [
-    { name: "Baseline", color: "var(--color-primary)", lineStyle: "solid" as const },
-    ...Array.from(selectedScenarioIds).map((scenarioId) => {
-      const scenario = scenarios.find((s) => s.id === scenarioId);
-      const scenarioIndex = scenarios.findIndex((s) => s.id === scenarioId);
-      return {
-        name: scenario?.name || scenarioId,
-        color: getScenarioColor(scenarioIndex),
-        lineStyle: "dashed" as const,
-      };
-    }),
-    ...goals.map((goal, i) => ({
-      name: goal.name,
-      color: getGoalColor(i),
-      lineStyle: "dotted" as const,
-    })),
-  ];
+  const chartKey = `${period}-${offset}-${customRange.start}-${customRange.end}-${Array.from(selectedScenarioIds).join(",")}`;
 
   return (
     <div className="rounded-lg border p-6 space-y-4">
