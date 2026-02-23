@@ -14,8 +14,6 @@ export function AccountPicker({
   excludedIds,
   onToggle,
 }: AccountPickerProps) {
-  if (accounts.length < 2) return null;
-
   const items = useMemo(
     () => accounts.map((a) => ({ id: a.id, label: a.name })),
     [accounts]
@@ -28,6 +26,8 @@ export function AccountPicker({
     }
     return included;
   }, [accounts, excludedIds]);
+
+  if (accounts.length < 2) return null;
 
   return (
     <MultiSelectPicker
