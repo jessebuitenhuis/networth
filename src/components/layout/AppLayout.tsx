@@ -5,11 +5,7 @@ import { useMemo } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { AccountIcon } from "@/accounts/components/AccountIcon";
-import { CreateAccountDialog } from "@/accounts/components/CreateAccountDialog";
-import { EditAccountDialog } from "@/accounts/components/EditAccountDialog";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
 import { useTransactions } from "@/transactions/TransactionContext";
 
 import { AppSidebar } from "./AppSidebar";
@@ -25,8 +21,8 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
   const { getBalance } = useTransactions();
   const pathname = usePathname();
 
-  const allGroups = useMemo(() => {
-    const mainGroups = navGroups.map((group) => ({
+  const { groups, netWorth } = useMemo(() => {
+    const groups = navGroups.map((group) => ({
       ...group,
       items: group.items.map((item) => ({
         ...item,
@@ -39,25 +35,12 @@ export function AppLayout({ navGroups, children }: AppLayoutProps) {
       return a.type === AccountType.Asset ? sum + bal : sum - bal;
     }, 0);
 
-    const accountsGroup: NavGroup = {
-      label: "Accounts",
-      labelSuffix: formatCompactCurrency(netWorth),
-      items: accounts.map((a) => ({
-        title: a.name,
-        url: `/accounts/${a.id}`,
-        icon: <AccountIcon name={a.name} type={a.type} />,
-        isActive: pathname === `/accounts/${a.id}`,
-        action: <EditAccountDialog account={a} />,
-        subtitle: formatCompactCurrency(getBalance(a.id)),
-      })),
-      footerAction: <CreateAccountDialog />,
-    };
-    return [...mainGroups, accountsGroup];
+    return { groups, netWorth };
   }, [navGroups, accounts, pathname, getBalance]);
 
   return (
     <>
-      <AppSidebar navGroups={allGroups} />
+      <AppSidebar navGroups={groups} netWorth={netWorth} />
       <SidebarInset>{children}</SidebarInset>
     </>
   );

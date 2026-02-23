@@ -8,10 +8,10 @@ import type { NavGroup } from "./NavGroup.type";
 export class AppSidebarPage {
   private constructor(private _container: HTMLElement) {}
 
-  static render(navGroups: NavGroup[]) {
+  static render(navGroups: NavGroup[], netWorth = 0) {
     const { container } = render(
       <SidebarProvider>
-        <AppSidebar navGroups={navGroups} />
+        <AppSidebar navGroups={navGroups} netWorth={netWorth} />
       </SidebarProvider>
     );
     return new AppSidebarPage(container);
@@ -25,7 +25,7 @@ export class AppSidebarPage {
     return screen.getByText(text);
   }
 
-  getLink(name: string) {
+  getLink(name: string | RegExp) {
     return screen.getByRole("link", { name });
   }
 

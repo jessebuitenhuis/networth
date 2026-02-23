@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { GanttChart as GanttChartIcon, LayoutDashboard, Tag, Target, TrendingUp } from "lucide-react";
+import { ArrowLeftRight, Landmark, Target, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
@@ -21,13 +21,17 @@ export const metadata: Metadata = {
 
 const navGroups: NavGroup[] = [
   {
-    label: "Main",
+    label: "Planning",
     items: [
-      { title: "Dashboard", url: "/", icon: <LayoutDashboard /> },
-      { title: "Planning", url: "/planning", icon: <TrendingUp /> },
-      { title: "Timeline", url: "/timeline", icon: <GanttChartIcon /> },
+      { title: "Projections", url: "/planning", icon: <TrendingUp /> },
       { title: "Goals", url: "/goals", icon: <Target /> },
-      { title: "Categories", url: "/categories", icon: <Tag /> },
+    ],
+  },
+  {
+    label: "Tracking",
+    items: [
+      { title: "Transactions", url: "/transactions", icon: <ArrowLeftRight /> },
+      { title: "Accounts", url: "/accounts", icon: <Landmark /> },
     ],
   },
 ];

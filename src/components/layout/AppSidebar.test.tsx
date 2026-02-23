@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { AppSidebarPage } from "./AppSidebar.page";
@@ -5,15 +6,15 @@ import type { NavGroup } from "./NavGroup.type";
 
 const testGroups: NavGroup[] = [
   {
-    label: "Main",
+    label: "Planning",
     items: [
-      { title: "Dashboard", url: "/dashboard" },
-      { title: "Accounts", url: "/accounts", isActive: true },
+      { title: "Projections", url: "/planning" },
+      { title: "Goals", url: "/goals", isActive: true },
     ],
   },
   {
-    label: "Settings",
-    items: [{ title: "Profile", url: "/profile" }],
+    label: "Tracking",
+    items: [{ title: "Transactions", url: "/transactions" }],
   },
 ];
 
@@ -21,16 +22,29 @@ describe("AppSidebar", () => {
   it("renders all nav group labels", () => {
     const page = AppSidebarPage.render(testGroups);
 
-    expect(page.getText("Main")).toBeInTheDocument();
-    expect(page.getText("Settings")).toBeInTheDocument();
+    expect(page.getText("Planning")).toBeInTheDocument();
+    expect(page.getText("Tracking")).toBeInTheDocument();
   });
 
   it("renders all nav items as links with correct hrefs", () => {
     const page = AppSidebarPage.render(testGroups);
 
-    expect(page.getLink("Dashboard")).toHaveAttribute("href", "/dashboard");
-    expect(page.getLink("Accounts")).toHaveAttribute("href", "/accounts");
-    expect(page.getLink("Profile")).toHaveAttribute("href", "/profile");
+    expect(page.getLink("Projections")).toHaveAttribute("href", "/planning");
+    expect(page.getLink("Goals")).toHaveAttribute("href", "/goals");
+    expect(page.getLink("Transactions")).toHaveAttribute("href", "/transactions");
+  });
+
+  it("logo links to home", () => {
+    const page = AppSidebarPage.render(testGroups);
+
+    const homeLink = page.getLink(/Net Worth/);
+    expect(homeLink).toHaveAttribute("href", "/");
+  });
+
+  it("renders net worth in sidebar header", () => {
+    const page = AppSidebarPage.render(testGroups, 4000);
+
+    expect(page.getText("$4K")).toBeInTheDocument();
   });
 
   it("renders group action when provided", () => {
@@ -69,9 +83,11 @@ describe("AppSidebar", () => {
   });
 
   it("handles empty nav groups", () => {
-    const page = AppSidebarPage.render([]);
+    AppSidebarPage.render([]);
 
-    expect(page.queryLink()).not.toBeInTheDocument();
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/");
   });
 
   it("renders item icon when provided", () => {

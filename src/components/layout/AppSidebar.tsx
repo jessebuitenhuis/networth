@@ -16,14 +16,16 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { formatCompactCurrency } from "@/lib/formatCompactCurrency";
 
 import type { NavGroup } from "./NavGroup.type";
 
 type AppSidebarProps = {
   navGroups: NavGroup[];
+  netWorth: number;
 };
 
-export function AppSidebar({ navGroups }: AppSidebarProps) {
+export function AppSidebar({ navGroups, netWorth }: AppSidebarProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   return (
@@ -32,14 +34,17 @@ export function AppSidebar({ navGroups }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <DollarSign className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Net Worth</span>
+                  <span className="truncate text-xs text-muted-foreground" suppressHydrationWarning>
+                    {formatCompactCurrency(netWorth)}
+                  </span>
                 </div>
-              </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
