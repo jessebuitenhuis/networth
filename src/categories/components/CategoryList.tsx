@@ -5,9 +5,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { DragHandlers, TreeDragState } from "@/hooks/useTreeDrag";
+import { useTreeDrag } from "@/hooks/useTreeDrag";
 import { buildTree } from "@/lib/buildTree";
 import { generateId } from "@/lib/generateId";
-import { getDescendantIds } from "@/lib/getDescendantIds";
 import type { TreeNode } from "@/lib/TreeNode.type";
 
 import type { Category } from "../Category.type";
@@ -52,30 +53,16 @@ function InlineSubcategoryInput({
 function CategoryItem({
   node,
   depth,
-  categories,
-  draggedId,
-  dropTargetId,
-  onDragStart,
-  onDragEnd,
-  onDrop,
-  onDragOver,
-  onDragLeave,
+  drag,
 }: {
   node: TreeNode<Category>;
   depth: number;
-  categories: Category[];
-  draggedId: string | null;
-  dropTargetId: string | null;
-  onDragStart: (id: string) => void;
-  onDragEnd: () => void;
-  onDrop: (targetId: string) => void;
-  onDragOver: (e: React.DragEvent, targetId: string) => void;
-  onDragLeave: () => void;
+  drag: TreeDragState & DragHandlers;
 }) {
   const { addCategory } = useCategories();
   const [isCreating, setIsCreating] = useState(false);
-  const isDropTarget = dropTargetId === node.id;
-  const isDragged = draggedId === node.id;
+  const isDropTarget = drag.dropTargetId === node.id;
+  const isDragged = drag.draggedId === node.id;
 
   function handleCreateSubcategory(name: string) {
     addCategory({
@@ -98,15 +85,15 @@ function CategoryItem({
       onDragStart={(e) => {
         e.dataTransfer.setData("text/plain", node.id);
         e.dataTransfer.effectAllowed = "move";
-        onDragStart(node.id);
+        drag.onDragStart(node.id);
       }}
-      onDragEnd={onDragEnd}
-      onDragOver={(e) => onDragOver(e, node.id)}
-      onDragLeave={onDragLeave}
+      onDragEnd={drag.onDragEnd}
+      onDragOver={(e) => drag.onDragOver(e, node.id)}
+      onDragLeave={drag.onDragLeave}
       onDrop={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onDrop(node.id);
+        drag.onDrop(node.id);
       }}
       className={`group/cat ${isDragged ? "opacity-40" : ""} ${isDropTarget ? "bg-accent rounded" : ""}`}
     >
@@ -146,19 +133,7 @@ function CategoryItem({
         </div>
       )}
       {node.children.map((child) => (
-        <CategoryItem
-          key={child.id}
-          node={child}
-          depth={depth + 1}
-          categories={categories}
-          draggedId={draggedId}
-          dropTargetId={dropTargetId}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-        />
+        <CategoryItem key={child.id} node={child} depth={depth + 1} drag={drag} />
       ))}
     </div>
   );
@@ -171,40 +146,15 @@ type CategoryListProps = {
 export function CategoryList({ categories }: CategoryListProps) {
   const { updateCategory } = useCategories();
   const tree = useMemo(() => buildTree(categories), [categories]);
-  const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
 
-  const isValidDropTarget = useCallback(
-    (targetId: string) => {
-      if (!draggedId || draggedId === targetId) return false;
-      const descendants = getDescendantIds(draggedId, categories);
-      return !descendants.has(targetId);
+  const handleReparent = useCallback(
+    (item: Category, newParentId: string) => {
+      updateCategory({ ...item, parentCategoryId: newParentId });
     },
-    [draggedId, categories],
+    [updateCategory],
   );
 
-  function handleDragOver(e: React.DragEvent, targetId: string) {
-    if (isValidDropTarget(targetId)) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      setDropTargetId(targetId);
-    }
-  }
-
-  function handleDrop(targetId: string) {
-    if (!draggedId || !isValidDropTarget(targetId)) return;
-    const dragged = categories.find((c) => c.id === draggedId);
-    if (dragged) {
-      updateCategory({ ...dragged, parentCategoryId: targetId });
-    }
-    setDraggedId(null);
-    setDropTargetId(null);
-  }
-
-  function handleDragEnd() {
-    setDraggedId(null);
-    setDropTargetId(null);
-  }
+  const drag = useTreeDrag(categories, handleReparent);
 
   if (categories.length === 0) {
     return (
@@ -217,19 +167,7 @@ export function CategoryList({ categories }: CategoryListProps) {
   return (
     <div className="divide-y">
       {tree.map((node) => (
-        <CategoryItem
-          key={node.id}
-          node={node}
-          depth={0}
-          categories={categories}
-          draggedId={draggedId}
-          dropTargetId={dropTargetId}
-          onDragStart={setDraggedId}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={() => setDropTargetId(null)}
-        />
+        <CategoryItem key={node.id} node={node} depth={0} drag={drag} />
       ))}
     </div>
   );
