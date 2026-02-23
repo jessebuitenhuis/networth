@@ -5,7 +5,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { DragHandlers, TreeDragState } from "@/hooks/useTreeDrag";
+import type { DragHandlers } from "@/hooks/DragHandlers.type";
+import type { TreeDragState } from "@/hooks/TreeDragState.type";
 import { useTreeDrag } from "@/hooks/useTreeDrag";
 import { buildTree } from "@/lib/buildTree";
 import { generateId } from "@/lib/generateId";
