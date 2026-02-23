@@ -29,6 +29,6 @@ Pickers only appear when they offer a meaningful choice, following the "Clean wh
 
 | Detail | Status |
 | --- | --- |
-| Scenario picker is hidden when no scenarios exist | Planned |
-| Account picker is hidden when fewer than 2 accounts exist | Planned |
-| Applies to the planning page and any other pages with these pickers | Planned |
+| Scenario picker is hidden when no scenarios exist | Done |
+| Account picker is hidden when fewer than 2 accounts exist | Done |
+| Applies to the planning page and any other pages with these pickers | Done |
