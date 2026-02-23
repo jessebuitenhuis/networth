@@ -1,7 +1,4 @@
-type YAxisConfig = {
-  domain: [number, number];
-  ticks: number[];
-};
+import { YAxisConfig } from "./YAxisConfig";
 
 const TARGET_TICK_COUNT = 5;
 
@@ -36,7 +33,7 @@ function _roundUpToNice(value: number): number {
   const normalized = value / magnitude;
   const niceNormalized = NICE_NUMBERS.find((n) => n >= normalized) ?? 10;
 
-  return Math.round(niceNormalized * magnitude);
+  return Math.max(1, Math.round(niceNormalized * magnitude));
 }
 
 function _generateTicks(min: number, max: number): number[] {
