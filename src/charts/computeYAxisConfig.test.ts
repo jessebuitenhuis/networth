@@ -56,7 +56,7 @@ describe("computeYAxisConfig", () => {
     it("rounds domain bounds to nice numbers", () => {
       const config = computeYAxisConfig(0, 338);
 
-      expect(config.domain[1] % 50).toBe(0);
+      expect(config.domain[1] % 100).toBe(0);
     });
 
     it("rounds negative domain bounds to nice numbers", () => {
@@ -75,11 +75,11 @@ describe("computeYAxisConfig", () => {
     });
 
     it.each([
-      { min: 0, max: 338, expectedMax: 350 },
-      { min: 0, max: 400, expectedMax: 400 },
+      { min: 0, max: 338, expectedMax: 500 },
+      { min: 0, max: 400, expectedMax: 500 },
       { min: 0, max: 950, expectedMax: 1000 },
       { min: 0, max: 4500, expectedMax: 5000 },
-      { min: 0, max: 12000, expectedMax: 12000 },
+      { min: 0, max: 12000, expectedMax: 20000 },
       { min: 0, max: 17000, expectedMax: 20000 },
       { min: 0, max: 98000, expectedMax: 100000 },
     ])("rounds max $max up to $expectedMax", ({ min, max, expectedMax }) => {

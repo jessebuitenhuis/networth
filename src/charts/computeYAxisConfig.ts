@@ -28,26 +28,13 @@ export function computeYAxisConfig(dataMin: number, dataMax: number): YAxisConfi
   };
 }
 
+const NICE_NUMBERS = [1, 2, 5, 10];
+
 function _roundUpToNice(value: number): number {
   if (value === 0) return 100;
   const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
   const normalized = value / magnitude;
-
-  let niceNormalized: number;
-  if (normalized <= 1) niceNormalized = 1;
-  else if (normalized <= 1.2) niceNormalized = 1.2;
-  else if (normalized <= 1.5) niceNormalized = 1.5;
-  else if (normalized <= 2) niceNormalized = 2;
-  else if (normalized <= 2.5) niceNormalized = 2.5;
-  else if (normalized <= 3) niceNormalized = 3;
-  else if (normalized <= 3.5) niceNormalized = 3.5;
-  else if (normalized <= 4) niceNormalized = 4;
-  else if (normalized <= 5) niceNormalized = 5;
-  else if (normalized <= 6) niceNormalized = 6;
-  else if (normalized <= 7) niceNormalized = 7;
-  else if (normalized <= 8) niceNormalized = 8;
-  else if (normalized <= 9) niceNormalized = 9;
-  else niceNormalized = 10;
+  const niceNormalized = NICE_NUMBERS.find((n) => n >= normalized) ?? 10;
 
   return Math.round(niceNormalized * magnitude);
 }
