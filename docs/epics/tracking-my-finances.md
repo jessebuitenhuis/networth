@@ -43,8 +43,8 @@ Managing the category hierarchy feels direct and fast. Progressive disclosure ke
 
 | Detail | Status |
 | --- | --- |
-| Category list has no Card wrapper — the page title is sufficient context | Planned |
-| No redundant "Categories" heading inside the list | Planned |
-| Edit and add-subcategory buttons are visible only on hover | Planned |
-| Each category has a "+" button to create a subcategory inline | Planned |
-| Categories can be dragged onto another category to reparent — no reordering | Planned |
+| Category list has no Card wrapper — the page title is sufficient context | Done |
+| No redundant "Categories" heading inside the list | Done |
+| Edit and add-subcategory buttons are visible only on hover | Done |
+| Each category has a "+" button to create a subcategory inline | Done |
+| Categories can be dragged onto another category to reparent — no reordering | Done |
