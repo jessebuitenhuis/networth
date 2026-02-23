@@ -7,8 +7,8 @@ import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { ACCOUNT_TYPE_OPTIONS } from "@/accounts/accountTypeOptions";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { PercentageInput } from "@/components/shared/PercentageInput";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -151,7 +151,10 @@ export function CreateAccountDialog({ trigger }: CreateAccountDialogProps) {
               onChange={setExpectedReturnRate}
             />
           </div>
-          <Button type="submit">Add Account</Button>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Add Account"
+          />
         </form>
       </DialogContent>
     </Dialog>

@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -83,18 +84,11 @@ export function CreateGoalDialog() {
               showSignToggle={false}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Add Goal
-            </Button>
-          </div>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Add Goal"
+            isSubmitDisabled={!name.trim()}
+          />
         </form>
       </DialogContent>
     </Dialog>

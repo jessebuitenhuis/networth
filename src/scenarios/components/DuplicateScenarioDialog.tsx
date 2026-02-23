@@ -3,6 +3,7 @@
 import { Copy } from "lucide-react";
 import { useState } from "react";
 
+import { DialogFooterActions } from "@/components/shared/DialogFooterActions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -77,18 +78,11 @@ export function DuplicateScenarioDialog({
               autoFocus
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Duplicate
-            </Button>
-          </div>
+          <DialogFooterActions
+            onCancel={() => setIsOpen(false)}
+            submitLabel="Duplicate"
+            isSubmitDisabled={!name.trim()}
+          />
         </form>
       </DialogContent>
     </Dialog>
