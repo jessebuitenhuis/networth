@@ -61,8 +61,9 @@ export function NetWorthChart() {
     undefined,
     period === ChartPeriod.Custom ? customRange : undefined
   );
-  const minValue = data.reduce((min, p) => Math.min(min, p.netWorth), 0);
-  const maxValue = data.reduce((max, p) => Math.max(max, p.netWorth), 0);
+  const netWorthValues = data.map((p) => p.netWorth);
+  const minValue = netWorthValues.length > 0 ? Math.min(...netWorthValues) : 0;
+  const maxValue = netWorthValues.length > 0 ? Math.max(...netWorthValues) : 0;
   const yAxisConfig = computeYAxisConfig(minValue, maxValue);
   const tickFormat = getTickFormat(period, data);
 

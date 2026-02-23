@@ -104,14 +104,9 @@ export function ProjectedNetWorthChart({
 
   // Calculate Y-axis domain to include goal target amounts
   const maxGoalAmount = goals.length > 0 ? Math.max(...goals.map((g) => g.targetAmount)) : 0;
-  const maxDataValue = data.reduce((max, point) => {
-    const values = Object.values(point).filter((v) => typeof v === "number");
-    return Math.max(max, ...values);
-  }, 0);
-  const minDataValue = data.reduce((min, point) => {
-    const values = Object.values(point).filter((v) => typeof v === "number");
-    return Math.min(min, ...values);
-  }, 0);
+  const allNumericValues = data.flatMap((point) => Object.values(point).filter((v): v is number => typeof v === "number"));
+  const maxDataValue = allNumericValues.length > 0 ? Math.max(...allNumericValues) : 0;
+  const minDataValue = allNumericValues.length > 0 ? Math.min(...allNumericValues) : 0;
   const yAxisConfig = computeYAxisConfig(minDataValue, Math.max(maxDataValue, maxGoalAmount));
 
   // Build legend entries
