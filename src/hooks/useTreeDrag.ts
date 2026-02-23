@@ -2,20 +2,9 @@ import { useCallback, useState } from "react";
 
 import { getDescendantIds } from "@/lib/getDescendantIds";
 
-type TreeItem = { id: string; parentCategoryId?: string };
-
-export type TreeDragState = {
-  draggedId: string | null;
-  dropTargetId: string | null;
-};
-
-export type DragHandlers = {
-  onDragStart: (id: string) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent, targetId: string) => void;
-  onDragLeave: () => void;
-  onDrop: (targetId: string) => void;
-};
+import type { DragHandlers } from "./DragHandlers.type";
+import type { TreeDragState } from "./TreeDragState.type";
+import type { TreeItem } from "./TreeItem.type";
 
 export function useTreeDrag<T extends TreeItem>(
   items: T[],
