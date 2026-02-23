@@ -1,9 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import {
   formatChartCurrency as formatCurrency,
@@ -16,26 +13,11 @@ import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import { NetWorthChart } from "./NetWorthChart";
+import { NetWorthChartPage } from "./NetWorthChart.page";
 
 mockResizeObserver();
 suppressRechartsWarnings();
-
-function renderWithProviders(
-  accounts: Account[] = [],
-  transactions: Transaction[] = []
-) {
-  mockApiResponses({ accounts, transactions });
-  return render(
-    <AccountProvider>
-      <TransactionProvider>
-        <NetWorthChart />
-      </TransactionProvider>
-    </AccountProvider>
-  );
-}
 
 describe("formatCurrency", () => {
   it("formats positive amounts", () => {
@@ -109,42 +91,33 @@ describe("NetWorthChart", () => {
   beforeEach(() => mockApiResponses());
 
   it("renders the period picker with 1M selected by default", () => {
-    renderWithProviders();
+    const page = NetWorthChartPage.render();
 
-    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(page.periodButton("1M")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("switches period on button click", async () => {
-    renderWithProviders();
+    const page = NetWorthChartPage.render();
 
-    await userEvent.click(screen.getByRole("button", { name: "1Y" }));
+    await page.selectPeriod("1Y");
 
-    expect(screen.getByRole("button", { name: "1Y" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+    expect(page.periodButton("1Y")).toHaveAttribute("aria-pressed", "true");
+    expect(page.periodButton("1M")).toHaveAttribute("aria-pressed", "false");
   });
 
   it("renders the chart container", () => {
-    renderWithProviders();
+    const page = NetWorthChartPage.render();
 
-    expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
+    expect(page.chartContainer).toBeInTheDocument();
   });
 
   it("renders without crashing with no transactions", () => {
     const accounts: Account[] = [
       { id: "1", name: "Checking", type: AccountType.Asset },
     ];
-    renderWithProviders(accounts);
+    const page = NetWorthChartPage.render({ accounts });
 
-    expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
+    expect(page.chartContainer).toBeInTheDocument();
   });
 
   it("renders without crashing with transactions", () => {
@@ -154,9 +127,9 @@ describe("NetWorthChart", () => {
     const transactions: Transaction[] = [
       { id: "t1", accountId: "1", amount: 1000, date: "2024-01-01", description: "Opening" },
     ];
-    renderWithProviders(accounts, transactions);
+    const page = NetWorthChartPage.render({ accounts, transactions });
 
-    expect(screen.getByTestId("net-worth-chart")).toBeInTheDocument();
+    expect(page.chartContainer).toBeInTheDocument();
   });
 
   it("renders legend with account names as buttons", async () => {
@@ -164,10 +137,10 @@ describe("NetWorthChart", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    renderWithProviders(accounts);
+    const page = NetWorthChartPage.render({ accounts });
 
-    expect(await screen.findByRole("button", { name: "Checking" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Savings" })).toBeInTheDocument();
+    expect(await page.findAccountButton("Checking")).toBeInTheDocument();
+    expect(page.accountButton("Savings")).toBeInTheDocument();
   });
 
   it("has all accounts enabled by default", async () => {
@@ -175,10 +148,10 @@ describe("NetWorthChart", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    renderWithProviders(accounts);
+    const page = NetWorthChartPage.render({ accounts });
 
-    expect(await screen.findByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
+    expect(await page.findAccountButton("Checking")).toHaveAttribute("aria-pressed", "true");
+    expect(page.accountButton("Savings")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("toggles an account off when clicked", async () => {
@@ -186,13 +159,13 @@ describe("NetWorthChart", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    renderWithProviders(accounts);
+    const page = NetWorthChartPage.render({ accounts });
 
-    await screen.findByRole("button", { name: "Savings" });
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    await page.findAccountButton("Savings");
+    await page.toggleAccount("Savings");
 
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "Checking" })).toHaveAttribute("aria-pressed", "true");
+    expect(page.accountButton("Savings")).toHaveAttribute("aria-pressed", "false");
+    expect(page.accountButton("Checking")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("toggles an account back on when clicked again", async () => {
@@ -200,42 +173,45 @@ describe("NetWorthChart", () => {
       { id: "1", name: "Checking", type: AccountType.Asset },
       { id: "2", name: "Savings", type: AccountType.Asset },
     ];
-    renderWithProviders(accounts);
+    const page = NetWorthChartPage.render({ accounts });
 
-    await screen.findByRole("button", { name: "Savings" });
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
-    await userEvent.click(screen.getByRole("button", { name: "Savings" }));
+    await page.findAccountButton("Savings");
+    await page.toggleAccount("Savings");
+    await page.toggleAccount("Savings");
 
-    expect(screen.getByRole("button", { name: "Savings" })).toHaveAttribute("aria-pressed", "true");
+    expect(page.accountButton("Savings")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("switches to 1W period", async () => {
-    renderWithProviders();
+    const page = NetWorthChartPage.render();
 
-    await userEvent.click(screen.getByRole("button", { name: "1W" }));
+    await page.selectPeriod("1W");
 
-    expect(screen.getByRole("button", { name: "1W" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute("aria-pressed", "false");
+    expect(page.periodButton("1W")).toHaveAttribute("aria-pressed", "true");
+    expect(page.periodButton("1M")).toHaveAttribute("aria-pressed", "false");
   });
 
   it("switches to 3M period", async () => {
-    renderWithProviders();
+    const page = NetWorthChartPage.render();
 
-    await userEvent.click(screen.getByRole("button", { name: "3M" }));
+    await page.selectPeriod("3M");
 
-    expect(screen.getByRole("button", { name: "3M" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "1M" })).toHaveAttribute("aria-pressed", "false");
+    expect(page.periodButton("3M")).toHaveAttribute("aria-pressed", "true");
+    expect(page.periodButton("1M")).toHaveAttribute("aria-pressed", "false");
   });
 
   it("shows custom date range picker when Custom is selected", async () => {
-    renderWithProviders();
-    await userEvent.click(screen.getByRole("button", { name: "Custom" }));
-    expect(screen.getByLabelText("Start")).toBeInTheDocument();
-    expect(screen.getByLabelText("End")).toBeInTheDocument();
+    const page = NetWorthChartPage.render();
+
+    await page.selectPeriod("Custom");
+
+    expect(page.startInput).toBeInTheDocument();
+    expect(page.endInput).toBeInTheDocument();
   });
 
   it("does not show custom date range picker by default", () => {
-    renderWithProviders();
-    expect(screen.queryByLabelText("Start")).not.toBeInTheDocument();
+    const page = NetWorthChartPage.render();
+
+    expect(page.queryStartInput()).not.toBeInTheDocument();
   });
 });

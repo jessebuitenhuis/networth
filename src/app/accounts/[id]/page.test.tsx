@@ -1,24 +1,15 @@
-import { render, screen } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
-import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { CategoryProvider } from "@/categories/CategoryContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
 import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
 import { suppressRechartsWarnings } from "@/test/mocks/suppressRechartsWarnings";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import AccountDetailPage from "./page";
+import { AccountDetailPageObject } from "./page.page";
 
 mockResizeObserver();
 suppressRechartsWarnings();
@@ -33,40 +24,6 @@ const transactions: Transaction[] = [
   { id: "t2", accountId: "a1", amount: -200, date: "2024-01-02", description: "Groceries" },
 ];
 
-function renderPage(
-  id: string,
-  opts: {
-    accounts?: Account[];
-    transactions?: Transaction[];
-    scenarios?: Scenario[];
-    activeScenarioId?: string | null;
-  } = {}
-) {
-  mockApiResponses({
-    accounts: opts.accounts ?? [],
-    transactions: opts.transactions ?? [],
-    scenarios: opts.scenarios ?? [],
-    activeScenarioId: opts.activeScenarioId ?? null,
-  });
-  return render(
-    <TooltipProvider>
-      <SidebarProvider>
-        <AccountProvider>
-          <TransactionProvider>
-            <ScenarioProvider>
-              <RecurringTransactionProvider>
-                <CategoryProvider>
-                  <AccountDetailPage params={{ id }} />
-                </CategoryProvider>
-              </RecurringTransactionProvider>
-            </ScenarioProvider>
-          </TransactionProvider>
-        </AccountProvider>
-      </SidebarProvider>
-    </TooltipProvider>
-  );
-}
-
 describe("AccountDetailPage", () => {
   beforeEach(() => {
     mockApiResponses();
@@ -74,48 +31,47 @@ describe("AccountDetailPage", () => {
   });
 
   it("shows account name as heading", async () => {
-    renderPage("a1", { accounts, transactions });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions });
 
-    expect(await screen.findByRole("heading", { name: "Checking" })).toBeInTheDocument();
+    expect(await page.findHeading("Checking")).toBeInTheDocument();
   });
 
   it("shows current balance computed from transactions", async () => {
-    renderPage("a1", { accounts, transactions });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions });
 
-    expect(await screen.findByText("$800.00")).toBeInTheDocument();
+    expect(await page.findText("$800.00")).toBeInTheDocument();
   });
 
   it("renders transaction list", async () => {
-    renderPage("a1", { accounts, transactions });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions });
 
-    expect(await screen.findByText("Opening balance")).toBeInTheDocument();
-    expect(screen.getByText("Groceries")).toBeInTheDocument();
+    expect(await page.findText("Opening balance")).toBeInTheDocument();
+    expect(page.getText("Groceries")).toBeInTheDocument();
   });
 
   it("renders add transaction dialog trigger", async () => {
-    renderPage("a1", { accounts });
+    const page = AccountDetailPageObject.render("a1", { accounts });
 
-    expect(await screen.findByRole("button", { name: "Add Transaction" })).toBeInTheDocument();
+    expect(await page.findButton("Add Transaction")).toBeInTheDocument();
   });
 
   it("shows 'Account not found' for invalid ID", () => {
-    renderPage("nonexistent");
+    const page = AccountDetailPageObject.render("nonexistent");
 
-    expect(screen.getByText("Account not found")).toBeInTheDocument();
+    expect(page.getText("Account not found")).toBeInTheDocument();
   });
 
   it("shows scenario filter in TopBar with 'Baseline only' default", async () => {
     const scenarios: Scenario[] = [
       { id: "s1", name: "Scenario 1", description: "" },
     ];
-    renderPage("a1", { accounts, transactions, scenarios });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions, scenarios });
 
-    const filter = await screen.findByRole("combobox", { name: "Scenario filter" });
+    const filter = await page.findCombobox("Scenario filter");
     expect(filter).toHaveTextContent("Baseline only");
   });
 
   it("filters balance by selected scenario", async () => {
-    const user = userEvent.setup();
     const scenarios: Scenario[] = [
       { id: "s1", name: "Scenario 1", description: "" },
     ];
@@ -123,17 +79,17 @@ describe("AccountDetailPage", () => {
       { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
       { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Scenario tx", scenarioId: "s1" },
     ];
-    renderPage("a1", { accounts, transactions: scenarioTransactions, scenarios });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions: scenarioTransactions, scenarios });
 
-    expect(await screen.findByText("$1,000.00")).toBeInTheDocument();
+    expect(await page.findText("$1,000.00")).toBeInTheDocument();
 
-    const filter = screen.getByRole("combobox", { name: "Scenario filter" });
-    await user.click(filter);
+    const filter = page.getCombobox("Scenario filter");
+    await page.clickElement(filter);
 
-    const scenario1Option = screen.getByRole("option", { name: "Scenario 1" });
-    await user.click(scenario1Option);
+    const scenario1Option = page.getOption("Scenario 1");
+    await page.clickElement(scenario1Option);
 
-    expect(await screen.findByText("$1,500.00")).toBeInTheDocument();
+    expect(await page.findText("$1,500.00")).toBeInTheDocument();
   });
 
   it("handles deleted scenario gracefully (falls back to baseline)", async () => {
@@ -144,11 +100,11 @@ describe("AccountDetailPage", () => {
       { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-01", description: "Baseline" },
       { id: "t2", accountId: "a1", amount: 500, date: "2024-01-02", description: "Deleted scenario tx", scenarioId: "deleted" },
     ];
-    renderPage("a1", { accounts, transactions: scenarioTransactions, scenarios, activeScenarioId: "deleted" });
+    const page = AccountDetailPageObject.render("a1", { accounts, transactions: scenarioTransactions, scenarios, activeScenarioId: "deleted" });
 
-    const filter = await screen.findByRole("combobox", { name: "Scenario filter" });
+    const filter = await page.findCombobox("Scenario filter");
     expect(filter).toHaveTextContent("Baseline only");
 
-    expect(await screen.findByText("$1,000.00")).toBeInTheDocument();
+    expect(await page.findText("$1,000.00")).toBeInTheDocument();
   });
 });

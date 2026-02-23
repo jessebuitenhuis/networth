@@ -1,9 +1,8 @@
-import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { Goal } from "@/goals/Goal.type";
 
-import { GoalCard } from "./GoalCard";
+import { GoalCardPage } from "./GoalCard.page";
 
 const goal: Goal = {
   id: "1",
@@ -13,17 +12,17 @@ const goal: Goal = {
 
 describe("GoalCard", () => {
   it("displays goal name", () => {
-    render(<GoalCard goal={goal} editAction={<button>Edit</button>} />);
-    expect(screen.getByText("Emergency Fund")).toBeInTheDocument();
+    const page = GoalCardPage.render({ goal });
+    expect(page.getByText("Emergency Fund")).toBeInTheDocument();
   });
 
   it("displays formatted target amount", () => {
-    render(<GoalCard goal={goal} editAction={<button>Edit</button>} />);
-    expect(screen.getByText("$10,000.00")).toBeInTheDocument();
+    const page = GoalCardPage.render({ goal });
+    expect(page.getByText("$10,000.00")).toBeInTheDocument();
   });
 
   it("renders edit action", () => {
-    render(<GoalCard goal={goal} editAction={<button>Edit</button>} />);
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    const page = GoalCardPage.render({ goal });
+    expect(page.getByRole("button", { name: "Edit" })).toBeInTheDocument();
   });
 });

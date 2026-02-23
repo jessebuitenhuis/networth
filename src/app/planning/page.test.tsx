@@ -1,19 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { CategoryProvider } from "@/categories/CategoryContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { GoalProvider } from "@/goals/GoalContext";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import PlanningPage from "./page";
+import { PlanningPageObject } from "./page.page";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -23,26 +14,6 @@ vi.stubGlobal(
     disconnect() {}
   },
 );
-
-function renderPage() {
-  return render(
-    <SidebarProvider>
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <GoalProvider>
-                <CategoryProvider>
-                  <PlanningPage />
-                </CategoryProvider>
-              </GoalProvider>
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    </SidebarProvider>,
-  );
-}
 
 describe("PlanningPage", () => {
   beforeEach(() => {
@@ -54,17 +25,15 @@ describe("PlanningPage", () => {
   });
 
   it("renders the Planning heading", () => {
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      screen.getByRole("heading", { name: "Planning" }),
-    ).toBeInTheDocument();
+    expect(page.getHeading("Planning")).toBeInTheDocument();
   });
 
   it("renders the projected net worth chart", () => {
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(screen.getByTestId("projected-chart")).toBeInTheDocument();
+    expect(page.getTestId("projected-chart")).toBeInTheDocument();
   });
 
   it("renders the scenario picker when scenarios exist", async () => {
@@ -72,19 +41,15 @@ describe("PlanningPage", () => {
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      await screen.findByRole("button", { name: /scenarios/i }),
-    ).toBeInTheDocument();
+    expect(await page.findButton(/scenarios/i)).toBeInTheDocument();
   });
 
   it("hides the scenario picker when no scenarios exist", () => {
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      screen.queryByRole("button", { name: /scenarios/i }),
-    ).not.toBeInTheDocument();
+    expect(page.queryButton(/scenarios/i)).not.toBeInTheDocument();
   });
 
   it("renders the Account picker when 2+ accounts exist", async () => {
@@ -95,27 +60,21 @@ describe("PlanningPage", () => {
       ],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      await screen.findByRole("button", { name: /accounts/i }),
-    ).toBeInTheDocument();
+    expect(await page.findButton(/accounts/i)).toBeInTheDocument();
   });
 
   it("hides the Account picker when fewer than 2 accounts exist", () => {
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      screen.queryByRole("button", { name: /accounts/i }),
-    ).not.toBeInTheDocument();
+    expect(page.queryButton(/accounts/i)).not.toBeInTheDocument();
   });
 
   it("renders the create scenario button", () => {
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    expect(
-      screen.getByRole("button", { name: /new scenario/i }),
-    ).toBeInTheDocument();
+    expect(page.getButton(/new scenario/i)).toBeInTheDocument();
   });
 
   it("toggles scenario selection when checkbox is clicked", async () => {
@@ -123,21 +82,14 @@ describe("PlanningPage", () => {
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    // Wait for scenario data to load
-    await screen.findByRole("button", { name: "Scenarios (0)" });
+    await page.findButton("Scenarios (0)");
 
-    // Open picker and click scenario
-    await userEvent.click(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    );
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
+    await page.clickButton("Scenarios (0)");
+    await page.clickCheckbox("Optimistic");
 
-    // Should update to 1 selected
-    expect(
-      screen.getByRole("button", { name: "Scenarios (1)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Scenarios (1)")).toBeInTheDocument();
   });
 
   it("toggles account filter when checkbox is clicked", async () => {
@@ -148,35 +100,26 @@ describe("PlanningPage", () => {
       ],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    // Wait for account data to load
-    await screen.findByRole("button", { name: "Accounts (2)" });
+    await page.findButton("Accounts (2)");
 
-    // Open picker and toggle account off
-    await userEvent.click(screen.getByRole("button", { name: "Accounts (2)" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Checking" }));
+    await page.clickButton("Accounts (2)");
+    await page.clickCheckbox("Checking");
 
-    // Should update to 1 account
-    expect(
-      screen.getByRole("button", { name: "Accounts (1)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Accounts (1)")).toBeInTheDocument();
   });
 
   it("creates scenario and auto-selects it", async () => {
     mockApiResponses();
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /new scenario/i }),
-    );
-    await userEvent.type(screen.getByLabelText(/name/i), "My Scenario");
-    await userEvent.click(screen.getByRole("button", { name: /create$/i }));
+    await page.clickButton(/new scenario/i);
+    await page.typeIntoLabel(/name/i, "My Scenario");
+    await page.clickButton(/create$/i);
 
-    expect(
-      screen.getByRole("button", { name: "Scenarios (1)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Scenarios (1)")).toBeInTheDocument();
   });
 
   it("hides scenario picker after deleting last scenario", async () => {
@@ -184,28 +127,18 @@ describe("PlanningPage", () => {
       scenarios: [{ id: "scenario-1", name: "Optimistic" }],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    await screen.findByRole("button", { name: "Scenarios (0)" });
+    await page.findButton("Scenarios (0)");
 
-    // Open picker, select the scenario, then click edit (popover stays open)
-    await userEvent.click(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    );
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
-    await userEvent.click(screen.getByLabelText("Edit Scenario"));
+    await page.clickButton("Scenarios (0)");
+    await page.clickCheckbox("Optimistic");
+    await page.clickButton("Edit Scenario");
 
-    // Click delete in the edit dialog
-    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await page.clickButton(/delete/i);
+    await page.clickLastButton(/delete/i);
 
-    // Confirm delete in the alert dialog
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
-    await userEvent.click(deleteButtons[deleteButtons.length - 1]);
-
-    // Scenario picker should be hidden (no scenarios left)
-    expect(
-      screen.queryByRole("button", { name: /scenarios/i }),
-    ).not.toBeInTheDocument();
+    expect(page.queryButton(/scenarios/i)).not.toBeInTheDocument();
   });
 
   it("duplicates scenario with transactions and auto-selects the copy", async () => {
@@ -235,24 +168,17 @@ describe("PlanningPage", () => {
       ],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    await screen.findByRole("button", { name: "Scenarios (0)" });
+    await page.findButton("Scenarios (0)");
 
-    // Open picker to render the duplicate button
-    await userEvent.click(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    );
-    await userEvent.click(screen.getByLabelText("Duplicate Scenario"));
+    await page.clickButton("Scenarios (0)");
+    await page.clickButton("Duplicate Scenario");
 
-    // Submit duplicate dialog with pre-filled name
-    expect(screen.getByLabelText(/name/i)).toHaveValue("Optimistic (Copy)");
-    await userEvent.click(screen.getByRole("button", { name: /duplicate$/i }));
+    expect(page.getLabel(/name/i)).toHaveValue("Optimistic (Copy)");
+    await page.clickButton(/duplicate$/i);
 
-    // New scenario should be auto-selected
-    expect(
-      screen.getByRole("button", { name: "Scenarios (1)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Scenarios (1)")).toBeInTheDocument();
   });
 
   it("clears all scenarios when Deselect all is clicked", async () => {
@@ -263,30 +189,18 @@ describe("PlanningPage", () => {
       ],
     });
 
-    renderPage();
+    const page = PlanningPageObject.render();
 
-    // Wait for scenario data to load
-    await screen.findByRole("button", { name: "Scenarios (0)" });
+    await page.findButton("Scenarios (0)");
 
-    // Select two scenarios
-    await userEvent.click(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    );
-    await userEvent.click(screen.getByRole("checkbox", { name: "Optimistic" }));
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Conservative" }),
-    );
+    await page.clickButton("Scenarios (0)");
+    await page.clickCheckbox("Optimistic");
+    await page.clickCheckbox("Conservative");
 
-    expect(
-      screen.getByRole("button", { name: "Scenarios (2)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Scenarios (2)")).toBeInTheDocument();
 
-    // Click Deselect all
-    await userEvent.click(screen.getByRole("button", { name: "Deselect all" }));
+    await page.clickButton("Deselect all");
 
-    // Should clear selection
-    expect(
-      screen.getByRole("button", { name: "Scenarios (0)" }),
-    ).toBeInTheDocument();
+    expect(page.getButton("Scenarios (0)")).toBeInTheDocument();
   });
 });

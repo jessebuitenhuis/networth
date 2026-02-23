@@ -1,70 +1,38 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect,it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-
-import TopBar from "./TopBar";
+import { TopBarPage } from "./TopBar.page";
 
 describe("TopBar", () => {
   it("renders SidebarTrigger", () => {
-    const { container } = render(
-      <SidebarProvider>
-        <TopBar />
-      </SidebarProvider>
-    );
+    const page = TopBarPage.render();
 
-    const trigger = container.querySelector('[data-slot="sidebar-trigger"]');
-    expect(trigger).toBeInTheDocument();
+    expect(page.sidebarTrigger).toBeInTheDocument();
   });
 
   it("renders title as h1 when provided", () => {
-    render(
-      <SidebarProvider>
-        <TopBar title="Test Page" />
-      </SidebarProvider>
-    );
+    const page = TopBarPage.render({ title: "Test Page" });
 
-    const heading = screen.getByRole("heading", { level: 1, name: "Test Page" });
-    expect(heading).toBeInTheDocument();
+    expect(page.getHeading("Test Page", 1)).toBeInTheDocument();
   });
 
   it("renders actions when provided", () => {
-    render(
-      <SidebarProvider>
-        <TopBar
-          actions={
-            <button type="button">Test Action</button>
-          }
-        />
-      </SidebarProvider>
-    );
+    const page = TopBarPage.render({
+      actions: <button type="button">Test Action</button>,
+    });
 
-    const action = screen.getByRole("button", { name: "Test Action" });
-    expect(action).toBeInTheDocument();
+    expect(page.getButton("Test Action")).toBeInTheDocument();
   });
 
   it("does not render h1 when no title provided", () => {
-    render(
-      <SidebarProvider>
-        <TopBar />
-      </SidebarProvider>
-    );
+    const page = TopBarPage.render();
 
-    const headings = screen.queryAllByRole("heading", { level: 1 });
-    expect(headings).toHaveLength(0);
+    expect(page.queryHeading(1)).toHaveLength(0);
   });
 
   it("does not render actions container when no actions provided", () => {
-    const { container } = render(
-      <SidebarProvider>
-        <TopBar />
-      </SidebarProvider>
-    );
+    const page = TopBarPage.render();
 
-    const header = container.querySelector("header");
-    expect(header).toBeInTheDocument();
-
-    const buttons = screen.queryAllByRole("button");
-    expect(buttons).toHaveLength(1); // only sidebar trigger
+    expect(page.header).toBeInTheDocument();
+    expect(page.queryAllButtons()).toHaveLength(1); // only sidebar trigger
   });
 });

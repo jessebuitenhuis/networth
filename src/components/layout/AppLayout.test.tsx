@@ -1,22 +1,17 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/",
 }));
+
 import type { Account } from "@/accounts/Account.type";
-import { AccountProvider } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import { AppLayout } from "./AppLayout";
+import { AppLayoutPage } from "./AppLayout.page";
 import type { NavGroup } from "./NavGroup.type";
 
 const testGroups: NavGroup[] = [
@@ -25,22 +20,6 @@ const testGroups: NavGroup[] = [
     items: [{ title: "Dashboard", url: "/dashboard" }],
   },
 ];
-
-function renderWithProvider(navGroups: NavGroup[], children: React.ReactNode) {
-  return render(
-    <SidebarProvider>
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <AppLayout navGroups={navGroups}>{children}</AppLayout>
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    </SidebarProvider>,
-  );
-}
 
 describe("AppLayout", () => {
   beforeEach(() => {
@@ -52,17 +31,15 @@ describe("AppLayout", () => {
   });
 
   it("renders children in main content area", () => {
-    renderWithProvider(testGroups, <p>Page content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Page content</p>);
 
-    expect(screen.getByText("Page content")).toBeInTheDocument();
+    expect(page.getText("Page content")).toBeInTheDocument();
   });
 
   it("renders sidebar with nav items", () => {
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    expect(
-      screen.getByRole("link", { name: "Dashboard" }),
-    ).toBeInTheDocument();
+    expect(page.getLink("Dashboard")).toBeInTheDocument();
   });
 
   it("renders Accounts nav group when accounts exist", async () => {
@@ -72,11 +49,11 @@ describe("AppLayout", () => {
     ];
     mockApiResponses({ accounts });
 
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    expect(await screen.findByText("Accounts")).toBeInTheDocument();
-    expect(screen.getByText("Checking")).toBeInTheDocument();
-    expect(screen.getByText("Savings")).toBeInTheDocument();
+    expect(await page.findText("Accounts")).toBeInTheDocument();
+    expect(page.getText("Checking")).toBeInTheDocument();
+    expect(page.getText("Savings")).toBeInTheDocument();
   });
 
   it("links accounts to /accounts/:id", async () => {
@@ -85,24 +62,22 @@ describe("AppLayout", () => {
     ];
     mockApiResponses({ accounts });
 
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    const link = await screen.findByRole("link", { name: /Checking/ });
+    const link = await page.findLink(/Checking/);
     expect(link).toHaveAttribute("href", "/accounts/1");
   });
 
   it("renders Accounts nav group even when no accounts exist", () => {
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    expect(screen.getByText("Accounts")).toBeInTheDocument();
+    expect(page.getText("Accounts")).toBeInTheDocument();
   });
 
   it("renders add account button in Accounts group", () => {
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    expect(
-      screen.getByRole("button", { name: /New Account/i }),
-    ).toBeInTheDocument();
+    expect(page.getButton(/New Account/i)).toBeInTheDocument();
   });
 
   it("renders AccountIcon for each account nav item", async () => {
@@ -112,7 +87,7 @@ describe("AppLayout", () => {
     ];
     mockApiResponses({ accounts });
 
-    renderWithProvider(testGroups, <p>Content</p>);
+    AppLayoutPage.render(testGroups, <p>Content</p>);
 
     const checkingIcon = await screen.findByText("CH");
     expect(checkingIcon).toBeInTheDocument();
@@ -146,7 +121,7 @@ describe("AppLayout", () => {
     ];
     mockApiResponses({ accounts, transactions });
 
-    renderWithProvider(testGroups, <p>Content</p>);
+    AppLayoutPage.render(testGroups, <p>Content</p>);
 
     expect(await screen.findByText("$1.5K")).toBeInTheDocument();
     expect(screen.getByText("$250K")).toBeInTheDocument();
@@ -175,15 +150,15 @@ describe("AppLayout", () => {
     ];
     mockApiResponses({ accounts, transactions });
 
-    renderWithProvider(testGroups, <p>Content</p>);
+    AppLayoutPage.render(testGroups, <p>Content</p>);
 
     expect(await screen.findByText("$4K")).toBeInTheDocument();
   });
 
   it("renders New Account as a muted link at the bottom of account list", () => {
-    renderWithProvider(testGroups, <p>Content</p>);
+    const page = AppLayoutPage.render(testGroups, <p>Content</p>);
 
-    const newAccountLink = screen.getByRole("button", { name: /New Account/i });
+    const newAccountLink = page.getButton(/New Account/i);
     expect(newAccountLink).toBeInTheDocument();
     expect(newAccountLink).toHaveClass("text-muted-foreground");
   });

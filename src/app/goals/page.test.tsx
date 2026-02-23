@@ -1,10 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { GoalProvider } from "@/goals/GoalContext";
-
-import GoalsPage from "./page";
+import { GoalsPageObject } from "./page.page";
 
 describe("GoalsPage", () => {
   beforeEach(() => {
@@ -12,39 +8,19 @@ describe("GoalsPage", () => {
   });
 
   it("renders TopBar with title", () => {
-    render(
-      <SidebarProvider>
-        <GoalProvider>
-          <GoalsPage />
-        </GoalProvider>
-      </SidebarProvider>
-    );
-    expect(screen.getByRole("heading", { name: "Goals" })).toBeInTheDocument();
+    const page = GoalsPageObject.render();
+    expect(page.getHeading("Goals")).toBeInTheDocument();
   });
 
   it("renders CreateGoalDialog in TopBar actions", () => {
-    render(
-      <SidebarProvider>
-        <GoalProvider>
-          <GoalsPage />
-        </GoalProvider>
-      </SidebarProvider>
-    );
-    expect(
-      screen.getByRole("button", { name: /add goal/i })
-    ).toBeInTheDocument();
+    const page = GoalsPageObject.render();
+    expect(page.getButton(/add goal/i)).toBeInTheDocument();
   });
 
   it("renders GoalList", () => {
-    render(
-      <SidebarProvider>
-        <GoalProvider>
-          <GoalsPage />
-        </GoalProvider>
-      </SidebarProvider>
-    );
+    const page = GoalsPageObject.render();
     expect(
-      screen.getByText(
+      page.getText(
         /no goals yet\. add a goal to start tracking your financial targets\./i
       )
     ).toBeInTheDocument();

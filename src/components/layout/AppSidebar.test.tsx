@@ -1,18 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-
-import { AppSidebar } from "./AppSidebar";
 import type { NavGroup } from "./NavGroup.type";
-
-function renderWithProvider(navGroups: NavGroup[]) {
-  return render(
-    <SidebarProvider>
-      <AppSidebar navGroups={navGroups} />
-    </SidebarProvider>
-  );
-}
+import { AppSidebarPage } from "./AppSidebar.page";
 
 const testGroups: NavGroup[] = [
   {
@@ -30,23 +19,18 @@ const testGroups: NavGroup[] = [
 
 describe("AppSidebar", () => {
   it("renders all nav group labels", () => {
-    renderWithProvider(testGroups);
+    const page = AppSidebarPage.render(testGroups);
 
-    expect(screen.getByText("Main")).toBeInTheDocument();
-    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(page.getText("Main")).toBeInTheDocument();
+    expect(page.getText("Settings")).toBeInTheDocument();
   });
 
   it("renders all nav items as links with correct hrefs", () => {
-    renderWithProvider(testGroups);
+    const page = AppSidebarPage.render(testGroups);
 
-    const dashboard = screen.getByRole("link", { name: "Dashboard" });
-    expect(dashboard).toHaveAttribute("href", "/dashboard");
-
-    const accounts = screen.getByRole("link", { name: "Accounts" });
-    expect(accounts).toHaveAttribute("href", "/accounts");
-
-    const profile = screen.getByRole("link", { name: "Profile" });
-    expect(profile).toHaveAttribute("href", "/profile");
+    expect(page.getLink("Dashboard")).toHaveAttribute("href", "/dashboard");
+    expect(page.getLink("Accounts")).toHaveAttribute("href", "/accounts");
+    expect(page.getLink("Profile")).toHaveAttribute("href", "/profile");
   });
 
   it("renders group action when provided", () => {
@@ -57,9 +41,9 @@ describe("AppSidebar", () => {
         action: <button>+</button>,
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.getByRole("button", { name: "+" })).toBeInTheDocument();
+    expect(page.getButton("+")).toBeInTheDocument();
   });
 
   it("renders item action only on hover", () => {
@@ -75,21 +59,19 @@ describe("AppSidebar", () => {
         ],
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(page.queryButton("Edit")).not.toBeInTheDocument();
 
-    const checkingLink = screen.getByRole("link", { name: "Checking" });
-    const listItem = checkingLink.closest('[data-slot="sidebar-menu-item"]')!;
-    fireEvent.mouseEnter(listItem);
+    page.hoverItem("Checking");
 
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(page.getButton("Edit")).toBeInTheDocument();
   });
 
   it("handles empty nav groups", () => {
-    renderWithProvider([]);
+    const page = AppSidebarPage.render([]);
 
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(page.queryLink()).not.toBeInTheDocument();
   });
 
   it("renders item icon when provided", () => {
@@ -105,34 +87,28 @@ describe("AppSidebar", () => {
         ],
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.getByTestId("dashboard-icon")).toBeInTheDocument();
+    expect(page.getTestId("dashboard-icon")).toBeInTheDocument();
   });
 
   it("renders app name in sidebar header", () => {
-    renderWithProvider(testGroups);
+    const page = AppSidebarPage.render(testGroups);
 
-    expect(screen.getByText("Net Worth")).toBeInTheDocument();
+    expect(page.getText("Net Worth")).toBeInTheDocument();
   });
 
   it("renders money icon in sidebar header", () => {
-    const { container } = renderWithProvider(testGroups);
+    const page = AppSidebarPage.render(testGroups);
 
-    const header = container.querySelector("[data-slot='sidebar-header']");
-    expect(header).toBeInTheDocument();
-
-    const icon = header?.querySelector("svg");
+    const icon = page.sidebarHeader?.querySelector("svg");
     expect(icon).toBeInTheDocument();
   });
 
   it("does not render toggle in sidebar header", () => {
-    const { container } = renderWithProvider(testGroups);
+    const page = AppSidebarPage.render(testGroups);
 
-    const header = container.querySelector("[data-slot='sidebar-header']");
-    expect(header).toBeInTheDocument();
-
-    const trigger = header?.querySelector("[data-slot='sidebar-trigger']");
+    const trigger = page.sidebarHeader?.querySelector("[data-slot='sidebar-trigger']");
     expect(trigger).not.toBeInTheDocument();
   });
 
@@ -144,10 +120,10 @@ describe("AppSidebar", () => {
         items: [],
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.getByText("Accounts")).toBeInTheDocument();
-    expect(screen.getByText("$250K")).toBeInTheDocument();
+    expect(page.getText("Accounts")).toBeInTheDocument();
+    expect(page.getText("$250K")).toBeInTheDocument();
   });
 
   it("renders subtitle next to item title", () => {
@@ -163,10 +139,10 @@ describe("AppSidebar", () => {
         ],
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.getByText("Checking")).toBeInTheDocument();
-    expect(screen.getByText("$1.5K")).toBeInTheDocument();
+    expect(page.getText("Checking")).toBeInTheDocument();
+    expect(page.getText("$1.5K")).toBeInTheDocument();
   });
 
   it("renders footerAction below items", () => {
@@ -177,8 +153,8 @@ describe("AppSidebar", () => {
         footerAction: <button>New Account</button>,
       },
     ];
-    renderWithProvider(groups);
+    const page = AppSidebarPage.render(groups);
 
-    expect(screen.getByRole("button", { name: "New Account" })).toBeInTheDocument();
+    expect(page.getButton("New Account")).toBeInTheDocument();
   });
 });

@@ -1,19 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { AccountProvider } from "@/accounts/AccountContext";
-import { CategoryProvider } from "@/categories/CategoryContext";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { RecurrenceFrequency } from "@/recurring-transactions/RecurrenceFrequency";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
-import { RecurringTransactionProvider } from "@/recurring-transactions/RecurringTransactionContext";
 import type { Scenario } from "@/scenarios/Scenario.type";
-import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import type { Transaction } from "@/transactions/Transaction.type";
-import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import { TransactionList } from "./TransactionList";
+import { TransactionListPage } from "./TransactionList.page";
 
 const transactions: Transaction[] = [
   { id: "t1", accountId: "a1", amount: 1000, date: "2024-01-15", description: "Opening balance" },
@@ -21,49 +15,18 @@ const transactions: Transaction[] = [
   { id: "t3", accountId: "a1", amount: 500, date: "2024-01-18", description: "Salary" },
 ];
 
-function renderWithProvider(
-  accountId: string,
-  initialTransactions: Transaction[] = [],
-  initialRecurring: RecurringTransaction[] = [],
-  initialScenarios: Scenario[] = [],
-  activeScenarioId?: string | null
-) {
-  mockApiResponses({
-    transactions: initialTransactions,
-    recurringTransactions: initialRecurring,
-    scenarios: initialScenarios,
-    activeScenarioId: activeScenarioId ?? null,
-  });
-  return render(
-    <TooltipProvider>
-      <AccountProvider>
-        <TransactionProvider>
-          <ScenarioProvider>
-            <RecurringTransactionProvider>
-              <CategoryProvider>
-                <TransactionList accountId={accountId} />
-              </CategoryProvider>
-            </RecurringTransactionProvider>
-          </ScenarioProvider>
-        </TransactionProvider>
-      </AccountProvider>
-    </TooltipProvider>
-  );
-}
-
 describe("TransactionList", () => {
   beforeEach(() => mockApiResponses());
 
   it("shows empty message when no transactions", () => {
-    renderWithProvider("a1");
-    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+    const page = TransactionListPage.render({ accountId: "a1" });
+    expect(page.emptyMessage).toBeInTheDocument();
   });
 
   it("lists transactions sorted by date newest first", async () => {
-    renderWithProvider("a1", transactions);
+    const page = TransactionListPage.render({ accountId: "a1", transactions });
 
-    const rows = await screen.findAllByRole("row");
-    const dataRows = rows.slice(1); // Skip header row
+    const dataRows = await page.findRows();
     expect(dataRows).toHaveLength(3);
     expect(dataRows[0]).toHaveTextContent("Groceries");
     expect(dataRows[1]).toHaveTextContent("Salary");
@@ -71,43 +34,42 @@ describe("TransactionList", () => {
   });
 
   it("displays date, description, and formatted amount", async () => {
-    renderWithProvider("a1", [transactions[0]]);
+    const page = TransactionListPage.render({ accountId: "a1", transactions: [transactions[0]] });
 
-    expect(await screen.findByText("Opening balance")).toBeInTheDocument();
+    expect(await page.findText("Opening balance")).toBeInTheDocument();
     const formattedDate = new Date("2024-01-15T00:00:00").toLocaleDateString("en-US");
     expect(screen.getByText(formattedDate)).toBeInTheDocument();
     expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
   });
 
   it("shows positive amounts in green", async () => {
-    renderWithProvider("a1", [transactions[0]]);
+    TransactionListPage.render({ accountId: "a1", transactions: [transactions[0]] });
 
     const amount = await screen.findByText("+$1,000.00");
     expect(amount).toHaveClass("text-green-600");
   });
 
   it("shows negative amounts in red", async () => {
-    renderWithProvider("a1", [transactions[1]]);
+    TransactionListPage.render({ accountId: "a1", transactions: [transactions[1]] });
 
     const amount = await screen.findByText("-$200.00");
     expect(amount).toHaveClass("text-red-600");
   });
 
   it("shows edit button for each transaction", async () => {
-    renderWithProvider("a1", [transactions[0]]);
+    const page = TransactionListPage.render({ accountId: "a1", transactions: [transactions[0]] });
 
-    const editButton = await screen.findByLabelText("Edit Transaction");
-    expect(editButton).toBeInTheDocument();
+    expect(await page.findEditButton()).toBeInTheDocument();
   });
 
   it("renders future-dated transaction with dashed border", async () => {
     const futureTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: 1000, date: "2099-01-01", description: "Future tx" },
     ];
-    const { container } = renderWithProvider("a1", futureTransactions);
+    TransactionListPage.render({ accountId: "a1", transactions: futureTransactions });
 
     await screen.findByText("Future tx");
-    const rows = container.querySelectorAll("[data-slot='table-row']");
+    const rows = document.querySelectorAll("[data-slot='table-row']");
     const dataRow = rows[1]; // Skip header row
     expect(dataRow).toHaveClass("border-dashed");
   });
@@ -117,16 +79,15 @@ describe("TransactionList", () => {
       ...transactions,
       { id: "t4", accountId: "a2", amount: 9999, date: "2024-01-25", description: "Other account" },
     ];
-    renderWithProvider("a1", mixedTransactions);
+    const page = TransactionListPage.render({ accountId: "a1", transactions: mixedTransactions });
 
-    const rows = await screen.findAllByRole("row");
-    const dataRows = rows.slice(1); // Skip header row
+    const dataRows = await page.findRows();
     expect(dataRows).toHaveLength(3);
-    expect(screen.queryByText("Other account")).not.toBeInTheDocument();
+    expect(page.queryText("Other account")).not.toBeInTheDocument();
   });
 
   it("shows next recurring occurrence in the list", async () => {
-    const recurring: RecurringTransaction[] = [
+    const recurringTransactions: RecurringTransaction[] = [
       {
         id: "r1",
         accountId: "a1",
@@ -136,15 +97,15 @@ describe("TransactionList", () => {
         startDate: "2024-01-15",
       },
     ];
-    renderWithProvider("a1", [], recurring);
+    const page = TransactionListPage.render({ accountId: "a1", recurringTransactions });
 
-    expect(await screen.findByText("Monthly Salary")).toBeInTheDocument();
+    expect(await page.findText("Monthly Salary")).toBeInTheDocument();
     expect(screen.getByText("Recurring")).toBeInTheDocument();
   });
 
   it("sorts recurring occurrence among regular transactions by date", async () => {
     // Use a date far in the future so the next occurrence is predictable
-    const recurring: RecurringTransaction[] = [
+    const recurringTransactions: RecurringTransaction[] = [
       {
         id: "r1",
         accountId: "a1",
@@ -157,10 +118,9 @@ describe("TransactionList", () => {
     const txs: Transaction[] = [
       { id: "t1", accountId: "a1", amount: 100, date: "2099-07-01", description: "Future tx" },
     ];
-    renderWithProvider("a1", txs, recurring);
+    const page = TransactionListPage.render({ accountId: "a1", transactions: txs, recurringTransactions });
 
-    const rows = await screen.findAllByRole("row");
-    const dataRows = rows.slice(1); // Skip header row
+    const dataRows = await page.findRows();
     expect(dataRows).toHaveLength(2);
     // Future tx (2099-07-01) is newer, so appears first
     expect(dataRows[0]).toHaveTextContent("Future tx");
@@ -168,7 +128,7 @@ describe("TransactionList", () => {
   });
 
   it("shows edit button for recurring transaction", async () => {
-    const recurring: RecurringTransaction[] = [
+    const recurringTransactions: RecurringTransaction[] = [
       {
         id: "r1",
         accountId: "a1",
@@ -178,14 +138,13 @@ describe("TransactionList", () => {
         startDate: "2024-01-15",
       },
     ];
-    renderWithProvider("a1", [], recurring);
+    const page = TransactionListPage.render({ accountId: "a1", recurringTransactions });
 
-    const editButton = await screen.findByLabelText("Edit Transaction");
-    expect(editButton).toBeInTheDocument();
+    expect(await page.findEditButton()).toBeInTheDocument();
   });
 
   it("does not show ended recurring transaction", async () => {
-    const recurring: RecurringTransaction[] = [
+    const recurringTransactions: RecurringTransaction[] = [
       {
         id: "r1",
         accountId: "a1",
@@ -196,13 +155,13 @@ describe("TransactionList", () => {
         endDate: "2020-06-01",
       },
     ];
-    renderWithProvider("a1", [], recurring);
+    const page = TransactionListPage.render({ accountId: "a1", recurringTransactions });
 
-    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+    expect(page.emptyMessage).toBeInTheDocument();
   });
 
   it("does not show recurring transaction for a different account", async () => {
-    const recurring: RecurringTransaction[] = [
+    const recurringTransactions: RecurringTransaction[] = [
       {
         id: "r1",
         accountId: "a2",
@@ -212,65 +171,74 @@ describe("TransactionList", () => {
         startDate: "2024-01-15",
       },
     ];
-    renderWithProvider("a1", [], recurring);
+    const page = TransactionListPage.render({ accountId: "a1", recurringTransactions });
 
-    expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
+    expect(page.emptyMessage).toBeInTheDocument();
   });
 
   it("hides account column in single-account view", async () => {
-    renderWithProvider("a1", transactions);
+    const page = TransactionListPage.render({ accountId: "a1", transactions });
 
-    await screen.findByText("Groceries");
-    expect(screen.queryByRole("columnheader", { name: /Account/ })).not.toBeInTheDocument();
+    await page.findText("Groceries");
+    expect(page.queryColumnHeader(/Account/)).not.toBeInTheDocument();
   });
 
   it("shows scenario icon for transactions with a scenarioId", async () => {
-    const scenarios: Scenario[] = [
-      { id: "s1", name: "Early Retirement", description: "" },
-    ];
+    const scenarios: Scenario[] = [{ id: "s1", name: "Early Retirement", description: "" }];
     const scenarioTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "s1" },
     ];
-    renderWithProvider("a1", scenarioTransactions, [], scenarios, "s1");
+    const page = TransactionListPage.render({
+      accountId: "a1",
+      transactions: scenarioTransactions,
+      scenarios,
+      activeScenarioId: "s1",
+    });
 
-    expect(await screen.findByLabelText("Scenario: Early Retirement")).toBeInTheDocument();
+    expect(await page.findScenarioLabel("Scenario: Early Retirement")).toBeInTheDocument();
   });
 
   it("does not show scenario icon for baseline transactions", async () => {
     const baselineTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: -200, date: "2024-01-15", description: "Groceries" },
     ];
-    renderWithProvider("a1", baselineTransactions);
+    const page = TransactionListPage.render({ accountId: "a1", transactions: baselineTransactions });
 
-    await screen.findByText("Groceries");
-    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+    await page.findText("Groceries");
+    expect(page.queryScenarioLabel(/^Scenario:/)).not.toBeInTheDocument();
   });
 
   it("does not show scenario icon when scenario was deleted", async () => {
     const orphanScenarioTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: -30000, date: "2024-01-15", description: "New Car", scenarioId: "deleted-scenario" },
     ];
-    const dummyScenarios: Scenario[] = [
-      { id: "dummy", name: "Dummy", description: "" },
-    ];
-    renderWithProvider("a1", orphanScenarioTransactions, [], dummyScenarios, "deleted-scenario");
+    const dummyScenarios: Scenario[] = [{ id: "dummy", name: "Dummy", description: "" }];
+    const page = TransactionListPage.render({
+      accountId: "a1",
+      transactions: orphanScenarioTransactions,
+      scenarios: dummyScenarios,
+      activeScenarioId: "deleted-scenario",
+    });
 
-    await screen.findByText("New Car");
-    expect(screen.queryByLabelText(/^Scenario:/)).not.toBeInTheDocument();
+    await page.findText("New Car");
+    expect(page.queryScenarioLabel(/^Scenario:/)).not.toBeInTheDocument();
   });
 
   it("shows only baseline transactions when activeScenarioId is null", async () => {
-    const scenarios: Scenario[] = [
-      { id: "s1", name: "Scenario 1", description: "" },
-    ];
+    const scenarios: Scenario[] = [{ id: "s1", name: "Scenario 1", description: "" }];
     const mixedTransactions: Transaction[] = [
       { id: "t1", accountId: "a1", amount: 100, date: "2024-01-15", description: "Baseline tx" },
       { id: "t2", accountId: "a1", amount: 200, date: "2024-01-16", description: "Scenario tx", scenarioId: "s1" },
     ];
-    renderWithProvider("a1", mixedTransactions, [], scenarios, null);
+    const page = TransactionListPage.render({
+      accountId: "a1",
+      transactions: mixedTransactions,
+      scenarios,
+      activeScenarioId: null,
+    });
 
-    expect(await screen.findByText("Baseline tx")).toBeInTheDocument();
-    expect(screen.queryByText("Scenario tx")).not.toBeInTheDocument();
+    expect(await page.findText("Baseline tx")).toBeInTheDocument();
+    expect(page.queryText("Scenario tx")).not.toBeInTheDocument();
   });
 
   it("shows baseline + scenario transactions when activeScenarioId is set", async () => {
@@ -283,10 +251,15 @@ describe("TransactionList", () => {
       { id: "t2", accountId: "a1", amount: 200, date: "2024-01-16", description: "Scenario 1 tx", scenarioId: "s1" },
       { id: "t3", accountId: "a1", amount: 300, date: "2024-01-17", description: "Scenario 2 tx", scenarioId: "s2" },
     ];
-    renderWithProvider("a1", mixedTransactions, [], scenarios, "s1");
+    const page = TransactionListPage.render({
+      accountId: "a1",
+      transactions: mixedTransactions,
+      scenarios,
+      activeScenarioId: "s1",
+    });
 
-    expect(await screen.findByText("Baseline tx")).toBeInTheDocument();
+    expect(await page.findText("Baseline tx")).toBeInTheDocument();
     expect(screen.getByText("Scenario 1 tx")).toBeInTheDocument();
-    expect(screen.queryByText("Scenario 2 tx")).not.toBeInTheDocument();
+    expect(page.queryText("Scenario 2 tx")).not.toBeInTheDocument();
   });
 });

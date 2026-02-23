@@ -1,11 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  MultiSelectPicker,
-  type MultiSelectPickerItem,
-} from "./MultiSelectPicker";
+import { type MultiSelectPickerItem } from "./MultiSelectPicker";
+import { MultiSelectPickerPage } from "./MultiSelectPicker.page";
 
 const items: MultiSelectPickerItem[] = [
   { id: "1", label: "Alpha" },
@@ -15,148 +12,118 @@ const items: MultiSelectPickerItem[] = [
 
 describe("MultiSelectPicker", () => {
   it("renders trigger with label and selected count", () => {
-    const selectedIds = new Set(["1", "2"]);
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set(["1", "2"]),
+      onToggle: vi.fn(),
+    });
 
-    expect(
-      screen.getByRole("button", { name: "Items (2)" })
-    ).toBeInTheDocument();
+    expect(page.trigger("Items", 2)).toBeInTheDocument();
   });
 
   it("shows checkboxes for all items when opened", async () => {
-    const selectedIds = new Set<string>();
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (0)" }));
+    await page.open("Items", 0);
 
-    expect(screen.getByRole("checkbox", { name: "Alpha" })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Beta" })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Gamma" })).toBeInTheDocument();
+    expect(page.checkbox("Alpha")).toBeInTheDocument();
+    expect(page.checkbox("Beta")).toBeInTheDocument();
+    expect(page.checkbox("Gamma")).toBeInTheDocument();
   });
 
   it("reflects selectedIds in checkbox state", async () => {
-    const selectedIds = new Set(["1"]);
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set(["1"]),
+      onToggle: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (1)" }));
+    await page.open("Items", 1);
 
-    expect(screen.getByRole("checkbox", { name: "Alpha" })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Beta" })).not.toBeChecked();
+    expect(page.checkbox("Alpha")).toBeChecked();
+    expect(page.checkbox("Beta")).not.toBeChecked();
   });
 
   it("calls onToggle with item id when checkbox is clicked", async () => {
     const onToggle = vi.fn();
-    const selectedIds = new Set<string>();
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={onToggle}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set<string>(),
+      onToggle,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (0)" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Beta" }));
+    await page.open("Items", 0);
+    await page.toggleItem("Beta");
 
     expect(onToggle).toHaveBeenCalledWith("2");
   });
 
   it("shows Deselect all when items are selected and onClearAll provided", async () => {
     const onClearAll = vi.fn();
-    const selectedIds = new Set(["1"]);
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-        onClearAll={onClearAll}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set(["1"]),
+      onToggle: vi.fn(),
+      onClearAll,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (1)" }));
-    await userEvent.click(
-      screen.getByRole("button", { name: "Deselect all" })
-    );
+    await page.open("Items", 1);
+    await page.clickDeselectAll();
 
     expect(onClearAll).toHaveBeenCalled();
   });
 
   it("hides Deselect all when no items are selected", async () => {
-    const selectedIds = new Set<string>();
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-        onClearAll={vi.fn()}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set<string>(),
+      onToggle: vi.fn(),
+      onClearAll: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (0)" }));
+    await page.open("Items", 0);
 
-    expect(
-      screen.queryByRole("button", { name: "Deselect all" })
-    ).not.toBeInTheDocument();
+    expect(page.queryDeselectAllButton()).not.toBeInTheDocument();
   });
 
   it("renders action buttons via renderActions", async () => {
-    const selectedIds = new Set<string>();
     const renderActions = (item: MultiSelectPickerItem) => (
       <button data-testid={`action-${item.id}`}>Edit</button>
     );
 
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-        renderActions={renderActions}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set<string>(),
+      onToggle: vi.fn(),
+      renderActions,
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (0)" }));
+    await page.open("Items", 0);
 
-    expect(screen.getByTestId("action-1")).toHaveTextContent("Edit");
-    expect(screen.getByTestId("action-2")).toHaveTextContent("Edit");
+    expect(page.getByTestId("action-1")).toHaveTextContent("Edit");
+    expect(page.getByTestId("action-2")).toHaveTextContent("Edit");
   });
 
   it("does not render action container when renderActions is undefined", async () => {
-    const selectedIds = new Set<string>();
-    render(
-      <MultiSelectPicker
-        label="Items"
-        items={items}
-        selectedIds={selectedIds}
-        onToggle={vi.fn()}
-      />
-    );
+    const page = MultiSelectPickerPage.render({
+      label: "Items",
+      items,
+      selectedIds: new Set<string>(),
+      onToggle: vi.fn(),
+    });
 
-    await userEvent.click(screen.getByRole("button", { name: "Items (0)" }));
+    await page.open("Items", 0);
 
     expect(screen.queryByTestId(/action-/)).not.toBeInTheDocument();
   });

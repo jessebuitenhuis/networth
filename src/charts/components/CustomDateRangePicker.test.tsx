@@ -1,35 +1,20 @@
-import { fireEvent,render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CustomDateRangePicker } from "./CustomDateRangePicker";
+import { CustomDateRangePickerPage } from "./CustomDateRangePicker.page";
 
 describe("CustomDateRangePicker", () => {
   it("renders start and end date inputs", () => {
-    render(
-      <CustomDateRangePicker
-        start="2024-07-01"
-        end="2024-12-31"
-        onChange={vi.fn()}
-      />
-    );
+    const page = CustomDateRangePickerPage.render({ start: "2024-07-01", end: "2024-12-31" });
 
-    expect(screen.getByLabelText("Start")).toHaveValue("2024-07-01");
-    expect(screen.getByLabelText("End")).toHaveValue("2024-12-31");
+    expect(page.startInput).toHaveValue("2024-07-01");
+    expect(page.endInput).toHaveValue("2024-12-31");
   });
 
   it("calls onChange when start date changes", () => {
     const onChange = vi.fn();
-    render(
-      <CustomDateRangePicker
-        start="2024-07-01"
-        end="2024-12-31"
-        onChange={onChange}
-      />
-    );
+    const page = CustomDateRangePickerPage.render({ start: "2024-07-01", end: "2024-12-31", onChange });
 
-    fireEvent.change(screen.getByLabelText("Start"), {
-      target: { value: "2024-08-01" },
-    });
+    page.changeStart("2024-08-01");
 
     expect(onChange).toHaveBeenCalledWith({
       start: "2024-08-01",
@@ -39,17 +24,9 @@ describe("CustomDateRangePicker", () => {
 
   it("calls onChange when end date changes", () => {
     const onChange = vi.fn();
-    render(
-      <CustomDateRangePicker
-        start="2024-07-01"
-        end="2024-12-31"
-        onChange={onChange}
-      />
-    );
+    const page = CustomDateRangePickerPage.render({ start: "2024-07-01", end: "2024-12-31", onChange });
 
-    fireEvent.change(screen.getByLabelText("End"), {
-      target: { value: "2025-06-30" },
-    });
+    page.changeEnd("2025-06-30");
 
     expect(onChange).toHaveBeenCalledWith({
       start: "2024-07-01",
