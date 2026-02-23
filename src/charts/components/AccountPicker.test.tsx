@@ -93,6 +93,47 @@ describe("AccountPicker", () => {
     expect(screen.getByRole("checkbox", { name: "Credit Card" })).toBeChecked();
   });
 
+  it("renders nothing when fewer than 2 accounts exist", () => {
+    const { container } = render(
+      <AccountPicker
+        accounts={[{ id: "1", name: "Checking", type: AccountType.Asset }]}
+        excludedIds={new Set<string>()}
+        onToggle={vi.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing when no accounts exist", () => {
+    const { container } = render(
+      <AccountPicker
+        accounts={[]}
+        excludedIds={new Set<string>()}
+        onToggle={vi.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders when exactly 2 accounts exist", () => {
+    render(
+      <AccountPicker
+        accounts={[
+          { id: "1", name: "Checking", type: AccountType.Asset },
+          { id: "2", name: "Savings", type: AccountType.Asset },
+        ]}
+        excludedIds={new Set<string>()}
+        onToggle={vi.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Accounts (2)" })
+    ).toBeInTheDocument();
+  });
+
   it("clicking checkbox calls onToggle with correct id", async () => {
     const onToggle = vi.fn();
     const excludedIds = new Set<string>();

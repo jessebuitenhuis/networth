@@ -151,6 +151,18 @@ describe("ScenarioPicker", () => {
     expect(screen.getByTestId("action-scenario-3")).toHaveTextContent("Edit");
   });
 
+  it("renders nothing when no scenarios exist", () => {
+    const { container } = render(
+      <ScenarioPicker
+        scenarios={[]}
+        selectedIds={new Set<string>()}
+        onToggle={vi.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("does not render action buttons when renderActions is undefined", async () => {
     const selectedIds = new Set<string>();
     render(
