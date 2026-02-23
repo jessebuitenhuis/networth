@@ -1,7 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
-
 import { ChartPeriod } from "@/charts/ChartPeriod";
 import { BasePageObject } from "@/test/page/BasePageObject";
 
@@ -10,9 +8,9 @@ import { PeriodPicker } from "./PeriodPicker";
 type RenderOptions = {
   periods: ChartPeriod[];
   selected: ChartPeriod;
-  onSelect?: ReturnType<typeof vi.fn>;
-  onPrevious?: ReturnType<typeof vi.fn>;
-  onNext?: ReturnType<typeof vi.fn>;
+  onSelect?: (period: ChartPeriod) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
 };
 
 export class PeriodPickerPage extends BasePageObject {
@@ -22,7 +20,7 @@ export class PeriodPickerPage extends BasePageObject {
 
   static render(options: RenderOptions) {
     const user = userEvent.setup();
-    const { periods, selected, onSelect = vi.fn(), onPrevious, onNext } = options;
+    const { periods, selected, onSelect = () => {}, onPrevious, onNext } = options;
     render(
       <PeriodPicker
         periods={periods}

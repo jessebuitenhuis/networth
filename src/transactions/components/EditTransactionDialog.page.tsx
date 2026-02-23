@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
+import type { Category } from "@/categories/Category.type";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import { BasePageObject } from "@/test/page/BasePageObject";
 import type { Transaction } from "@/transactions/Transaction.type";
@@ -57,10 +58,10 @@ export class EditTransactionDialogPage extends BasePageObject {
         transaction={options.transaction ?? defaultTransaction}
         scenarios={options.scenarios ?? []}
         categories={[]}
-        onSave={onSave}
-        onDelete={onDelete}
-        onCreateScenario={onCreateScenario}
-        onCreateCategory={onCreateCategory}
+        onSave={onSave as (t: Transaction) => void}
+        onDelete={onDelete as (id: string) => void}
+        onCreateScenario={onCreateScenario as (s: { id: string; name: string }) => void}
+        onCreateCategory={onCreateCategory as (c: Category) => void}
       />,
     );
 

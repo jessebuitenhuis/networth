@@ -42,14 +42,9 @@ export class ScenarioFilterSelectPage extends BasePageObject {
     return this;
   }
 
-  async selectOption(name: string) {
-    await this._user.click(screen.getByRole("option", { name }));
-    return this;
-  }
-
   async selectScenario(name: string) {
     await this.open();
-    await this.selectOption(name);
+    await this._user.click(screen.getByRole("option", { name }));
     return this;
   }
 }
