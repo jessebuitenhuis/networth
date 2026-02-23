@@ -8,8 +8,8 @@ import { getNextOccurrence } from "@/recurring-transactions/getNextOccurrence";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import type { Scenario } from "@/scenarios/Scenario.type";
 import type { DisplayTransaction } from "@/transactions/DisplayTransaction.type";
-import type { Transaction } from "@/transactions/Transaction.type";
 import { filterTransactionsByScenario } from "@/transactions/filterTransactionsByScenario";
+import type { Transaction } from "@/transactions/Transaction.type";
 
 type BuildAllDisplayTransactionsOptions = {
   transactions: Transaction[];

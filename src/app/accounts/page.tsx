@@ -3,8 +3,8 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
 
-import { useAccounts } from "@/accounts/AccountContext";
 import type { Account } from "@/accounts/Account.type";
+import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { calculateNetWorth } from "@/accounts/calculateNetWorth";
 import { AccountIcon } from "@/accounts/components/AccountIcon";

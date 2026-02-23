@@ -1,5 +1,5 @@
-import { useAccounts } from "@/accounts/AccountContext";
 import type { AccountBalanceItem } from "@/accounts/AccountBalanceItem.type";
+import { useAccounts } from "@/accounts/AccountContext";
 import { AccountType } from "@/accounts/AccountType";
 import { calculateNetWorth } from "@/accounts/calculateNetWorth";
 import { useTransactions } from "@/transactions/TransactionContext";
