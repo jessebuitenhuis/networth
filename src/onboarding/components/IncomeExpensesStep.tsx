@@ -1,20 +1,11 @@
-import { X } from "lucide-react";
-
-import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import type { RecurringSuggestion } from "../recurringSuggestions";
 import { recurringSuggestions } from "../recurringSuggestions";
 import type { WizardAccountEntry } from "../WizardAccountEntry.type";
 import type { WizardRecurringEntry } from "../WizardRecurringEntry.type";
+import { RecurringEntryRow } from "./RecurringEntryRow";
 
 type IncomeExpensesStepProps = {
   entries: WizardRecurringEntry[];
@@ -71,50 +62,13 @@ export function IncomeExpensesStep({
           {entries.length > 0 && (
             <div className="space-y-3">
               {entries.map((entry) => (
-                <div
+                <RecurringEntryRow
                   key={entry.tempId}
-                  className="flex items-center gap-3 rounded-lg border p-3"
-                >
-                  <span className="min-w-0 flex-shrink-0 text-sm font-medium">
-                    {entry.description}
-                  </span>
-                  <div className="w-40">
-                    <CurrencyInput
-                      value={entry.amount}
-                      onChange={(amount) =>
-                        onUpdate(entry.tempId, { amount })
-                      }
-                      aria-label={`${entry.description} amount`}
-                    />
-                  </div>
-                  <div className="w-36">
-                    <Select
-                      value={entry.accountTempId}
-                      onValueChange={(accountTempId) =>
-                        onUpdate(entry.tempId, { accountTempId })
-                      }
-                    >
-                      <SelectTrigger aria-label={`${entry.description} account`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((a) => (
-                          <SelectItem key={a.tempId} value={a.tempId}>
-                            {a.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onRemove(entry.tempId)}
-                    aria-label={`Remove ${entry.description}`}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+                  entry={entry}
+                  accounts={accounts}
+                  onUpdate={onUpdate}
+                  onRemove={onRemove}
+                />
               ))}
             </div>
           )}

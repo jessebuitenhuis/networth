@@ -3,59 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { AccountType } from "@/accounts/AccountType";
 
-import { SetupStep } from "./SetupStep";
 import { useWizardState } from "./useWizardState";
 
 describe("useWizardState", () => {
-  describe("step navigation", () => {
-    it("starts at Accounts step", () => {
-      const { result } = renderHook(() => useWizardState());
-      expect(result.current.step).toBe(SetupStep.Accounts);
-    });
-
-    it("advances to next step", () => {
-      const { result } = renderHook(() => useWizardState());
-      act(() => result.current.nextStep());
-      expect(result.current.step).toBe(SetupStep.IncomeExpenses);
-    });
-
-    it("goes back to previous step", () => {
-      const { result } = renderHook(() => useWizardState());
-      act(() => result.current.nextStep());
-      act(() => result.current.prevStep());
-      expect(result.current.step).toBe(SetupStep.Accounts);
-    });
-
-    it("does not go before first step", () => {
-      const { result } = renderHook(() => useWizardState());
-      act(() => result.current.prevStep());
-      expect(result.current.step).toBe(SetupStep.Accounts);
-    });
-
-    it("reports isLastStep correctly", () => {
-      const { result } = renderHook(() => useWizardState());
-      expect(result.current.isLastStep).toBe(false);
-      act(() => result.current.nextStep());
-      act(() => result.current.nextStep());
-      act(() => result.current.nextStep());
-      expect(result.current.isLastStep).toBe(true);
-    });
-
-    it("reports isFirstStep correctly", () => {
-      const { result } = renderHook(() => useWizardState());
-      expect(result.current.isFirstStep).toBe(true);
-      act(() => result.current.nextStep());
-      expect(result.current.isFirstStep).toBe(false);
-    });
-
-    it("reports stepIndex correctly", () => {
-      const { result } = renderHook(() => useWizardState());
-      expect(result.current.stepIndex).toBe(0);
-      act(() => result.current.nextStep());
-      expect(result.current.stepIndex).toBe(1);
-    });
-  });
-
   describe("account management", () => {
     it("starts with no accounts", () => {
       const { result } = renderHook(() => useWizardState());

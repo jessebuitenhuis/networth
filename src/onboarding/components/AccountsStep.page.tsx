@@ -44,6 +44,10 @@ export class AccountsStepPage {
     return this._props.onRemove;
   }
 
+  get onUpdate() {
+    return this._props.onUpdate;
+  }
+
   getSuggestionButton(name: string) {
     return screen.getByRole("button", { name: new RegExp(`^[^A-Za-z]+ ${name}$`) });
   }
@@ -56,8 +60,12 @@ export class AccountsStepPage {
     return screen.getByRole("button", { name: `Remove ${accountName}` });
   }
 
-  getAccountRow(name: string) {
-    return screen.getByText(name).closest("div")!;
+  getNameInput(accountName: string) {
+    return screen.getByLabelText(`${accountName} name`);
+  }
+
+  getBalanceInput(accountName: string) {
+    return screen.getByLabelText(`${accountName} balance`);
   }
 
   async clickSuggestion(name: string) {
@@ -70,7 +78,10 @@ export class AccountsStepPage {
     return this;
   }
 
-  getBalanceInput(accountName: string) {
-    return screen.getByLabelText(`${accountName} balance`);
+  async editName(accountName: string, newName: string) {
+    const input = this.getNameInput(accountName);
+    await this._user.clear(input);
+    await this._user.type(input, newName);
+    return this;
   }
 }

@@ -1,11 +1,9 @@
-import { X } from "lucide-react";
-
-import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { Button } from "@/components/ui/button";
 
 import type { AccountSuggestion } from "../accountSuggestions";
 import { accountSuggestions } from "../accountSuggestions";
 import type { WizardAccountEntry } from "../WizardAccountEntry.type";
+import { AccountRow } from "./AccountRow";
 
 type AccountsStepProps = {
   accounts: WizardAccountEntry[];
@@ -53,35 +51,12 @@ export function AccountsStep({
       {accounts.length > 0 && (
         <div className="space-y-3">
           {accounts.map((account) => (
-            <div
+            <AccountRow
               key={account.tempId}
-              className="flex items-center gap-3 rounded-lg border p-3"
-            >
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                {account.name}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {account.type}
-              </span>
-              <div className="w-40">
-                <CurrencyInput
-                  value={account.balance}
-                  onChange={(balance) =>
-                    onUpdate(account.tempId, { balance })
-                  }
-                  aria-label={`${account.name} balance`}
-                  showSignToggle={false}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemove(account.tempId)}
-                aria-label={`Remove ${account.name}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+              account={account}
+              onUpdate={onUpdate}
+              onRemove={onRemove}
+            />
           ))}
         </div>
       )}

@@ -1,12 +1,9 @@
 import { useCallback, useState } from "react";
 
-import { setupSteps } from "./setupSteps";
 import type { WizardAccountEntry } from "./WizardAccountEntry.type";
 import type { WizardData } from "./WizardData.type";
 import type { WizardGoalEntry } from "./WizardGoalEntry.type";
 import type { WizardRecurringEntry } from "./WizardRecurringEntry.type";
-
-const STEP_ORDER = setupSteps.map((s) => s.step);
 
 const INITIAL_DATA: WizardData = {
   accounts: [],
@@ -15,20 +12,7 @@ const INITIAL_DATA: WizardData = {
 };
 
 export function useWizardState() {
-  const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<WizardData>(INITIAL_DATA);
-
-  const step = STEP_ORDER[stepIndex];
-  const isFirstStep = stepIndex === 0;
-  const isLastStep = stepIndex === STEP_ORDER.length - 1;
-
-  const nextStep = useCallback(() => {
-    setStepIndex((i) => Math.min(i + 1, STEP_ORDER.length - 1));
-  }, []);
-
-  const prevStep = useCallback(() => {
-    setStepIndex((i) => Math.max(i - 1, 0));
-  }, []);
 
   const addAccount = useCallback((account: WizardAccountEntry) => {
     setData((d) => ({ ...d, accounts: [...d.accounts, account] }));
@@ -87,12 +71,6 @@ export function useWizardState() {
   }, []);
 
   return {
-    step,
-    stepIndex,
-    isFirstStep,
-    isLastStep,
-    nextStep,
-    prevStep,
     data,
     addAccount,
     removeAccount,

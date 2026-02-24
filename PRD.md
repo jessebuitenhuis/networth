@@ -56,7 +56,7 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 
 ### Home
 
-- ~~As a user, I want a quick-start wizard to set up my accounts and assumptions, so I can see my first projection without detailed tracking — and revisit it anytime my situation changes.~~ ✅
+- As a user, I want a quick-start wizard to set up my accounts and assumptions, so I can see my first projection without detailed tracking — and revisit it anytime my situation changes.
 - As a user, I want to see my net worth, assets, and liabilities, so I know where I stand at a glance.
 - As a user, I want to see goal progress, so I stay motivated toward my financial targets.
 - As a user, I want to see my projected net worth trajectory, so I can quickly see where I'm headed.

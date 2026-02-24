@@ -1,8 +1,7 @@
 import { AccountType } from "@/accounts/AccountType";
-import { PercentageInput } from "@/components/shared/PercentageInput";
-import { Label } from "@/components/ui/label";
 
 import type { WizardAccountEntry } from "../WizardAccountEntry.type";
+import { GrowthRow } from "./GrowthRow";
 
 type GrowthStepProps = {
   accounts: WizardAccountEntry[];
@@ -23,25 +22,11 @@ export function GrowthStep({ accounts, onUpdate }: GrowthStepProps) {
   return (
     <div className="space-y-4">
       {assetAccounts.map((account) => (
-        <div key={account.tempId} className="flex items-center gap-4">
-          <Label className="min-w-0 flex-1 truncate">{account.name}</Label>
-          <div className="w-32">
-            <PercentageInput
-              value={
-                account.expectedReturnRate != null
-                  ? String(account.expectedReturnRate)
-                  : ""
-              }
-              onChange={(value) =>
-                onUpdate(account.tempId, {
-                  expectedReturnRate: value ? Number(value) : undefined,
-                })
-              }
-              aria-label={`${account.name} return rate`}
-              placeholder="e.g. 7"
-            />
-          </div>
-        </div>
+        <GrowthRow
+          key={account.tempId}
+          account={account}
+          onUpdate={onUpdate}
+        />
       ))}
     </div>
   );

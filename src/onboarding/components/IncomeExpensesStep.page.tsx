@@ -55,6 +55,10 @@ export class IncomeExpensesStepPage {
     return this._props.onRemove;
   }
 
+  get onUpdate() {
+    return this._props.onUpdate;
+  }
+
   getSuggestionButton(description: string) {
     return screen.getByRole("button", { name: new RegExp(`^[^A-Za-z]+ ${description}$`) });
   }
@@ -65,6 +69,10 @@ export class IncomeExpensesStepPage {
 
   getRemoveButton(description: string) {
     return screen.getByRole("button", { name: `Remove ${description}` });
+  }
+
+  getDescriptionInput(description: string) {
+    return screen.getByLabelText(`${description} description`);
   }
 
   getText(text: string | RegExp) {
@@ -82,6 +90,13 @@ export class IncomeExpensesStepPage {
 
   async clickRemove(description: string) {
     await this._user.click(this.getRemoveButton(description));
+    return this;
+  }
+
+  async editDescription(description: string, newDescription: string) {
+    const input = this.getDescriptionInput(description);
+    await this._user.clear(input);
+    await this._user.type(input, newDescription);
     return this;
   }
 }

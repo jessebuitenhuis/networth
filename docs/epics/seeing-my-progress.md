@@ -6,29 +6,29 @@ Design specifics and behavioral details for stories in the "Seeing my progress" 
 
 The chart is the core visualization. It handles all data ranges — including negative values — in a way that's immediately readable.
 
-| Detail | Status |
-| --- | --- |
-| Zero line is always visible on both dashboard and planning charts | Done |
-| When values are negative, zero line is centered — equal visual weight above and below zero | Done |
-| Y-axis tick values are rounded to even numbers (e.g. -338 becomes -350 or -400) for easy reading | Done |
+| Detail |
+| --- |
+| Zero line is always visible on both dashboard and planning charts |
+| When values are negative, zero line is centered — equal visual weight above and below zero |
+| Y-axis tick values are rounded to even numbers (e.g. -338 becomes -350 or -400) for easy reading |
 
 ## Story 46: Planning Chart Navigation
 
 The planning chart connects past reality to future projections, and users can step through time to explore different windows.
 
-| Detail | Status |
-| --- | --- |
-| Default view shows one period of history before today (e.g. 1W selected shows -1W to +1W centered on today) | Done |
-| Historical portion shows actual recorded transactions, not projections | Done |
-| Forward and backward arrow buttons step through time by one period increment (1W selected + next arrow = window moves one week forward) | Done |
-| Arrow buttons are adjacent to the period picker | Done |
+| Detail |
+| --- |
+| Default view shows one period of history before today (e.g. 1W selected shows -1W to +1W centered on today) |
+| Historical portion shows actual recorded transactions, not projections |
+| Forward and backward arrow buttons step through time by one period increment (1W selected + next arrow = window moves one week forward) |
+| Arrow buttons are adjacent to the period picker |
 
 ## Story 47: Clean Pickers
 
 Pickers only appear when they offer a meaningful choice, following the "Clean when irrelevant" UX principle.
 
-| Detail | Status |
-| --- | --- |
-| Scenario picker is hidden when no scenarios exist | Done |
-| Account picker is hidden when fewer than 2 accounts exist | Done |
-| Applies to the planning page and any other pages with these pickers | Done |
+| Detail |
+| --- |
+| Scenario picker is hidden when no scenarios exist |
+| Account picker is hidden when fewer than 2 accounts exist |
+| Applies to the planning page and any other pages with these pickers |
