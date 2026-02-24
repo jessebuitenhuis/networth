@@ -29,7 +29,7 @@ type TransactionFilterBarProps = {
 type SearchInputProps = {
   value: string;
   isOpen: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   onOpen: () => void;
   onChange: (value: string) => void;
   onBlur: () => void;
