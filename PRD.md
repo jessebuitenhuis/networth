@@ -56,11 +56,13 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 
 ### Home
 
+- As a user, I want a quick-start wizard to set up my accounts and assumptions, so I can see my first projection without detailed tracking — and revisit it anytime my situation changes.
 - As a user, I want to see my net worth, assets, and liabilities, so I know where I stand at a glance.
 - As a user, I want to see goal progress, so I stay motivated toward my financial targets.
 - As a user, I want to see my projected net worth trajectory, so I can quickly see where I'm headed.
 - As a user, I want to quickly record a transaction, so I can keep my finances up to date with minimal effort.
 - As a user, I want to see planned vs actual spending, so I can see if my projections match reality.
+- As a user, I want to be notified when I reach a financial milestone, so I feel the progress I'm making.
 
 ### Planning — Projections
 
@@ -78,6 +80,7 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 ### Planning — Goals
 
 - As a user, I want to set net worth goals, so I have clear financial targets to work toward.
+- As a user, I want to set a financial independence goal based on annual expenses, so I can see when my investments can sustain my lifestyle.
 - As a user, I want to see my goals on the projection chart, so I can see when different scenarios are projected to reach each goal.
 
 ### Planning — Spending Plan
@@ -97,8 +100,10 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 - As a user, I want to import transactions from a bank statement CSV, so I can quickly catch up on transaction history.
 - As a user, I want to assign hierarchical categories to transactions, so I can organize my finances by type.
 - As a user, I want to search and filter transactions, so I can quickly find specific entries.
+- As a user, I want to export my transactions as CSV, so I always have access to my own data.
 
 ### Tracking — Reports
 
+- As a user, I want to see my savings rate over time, so I can track the metric that most directly drives my net worth growth.
 - As a user, I want to see spending trends and income vs expenses over time, so I can understand my financial patterns.
 - As a user, I want to see a monthly cash flow breakdown by category, so I understand where my money is going.
