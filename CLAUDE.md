@@ -35,6 +35,22 @@ src/
   test/             # Test setup and configuration
 ```
 
+## Commands
+
+Use these npm scripts — they go through turbo and benefit from caching. Do **not** invoke `next build`, `eslint`, or `vitest` directly for full runs, as that bypasses the cache.
+
+| Task | Command |
+|---|---|
+| Run all tests | `npm run test` |
+| Run specific tests | `npx vitest run <path>` (e.g. `npx vitest run src/accounts/`) |
+| Build | `npm run build` |
+| Lint | `npm run lint` |
+| Lint + auto-fix | `npm run format` |
+| All checks (lint + build + test + smoke) | `npm run verify` |
+| Test coverage | `npm run test:coverage` |
+
+> **Note:** `npx vitest run <path>` bypasses turbo caching but is correct for targeted test runs during development. Use `npm run test` when you want the full suite with caching.
+
 ## Workflow
 
 - When implementing a user story from PRD.md or detail from an epic doc, mark it as done when completed
