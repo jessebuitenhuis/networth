@@ -2,7 +2,7 @@
 
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { type ReactElement, useCallback, useState } from "react";
 
 import type { Account } from "@/accounts/Account.type";
 import { useAccounts } from "@/accounts/AccountContext";
@@ -42,9 +42,10 @@ import { useTransactions } from "@/transactions/TransactionContext";
 
 type EditAccountDialogProps = {
   account: Account;
+  trigger?: ReactElement<{ ref?: React.Ref<HTMLElement> }>;
 };
 
-export function EditAccountDialog({ account }: EditAccountDialogProps) {
+export function EditAccountDialog({ account, trigger }: EditAccountDialogProps) {
   const { updateAccount, removeAccount } = useAccounts();
   const { removeTransactionsByAccountId } = useTransactions();
   const router = useRouter();
@@ -100,9 +101,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
         }}
       >
         <DialogTrigger asChild>
-          <SidebarMenuAction aria-label="Edit Account">
-            <Pencil />
-          </SidebarMenuAction>
+          {trigger ?? (
+            <SidebarMenuAction aria-label="Edit Account">
+              <Pencil />
+            </SidebarMenuAction>
+          )}
         </DialogTrigger>
         <DialogContent aria-describedby={undefined}>
           <DialogHeader>

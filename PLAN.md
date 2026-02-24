@@ -70,8 +70,8 @@ The existing `/accounts/[id]` detail page stays unchanged.
 
 ### 4. Remove old nav routes
 
-- Delete `/categories` page — categories are already manageable inline via `CategorySelect` in transaction/recurring transaction forms. The `CategoryList` component and `CreateCategoryDialog` can be reused later if an inline management UI is needed.
-- Delete `/timeline` page — the `RecurringTransactionTimeline` component stays in the codebase for potential future use but loses its route.
+- Delete `/categories` page and `CategoryList` component — categories are already manageable inline via `CategorySelect` in transaction/recurring transaction forms.
+- Delete `/timeline` page, `RecurringTransactionTimeline` component, Gantt chart components, and related utilities.
 - Clean up any dead imports or references to these routes.
 
 ### 5. Update Dashboard

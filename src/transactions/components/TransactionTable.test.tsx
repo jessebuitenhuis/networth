@@ -13,6 +13,7 @@ describe("TransactionTable", () => {
 
   const makeItem = (overrides: Partial<DisplayTransaction> = {}): DisplayTransaction => ({
     id: "1",
+    accountId: "a1",
     description: "Groceries",
     accountName: "",
     date: "2024-01-20",

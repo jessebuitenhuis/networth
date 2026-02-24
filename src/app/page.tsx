@@ -1,6 +1,7 @@
 "use client";
 
 import { useAccounts } from "@/accounts/AccountContext";
+import { AccountBreakdownSection } from "@/accounts/components/AccountBreakdownSection";
 import { CreateAccountDialog } from "@/accounts/components/CreateAccountDialog";
 import { EmptyDashboard } from "@/accounts/components/EmptyDashboard";
 import { NetWorthSummary } from "@/accounts/components/NetWorthSummary";
@@ -28,6 +29,7 @@ export default function Home() {
             <>
               <CreateTransactionDialog />
               <NetWorthSummary />
+              <AccountBreakdownSection />
               <NetWorthChart />
               <GoalProgressSection />
             </>
