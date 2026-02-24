@@ -1,21 +1,14 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { db } from "@/db/connection";
+import { getUserDb } from "@/db/userDb";
 import { accounts } from "@/db/schema";
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllAccounts() {
-  const userId = getCurrentUserId();
-  return db.select().from(accounts).where(eq(accounts.userId, userId)).all();
+  return getUserDb().select(accounts).all();
 }
 
 export function getAccountById(id: string) {
-  const userId = getCurrentUserId();
-  const [row] = db
-    .select()
-    .from(accounts)
-    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
-    .all();
+  const [row] = getUserDb().select(accounts, eq(accounts.id, id)).all();
   return row;
 }
 
@@ -30,17 +23,7 @@ export function createAccount({
   type: string;
   expectedReturnRate?: number | null;
 }) {
-  const userId = getCurrentUserId();
-  db.insert(accounts)
-    .values({
-      id,
-      userId,
-      name,
-      type,
-      expectedReturnRate: expectedReturnRate ?? null,
-    })
-    .run();
-
+  getUserDb().insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
   return getAccountById(id)!;
 }
 
@@ -56,22 +39,12 @@ export function updateAccount(
     expectedReturnRate?: number | null;
   },
 ) {
-  const userId = getCurrentUserId();
-  db.update(accounts)
-    .set({
-      name,
-      type,
-      expectedReturnRate: expectedReturnRate ?? null,
-    })
-    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
+  getUserDb()
+    .update(accounts, { name, type, expectedReturnRate: expectedReturnRate ?? null }, eq(accounts.id, id))
     .run();
-
   return getAccountById(id)!;
 }
 
 export function deleteAccount(id: string) {
-  const userId = getCurrentUserId();
-  db.delete(accounts)
-    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
-    .run();
+  getUserDb().delete(accounts, eq(accounts.id, id)).run();
 }

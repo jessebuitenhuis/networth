@@ -1,22 +1,15 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { db } from "@/db/connection";
+import { getUserDb } from "@/db/userDb";
 import { transactions } from "@/db/schema";
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllTransactions() {
-  const userId = getCurrentUserId();
-  return db.select().from(transactions).where(eq(transactions.userId, userId)).all();
+  return getUserDb().select(transactions).all();
 }
 
 export function getTransactionById(id: string) {
-  const userId = getCurrentUserId();
-  const rows = db
-    .select()
-    .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
-    .all();
-  return rows[0];
+  const [row] = getUserDb().select(transactions, eq(transactions.id, id)).all();
+  return row;
 }
 
 export function createTransaction(data: {
@@ -29,21 +22,16 @@ export function createTransaction(data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  const userId = getCurrentUserId();
-  db.insert(transactions)
-    .values({
-      id: data.id,
-      userId,
-      accountId: data.accountId,
-      amount: data.amount,
-      date: data.date,
-      description: data.description,
-      isProjected: data.isProjected ?? null,
-      scenarioId: data.scenarioId ?? null,
-      categoryId: data.categoryId ?? null,
-    })
-    .run();
-
+  getUserDb().insert(transactions, {
+    id: data.id,
+    accountId: data.accountId,
+    amount: data.amount,
+    date: data.date,
+    description: data.description,
+    isProjected: data.isProjected ?? null,
+    scenarioId: data.scenarioId ?? null,
+    categoryId: data.categoryId ?? null,
+  }).run();
   return getTransactionById(data.id)!;
 }
 
@@ -57,30 +45,21 @@ export function createTransactions(items: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }[]) {
-  const userId = getCurrentUserId();
+  const userDb = getUserDb();
   for (const item of items) {
-    db.insert(transactions)
-      .values({
-        id: item.id,
-        userId,
-        accountId: item.accountId,
-        amount: item.amount,
-        date: item.date,
-        description: item.description,
-        isProjected: item.isProjected ?? null,
-        scenarioId: item.scenarioId ?? null,
-        categoryId: item.categoryId ?? null,
-      })
-      .run();
+    userDb.insert(transactions, {
+      id: item.id,
+      accountId: item.accountId,
+      amount: item.amount,
+      date: item.date,
+      description: item.description,
+      isProjected: item.isProjected ?? null,
+      scenarioId: item.scenarioId ?? null,
+      categoryId: item.categoryId ?? null,
+    }).run();
   }
-
   const ids = items.map((item) => item.id);
-  return db
-    .select()
-    .from(transactions)
-    .where(eq(transactions.userId, userId))
-    .all()
-    .filter((row) => ids.includes(row.id));
+  return userDb.select(transactions).all().filter((row) => ids.includes(row.id));
 }
 
 export function updateTransaction(id: string, data: {
@@ -92,40 +71,26 @@ export function updateTransaction(id: string, data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  const userId = getCurrentUserId();
-  db.update(transactions)
-    .set({
-      accountId: data.accountId,
-      amount: data.amount,
-      date: data.date,
-      description: data.description,
-      isProjected: data.isProjected ?? null,
-      scenarioId: data.scenarioId ?? null,
-      categoryId: data.categoryId ?? null,
-    })
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
-    .run();
-
+  getUserDb().update(transactions, {
+    accountId: data.accountId,
+    amount: data.amount,
+    date: data.date,
+    description: data.description,
+    isProjected: data.isProjected ?? null,
+    scenarioId: data.scenarioId ?? null,
+    categoryId: data.categoryId ?? null,
+  }, eq(transactions.id, id)).run();
   return getTransactionById(id)!;
 }
 
 export function deleteTransaction(id: string) {
-  const userId = getCurrentUserId();
-  db.delete(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
-    .run();
+  getUserDb().delete(transactions, eq(transactions.id, id)).run();
 }
 
 export function deleteTransactionsByAccountId(accountId: string) {
-  const userId = getCurrentUserId();
-  db.delete(transactions)
-    .where(and(eq(transactions.accountId, accountId), eq(transactions.userId, userId)))
-    .run();
+  getUserDb().delete(transactions, eq(transactions.accountId, accountId)).run();
 }
 
 export function deleteTransactionsByScenarioId(scenarioId: string) {
-  const userId = getCurrentUserId();
-  db.delete(transactions)
-    .where(and(eq(transactions.scenarioId, scenarioId), eq(transactions.userId, userId)))
-    .run();
+  getUserDb().delete(transactions, eq(transactions.scenarioId, scenarioId)).run();
 }

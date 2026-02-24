@@ -1,40 +1,23 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 
-import { db } from "@/db/connection";
+import { getUserDb } from "@/db/userDb";
 import { categories } from "@/db/schema";
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllCategories() {
-  const userId = getCurrentUserId();
-  return db.select().from(categories).where(eq(categories.userId, userId)).all();
+  return getUserDb().select(categories).all();
 }
 
 export function getCategoryById(id: string) {
-  const userId = getCurrentUserId();
-  const [row] = db
-    .select()
-    .from(categories)
-    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
-    .all();
+  const [row] = getUserDb().select(categories, eq(categories.id, id)).all();
   return row;
 }
 
 export function getRootCategories() {
-  const userId = getCurrentUserId();
-  return db
-    .select()
-    .from(categories)
-    .where(and(isNull(categories.parentCategoryId), eq(categories.userId, userId)))
-    .all();
+  return getUserDb().select(categories, isNull(categories.parentCategoryId)).all();
 }
 
 export function getCategoriesByParentId(parentId: string) {
-  const userId = getCurrentUserId();
-  return db
-    .select()
-    .from(categories)
-    .where(and(eq(categories.parentCategoryId, parentId), eq(categories.userId, userId)))
-    .all();
+  return getUserDb().select(categories, eq(categories.parentCategoryId, parentId)).all();
 }
 
 export function createCategory({
@@ -46,40 +29,27 @@ export function createCategory({
   name: string;
   parentCategoryId?: string | null;
 }) {
-  const userId = getCurrentUserId();
-  db.insert(categories)
-    .values({ id, userId, name, parentCategoryId: parentCategoryId ?? null })
-    .run();
-
+  getUserDb().insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null }).run();
   return getCategoryById(id)!;
 }
 
 export function updateCategory(
   id: string,
-  {
-    name,
-    parentCategoryId,
-  }: { name: string; parentCategoryId?: string | null },
+  { name, parentCategoryId }: { name: string; parentCategoryId?: string | null },
 ) {
-  const userId = getCurrentUserId();
-  db.update(categories)
-    .set({ name, parentCategoryId: parentCategoryId ?? null })
-    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+  getUserDb()
+    .update(categories, { name, parentCategoryId: parentCategoryId ?? null }, eq(categories.id, id))
     .run();
-
   return getCategoryById(id)!;
 }
 
 export function deleteCategory(id: string) {
-  const userId = getCurrentUserId();
+  const userDb = getUserDb();
   const category = getCategoryById(id);
   if (category) {
-    db.update(categories)
-      .set({ parentCategoryId: category.parentCategoryId })
-      .where(and(eq(categories.parentCategoryId, id), eq(categories.userId, userId)))
+    userDb
+      .update(categories, { parentCategoryId: category.parentCategoryId }, eq(categories.parentCategoryId, id))
       .run();
   }
-  db.delete(categories)
-    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
-    .run();
+  userDb.delete(categories, eq(categories.id, id)).run();
 }
