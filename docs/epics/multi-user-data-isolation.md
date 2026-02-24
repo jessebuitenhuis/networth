@@ -33,13 +33,13 @@ Add `user_id TEXT NOT NULL` to every user-scoped table:
 
 | Table | Status |
 | --- | --- |
-| accounts | |
-| transactions | |
-| recurring_transactions | |
-| categories | |
-| scenarios | |
-| goals | |
-| settings | |
+| accounts | done |
+| transactions | done |
+| recurring_transactions | done |
+| categories | done |
+| scenarios | done |
+| goals | done |
+| settings | done |
 
 ## Repository Changes
 
@@ -47,23 +47,23 @@ Every repository is scoped to the current user. No repository function can retur
 
 | Detail | Status |
 | --- | --- |
-| `getCurrentUserId()` returns a hardcoded placeholder user ID | |
-| All `SELECT` queries include `WHERE user_id = ?` | |
-| All `INSERT` statements include `user_id` from `getCurrentUserId()` | |
-| All `UPDATE` and `DELETE` statements include `WHERE user_id = ?` | |
-| Raw `db` export cannot be used to bypass user scoping (either removed, wrapped, or linted against) | |
+| `getCurrentUserId()` returns a hardcoded placeholder user ID | done |
+| All `SELECT` queries include `WHERE user_id = ?` | done |
+| All `INSERT` statements include `user_id` from `getCurrentUserId()` | done |
+| All `UPDATE` and `DELETE` statements include `WHERE user_id = ?` | done |
+| Raw `db` export cannot be used to bypass user scoping (either removed, wrapped, or linted against) | done |
 
 ## Seed Script
 
 | Detail | Status |
 | --- | --- |
-| Seed data is scoped to the placeholder user ID | |
-| Seed script works correctly with the new schema | |
+| Seed data is scoped to the placeholder user ID | done |
+| Seed script works correctly with the new schema | done |
 
 ## Testing
 
 | Detail | Status |
 | --- | --- |
-| Repository tests verify that queries only return data for the current user | |
-| Repository tests verify that a user cannot read, update, or delete another user's data | |
-| Existing tests pass with the new user-scoped schema | |
+| Repository tests verify that queries only return data for the current user | done |
+| Repository tests verify that a user cannot read, update, or delete another user's data | done |
+| Existing tests pass with the new user-scoped schema | done |

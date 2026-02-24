@@ -1,34 +1,39 @@
-import { eq, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { categories } from "@/db/schema";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllCategories() {
-  return db.select().from(categories).all();
+  const userId = getCurrentUserId();
+  return db.select().from(categories).where(eq(categories.userId, userId)).all();
 }
 
 export function getCategoryById(id: string) {
+  const userId = getCurrentUserId();
   const [row] = db
     .select()
     .from(categories)
-    .where(eq(categories.id, id))
+    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
     .all();
   return row;
 }
 
 export function getRootCategories() {
+  const userId = getCurrentUserId();
   return db
     .select()
     .from(categories)
-    .where(isNull(categories.parentCategoryId))
+    .where(and(isNull(categories.parentCategoryId), eq(categories.userId, userId)))
     .all();
 }
 
 export function getCategoriesByParentId(parentId: string) {
+  const userId = getCurrentUserId();
   return db
     .select()
     .from(categories)
-    .where(eq(categories.parentCategoryId, parentId))
+    .where(and(eq(categories.parentCategoryId, parentId), eq(categories.userId, userId)))
     .all();
 }
 
@@ -41,8 +46,9 @@ export function createCategory({
   name: string;
   parentCategoryId?: string | null;
 }) {
+  const userId = getCurrentUserId();
   db.insert(categories)
-    .values({ id, name, parentCategoryId: parentCategoryId ?? null })
+    .values({ id, userId, name, parentCategoryId: parentCategoryId ?? null })
     .run();
 
   return getCategoryById(id)!;
@@ -55,22 +61,25 @@ export function updateCategory(
     parentCategoryId,
   }: { name: string; parentCategoryId?: string | null },
 ) {
+  const userId = getCurrentUserId();
   db.update(categories)
     .set({ name, parentCategoryId: parentCategoryId ?? null })
-    .where(eq(categories.id, id))
+    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
     .run();
 
   return getCategoryById(id)!;
 }
 
 export function deleteCategory(id: string) {
-  // Move children to parent's parent (or root) before deleting
+  const userId = getCurrentUserId();
   const category = getCategoryById(id);
   if (category) {
     db.update(categories)
       .set({ parentCategoryId: category.parentCategoryId })
-      .where(eq(categories.parentCategoryId, id))
+      .where(and(eq(categories.parentCategoryId, id), eq(categories.userId, userId)))
       .run();
   }
-  db.delete(categories).where(eq(categories.id, id)).run();
+  db.delete(categories)
+    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+    .run();
 }

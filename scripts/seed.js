@@ -4,6 +4,8 @@ const { mkdirSync } = require("fs");
 const { dirname } = require("path");
 const { randomUUID } = require("crypto");
 
+const PLACEHOLDER_USER_ID = "placeholder-user-id";
+
 // ---------------------------------------------------------------------------
 // Database connection (mirrors src/db/connection.ts)
 // ---------------------------------------------------------------------------
@@ -18,12 +20,14 @@ db.pragma("foreign_keys = ON");
 db.exec(`
   CREATE TABLE IF NOT EXISTS accounts (
     id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     expected_return_rate REAL
   );
   CREATE TABLE IF NOT EXISTS transactions (
     id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
     account_id TEXT NOT NULL,
     amount REAL NOT NULL,
     date TEXT NOT NULL,
@@ -33,6 +37,7 @@ db.exec(`
   );
   CREATE TABLE IF NOT EXISTS recurring_transactions (
     id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
     account_id TEXT NOT NULL,
     amount REAL NOT NULL,
     description TEXT NOT NULL,
@@ -43,16 +48,20 @@ db.exec(`
   );
   CREATE TABLE IF NOT EXISTS scenarios (
     id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
     name TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS goals (
     id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
     name TEXT NOT NULL,
     target_amount REAL NOT NULL
   );
   CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT
+    user_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    value TEXT,
+    PRIMARY KEY (user_id, key)
   );
 `);
 
@@ -151,42 +160,42 @@ const accountRows = [
 ];
 
 const insertAccount = db.prepare(
-  `INSERT INTO accounts (id, name, type, expected_return_rate) VALUES (?, ?, ?, ?)`,
+  `INSERT INTO accounts (id, user_id, name, type, expected_return_rate) VALUES (?, ?, ?, ?, ?)`,
 );
 for (const a of accountRows) {
-  insertAccount.run(a.id, a.name, a.type, a.expected_return_rate);
+  insertAccount.run(a.id, PLACEHOLDER_USER_ID, a.name, a.type, a.expected_return_rate);
 }
 
 // ---------------------------------------------------------------------------
 // 2. Scenarios
 // ---------------------------------------------------------------------------
 const insertScenario = db.prepare(
-  `INSERT INTO scenarios (id, name) VALUES (?, ?)`,
+  `INSERT INTO scenarios (id, user_id, name) VALUES (?, ?, ?)`,
 );
-insertScenario.run(scenarioIds.basePlan, "Base Plan");
-insertScenario.run(scenarioIds.aggressive, "Aggressive Savings");
+insertScenario.run(scenarioIds.basePlan, PLACEHOLDER_USER_ID, "Base Plan");
+insertScenario.run(scenarioIds.aggressive, PLACEHOLDER_USER_ID, "Aggressive Savings");
 
 // Set Base Plan as active
 db.prepare(
-  `INSERT INTO settings (key, value) VALUES ('activeScenarioId', ?)`,
-).run(scenarioIds.basePlan);
+  `INSERT INTO settings (user_id, key, value) VALUES (?, 'activeScenarioId', ?)`,
+).run(PLACEHOLDER_USER_ID, scenarioIds.basePlan);
 
 // ---------------------------------------------------------------------------
 // 3. Goals
 // ---------------------------------------------------------------------------
 const insertGoal = db.prepare(
-  `INSERT INTO goals (id, name, target_amount) VALUES (?, ?, ?)`,
+  `INSERT INTO goals (id, user_id, name, target_amount) VALUES (?, ?, ?, ?)`,
 );
-insertGoal.run(goalIds.emergency, "Emergency Fund", 25000);
-insertGoal.run(goalIds.downPayment, "House Down Payment", 100000);
-insertGoal.run(goalIds.fire, "Financial Independence", 1000000);
+insertGoal.run(goalIds.emergency, PLACEHOLDER_USER_ID, "Emergency Fund", 25000);
+insertGoal.run(goalIds.downPayment, PLACEHOLDER_USER_ID, "House Down Payment", 100000);
+insertGoal.run(goalIds.fire, PLACEHOLDER_USER_ID, "Financial Independence", 1000000);
 
 // ---------------------------------------------------------------------------
 // 4. Transactions — historical data from July 2024 through Feb 2026
 // ---------------------------------------------------------------------------
 const insertTx = db.prepare(
-  `INSERT INTO transactions (id, account_id, amount, date, description, is_projected, scenario_id)
-   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  `INSERT INTO transactions (id, user_id, account_id, amount, date, description, is_projected, scenario_id)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 );
 
 const txRows = [];
@@ -398,6 +407,7 @@ const insertTxBatch = db.transaction(() => {
   for (const t of txRows) {
     insertTx.run(
       t.id,
+      PLACEHOLDER_USER_ID,
       t.accountId,
       t.amount,
       t.date,
@@ -413,8 +423,8 @@ insertTxBatch();
 // 5. Recurring transactions
 // ---------------------------------------------------------------------------
 const insertRecurring = db.prepare(
-  `INSERT INTO recurring_transactions (id, account_id, amount, description, frequency, start_date, end_date, scenario_id)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  `INSERT INTO recurring_transactions (id, user_id, account_id, amount, description, frequency, start_date, end_date, scenario_id)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 );
 
 const recurringRows = [
@@ -523,6 +533,7 @@ const insertRecurringBatch = db.transaction(() => {
   for (const r of recurringRows) {
     insertRecurring.run(
       randomUUID(),
+      PLACEHOLDER_USER_ID,
       r.accountId,
       r.amount,
       r.description,

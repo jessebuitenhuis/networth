@@ -1,7 +1,8 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const accounts = sqliteTable("accounts", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(),
   expectedReturnRate: real("expected_return_rate"),
@@ -9,6 +10,7 @@ export const accounts = sqliteTable("accounts", {
 
 export const transactions = sqliteTable("transactions", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   accountId: text("account_id").notNull(),
   amount: real("amount").notNull(),
   date: text("date").notNull(),
@@ -20,6 +22,7 @@ export const transactions = sqliteTable("transactions", {
 
 export const recurringTransactions = sqliteTable("recurring_transactions", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   accountId: text("account_id").notNull(),
   amount: real("amount").notNull(),
   description: text("description").notNull(),
@@ -32,23 +35,33 @@ export const recurringTransactions = sqliteTable("recurring_transactions", {
 
 export const categories = sqliteTable("categories", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   parentCategoryId: text("parent_category_id"),
 });
 
 export const scenarios = sqliteTable("scenarios", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   inflationRate: real("inflation_rate"),
 });
 
 export const goals = sqliteTable("goals", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   targetAmount: real("target_amount").notNull(),
 });
 
-export const settings = sqliteTable("settings", {
-  key: text("key").primaryKey(),
-  value: text("value"),
-});
+export const settings = sqliteTable(
+  "settings",
+  {
+    userId: text("user_id").notNull(),
+    key: text("key").notNull(),
+    value: text("value"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.key] }),
+  }),
+);

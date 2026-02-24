@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { recurringTransactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
+vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
+
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -28,8 +30,8 @@ describe("getAllRecurringTransactions", () => {
     testDb
       .insert(recurringTransactions)
       .values([
-        { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" },
-        { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01" },
+        { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" },
+        { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" },
       ])
       .run();
 
@@ -41,7 +43,7 @@ describe("getRecurringTransactionById", () => {
   it("returns the matching recurring transaction", () => {
     testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
     const result = getRecurringTransactionById("rt-1");
@@ -99,7 +101,7 @@ describe("updateRecurringTransaction", () => {
   it("modifies and returns the updated recurring transaction", () => {
     testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
     const result = updateRecurringTransaction("rt-1", {
@@ -119,7 +121,7 @@ describe("deleteRecurringTransaction", () => {
   it("removes the recurring transaction", () => {
     testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01" })
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
     deleteRecurringTransaction("rt-1");
@@ -132,8 +134,8 @@ describe("deleteRecurringTransactionsByScenarioId", () => {
     testDb
       .insert(recurringTransactions)
       .values([
-        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Base", frequency: "Monthly", startDate: "2025-01-01" },
-        { id: "rt-2", accountId: "acc-1", amount: 200, description: "Scenario", frequency: "Monthly", startDate: "2025-01-01", scenarioId: "s-1" },
+        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Base", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" },
+        { id: "rt-2", accountId: "acc-1", amount: 200, description: "Scenario", frequency: "Monthly", startDate: "2025-01-01", scenarioId: "s-1", userId: "test-user" },
       ])
       .run();
 
@@ -142,5 +144,60 @@ describe("deleteRecurringTransactionsByScenarioId", () => {
     const remaining = getAllRecurringTransactions();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("rt-1");
+  });
+});
+
+describe("cross-user isolation", () => {
+  it("getAllRecurringTransactions does not return other user's records", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values([
+        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Mine", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" },
+        { id: "rt-2", accountId: "acc-1", amount: 200, description: "Theirs", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" },
+      ])
+      .run();
+
+    const result = getAllRecurringTransactions();
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("rt-1");
+  });
+
+  it("getRecurringTransactionById returns undefined for other user's record", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
+      .run();
+
+    expect(getRecurringTransactionById("rt-1")).toBeUndefined();
+  });
+
+  it("updateRecurringTransaction does not modify other user's record", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Original", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
+      .run();
+
+    updateRecurringTransaction("rt-1", {
+      accountId: "acc-1",
+      amount: 999,
+      description: "Hacked",
+      frequency: "Monthly",
+      startDate: "2025-01-01",
+    });
+
+    const allRows = testDb.select().from(recurringTransactions).all();
+    expect(allRows.find((r) => r.id === "rt-1")?.description).toBe("Original");
+  });
+
+  it("deleteRecurringTransaction does not delete other user's record", () => {
+    testDb
+      .insert(recurringTransactions)
+      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
+      .run();
+
+    deleteRecurringTransaction("rt-1");
+
+    const allRows = testDb.select().from(recurringTransactions).all();
+    expect(allRows.find((r) => r.id === "rt-1")).toBeDefined();
   });
 });

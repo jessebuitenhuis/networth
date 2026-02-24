@@ -22,6 +22,7 @@ function initDb(): BetterSQLite3Database<typeof schema> {
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS accounts (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       expected_return_rate REAL
@@ -29,6 +30,7 @@ function initDb(): BetterSQLite3Database<typeof schema> {
 
     CREATE TABLE IF NOT EXISTS transactions (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       account_id TEXT NOT NULL,
       amount REAL NOT NULL,
       date TEXT NOT NULL,
@@ -40,6 +42,7 @@ function initDb(): BetterSQLite3Database<typeof schema> {
 
     CREATE TABLE IF NOT EXISTS recurring_transactions (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       account_id TEXT NOT NULL,
       amount REAL NOT NULL,
       description TEXT NOT NULL,
@@ -52,24 +55,30 @@ function initDb(): BetterSQLite3Database<typeof schema> {
 
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       parent_category_id TEXT
     );
 
     CREATE TABLE IF NOT EXISTS scenarios (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      inflation_rate REAL
     );
 
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       target_amount REAL NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT
+      user_id TEXT NOT NULL,
+      key TEXT NOT NULL,
+      value TEXT,
+      PRIMARY KEY (user_id, key)
     );
   `);
 
@@ -89,6 +98,47 @@ function initDb(): BetterSQLite3Database<typeof schema> {
     sqlite.exec(`ALTER TABLE scenarios ADD COLUMN inflation_rate REAL`);
   } catch {
     // Column already exists
+  }
+
+  // Migrate entity tables to add user_id column if missing
+  const entityTables = [
+    "accounts",
+    "transactions",
+    "recurring_transactions",
+    "categories",
+    "scenarios",
+    "goals",
+  ];
+  for (const table of entityTables) {
+    try {
+      sqlite.exec(`ALTER TABLE ${table} ADD COLUMN user_id TEXT NOT NULL DEFAULT ''`);
+      sqlite.exec(`UPDATE ${table} SET user_id = 'placeholder-user-id' WHERE user_id = ''`);
+    } catch {
+      // Column already exists
+    }
+  }
+
+  // Migrate settings table: rebuild with compound PK (userId, key)
+  const needsSettingsMigration = (() => {
+    try {
+      sqlite.exec(`ALTER TABLE settings ADD COLUMN user_id TEXT`);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  if (needsSettingsMigration) {
+    sqlite.exec(`
+      ALTER TABLE settings RENAME TO settings_old;
+      CREATE TABLE settings (
+        user_id TEXT NOT NULL,
+        key TEXT NOT NULL,
+        value TEXT,
+        PRIMARY KEY (user_id, key)
+      );
+      INSERT INTO settings SELECT 'placeholder-user-id', key, value FROM settings_old;
+      DROP TABLE settings_old;
+    `);
   }
 
   _db = drizzle(sqlite, { schema });
