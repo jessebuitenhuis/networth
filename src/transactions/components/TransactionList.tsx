@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useAccounts } from "@/accounts/AccountContext";
 import { useCategories } from "@/categories/CategoryContext";
 import { getCategoryPath } from "@/categories/getCategoryPath";
+import { useCategoryPickerItems } from "@/categories/useCategoryPickerItems";
 import { formatDate } from "@/lib/dateUtils";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
@@ -84,14 +85,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
     [allItems, filters]
   );
 
-  const categoryItems = useMemo(
-    () =>
-      categories.map((c) => ({
-        id: c.id,
-        label: getCategoryPath(c.id, categories),
-      })),
-    [categories]
-  );
+  const categoryItems = useCategoryPickerItems();
 
   if (allItems.length === 0) {
     return <p className="text-muted-foreground">No transactions yet.</p>;

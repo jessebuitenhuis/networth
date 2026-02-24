@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { useAccounts } from "@/accounts/AccountContext";
-import { useCategories } from "@/categories/CategoryContext";
-import { getCategoryPath } from "@/categories/getCategoryPath";
+import { useCategoryPickerItems } from "@/categories/useCategoryPickerItems";
 import TopBar from "@/components/layout/TopBar";
 import { CreateTransactionDialog } from "@/transactions/components/CreateTransactionDialog";
 import { TransactionFilterBar } from "@/transactions/components/TransactionFilterBar";
@@ -19,7 +18,7 @@ import { useAllDisplayTransactions } from "@/transactions/useAllDisplayTransacti
 export default function TransactionsPage() {
   const allItems = useAllDisplayTransactions();
   const { accounts } = useAccounts();
-  const { categories } = useCategories();
+  const categoryItems = useCategoryPickerItems();
   const [filters, setFilters] = useState<TransactionFilters>(emptyFilters);
 
   const filteredItems = useMemo(
@@ -30,11 +29,6 @@ export default function TransactionsPage() {
   const accountItems = useMemo(
     () => accounts.map((a) => ({ id: a.id, label: a.name })),
     [accounts]
-  );
-
-  const categoryItems = useMemo(
-    () => categories.map((c) => ({ id: c.id, label: getCategoryPath(c.id, categories) })),
-    [categories]
   );
 
   return (
