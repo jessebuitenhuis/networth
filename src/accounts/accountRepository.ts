@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { getUserDb } from "@/db/userDb";
 import { accounts } from "@/db/schema";
+import { getUserDb } from "@/db/userDb";
 
 export function getAllAccounts() {
   return getUserDb().select(accounts).all();

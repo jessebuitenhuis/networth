@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { getUserDb } from "@/db/userDb";
 import { recurringTransactions } from "@/db/schema";
+import { getUserDb } from "@/db/userDb";
 
 export function getAllRecurringTransactions() {
   return getUserDb().select(recurringTransactions).all();

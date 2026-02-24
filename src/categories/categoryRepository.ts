@@ -1,7 +1,7 @@
 import { eq, isNull } from "drizzle-orm";
 
-import { getUserDb } from "@/db/userDb";
 import { categories } from "@/db/schema";
+import { getUserDb } from "@/db/userDb";
 
 export function getAllCategories() {
   return getUserDb().select(categories).all();

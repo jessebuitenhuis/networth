@@ -1,14 +1,16 @@
-import { and, eq, SQL } from "drizzle-orm";
+import { and, Column, eq, SQL } from "drizzle-orm";
 import { SQLiteTable } from "drizzle-orm/sqlite-core";
 
 import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 import { db } from "./connection";
 
+type UserTable = SQLiteTable & { userId: Column };
+
 export function getUserDb() {
   const userId = getCurrentUserId();
 
-  function userWhere(table: { userId: any }, extra?: SQL): SQL {
+  function userWhere(table: UserTable, extra?: SQL): SQL {
     const userCond = eq(table.userId, userId);
     return extra ? (and(userCond, extra) as SQL) : userCond;
   }
@@ -16,20 +18,22 @@ export function getUserDb() {
   return {
     userId,
 
-    select<T extends SQLiteTable>(table: T, where?: SQL) {
-      return db.select().from(table).where(userWhere(table as any, where));
+    select<T extends UserTable>(table: T, where?: SQL) {
+      return db.select().from(table).where(userWhere(table, where));
     },
 
-    insert<T extends SQLiteTable>(table: T, data: Record<string, unknown>) {
+    insert<T extends UserTable>(table: T, data: Record<string, unknown>) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return db.insert(table).values({ ...data, userId } as any);
     },
 
-    update<T extends SQLiteTable>(table: T, data: Record<string, unknown>, where: SQL) {
-      return db.update(table).set(data as any).where(userWhere(table as any, where));
+    update<T extends UserTable>(table: T, data: Record<string, unknown>, where: SQL) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return db.update(table).set(data as any).where(userWhere(table, where));
     },
 
-    delete<T extends SQLiteTable>(table: T, where: SQL) {
-      return db.delete(table).where(userWhere(table as any, where));
+    delete<T extends UserTable>(table: T, where: SQL) {
+      return db.delete(table).where(userWhere(table, where));
     },
   };
 }
