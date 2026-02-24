@@ -1,14 +1,13 @@
 "use client";
 
-import { Search, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { X } from "lucide-react";
 
 import { AmountRangeFilter } from "@/components/shared/AmountRangeFilter";
 import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
 import type { MultiSelectPickerItem } from "@/components/shared/MultiSelectPicker";
 import { MultiSelectPicker } from "@/components/shared/MultiSelectPicker";
+import { SearchInput } from "@/components/shared/SearchInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   emptyFilters,
   type TransactionFilters,
@@ -26,41 +25,6 @@ type TransactionFilterBarProps = {
   categories?: MultiSelectPickerItem[];
 };
 
-type SearchInputProps = {
-  value: string;
-  isOpen: boolean;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  onOpen: () => void;
-  onChange: (value: string) => void;
-  onBlur: () => void;
-};
-
-function SearchInput({ value, isOpen, inputRef, onOpen, onChange, onBlur }: SearchInputProps) {
-  if (!isOpen) {
-    return (
-      <Button type="button" variant="outline" size="sm" onClick={onOpen} aria-label="Open search">
-        <Search className="h-4 w-4" />
-      </Button>
-    );
-  }
-
-  return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-      <Input
-        ref={inputRef}
-        type="text"
-        placeholder="Search transactions..."
-        aria-label="Search transactions"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
-        className="pl-9 h-8 w-48"
-      />
-    </div>
-  );
-}
-
 export function TransactionFilterBar({
   filters,
   onChange,
@@ -70,26 +34,10 @@ export function TransactionFilterBar({
   accounts = [],
   categories = [],
 }: TransactionFilterBarProps) {
-  const [isSearchOpen, setIsSearchOpen] = useState(filters.description !== "");
-  const searchRef = useRef<HTMLInputElement>(null);
   const isActive = hasActiveFilters(filters);
 
   const updateFilter = (key: keyof TransactionFilters, value: string | Set<string>) => {
     onChange({ ...filters, [key]: value });
-  };
-
-  const clearFilters = () => {
-    onChange(emptyFilters);
-    setIsSearchOpen(false);
-  };
-
-  const openSearch = () => {
-    setIsSearchOpen(true);
-    setTimeout(() => searchRef.current?.focus(), 0);
-  };
-
-  const handleSearchBlur = () => {
-    if (filters.description === "") setIsSearchOpen(false);
   };
 
   const toggleSet = (key: "accountIds" | "categoryIds", id: string) => {
@@ -104,11 +52,8 @@ export function TransactionFilterBar({
       <div className="flex flex-wrap items-center gap-2">
         <SearchInput
           value={filters.description}
-          isOpen={isSearchOpen}
-          inputRef={searchRef}
-          onOpen={openSearch}
+          placeholder="Search transactions..."
           onChange={(v) => updateFilter("description", v)}
-          onBlur={handleSearchBlur}
         />
 
         <DateRangeFilter
@@ -152,7 +97,7 @@ export function TransactionFilterBar({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={clearFilters}
+            onClick={() => onChange(emptyFilters)}
             aria-label="Clear filters"
           >
             <X className="h-4 w-4" />
