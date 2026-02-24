@@ -53,6 +53,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
     const categoryId = item.sourceTransaction?.categoryId || item.sourceRecurringTransaction?.categoryId;
     return {
       ...item,
+      categoryId,
       categoryName: categoryId ? getCategoryPath(categoryId, categories) : undefined,
       editAction: item.sourceRecurringTransaction ? (
         <EditRecurringTransactionDialog
@@ -83,6 +84,15 @@ export function TransactionList({ accountId }: TransactionListProps) {
     [allItems, filters]
   );
 
+  const categoryItems = useMemo(
+    () =>
+      categories.map((c) => ({
+        id: c.id,
+        label: getCategoryPath(c.id, categories),
+      })),
+    [categories]
+  );
+
   if (allItems.length === 0) {
     return <p className="text-muted-foreground">No transactions yet.</p>;
   }
@@ -94,6 +104,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
         onChange={setFilters}
         resultCount={filteredItems.length}
         totalCount={allItems.length}
+        categories={categoryItems}
       />
       {filteredItems.length === 0 ? (
         <p className="text-muted-foreground">No transactions match the current filters.</p>

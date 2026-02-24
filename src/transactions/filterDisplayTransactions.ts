@@ -35,6 +35,14 @@ export function filterDisplayTransactions(
       }
     }
 
+    if (filters.accountIds.size > 0 && !filters.accountIds.has(item.accountId)) {
+      return false;
+    }
+
+    if (filters.categoryIds.size > 0 && !filters.categoryIds.has(item.categoryId ?? "")) {
+      return false;
+    }
+
     return true;
   });
 }
@@ -45,6 +53,8 @@ export function hasActiveFilters(filters: TransactionFilters): boolean {
     filters.dateFrom !== "" ||
     filters.dateTo !== "" ||
     filters.amountMin !== "" ||
-    filters.amountMax !== ""
+    filters.amountMax !== "" ||
+    filters.accountIds.size > 0 ||
+    filters.categoryIds.size > 0
   );
 }
