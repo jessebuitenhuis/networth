@@ -100,6 +100,5 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 
 ### Tracking — Reports
 
-- As a user, I want to see my net worth history, so I can understand how my financial position has changed over time.
 - As a user, I want to see spending trends and income vs expenses over time, so I can understand my financial patterns.
 - As a user, I want to see a monthly cash flow breakdown by category, so I understand where my money is going.
