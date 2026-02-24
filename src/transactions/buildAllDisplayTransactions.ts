@@ -45,6 +45,6 @@ function resolveCategoryPaths(
       item.sourceTransaction?.categoryId ??
       item.sourceRecurringTransaction?.categoryId;
     if (!categoryId) return item;
-    return { ...item, categoryName: getCategoryPath(categoryId, categories) };
+    return { ...item, categoryId, categoryName: getCategoryPath(categoryId, categories) };
   });
 }

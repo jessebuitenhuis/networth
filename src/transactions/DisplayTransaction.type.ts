@@ -8,6 +8,7 @@ export type DisplayTransaction = {
   isProjected: boolean;
   isRecurring: boolean;
   scenarioName?: string;
+  categoryId?: string;
   categoryName?: string;
   editAction: React.ReactNode;
 };

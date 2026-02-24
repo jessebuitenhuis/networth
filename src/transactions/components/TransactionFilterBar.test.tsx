@@ -6,41 +6,35 @@ import { emptyFilters } from "@/transactions/TransactionFilters.type";
 import { TransactionFilterBarPage } from "./TransactionFilterBar.page";
 
 describe("TransactionFilterBar", () => {
-  it("renders search input and filter toggle button", () => {
+  it("renders search button and date/amount filter controls", () => {
     const page = TransactionFilterBarPage.render();
-    expect(page.searchInput).toBeInTheDocument();
-    expect(page.toggleFiltersButton).toBeInTheDocument();
+    expect(page.searchButton).toBeInTheDocument();
+    expect(page.dateRangeButton).toBeInTheDocument();
+    expect(page.amountRangeButton).toBeInTheDocument();
   });
 
-  it("does not show advanced filters by default", () => {
+  it("does not show search input by default", () => {
     TransactionFilterBarPage.render();
-    expect(screen.queryByLabelText("From date")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Search transactions")).not.toBeInTheDocument();
   });
 
-  it("shows advanced filters when toggle is clicked", async () => {
+  it("expands search input when search button is clicked", async () => {
     const page = TransactionFilterBarPage.render();
-
-    await page.expandFilters();
-
-    expect(page.fromDateInput).toBeInTheDocument();
-    expect(page.toDateInput).toBeInTheDocument();
-    expect(page.minAmountInput).toBeInTheDocument();
-    expect(page.maxAmountInput).toBeInTheDocument();
+    await page.clickSearchButton();
+    expect(page.searchInput).toBeInTheDocument();
   });
 
-  it("hides advanced filters when toggle is clicked again", async () => {
-    const page = TransactionFilterBarPage.render();
-
-    await page.expandFilters();
-    expect(page.fromDateInput).toBeInTheDocument();
-
-    await page.clickToggleFilters();
-    expect(page.queryFromDate()).not.toBeInTheDocument();
+  it("shows search input when description filter is pre-populated", () => {
+    const page = TransactionFilterBarPage.render({
+      filters: { ...emptyFilters, description: "groceries" },
+    });
+    expect(page.searchInput).toBeInTheDocument();
+    expect(page.searchInput).toHaveValue("groceries");
   });
 
   it("calls onChange when typing in search input", async () => {
     const page = TransactionFilterBarPage.render();
-
+    await page.clickSearchButton();
     await page.typeInSearch("g");
 
     expect(page.onChange).toHaveBeenCalledWith({
@@ -49,17 +43,32 @@ describe("TransactionFilterBar", () => {
     });
   });
 
+  it("shows date range inputs inside popover", async () => {
+    const page = TransactionFilterBarPage.render();
+    await page.openDateRange();
+    expect(page.fromDateInput).toBeInTheDocument();
+    expect(page.toDateInput).toBeInTheDocument();
+  });
+
+  it("shows amount range inputs inside popover", async () => {
+    const page = TransactionFilterBarPage.render();
+    await page.openAmountRange();
+    expect(page.minAmountInput).toBeInTheDocument();
+    expect(page.maxAmountInput).toBeInTheDocument();
+  });
+
   it.each([
-    { field: "From date", filterKey: "dateFrom", value: "2024-01-15" },
-    { field: "To date", filterKey: "dateTo", value: "2024-12-31" },
-    { field: "Min amount", filterKey: "amountMin", value: "5" },
-    { field: "Max amount", filterKey: "amountMax", value: "9" },
+    { field: "From date", filterKey: "dateFrom", value: "2024-01-15", popover: "date" },
+    { field: "To date", filterKey: "dateTo", value: "2024-12-31", popover: "date" },
+    { field: "Min amount", filterKey: "amountMin", value: "5", popover: "amount" },
+    { field: "Max amount", filterKey: "amountMax", value: "9", popover: "amount" },
   ] as const)(
     "calls onChange when setting $field",
-    async ({ field, filterKey, value }) => {
+    async ({ field, filterKey, value, popover }) => {
       const page = TransactionFilterBarPage.render();
 
-      await page.expandFilters();
+      if (popover === "date") await page.openDateRange();
+      else await page.openAmountRange();
       await page.typeInField(field, value);
 
       expect(page.onChange).toHaveBeenCalledWith(
@@ -106,10 +115,26 @@ describe("TransactionFilterBar", () => {
     expect(screen.getByText("Showing 3 of 10 transactions")).toBeInTheDocument();
   });
 
-  it("displays current search value", () => {
-    const page = TransactionFilterBarPage.render({
-      filters: { ...emptyFilters, description: "groceries" },
+  it("shows account filter when showAccountFilter is true and accounts are provided", () => {
+    TransactionFilterBarPage.render({
+      showAccountFilter: true,
+      accounts: [{ id: "a1", label: "Checking" }],
     });
-    expect(page.searchInput).toHaveValue("groceries");
+    expect(screen.getByText("Accounts (0)")).toBeInTheDocument();
+  });
+
+  it("does not show account filter when showAccountFilter is false", () => {
+    TransactionFilterBarPage.render({
+      showAccountFilter: false,
+      accounts: [{ id: "a1", label: "Checking" }],
+    });
+    expect(screen.queryByText("Accounts (0)")).not.toBeInTheDocument();
+  });
+
+  it("shows category filter when categories are provided", () => {
+    TransactionFilterBarPage.render({
+      categories: [{ id: "c1", label: "Food" }],
+    });
+    expect(screen.getByText("Categories (0)")).toBeInTheDocument();
   });
 });
