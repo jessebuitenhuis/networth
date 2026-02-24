@@ -42,14 +42,14 @@ Use these npm scripts — they go through turbo and benefit from caching. Do **n
 | Task | Command |
 |---|---|
 | Run all tests | `npm run test` |
-| Run specific tests | `npx vitest run <path>` (e.g. `npx vitest run src/accounts/`) |
+| Run specific tests | `npm run test -- -- <filter>` (e.g. `npm run test -- -- src/accounts`) |
 | Build | `npm run build` |
 | Lint | `npm run lint` |
 | Lint + auto-fix | `npm run format` |
 | All checks (lint + build + test + smoke) | `npm run verify` |
 | Test coverage | `npm run test:coverage` |
 
-> **Note:** `npx vitest run <path>` bypasses turbo caching but is correct for targeted test runs during development. Use `npm run test` when you want the full suite with caching.
+> **Note:** The `<filter>` for specific tests is a substring/regex matched against file paths (e.g. `src/accounts`, `accountRepository`). The double `--` is required: the first passes through npm, the second through turbo, so the filter reaches vitest.
 
 ## Workflow
 
