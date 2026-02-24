@@ -28,7 +28,7 @@ src/
     shared/         # Reusable non-shadcn components (MultiSelectPicker, CurrencyInput, etc.)
     ui/             # shadcn/ui primitives (do not edit directly)
   categories/       # Category domain: types, context, repository, components
-    components/     # Category UI components (CategoryList, CategorySelect, dialogs, etc.)
+    components/     # Category UI components (CategorySelect, dialogs, etc.)
   db/               # Database schema (Drizzle) and connection singleton
   hooks/            # Custom React hooks
   lib/              # Generic utility functions (dateUtils, formatCurrency, generateId, tree utils, etc.)

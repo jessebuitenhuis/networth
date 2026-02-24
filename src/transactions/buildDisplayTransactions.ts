@@ -26,6 +26,7 @@ export function buildDisplayTransactions(
     activeScenarioId
   ).map((tx) => ({
     id: tx.id,
+    accountId,
     description: tx.description,
     accountName,
     date: tx.date,
@@ -47,6 +48,7 @@ export function buildDisplayTransactions(
       if (!next) return null;
       const item: DisplayTransactionData = {
         id: next.id,
+        accountId,
         description: next.description,
         accountName,
         date: next.date,

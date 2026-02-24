@@ -10,6 +10,7 @@ import { emptyFilters } from "./TransactionFilters.type";
 const items: DisplayTransaction[] = [
   {
     id: "1",
+    accountId: "a1",
     description: "Groceries at Whole Foods",
     accountName: "Checking",
     date: "2024-01-15",
@@ -20,6 +21,7 @@ const items: DisplayTransaction[] = [
   },
   {
     id: "2",
+    accountId: "a1",
     description: "Monthly Salary",
     accountName: "Checking",
     date: "2024-02-01",
@@ -30,6 +32,7 @@ const items: DisplayTransaction[] = [
   },
   {
     id: "3",
+    accountId: "a1",
     description: "Electric Bill",
     accountName: "Checking",
     date: "2024-01-20",
@@ -40,6 +43,7 @@ const items: DisplayTransaction[] = [
   },
   {
     id: "4",
+    accountId: "a2",
     description: "Freelance Payment",
     accountName: "Savings",
     date: "2024-03-10",
