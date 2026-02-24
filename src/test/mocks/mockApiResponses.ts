@@ -13,6 +13,7 @@ type ApiData = {
   scenarios?: Scenario[];
   activeScenarioId?: string | null;
   goals?: Goal[];
+  setupCompleted?: boolean;
 };
 
 export function mockApiResponses(data: ApiData = {}) {
@@ -23,6 +24,7 @@ export function mockApiResponses(data: ApiData = {}) {
     scenarios = [],
     activeScenarioId = null,
     goals = [],
+    setupCompleted = false,
   } = data;
 
   vi.stubGlobal(
@@ -48,6 +50,9 @@ export function mockApiResponses(data: ApiData = {}) {
       }
       if (url === "/api/goals") {
         return { ok: true, json: async () => goals };
+      }
+      if (url === "/api/settings/setup-completed") {
+        return { ok: true, json: async () => ({ completed: setupCompleted }) };
       }
 
       return { ok: true, status: 200, json: async () => [] };
