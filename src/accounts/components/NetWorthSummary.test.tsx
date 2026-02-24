@@ -71,12 +71,12 @@ describe("NetWorthSummary", () => {
 
     renderWithProvider(accounts, transactions);
 
-    expect(await screen.findByText("Total Assets")).toBeInTheDocument();
+    expect(await screen.findByText("Assets")).toBeInTheDocument();
     expect(await screen.findByText("$8,000.00")).toBeInTheDocument();
-    expect(await screen.findByText("Total Liabilities")).toBeInTheDocument();
+    expect(await screen.findByText("Liabilities")).toBeInTheDocument();
     // Net worth: $6,500.00 and liabilities: $1,500.00 share same formatted value
     // Verify both labels are present
-    expect(screen.getByText("Total Liabilities")).toBeInTheDocument();
+    expect(screen.getByText("Liabilities")).toBeInTheDocument();
   });
 
   it("displays negative net worth", async () => {

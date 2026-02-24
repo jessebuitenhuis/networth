@@ -45,9 +45,9 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className="antialiased"
+        className="font-sans antialiased"
       >
         <SidebarProvider defaultOpen={defaultOpen}>
           <AccountProvider>

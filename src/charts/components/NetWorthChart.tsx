@@ -72,9 +72,9 @@ export function NetWorthChart() {
   const tooltipValueFormatter = useCallback((value: unknown) => formatTooltipValue(Number(value)), []);
 
   return (
-    <div className="rounded-lg border p-6 space-y-4">
+    <div className="surface-section space-y-4 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted-foreground">Net Worth Over Time</h2>
+        <h2 className="section-label">Net Worth Over Time</h2>
         <PeriodPicker periods={HISTORICAL_PERIODS} selected={period} onSelect={setPeriod} />
       </div>
       {period === ChartPeriod.Custom && (
@@ -85,29 +85,35 @@ export function NetWorthChart() {
         />
       )}
       <div data-testid="net-worth-chart">
-        <ResponsiveContainer width="100%" height={256}>
+        <ResponsiveContainer width="100%" height={280}>
           <LineChart key={chartKey} data={data}>
-            <XAxis dataKey="date" tickFormatter={xAxisFormatter} tick={{ fontSize: 12 }} />
+            <defs>
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="oklch(0.72 0.17 162)" />
+                <stop offset="100%" stopColor="oklch(0.78 0.13 75)" />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="date" tickFormatter={xAxisFormatter} tick={{ fontSize: 11 }} />
             <YAxis
               domain={yAxisConfig.domain}
               ticks={yAxisConfig.ticks}
               tickFormatter={formatYAxisValue}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               width={80}
             />
             <Tooltip
               labelFormatter={tooltipLabelFormatter}
               formatter={tooltipValueFormatter}
             />
-            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} />
+            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} strokeDasharray="4 4" />
             <Line
               type="monotone"
               dataKey="netWorth"
-              stroke="var(--color-primary)"
-              strokeWidth={2}
+              stroke="url(#lineGradient)"
+              strokeWidth={2.5}
               dot={false}
               isAnimationActive={true}
-              animationDuration={300}
+              animationDuration={600}
             />
           </LineChart>
         </ResponsiveContainer>

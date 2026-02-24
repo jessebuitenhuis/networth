@@ -26,28 +26,27 @@ export function NetWorthCard({
   }, []);
 
   return (
-    <Card className="p-6">
+    <Card className="hero-glow overflow-hidden p-0">
       <CardContent className="p-0">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Net Worth
-        </h2>
-        <p className="text-3xl font-bold">
-          {isMounted ? formatCurrency(netWorth) : "..."}
-        </p>
-        <div className="mt-4 flex gap-6">
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Total Assets
-            </h3>
-            <p className="text-lg font-semibold text-green-600">
+        <div className="surface-hero relative px-8 py-8">
+          <div className="surface-hero-glow pointer-events-none absolute inset-0 opacity-30" />
+          <div className="relative">
+            <h2 className="section-label">Net Worth</h2>
+            <p className="hero-value mt-2 text-5xl font-normal leading-none">
+              {isMounted ? formatCurrency(netWorth) : "..."}
+            </p>
+          </div>
+        </div>
+        <div className="flex border-t border-border">
+          <div className="flex-1 border-r border-border px-8 py-5">
+            <h3 className="section-label">Assets</h3>
+            <p className="mt-1 font-display text-xl text-positive">
               {isMounted ? formatCurrency(totalAssets) : "..."}
             </p>
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Total Liabilities
-            </h3>
-            <p className="text-lg font-semibold text-red-600">
+          <div className="flex-1 px-8 py-5">
+            <h3 className="section-label">Liabilities</h3>
+            <p className="mt-1 font-display text-xl text-negative">
               {isMounted ? formatCurrency(totalLiabilities) : "..."}
             </p>
           </div>

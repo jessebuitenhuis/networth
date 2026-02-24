@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 type ScenarioLegendEntry = {
   name: string;
   color: string;
@@ -17,11 +19,13 @@ export function ScenarioLegend({ entries }: ScenarioLegendProps) {
         <div key={entry.name} className="flex items-center gap-1.5 text-sm">
           <span
             data-testid="legend-indicator"
-            className="inline-block h-0 w-4 border-t-2"
-            style={{
-              borderColor: entry.color,
-              borderStyle: entry.lineStyle,
-            }}
+            className="scenario-indicator inline-block h-0 w-4 border-t-2"
+            style={
+              {
+                "--indicator-color": entry.color,
+                "--indicator-style": entry.lineStyle,
+              } as CSSProperties
+            }
           />
           <span>{entry.name}</span>
         </div>

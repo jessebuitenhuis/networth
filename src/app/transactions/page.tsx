@@ -34,7 +34,7 @@ export default function TransactionsPage() {
   return (
     <>
       <TopBar title="Transactions" actions={<CreateTransactionDialog />} />
-      <div className="p-4 space-y-4">
+      <div className="p-6 space-y-4">
         {allItems.length === 0 ? (
           <p className="text-muted-foreground">No transactions yet.</p>
         ) : (

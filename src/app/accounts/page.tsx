@@ -19,11 +19,11 @@ function AccountRow({ account, balance }: { account: Account; balance: number })
     <>
       <Link
         href={`/accounts/${account.id}`}
-        className="flex-1 truncate text-sm hover:underline"
+        className="flex-1 truncate text-sm text-foreground/90 transition-colors hover:text-primary"
       >
         {account.name}
       </Link>
-      <span className="text-sm font-medium">{formatCurrency(balance)}</span>
+      <span className="font-mono text-sm font-medium">{formatCurrency(balance)}</span>
       <EditAccountDialog
         account={account}
         trigger={
@@ -47,8 +47,8 @@ export default function AccountsPage() {
         title="Accounts"
         actions={<CreateAccountDialog trigger={<Button>New Account</Button>} />}
       />
-      <div className="p-4">
-        <div className="mx-auto max-w-2xl space-y-6">
+      <div className="p-6">
+        <div className="mx-auto max-w-2xl space-y-8">
           <NetWorthCard
             netWorth={total}
             totalAssets={assets}

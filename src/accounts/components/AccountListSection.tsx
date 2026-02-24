@@ -23,17 +23,17 @@ export function AccountListSection({
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        <span className="text-sm font-medium">{formatCurrency(total)}</span>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="section-label">{title}</h3>
+        <span className="font-display text-sm text-gold">{formatCurrency(total)}</span>
       </div>
-      <div className="divide-y rounded-lg border">
+      <div className="surface-list">
         {accounts.map((account) => {
           const balance = getBalance(account.id);
           return (
             <div
               key={account.id}
-              className="flex items-center gap-3 px-4 py-3"
+              className="surface-list-row flex items-center gap-3 px-4 py-3"
             >
               <AccountIcon name={account.name} type={account.type} />
               {renderRow(account, balance)}

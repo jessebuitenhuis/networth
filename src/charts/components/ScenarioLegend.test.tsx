@@ -28,7 +28,7 @@ describe("ScenarioLegend", () => {
     const indicator = page.legendIndicators[0] as HTMLElement;
 
     expect(indicator).toBeInTheDocument();
-    expect(indicator.style.borderStyle).toBe("solid");
+    expect(indicator.style.getPropertyValue("--indicator-style")).toBe("solid");
   });
 
   it("renders dashed line indicator for dashed entries", () => {
@@ -37,7 +37,7 @@ describe("ScenarioLegend", () => {
     const indicator = page.legendIndicators[0] as HTMLElement;
 
     expect(indicator).toBeInTheDocument();
-    expect(indicator.style.borderStyle).toBe("dashed");
+    expect(indicator.style.getPropertyValue("--indicator-style")).toBe("dashed");
   });
 
   it("applies correct color to indicators", () => {
@@ -49,8 +49,8 @@ describe("ScenarioLegend", () => {
     const indicators = page.legendIndicators;
 
     expect(indicators).toHaveLength(2);
-    expect((indicators[0] as HTMLElement).style.borderColor).toBe("rgb(59, 130, 246)");
-    expect((indicators[1] as HTMLElement).style.borderColor).toBe("rgb(239, 68, 68)");
+    expect((indicators[0] as HTMLElement).style.getPropertyValue("--indicator-color")).toBe("#3b82f6");
+    expect((indicators[1] as HTMLElement).style.getPropertyValue("--indicator-color")).toBe("#ef4444");
   });
 
   it("renders entries in a centered flex-wrap row", () => {
@@ -75,6 +75,6 @@ describe("ScenarioLegend", () => {
     const indicator = page.legendIndicators[0] as HTMLElement;
 
     expect(indicator).toBeInTheDocument();
-    expect(indicator.style.borderStyle).toBe(lineStyle);
+    expect(indicator.style.getPropertyValue("--indicator-style")).toBe(lineStyle);
   });
 });

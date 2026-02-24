@@ -36,10 +36,12 @@ describe("GoalProgressCard", () => {
     expect(page.progressBar).toHaveAttribute("aria-valuenow", "45");
   });
 
-  it("applies goal color to title", () => {
+  it("applies goal color via CSS variable", () => {
     const page = GoalProgressCardPage.render({ progress: mockProgress, colorIndex: 0 });
     const title = page.getByText("Retirement Fund");
-    expect(title).toHaveStyle({ color: "#f59e0b" });
+    const card = title.closest("[data-slot='card']") as HTMLElement;
+    expect(card.style.getPropertyValue("--goal-color")).toBe("#f59e0b");
+    expect(title).toHaveClass("goal-name");
   });
 
   it("shows 'Achieved!' for achieved goals", () => {
@@ -56,11 +58,11 @@ describe("GoalProgressCard", () => {
 
   it("uses different colors for different indices", () => {
     const { rerender } = render(<GoalProgressCard progress={mockProgress} colorIndex={1} />);
-    const title1 = screen.getByText("Retirement Fund");
-    expect(title1).toHaveStyle({ color: "#10b981" });
+    const card1 = screen.getByText("Retirement Fund").closest("[data-slot='card']") as HTMLElement;
+    expect(card1.style.getPropertyValue("--goal-color")).toBe("#10b981");
 
     rerender(<GoalProgressCard progress={mockProgress} colorIndex={2} />);
-    const title2 = screen.getByText("Retirement Fund");
-    expect(title2).toHaveStyle({ color: "#f43f5e" });
+    const card2 = screen.getByText("Retirement Fund").closest("[data-slot='card']") as HTMLElement;
+    expect(card2.style.getPropertyValue("--goal-color")).toBe("#f43f5e");
   });
 });

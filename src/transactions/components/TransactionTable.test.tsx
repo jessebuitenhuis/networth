@@ -79,14 +79,14 @@ describe("TransactionTable", () => {
     TransactionTablePage.render({ items: [makeItem({ amount: 1000 })] });
 
     const amount = screen.getByText("+$1,000.00");
-    expect(amount).toHaveClass("text-green-600");
+    expect(amount).toHaveClass("text-positive");
   });
 
   it("displays negative amounts in red with minus sign", () => {
     TransactionTablePage.render({ items: [makeItem({ amount: -200 })] });
 
     const amount = screen.getByText("-$200.00");
-    expect(amount).toHaveClass("text-red-600");
+    expect(amount).toHaveClass("text-negative");
   });
 
   it("displays amount in monospace font", () => {

@@ -120,7 +120,7 @@ export default function PlanningPage() {
           </>
         }
       />
-      <div className="p-4 space-y-6">
+      <div className="p-6 space-y-8">
         <ProjectedNetWorthChart
           selectedScenarioIds={selectedScenarioIds}
           excludedAccountIds={excludedAccountIds}

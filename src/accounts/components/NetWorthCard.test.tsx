@@ -19,9 +19,9 @@ describe("NetWorthCard", () => {
 
   it("displays total assets and total liabilities", () => {
     const page = NetWorthCardPage.render({ netWorth: 6500, totalAssets: 8000, totalLiabilities: 1500 });
-    expect(page.getByText("Total Assets")).toBeInTheDocument();
+    expect(page.getByText("Assets")).toBeInTheDocument();
     expect(page.getByText("$8,000.00")).toBeInTheDocument();
-    expect(page.getByText("Total Liabilities")).toBeInTheDocument();
+    expect(page.getByText("Liabilities")).toBeInTheDocument();
     expect(page.getByText("$1,500.00")).toBeInTheDocument();
   });
 });

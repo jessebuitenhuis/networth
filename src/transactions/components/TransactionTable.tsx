@@ -188,10 +188,7 @@ export function TransactionTable({ items, showAccountColumn = true }: Transactio
             </TableCell>
             <TableCell className="text-right">
               <span
-                className={cn(
-                  "font-mono",
-                  item.amount >= 0 ? "text-green-600" : "text-red-600"
-                )}
+                className={cn("font-mono text-sm", item.amount >= 0 ? "text-positive" : "text-negative")}
               >
                 {formatSignedCurrency(item.amount)}
               </span>

@@ -115,7 +115,7 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium">Scenario Transactions</h3>
+      <h3 className="section-label">Scenario Transactions</h3>
       <TransactionTable items={allItems} />
     </div>
   );

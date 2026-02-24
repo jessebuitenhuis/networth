@@ -5,11 +5,12 @@ interface AccountIconProps {
   type: AccountType;
 }
 
-export function AccountIcon({ name }: AccountIconProps) {
+export function AccountIcon({ name, type }: AccountIconProps) {
   const initials = name.slice(0, 2).toUpperCase();
+  const iconClass = type === AccountType.Asset ? "account-icon-asset" : "account-icon-liability";
 
   return (
-    <div className="size-4 shrink-0 rounded flex items-center justify-center text-[10px] font-medium bg-zinc-800 text-white dark:bg-zinc-700">
+    <div className={`flex size-7 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold tracking-wide ${iconClass}`}>
       {initials}
     </div>
   );

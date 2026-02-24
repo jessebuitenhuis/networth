@@ -17,21 +17,33 @@ export default function Home() {
   return (
     <>
       <TopBar title="Dashboard" />
-      <div className="p-4">
-        <div className="mx-auto max-w-2xl space-y-6">
+      <div className="p-6">
+        <div className="mx-auto max-w-2xl space-y-8">
           {accounts.length === 0 ? (
-            <EmptyDashboard
-              createAccountTrigger={
-                <CreateAccountDialog trigger={<Button>Get Started</Button>} />
-              }
-            />
+            <div className="animate-fade-up">
+              <EmptyDashboard
+                createAccountTrigger={
+                  <CreateAccountDialog trigger={<Button>Get Started</Button>} />
+                }
+              />
+            </div>
           ) : (
             <>
-              <CreateTransactionDialog />
-              <NetWorthSummary />
-              <AccountBreakdownSection />
-              <NetWorthChart />
-              <GoalProgressSection />
+              <div className="animate-fade-up">
+                <CreateTransactionDialog />
+              </div>
+              <div className="animate-fade-up animation-delay-100">
+                <NetWorthSummary />
+              </div>
+              <div className="animate-fade-up animation-delay-200">
+                <AccountBreakdownSection />
+              </div>
+              <div className="animate-fade-up animation-delay-300">
+                <NetWorthChart />
+              </div>
+              <div className="animate-fade-up animation-delay-400">
+                <GoalProgressSection />
+              </div>
             </>
           )}
         </div>

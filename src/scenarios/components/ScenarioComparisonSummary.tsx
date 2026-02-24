@@ -39,10 +39,8 @@ export function ScenarioComparisonSummary({
   const scenarioIndexMap = new Map(scenarios.map((s, i) => [s.id, i]));
 
   return (
-    <div className="rounded-lg border p-6 space-y-4">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        Scenario Comparison
-      </h2>
+    <div className="surface-section space-y-4 p-6">
+      <h2 className="section-label">Scenario Comparison</h2>
       <Table>
         <TableHeader>
           <TableRow>

@@ -15,21 +15,26 @@ describe("AccountIcon", () => {
     expect(page.getByText("X")).toBeInTheDocument();
   });
 
-  it("applies dark background with white text", () => {
+  it("applies asset icon class for asset type", () => {
     const page = AccountIconPage.render("test", AccountType.Asset);
     const icon = page.getByText("TE");
 
-    expect(icon).toHaveClass("bg-zinc-800");
-    expect(icon).toHaveClass("text-white");
-    expect(icon).toHaveClass("dark:bg-zinc-700");
+    expect(icon).toHaveClass("account-icon-asset");
+  });
+
+  it("applies liability icon class for liability type", () => {
+    const page = AccountIconPage.render("test", AccountType.Liability);
+    const icon = page.getByText("TE");
+
+    expect(icon).toHaveClass("account-icon-liability");
   });
 
   it("has rounded styling with correct size and shrink-0", () => {
     const page = AccountIconPage.render("test", AccountType.Asset);
     const icon = page.getByText("TE");
 
-    expect(icon).toHaveClass("size-4");
+    expect(icon).toHaveClass("size-7");
     expect(icon).toHaveClass("shrink-0");
-    expect(icon).toHaveClass("rounded");
+    expect(icon).toHaveClass("rounded-md");
   });
 });

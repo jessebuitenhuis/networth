@@ -46,14 +46,14 @@ describe("TransactionList", () => {
     TransactionListPage.render({ accountId: "a1", transactions: [transactions[0]] });
 
     const amount = await screen.findByText("+$1,000.00");
-    expect(amount).toHaveClass("text-green-600");
+    expect(amount).toHaveClass("text-positive");
   });
 
   it("shows negative amounts in red", async () => {
     TransactionListPage.render({ accountId: "a1", transactions: [transactions[1]] });
 
     const amount = await screen.findByText("-$200.00");
-    expect(amount).toHaveClass("text-red-600");
+    expect(amount).toHaveClass("text-negative");
   });
 
   it("shows edit button for each transaction", async () => {

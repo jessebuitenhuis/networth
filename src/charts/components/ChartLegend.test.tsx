@@ -25,16 +25,16 @@ describe("ChartLegend", () => {
 
     const dots = page.legendDots;
     expect(dots).toHaveLength(3);
-    expect((dots[0] as HTMLElement).style.backgroundColor).toBe("rgb(59, 130, 246)");
-    expect((dots[1] as HTMLElement).style.backgroundColor).toBe("rgb(239, 68, 68)");
-    expect((dots[2] as HTMLElement).style.backgroundColor).toBe("rgb(34, 197, 94)");
+    expect((dots[0] as HTMLElement).style.getPropertyValue("--dot-color")).toBe("#3b82f6");
+    expect((dots[1] as HTMLElement).style.getPropertyValue("--dot-color")).toBe("#ef4444");
+    expect((dots[2] as HTMLElement).style.getPropertyValue("--dot-color")).toBe("#22c55e");
   });
 
-  it("applies opacity-40 to excluded accounts", () => {
+  it("applies opacity-30 to excluded accounts", () => {
     const page = ChartLegendPage.render({ accounts, excludedIds: new Set(["2"]) });
 
-    expect(page.getButton("Savings").className).toContain("opacity-40");
-    expect(page.getButton("Checking").className).not.toContain("opacity-40");
+    expect(page.getButton("Savings").className).toContain("opacity-30");
+    expect(page.getButton("Checking").className).not.toContain("opacity-30");
   });
 
   it("marks included accounts as pressed", () => {

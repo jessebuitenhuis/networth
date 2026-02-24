@@ -68,13 +68,11 @@ export default function AccountDetailPage({ params }: AccountDetailPageProps) {
           />
         }
       />
-      <div className="p-4">
+      <div className="p-6">
         <div className="space-y-6">
-          <div className="rounded-lg border p-6">
-            <p className="text-sm font-medium text-muted-foreground">
-              {account.type} Balance
-            </p>
-            <p className="text-3xl font-bold">
+          <div className="surface-section p-8">
+            <p className="section-label">{account.type} Balance</p>
+            <p className="hero-value mt-2 text-4xl font-normal leading-none">
               {balance.toLocaleString(getBrowserLocale(), {
                 style: "currency",
                 currency: getDefaultCurrency(),

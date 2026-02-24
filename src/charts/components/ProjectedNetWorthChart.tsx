@@ -85,11 +85,9 @@ export function ProjectedNetWorthChart({
   const chartKey = `${period}-${offset}-${customRange.start}-${customRange.end}-${Array.from(selectedScenarioIds).join(",")}`;
 
   return (
-    <div className="rounded-lg border p-6 space-y-4">
+    <div className="surface-section space-y-4 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Projected Net Worth
-        </h2>
+        <h2 className="section-label">Projected Net Worth</h2>
         <PeriodPicker
           periods={PROJECTED_PERIODS}
           selected={period}
@@ -106,21 +104,27 @@ export function ProjectedNetWorthChart({
         />
       )}
       <div data-testid="projected-chart">
-        <ResponsiveContainer width="100%" height={256}>
+        <ResponsiveContainer width="100%" height={280}>
           <LineChart key={chartKey} data={data}>
+            <defs>
+              <linearGradient id="projectedLineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="oklch(0.72 0.17 162)" />
+                <stop offset="100%" stopColor="oklch(0.78 0.13 75)" />
+              </linearGradient>
+            </defs>
             <XAxis
               dataKey="date"
               tickFormatter={(v) => formatTick(v, tickFormat)}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
             />
             <YAxis
               domain={yAxisConfig.domain}
               ticks={yAxisConfig.ticks}
               tickFormatter={formatCurrency}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               width={80}
             />
-            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} />
+            <ReferenceLine y={0} stroke="var(--color-border)" strokeWidth={1} strokeDasharray="4 4" />
             <Tooltip
               labelFormatter={(v) => formatTick(v as string, tickFormat)}
               formatter={(value) => formatCurrency(value as number)}
@@ -129,11 +133,11 @@ export function ProjectedNetWorthChart({
               type="monotone"
               dataKey="baseline"
               name="Baseline"
-              stroke="var(--color-primary)"
-              strokeWidth={2}
+              stroke="url(#projectedLineGradient)"
+              strokeWidth={2.5}
               dot={false}
               isAnimationActive={true}
-              animationDuration={300}
+              animationDuration={600}
             />
             {Array.from(selectedScenarioIds).map((scenarioId) => {
               const scenario = scenarios.find((s) => s.id === scenarioId);

@@ -56,7 +56,7 @@ export function GoalProgressSection() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Goal Progress</h2>
+      <h2 className="section-label">Goal Progress</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {progressData.map((progress, index) => (
           <GoalProgressCard key={progress.goalId} progress={progress} colorIndex={index} />

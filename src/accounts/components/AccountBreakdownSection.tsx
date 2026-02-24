@@ -10,8 +10,10 @@ import { AccountListSection } from "./AccountListSection";
 function BalanceRow({ account, balance }: { account: Account; balance: number }) {
   return (
     <>
-      <span className="flex-1 truncate text-sm">{account.name}</span>
-      <span className="text-sm font-medium">{formatCurrency(balance)}</span>
+      <span className="flex-1 truncate text-sm text-foreground/90">
+        {account.name}
+      </span>
+      <span className="font-mono text-sm font-medium">{formatCurrency(balance)}</span>
     </>
   );
 }

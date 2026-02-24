@@ -30,17 +30,22 @@ export function AppSidebar({ navGroups, netWorth }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/" className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <DollarSign className="size-4" />
+              <Link href="/" className="flex items-center gap-3">
+                <div className="sidebar-logo flex aspect-square size-9 items-center justify-center rounded-lg">
+                  <DollarSign className="size-5 text-white" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Net Worth</span>
-                  <span className="truncate text-xs text-muted-foreground" suppressHydrationWarning>
+                <div className="grid flex-1 text-left leading-tight">
+                  <span className="truncate text-sm font-semibold tracking-wide">
+                    Net Worth
+                  </span>
+                  <span
+                    className="truncate text-xs font-display text-gold"
+                    suppressHydrationWarning
+                  >
                     {formatCompactCurrency(netWorth)}
                   </span>
                 </div>
