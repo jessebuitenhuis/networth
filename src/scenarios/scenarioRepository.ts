@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { getUserDb } from "@/db/userDb";
 import { scenarios, settings } from "@/db/schema";
+import { getUserDb } from "@/db/userDb";
 import { generateId } from "@/lib/generateId";
 
 export function getAllScenarios() {

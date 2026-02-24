@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { getUserDb } from "@/db/userDb";
 import { goals } from "@/db/schema";
+import { getUserDb } from "@/db/userDb";
 
 export function getAllGoals() {
   return getUserDb().select(goals).all();
