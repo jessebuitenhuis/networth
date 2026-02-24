@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 
 import type { MultiSelectPickerItem } from "@/components/shared/MultiSelectPicker";
 import { MultiSelectPicker } from "@/components/shared/MultiSelectPicker";
+import { AmountRangeFilter } from "@/components/shared/AmountRangeFilter";
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,8 +15,6 @@ import {
 } from "@/transactions/TransactionFilters.type";
 
 import { hasActiveFilters } from "../filterDisplayTransactions";
-import { AmountRangeFilter } from "./AmountRangeFilter";
-import { DateRangeFilter } from "./DateRangeFilter";
 
 type TransactionFilterBarProps = {
   filters: TransactionFilters;
@@ -25,6 +25,41 @@ type TransactionFilterBarProps = {
   accounts?: MultiSelectPickerItem[];
   categories?: MultiSelectPickerItem[];
 };
+
+type SearchInputProps = {
+  value: string;
+  isOpen: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+  onOpen: () => void;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+};
+
+function SearchInput({ value, isOpen, inputRef, onOpen, onChange, onBlur }: SearchInputProps) {
+  if (!isOpen) {
+    return (
+      <Button type="button" variant="outline" size="sm" onClick={onOpen} aria-label="Open search">
+        <Search className="h-4 w-4" />
+      </Button>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <Input
+        ref={inputRef}
+        type="text"
+        placeholder="Search transactions..."
+        aria-label="Search transactions"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        className="pl-9 h-8 w-48"
+      />
+    </div>
+  );
+}
 
 export function TransactionFilterBar({
   filters,
@@ -54,53 +89,27 @@ export function TransactionFilterBar({
   };
 
   const handleSearchBlur = () => {
-    if (filters.description === "") {
-      setIsSearchOpen(false);
-    }
+    if (filters.description === "") setIsSearchOpen(false);
   };
 
-  const toggleAccount = (id: string) => {
-    const next = new Set(filters.accountIds);
+  const toggleSet = (key: "accountIds" | "categoryIds", id: string) => {
+    const next = new Set(filters[key]);
     if (next.has(id)) next.delete(id);
     else next.add(id);
-    updateFilter("accountIds", next);
-  };
-
-  const toggleCategory = (id: string) => {
-    const next = new Set(filters.categoryIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    updateFilter("categoryIds", next);
+    updateFilter(key, next);
   };
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
-        {isSearchOpen ? (
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <Input
-              ref={searchRef}
-              type="text"
-              placeholder="Search transactions..."
-              aria-label="Search transactions"
-              value={filters.description}
-              onChange={(e) => updateFilter("description", e.target.value)}
-              onBlur={handleSearchBlur}
-              className="pl-9 h-8 w-48"
-            />
-          </div>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={openSearch}
-            aria-label="Open search"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-        )}
+        <SearchInput
+          value={filters.description}
+          isOpen={isSearchOpen}
+          inputRef={searchRef}
+          onOpen={openSearch}
+          onChange={(v) => updateFilter("description", v)}
+          onBlur={handleSearchBlur}
+        />
 
         <DateRangeFilter
           dateFrom={filters.dateFrom}
@@ -123,7 +132,7 @@ export function TransactionFilterBar({
             label="Accounts"
             items={accounts}
             selectedIds={filters.accountIds}
-            onToggle={toggleAccount}
+            onToggle={(id) => toggleSet("accountIds", id)}
             onClearAll={() => updateFilter("accountIds", new Set())}
           />
         )}
@@ -133,7 +142,7 @@ export function TransactionFilterBar({
             label="Categories"
             items={categories}
             selectedIds={filters.categoryIds}
-            onToggle={toggleCategory}
+            onToggle={(id) => toggleSet("categoryIds", id)}
             onClearAll={() => updateFilter("categoryIds", new Set())}
           />
         )}
