@@ -56,6 +56,50 @@ Use these npm scripts — they go through turbo and benefit from caching. Do **n
 - When implementing a user story from PRD.md or detail from an epic doc, mark it as done when completed
 - Branch is automatically rebased onto origin/main before each stop (via Stop hook in `.claude/settings.json`). If a rebase conflict occurs, resolve it before proceeding.
 
+## Commits
+
+This repository uses **Conventional Commits** for clear, structured commit messages. This enables automated changelog generation and easier navigation through project history.
+
+### Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Types
+
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect the meaning of the code (formatting, missing semicolons, etc.)
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **perf**: A code change that improves performance
+- **test**: Adding or updating tests
+- **chore**: Changes to build process, dependencies, tooling, or configuration
+
+### Examples
+
+```
+feat(accounts): add account balance history tracking
+fix(transactions): correct category assignment for recurring transactions
+docs(readme): update setup instructions
+test(goals): add tests for goal progress calculation
+chore(deps): upgrade React to 18.3
+```
+
+### Guidelines
+
+- Keep the subject line concise (under 50 characters when possible)
+- Use imperative mood ("add" not "added" or "adds")
+- Do not capitalize the subject line
+- Do not end the subject with a period
+- Separate subject from body with a blank line
+- Reference issues in the footer: `Fixes #123` or `Related to #456`
+
 ## Coding Guidelines
 
 - Short names acceptable when context is clear
