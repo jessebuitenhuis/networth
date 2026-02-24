@@ -1,25 +1,14 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { db } from "@/db/connection";
+import { getUserDb } from "@/db/userDb";
 import { recurringTransactions } from "@/db/schema";
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllRecurringTransactions() {
-  const userId = getCurrentUserId();
-  return db
-    .select()
-    .from(recurringTransactions)
-    .where(eq(recurringTransactions.userId, userId))
-    .all();
+  return getUserDb().select(recurringTransactions).all();
 }
 
 export function getRecurringTransactionById(id: string) {
-  const userId = getCurrentUserId();
-  const [row] = db
-    .select()
-    .from(recurringTransactions)
-    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
-    .all();
+  const [row] = getUserDb().select(recurringTransactions, eq(recurringTransactions.id, id)).all();
   return row;
 }
 
@@ -44,22 +33,17 @@ export function createRecurringTransaction({
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  const userId = getCurrentUserId();
-  db.insert(recurringTransactions)
-    .values({
-      id,
-      userId,
-      accountId,
-      amount,
-      description,
-      frequency,
-      startDate,
-      endDate: endDate ?? null,
-      scenarioId: scenarioId ?? null,
-      categoryId: categoryId ?? null,
-    })
-    .run();
-
+  getUserDb().insert(recurringTransactions, {
+    id,
+    accountId,
+    amount,
+    description,
+    frequency,
+    startDate,
+    endDate: endDate ?? null,
+    scenarioId: scenarioId ?? null,
+    categoryId: categoryId ?? null,
+  }).run();
   return getRecurringTransactionById(id)!;
 }
 
@@ -85,39 +69,23 @@ export function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
-  const userId = getCurrentUserId();
-  db.update(recurringTransactions)
-    .set({
-      accountId,
-      amount,
-      description,
-      frequency,
-      startDate,
-      endDate: endDate ?? null,
-      scenarioId: scenarioId ?? null,
-      categoryId: categoryId ?? null,
-    })
-    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
-    .run();
-
+  getUserDb().update(recurringTransactions, {
+    accountId,
+    amount,
+    description,
+    frequency,
+    startDate,
+    endDate: endDate ?? null,
+    scenarioId: scenarioId ?? null,
+    categoryId: categoryId ?? null,
+  }, eq(recurringTransactions.id, id)).run();
   return getRecurringTransactionById(id)!;
 }
 
 export function deleteRecurringTransaction(id: string) {
-  const userId = getCurrentUserId();
-  db.delete(recurringTransactions)
-    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
-    .run();
+  getUserDb().delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
 }
 
 export function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
-  const userId = getCurrentUserId();
-  db.delete(recurringTransactions)
-    .where(
-      and(
-        eq(recurringTransactions.scenarioId, scenarioId),
-        eq(recurringTransactions.userId, userId),
-      ),
-    )
-    .run();
+  getUserDb().delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
 }

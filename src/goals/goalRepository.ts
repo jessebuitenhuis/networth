@@ -1,21 +1,14 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { db } from "@/db/connection";
+import { getUserDb } from "@/db/userDb";
 import { goals } from "@/db/schema";
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllGoals() {
-  const userId = getCurrentUserId();
-  return db.select().from(goals).where(eq(goals.userId, userId)).all();
+  return getUserDb().select(goals).all();
 }
 
 export function getGoalById(id: string) {
-  const userId = getCurrentUserId();
-  const [row] = db
-    .select()
-    .from(goals)
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
-    .all();
+  const [row] = getUserDb().select(goals, eq(goals.id, id)).all();
   return row;
 }
 
@@ -28,9 +21,7 @@ export function createGoal({
   name: string;
   targetAmount: number;
 }) {
-  const userId = getCurrentUserId();
-  db.insert(goals).values({ id, userId, name, targetAmount }).run();
-
+  getUserDb().insert(goals, { id, name, targetAmount }).run();
   return getGoalById(id)!;
 }
 
@@ -38,18 +29,10 @@ export function updateGoal(
   id: string,
   { name, targetAmount }: { name: string; targetAmount: number },
 ) {
-  const userId = getCurrentUserId();
-  db.update(goals)
-    .set({ name, targetAmount })
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
-    .run();
-
+  getUserDb().update(goals, { name, targetAmount }, eq(goals.id, id)).run();
   return getGoalById(id)!;
 }
 
 export function deleteGoal(id: string) {
-  const userId = getCurrentUserId();
-  db.delete(goals)
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
-    .run();
+  getUserDb().delete(goals, eq(goals.id, id)).run();
 }
