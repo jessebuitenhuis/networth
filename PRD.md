@@ -42,7 +42,7 @@ Higher-level, forward-looking features — scenarios, goals, budgets.
 
 - **Projections** `/planning`
 - **Goals** `/goals`
-- **Budget** `/budget`
+- **Spending Plan** `/budget`
 
 ### Tracking (sidebar section)
 
@@ -60,7 +60,7 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 - As a user, I want to see goal progress, so I stay motivated toward my financial targets.
 - As a user, I want to see my projected net worth trajectory, so I can quickly see where I'm headed.
 - As a user, I want to quickly record a transaction, so I can keep my finances up to date with minimal effort.
-- As a user, I want to see my budgeted vs actual spending, so I can assess my financial discipline at a glance.
+- As a user, I want to see planned vs actual spending, so I can see if my projections match reality.
 
 ### Planning — Projections
 
@@ -80,9 +80,10 @@ Operational, day-to-day financial reality — transactions, accounts, reports.
 - As a user, I want to set net worth goals, so I have clear financial targets to work toward.
 - As a user, I want to see my goals on the projection chart, so I can see when different scenarios are projected to reach each goal.
 
-### Planning — Budget
+### Planning — Spending Plan
 
-- As a user, I want to set monthly spending budgets per category, so I can define a spending plan and track my progress.
+- As a user, I want to plan expected spending per category, so my projections reflect realistic future expenses.
+- As a user, I want to see when a debt (like my mortgage) will be paid off under different scenarios, so I can plan around major financial milestones.
 
 ### Tracking — Accounts
 
