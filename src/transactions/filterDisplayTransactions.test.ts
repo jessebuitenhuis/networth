@@ -17,6 +17,7 @@ const items: DisplayTransaction[] = [
     amount: -200,
     isProjected: false,
     isRecurring: false,
+    categoryId: "cat1",
     editAction: null,
   },
   {
@@ -28,6 +29,7 @@ const items: DisplayTransaction[] = [
     amount: 5000,
     isProjected: false,
     isRecurring: true,
+    categoryId: "cat2",
     editAction: null,
   },
   {
@@ -50,6 +52,7 @@ const items: DisplayTransaction[] = [
     amount: 1200,
     isProjected: false,
     isRecurring: false,
+    categoryId: "cat1",
     editAction: null,
   },
 ];
@@ -150,6 +153,47 @@ describe("filterDisplayTransactions", () => {
     const result = filterDisplayTransactions(items, { ...emptyFilters, ...filters });
     expect(result.map((r) => r.id)).toContain(expectedId);
   });
+
+  it("filters by accountIds", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      accountIds: new Set(["a2"]),
+    });
+    expect(result.map((r) => r.id)).toEqual(["4"]);
+  });
+
+  it("returns all items when accountIds is empty", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      accountIds: new Set(),
+    });
+    expect(result).toHaveLength(4);
+  });
+
+  it("filters by categoryIds", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      categoryIds: new Set(["cat1"]),
+    });
+    expect(result.map((r) => r.id)).toEqual(["1", "4"]);
+  });
+
+  it("returns no items when categoryIds has no matching category", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      categoryIds: new Set(["cat99"]),
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  it("filters by both accountIds and categoryIds", () => {
+    const result = filterDisplayTransactions(items, {
+      ...emptyFilters,
+      accountIds: new Set(["a1"]),
+      categoryIds: new Set(["cat1"]),
+    });
+    expect(result.map((r) => r.id)).toEqual(["1"]);
+  });
 });
 
 describe("hasActiveFilters", () => {
@@ -165,5 +209,13 @@ describe("hasActiveFilters", () => {
     { field: "amountMax", value: "1000" },
   ] as const)("returns true when $field is set", ({ field, value }) => {
     expect(hasActiveFilters({ ...emptyFilters, [field]: value })).toBe(true);
+  });
+
+  it("returns true when accountIds has entries", () => {
+    expect(hasActiveFilters({ ...emptyFilters, accountIds: new Set(["a1"]) })).toBe(true);
+  });
+
+  it("returns true when categoryIds has entries", () => {
+    expect(hasActiveFilters({ ...emptyFilters, categoryIds: new Set(["c1"]) })).toBe(true);
   });
 });

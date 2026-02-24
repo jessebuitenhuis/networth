@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useAccounts } from "@/accounts/AccountContext";
 import { useCategories } from "@/categories/CategoryContext";
 import { getCategoryPath } from "@/categories/getCategoryPath";
+import { useCategoryPickerItems } from "@/categories/useCategoryPickerItems";
 import { formatDate } from "@/lib/dateUtils";
 import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
 import { useScenarios } from "@/scenarios/ScenarioContext";
@@ -53,6 +54,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
     const categoryId = item.sourceTransaction?.categoryId || item.sourceRecurringTransaction?.categoryId;
     return {
       ...item,
+      categoryId,
       categoryName: categoryId ? getCategoryPath(categoryId, categories) : undefined,
       editAction: item.sourceRecurringTransaction ? (
         <EditRecurringTransactionDialog
@@ -83,6 +85,8 @@ export function TransactionList({ accountId }: TransactionListProps) {
     [allItems, filters]
   );
 
+  const categoryItems = useCategoryPickerItems();
+
   if (allItems.length === 0) {
     return <p className="text-muted-foreground">No transactions yet.</p>;
   }
@@ -94,6 +98,7 @@ export function TransactionList({ accountId }: TransactionListProps) {
         onChange={setFilters}
         resultCount={filteredItems.length}
         totalCount={allItems.length}
+        categories={categoryItems}
       />
       {filteredItems.length === 0 ? (
         <p className="text-muted-foreground">No transactions match the current filters.</p>

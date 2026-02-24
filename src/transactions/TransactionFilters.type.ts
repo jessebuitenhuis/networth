@@ -4,6 +4,8 @@ export type TransactionFilters = {
   dateTo: string;
   amountMin: string;
   amountMax: string;
+  accountIds: Set<string>;
+  categoryIds: Set<string>;
 };
 
 export const emptyFilters: TransactionFilters = {
@@ -12,4 +14,6 @@ export const emptyFilters: TransactionFilters = {
   dateTo: "",
   amountMin: "",
   amountMax: "",
+  accountIds: new Set(),
+  categoryIds: new Set(),
 };

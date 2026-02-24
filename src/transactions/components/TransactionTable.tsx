@@ -35,31 +35,31 @@ const sortableColumns: ColumnDefinition[] = [
   {
     key: "date",
     label: "Date",
-    headerClassName: "w-[120px] text-left",
+    headerClassName: "whitespace-nowrap text-left",
     getSortValue: (item) => item.date,
   },
   {
     key: "description",
     label: "Description",
-    headerClassName: "w-[40%] text-left",
+    headerClassName: "w-full text-left",
     getSortValue: (item) => item.description.toLowerCase(),
   },
   {
     key: "account",
     label: "Account",
-    headerClassName: "w-[180px] text-left",
+    headerClassName: "whitespace-nowrap text-left",
     getSortValue: (item) => item.accountName.toLowerCase(),
   },
   {
     key: "category",
     label: "Category",
-    headerClassName: "w-[160px] text-left",
+    headerClassName: "whitespace-nowrap text-left",
     getSortValue: (item) => (item.categoryName || "").toLowerCase(),
   },
   {
     key: "amount",
     label: "Amount",
-    headerClassName: "w-[140px] text-right",
+    headerClassName: "whitespace-nowrap text-right",
     getSortValue: (item) => item.amount,
   },
 ];
@@ -116,7 +116,7 @@ export function TransactionTable({ items, showAccountColumn = true }: Transactio
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="table-fixed">
+      <Table>
         <TableHeader>
         <TableRow className="hover:bg-transparent">
           {columns.map((col) => (
@@ -135,7 +135,7 @@ export function TransactionTable({ items, showAccountColumn = true }: Transactio
               </div>
             </TableHead>
           ))}
-          <TableHead className="w-[100px] text-right">Actions</TableHead>
+          <TableHead className="whitespace-nowrap text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
