@@ -1,4 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockReplace = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
+}));
 
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { mockResizeObserver } from "@/test/mocks/mockResizeObserver";
@@ -11,37 +16,30 @@ suppressRechartsWarnings();
 
 describe("Dashboard", () => {
   beforeEach(() => {
-    mockApiResponses();
+    mockReplace.mockClear();
   });
 
-  describe("when no accounts exist", () => {
-    it("renders the page heading", () => {
-      const page = DashboardPage.render();
-      expect(page.heading).toHaveTextContent("Dashboard");
+  describe("when no accounts and setup not completed", () => {
+    beforeEach(() => {
+      mockApiResponses({ setupCompleted: false });
     });
 
-    it("renders the empty state CTA", () => {
-      const page = DashboardPage.render();
-      expect(page.getText("Welcome to Net Worth Tracker")).toBeInTheDocument();
-      expect(
-        page.getText(/create your first account to start tracking/i)
-      ).toBeInTheDocument();
+    it("redirects to /setup", async () => {
+      DashboardPage.render();
+      await vi.waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/setup");
+      });
+    });
+  });
+
+  describe("when no accounts but setup completed", () => {
+    beforeEach(() => {
+      mockApiResponses({ setupCompleted: true });
     });
 
-    it("does not render net worth summary", () => {
+    it("renders the page heading", async () => {
       const page = DashboardPage.render();
-      expect(page.queryText("Net Worth")).not.toBeInTheDocument();
-    });
-
-    it("does not render net worth chart", () => {
-      const page = DashboardPage.render();
-      expect(page.queryTestId("net-worth-chart")).not.toBeInTheDocument();
-    });
-
-    it("opens create account dialog when CTA is clicked", async () => {
-      const page = DashboardPage.render();
-      await page.clickButton("Get Started");
-      expect(page.getDialog("Add Account")).toBeInTheDocument();
+      expect(await page.findHeading()).toHaveTextContent("Dashboard");
     });
   });
 
@@ -52,9 +50,9 @@ describe("Dashboard", () => {
       });
     });
 
-    it("renders the page heading", () => {
+    it("renders the page heading", async () => {
       const page = DashboardPage.render();
-      expect(page.heading).toHaveTextContent("Dashboard");
+      expect(await page.findHeading()).toHaveTextContent("Dashboard");
     });
 
     it("renders net worth summary", async () => {
@@ -65,12 +63,6 @@ describe("Dashboard", () => {
     it("renders the net worth chart", async () => {
       const page = DashboardPage.render();
       expect(await page.findTestId("net-worth-chart")).toBeInTheDocument();
-    });
-
-    it("does not render empty state CTA", async () => {
-      const page = DashboardPage.render();
-      await page.findText("Net Worth");
-      expect(page.queryText("Welcome to Net Worth Tracker")).not.toBeInTheDocument();
     });
 
     it("does not render goal section when no goals exist", async () => {

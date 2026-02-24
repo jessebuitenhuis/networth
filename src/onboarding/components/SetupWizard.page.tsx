@@ -9,9 +9,9 @@ import { RecurringTransactionProvider } from "@/recurring-transactions/Recurring
 import { ScenarioProvider } from "@/scenarios/ScenarioContext";
 import { TransactionProvider } from "@/transactions/TransactionContext";
 
-import Home from "./page";
+import { SetupWizard } from "./SetupWizard";
 
-export class DashboardPage {
+export class SetupWizardPage {
   private constructor(private _user: ReturnType<typeof userEvent.setup>) {}
 
   static render() {
@@ -24,52 +24,63 @@ export class DashboardPage {
               <RecurringTransactionProvider>
                 <CategoryProvider>
                   <GoalProvider>
-                    <Home />
+                    <SetupWizard />
                   </GoalProvider>
                 </CategoryProvider>
               </RecurringTransactionProvider>
             </ScenarioProvider>
           </TransactionProvider>
         </AccountProvider>
-      </SidebarProvider>
+      </SidebarProvider>,
     );
-    return new DashboardPage(user);
+    return new SetupWizardPage(user);
   }
 
   get heading() {
     return screen.getByRole("heading", { level: 1 });
   }
 
-  getText(text: string | RegExp) {
-    return screen.getByText(text);
+  getButton(name: string | RegExp) {
+    return screen.getByRole("button", { name });
   }
 
-  async findText(text: string | RegExp) {
-    return screen.findByText(text);
+  queryButton(name: string | RegExp) {
+    return screen.queryByRole("button", { name });
+  }
+
+  getText(text: string | RegExp) {
+    return screen.getByText(text);
   }
 
   queryText(text: string | RegExp) {
     return screen.queryByText(text);
   }
 
-  queryTestId(testId: string) {
-    return screen.queryByTestId(testId);
+  async findText(text: string | RegExp) {
+    return screen.findByText(text);
   }
 
-  async findTestId(testId: string) {
-    return screen.findByTestId(testId);
-  }
-
-  getButton(name: string | RegExp) {
-    return screen.getByRole("button", { name });
-  }
-
-  getDialog(name: string) {
-    return screen.getByRole("dialog", { name });
+  getProgressBar() {
+    return screen.getByRole("progressbar");
   }
 
   async clickButton(name: string | RegExp) {
     await this._user.click(this.getButton(name));
+    return this;
+  }
+
+  async clickSuggestion(name: string) {
+    await this._user.click(
+      screen.getByRole("button", {
+        name: new RegExp(`^[^A-Za-z]+ ${name}$`),
+      }),
+    );
+    return this;
+  }
+
+  async type(label: string, text: string) {
+    const input = screen.getByLabelText(label);
+    await this._user.type(input, text);
     return this;
   }
 }
