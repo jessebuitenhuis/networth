@@ -39,6 +39,7 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
       const accountName = account?.name || "Unknown";
       return {
         id: tx.id,
+        accountId: tx.accountId,
         description: tx.description,
         accountName,
         date: tx.date,
@@ -75,6 +76,7 @@ export function ScenarioTransactionList({ selectedScenarioIds }: ScenarioTransac
       const accountName = account?.name || "Unknown";
       const item: DisplayTransaction = {
         id: next.id,
+        accountId: rt.accountId,
         description: next.description,
         accountName,
         date: next.date,

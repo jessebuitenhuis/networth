@@ -1,5 +1,6 @@
 export type DisplayTransaction = {
   id: string;
+  accountId: string;
   description: string;
   accountName: string;
   date: string;
