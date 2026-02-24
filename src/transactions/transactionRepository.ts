@@ -1,17 +1,20 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { transactions } from "@/db/schema";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllTransactions() {
-  return db.select().from(transactions).all();
+  const userId = getCurrentUserId();
+  return db.select().from(transactions).where(eq(transactions.userId, userId)).all();
 }
 
 export function getTransactionById(id: string) {
+  const userId = getCurrentUserId();
   const rows = db
     .select()
     .from(transactions)
-    .where(eq(transactions.id, id))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
     .all();
   return rows[0];
 }
@@ -26,9 +29,11 @@ export function createTransaction(data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
+  const userId = getCurrentUserId();
   db.insert(transactions)
     .values({
       id: data.id,
+      userId,
       accountId: data.accountId,
       amount: data.amount,
       date: data.date,
@@ -52,10 +57,12 @@ export function createTransactions(items: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }[]) {
+  const userId = getCurrentUserId();
   for (const item of items) {
     db.insert(transactions)
       .values({
         id: item.id,
+        userId,
         accountId: item.accountId,
         amount: item.amount,
         date: item.date,
@@ -71,6 +78,7 @@ export function createTransactions(items: {
   return db
     .select()
     .from(transactions)
+    .where(eq(transactions.userId, userId))
     .all()
     .filter((row) => ids.includes(row.id));
 }
@@ -84,6 +92,7 @@ export function updateTransaction(id: string, data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
+  const userId = getCurrentUserId();
   db.update(transactions)
     .set({
       accountId: data.accountId,
@@ -94,20 +103,29 @@ export function updateTransaction(id: string, data: {
       scenarioId: data.scenarioId ?? null,
       categoryId: data.categoryId ?? null,
     })
-    .where(eq(transactions.id, id))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
     .run();
 
   return getTransactionById(id)!;
 }
 
 export function deleteTransaction(id: string) {
-  db.delete(transactions).where(eq(transactions.id, id)).run();
+  const userId = getCurrentUserId();
+  db.delete(transactions)
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+    .run();
 }
 
 export function deleteTransactionsByAccountId(accountId: string) {
-  db.delete(transactions).where(eq(transactions.accountId, accountId)).run();
+  const userId = getCurrentUserId();
+  db.delete(transactions)
+    .where(and(eq(transactions.accountId, accountId), eq(transactions.userId, userId)))
+    .run();
 }
 
 export function deleteTransactionsByScenarioId(scenarioId: string) {
-  db.delete(transactions).where(eq(transactions.scenarioId, scenarioId)).run();
+  const userId = getCurrentUserId();
+  db.delete(transactions)
+    .where(and(eq(transactions.scenarioId, scenarioId), eq(transactions.userId, userId)))
+    .run();
 }

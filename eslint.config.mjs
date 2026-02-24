@@ -24,6 +24,27 @@ const eslintConfig = defineConfig([
       "simple-import-sort/exports": "error",
     },
   },
+  {
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/db/connection"],
+              message: "Import db only inside repository files.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["**/*Repository.ts", "src/test/**/*"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

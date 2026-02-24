@@ -1,17 +1,24 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { recurringTransactions } from "@/db/schema";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllRecurringTransactions() {
-  return db.select().from(recurringTransactions).all();
+  const userId = getCurrentUserId();
+  return db
+    .select()
+    .from(recurringTransactions)
+    .where(eq(recurringTransactions.userId, userId))
+    .all();
 }
 
 export function getRecurringTransactionById(id: string) {
+  const userId = getCurrentUserId();
   const [row] = db
     .select()
     .from(recurringTransactions)
-    .where(eq(recurringTransactions.id, id))
+    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
     .all();
   return row;
 }
@@ -37,9 +44,11 @@ export function createRecurringTransaction({
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
+  const userId = getCurrentUserId();
   db.insert(recurringTransactions)
     .values({
       id,
+      userId,
       accountId,
       amount,
       description,
@@ -76,6 +85,7 @@ export function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
+  const userId = getCurrentUserId();
   db.update(recurringTransactions)
     .set({
       accountId,
@@ -87,20 +97,27 @@ export function updateRecurringTransaction(
       scenarioId: scenarioId ?? null,
       categoryId: categoryId ?? null,
     })
-    .where(eq(recurringTransactions.id, id))
+    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
     .run();
 
   return getRecurringTransactionById(id)!;
 }
 
 export function deleteRecurringTransaction(id: string) {
+  const userId = getCurrentUserId();
   db.delete(recurringTransactions)
-    .where(eq(recurringTransactions.id, id))
+    .where(and(eq(recurringTransactions.id, id), eq(recurringTransactions.userId, userId)))
     .run();
 }
 
 export function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
+  const userId = getCurrentUserId();
   db.delete(recurringTransactions)
-    .where(eq(recurringTransactions.scenarioId, scenarioId))
+    .where(
+      and(
+        eq(recurringTransactions.scenarioId, scenarioId),
+        eq(recurringTransactions.userId, userId),
+      ),
+    )
     .run();
 }

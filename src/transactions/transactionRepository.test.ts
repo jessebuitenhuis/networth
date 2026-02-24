@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { transactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
+vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
+
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -30,8 +32,8 @@ describe("getAllTransactions", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit" },
-        { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal" },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", userId: "test-user" },
+        { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal", userId: "test-user" },
       ])
       .run();
 
@@ -43,7 +45,7 @@ describe("getTransactionById", () => {
   it("returns the matching transaction", () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit" })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", userId: "test-user" })
       .run();
 
     const result = getTransactionById("t-1");
@@ -110,7 +112,7 @@ describe("updateTransaction", () => {
   it("modifies and returns the updated transaction", () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original" })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: "test-user" })
       .run();
 
     const result = updateTransaction("t-1", {
@@ -129,7 +131,7 @@ describe("deleteTransaction", () => {
   it("removes the transaction", () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete" })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete", userId: "test-user" })
       .run();
 
     deleteTransaction("t-1");
@@ -142,8 +144,8 @@ describe("deleteTransactionsByAccountId", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A" },
-        { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B" },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A", userId: "test-user" },
+        { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B", userId: "test-user" },
       ])
       .run();
 
@@ -160,8 +162,8 @@ describe("deleteTransactionsByScenarioId", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Base" },
-        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1" },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Base", userId: "test-user" },
+        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1", userId: "test-user" },
       ])
       .run();
 
@@ -170,5 +172,54 @@ describe("deleteTransactionsByScenarioId", () => {
     const remaining = getAllTransactions();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-1");
+  });
+});
+
+describe("cross-user isolation", () => {
+  it("getAllTransactions does not return other user's transactions", () => {
+    testDb
+      .insert(transactions)
+      .values([
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Mine", userId: "test-user" },
+        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-01", description: "Theirs", userId: "other-user" },
+      ])
+      .run();
+
+    const result = getAllTransactions();
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("t-1");
+  });
+
+  it("getTransactionById returns undefined for other user's transaction", () => {
+    testDb
+      .insert(transactions)
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
+      .run();
+
+    expect(getTransactionById("t-1")).toBeUndefined();
+  });
+
+  it("updateTransaction does not modify other user's transaction", () => {
+    testDb
+      .insert(transactions)
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: "other-user" })
+      .run();
+
+    updateTransaction("t-1", { accountId: "acc-1", amount: 999, date: "2025-01-01", description: "Hacked" });
+
+    const allRows = testDb.select().from(transactions).all();
+    expect(allRows.find((r) => r.id === "t-1")?.description).toBe("Original");
+  });
+
+  it("deleteTransaction does not delete other user's transaction", () => {
+    testDb
+      .insert(transactions)
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
+      .run();
+
+    deleteTransaction("t-1");
+
+    const allRows = testDb.select().from(transactions).all();
+    expect(allRows.find((r) => r.id === "t-1")).toBeDefined();
   });
 });

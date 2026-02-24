@@ -1,14 +1,21 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/connection";
 import { accounts } from "@/db/schema";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export function getAllAccounts() {
-  return db.select().from(accounts).all();
+  const userId = getCurrentUserId();
+  return db.select().from(accounts).where(eq(accounts.userId, userId)).all();
 }
 
 export function getAccountById(id: string) {
-  const [row] = db.select().from(accounts).where(eq(accounts.id, id)).all();
+  const userId = getCurrentUserId();
+  const [row] = db
+    .select()
+    .from(accounts)
+    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
+    .all();
   return row;
 }
 
@@ -23,9 +30,11 @@ export function createAccount({
   type: string;
   expectedReturnRate?: number | null;
 }) {
+  const userId = getCurrentUserId();
   db.insert(accounts)
     .values({
       id,
+      userId,
       name,
       type,
       expectedReturnRate: expectedReturnRate ?? null,
@@ -47,18 +56,22 @@ export function updateAccount(
     expectedReturnRate?: number | null;
   },
 ) {
+  const userId = getCurrentUserId();
   db.update(accounts)
     .set({
       name,
       type,
       expectedReturnRate: expectedReturnRate ?? null,
     })
-    .where(eq(accounts.id, id))
+    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
     .run();
 
   return getAccountById(id)!;
 }
 
 export function deleteAccount(id: string) {
-  db.delete(accounts).where(eq(accounts.id, id)).run();
+  const userId = getCurrentUserId();
+  db.delete(accounts)
+    .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
+    .run();
 }

@@ -9,6 +9,7 @@ export function createTestDb() {
   sqlite.exec(`
     CREATE TABLE accounts (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       expected_return_rate REAL
@@ -16,6 +17,7 @@ export function createTestDb() {
 
     CREATE TABLE transactions (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       account_id TEXT NOT NULL,
       amount REAL NOT NULL,
       date TEXT NOT NULL,
@@ -27,6 +29,7 @@ export function createTestDb() {
 
     CREATE TABLE recurring_transactions (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       account_id TEXT NOT NULL,
       amount REAL NOT NULL,
       description TEXT NOT NULL,
@@ -39,25 +42,30 @@ export function createTestDb() {
 
     CREATE TABLE categories (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       parent_category_id TEXT
     );
 
     CREATE TABLE scenarios (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       inflation_rate REAL
     );
 
     CREATE TABLE goals (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       target_amount REAL NOT NULL
     );
 
     CREATE TABLE settings (
-      key TEXT PRIMARY KEY,
-      value TEXT
+      user_id TEXT NOT NULL,
+      key TEXT NOT NULL,
+      value TEXT,
+      PRIMARY KEY (user_id, key)
     );
   `);
 

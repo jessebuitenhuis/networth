@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { accounts } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
+vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
+
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -22,8 +24,8 @@ describe("getAllAccounts", () => {
     testDb
       .insert(accounts)
       .values([
-        { id: "1", name: "Checking", type: "Asset" },
-        { id: "2", name: "Mortgage", type: "Liability" },
+        { id: "1", name: "Checking", type: "Asset", userId: "test-user" },
+        { id: "2", name: "Mortgage", type: "Liability", userId: "test-user" },
       ])
       .run();
 
@@ -40,7 +42,7 @@ describe("getAllAccounts", () => {
 
 describe("getAccountById", () => {
   it("returns the matching account", () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset" }).run();
+    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset", userId: "test-user" }).run();
 
     const result = getAccountById("1");
     expect(result).toEqual(expect.objectContaining({ id: "1", name: "Checking" }));
@@ -72,14 +74,14 @@ describe("createAccount", () => {
 
 describe("updateAccount", () => {
   it("modifies and returns the updated account", () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset" }).run();
+    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset", userId: "test-user" }).run();
 
     const result = updateAccount("1", { name: "Updated Checking", type: "Asset" });
     expect(result.name).toBe("Updated Checking");
   });
 
   it("updates expectedReturnRate", () => {
-    testDb.insert(accounts).values({ id: "1", name: "Stocks", type: "Asset" }).run();
+    testDb.insert(accounts).values({ id: "1", name: "Stocks", type: "Asset", userId: "test-user" }).run();
 
     const result = updateAccount("1", { name: "Stocks", type: "Asset", expectedReturnRate: 0.1 });
     expect(result.expectedReturnRate).toBe(0.1);
@@ -88,9 +90,49 @@ describe("updateAccount", () => {
 
 describe("deleteAccount", () => {
   it("removes the account", () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset" }).run();
+    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset", userId: "test-user" }).run();
 
     deleteAccount("1");
     expect(getAllAccounts()).toHaveLength(0);
+  });
+});
+
+describe("cross-user isolation", () => {
+  it("getAllAccounts does not return other user's accounts", () => {
+    testDb
+      .insert(accounts)
+      .values([
+        { id: "1", name: "My Account", type: "Asset", userId: "test-user" },
+        { id: "2", name: "Other Account", type: "Asset", userId: "other-user" },
+      ])
+      .run();
+
+    const result = getAllAccounts();
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("1");
+  });
+
+  it("getAccountById returns undefined for other user's account", () => {
+    testDb.insert(accounts).values({ id: "1", name: "Other", type: "Asset", userId: "other-user" }).run();
+
+    expect(getAccountById("1")).toBeUndefined();
+  });
+
+  it("updateAccount does not modify other user's account", () => {
+    testDb.insert(accounts).values({ id: "1", name: "Original", type: "Asset", userId: "other-user" }).run();
+
+    updateAccount("1", { name: "Hacked", type: "Asset" });
+
+    const allRows = testDb.select().from(accounts).all();
+    expect(allRows.find((r) => r.id === "1")?.name).toBe("Original");
+  });
+
+  it("deleteAccount does not delete other user's account", () => {
+    testDb.insert(accounts).values({ id: "1", name: "Other", type: "Asset", userId: "other-user" }).run();
+
+    deleteAccount("1");
+
+    const allRows = testDb.select().from(accounts).all();
+    expect(allRows.find((r) => r.id === "1")).toBeDefined();
   });
 });
