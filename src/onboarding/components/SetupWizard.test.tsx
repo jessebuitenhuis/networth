@@ -1,9 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mockPush = vi.fn();
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
-}));
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { mockApiResponses } from "@/test/mocks/mockApiResponses";
 import { suppressActWarnings } from "@/test/mocks/suppressActWarnings";
@@ -14,7 +9,6 @@ suppressActWarnings();
 
 describe("SetupWizard", () => {
   beforeEach(() => {
-    mockPush.mockClear();
     mockApiResponses();
   });
 
@@ -56,19 +50,19 @@ describe("SetupWizard", () => {
     expect(page.getButton("Finish")).toBeInTheDocument();
   });
 
-  it("allows skipping all steps and finishing", async () => {
+  it("calls onFinish when Finish is clicked", async () => {
     const page = SetupWizardPage.render();
     await page.clickButton("Next");
     await page.clickButton("Next");
     await page.clickButton("Next");
     await page.clickButton("Finish");
-    expect(mockPush).toHaveBeenCalledWith("/planning");
+    expect(page.onFinish).toHaveBeenCalled();
   });
 
   it("allows adding an account and navigating through steps", async () => {
     const page = SetupWizardPage.render();
     await page.clickSuggestion("Checking");
-    expect(page.getText("Checking")).toBeInTheDocument();
+    expect(page.getNameInput("Checking")).toHaveValue("Checking");
 
     await page.clickButton("Next");
     expect(page.heading).toHaveTextContent(

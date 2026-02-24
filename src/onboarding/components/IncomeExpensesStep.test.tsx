@@ -50,4 +50,21 @@ describe("IncomeExpensesStep", () => {
     const page = IncomeExpensesStepPage.render([], []);
     expect(page.getText(/add accounts in the previous step/i)).toBeInTheDocument();
   });
+
+  it("renders editable description input for added entries", () => {
+    const entries = [
+      { tempId: "r1", description: "Salary", amount: 5000, accountTempId: "a1" },
+    ];
+    const page = IncomeExpensesStepPage.render(entries);
+    expect(page.getDescriptionInput("Salary")).toHaveValue("Salary");
+  });
+
+  it("calls onUpdate when description is edited", async () => {
+    const entries = [
+      { tempId: "r1", description: "Salary", amount: 5000, accountTempId: "a1" },
+    ];
+    const page = IncomeExpensesStepPage.render(entries);
+    await page.editDescription("Salary", "Monthly Salary");
+    expect(page.onUpdate).toHaveBeenCalledWith("r1", expect.objectContaining({ description: expect.any(String) }));
+  });
 });

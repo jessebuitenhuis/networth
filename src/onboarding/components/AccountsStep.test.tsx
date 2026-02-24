@@ -50,4 +50,21 @@ describe("AccountsStep", () => {
     await page.clickRemove("Checking");
     expect(page.onRemove).toHaveBeenCalledWith("a1");
   });
+
+  it("renders editable name input for added accounts", () => {
+    const accounts: WizardAccountEntry[] = [
+      { tempId: "a1", name: "Checking", type: AccountType.Asset, balance: 0 },
+    ];
+    const page = AccountsStepPage.render(accounts);
+    expect(page.getNameInput("Checking")).toHaveValue("Checking");
+  });
+
+  it("calls onUpdate when name is edited", async () => {
+    const accounts: WizardAccountEntry[] = [
+      { tempId: "a1", name: "Checking", type: AccountType.Asset, balance: 0 },
+    ];
+    const page = AccountsStepPage.render(accounts);
+    await page.editName("Checking", "Chase Checking");
+    expect(page.onUpdate).toHaveBeenCalledWith("a1", expect.objectContaining({ name: expect.any(String) }));
+  });
 });
