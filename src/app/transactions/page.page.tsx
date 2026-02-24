@@ -76,6 +76,8 @@ export class TransactionsPageObject {
   }
 
   async findSearchInput() {
+    const searchButton = await screen.findByLabelText("Open search");
+    await this._user.click(searchButton);
     return screen.findByRole("textbox", { name: "Search transactions" });
   }
 
