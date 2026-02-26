@@ -56,6 +56,10 @@ Use these npm scripts — they go through turbo and benefit from caching. Do **n
 - When implementing a user story from PRD.md or detail from an epic doc, mark it as done when completed
 - Branch is automatically rebased onto origin/main before each stop (via Stop hook in `.claude/settings.json`). If a rebase conflict occurs, resolve it before proceeding.
 
+## Commits
+
+This repository uses **[Conventional Commits](https://www.conventionalcommits.org/)** for structured commit messages.
+
 ## Coding Guidelines
 
 - Short names acceptable when context is clear
