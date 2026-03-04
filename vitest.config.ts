@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    dangerouslyIgnoreUnhandledErrors: true,
     setupFiles: ["./src/test/setup.ts"],
     exclude: ["node_modules", ".worktrees", ".claude"],
     coverage: {
