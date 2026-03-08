@@ -1,12 +1,8 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/supabaseBrowserClient", () => ({
-  getSupabaseBrowserClient: () => ({ auth: { signOut: vi.fn() } }),
-}));
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+vi.mock("@/auth/actions", () => ({
+  logout: vi.fn(),
 }));
 
 import { AppSidebarPage } from "./AppSidebar.page";

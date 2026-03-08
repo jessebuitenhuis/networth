@@ -7,27 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { getSupabaseBrowserClient } from "../supabaseBrowserClient";
+import { forgotPassword } from "../actions";
 import { AuthCard } from "./AuthCard";
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback`,
-    });
+    const formData = new FormData(e.currentTarget);
+    const result = await forgotPassword(formData, window.location.origin);
 
-    if (error) {
-      setError(error.message);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
       return;
     }
@@ -68,10 +65,9 @@ export function ForgotPasswordForm() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
+            name="email"
             type="email"
             placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>

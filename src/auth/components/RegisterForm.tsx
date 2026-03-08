@@ -7,20 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { getSupabaseBrowserClient } from "../supabaseBrowserClient";
+import { register } from "../actions";
 import { AuthCard } from "./AuthCard";
 
 export function RegisterForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -34,11 +35,10 @@ export function RegisterForm() {
 
     setIsLoading(true);
 
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase.auth.signUp({ email, password });
+    const result = await register(formData);
 
-    if (error) {
-      setError(error.message);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
       return;
     }
@@ -80,10 +80,9 @@ export function RegisterForm() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
+            name="email"
             type="email"
             placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -91,9 +90,8 @@ export function RegisterForm() {
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
+            name="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
@@ -101,9 +99,8 @@ export function RegisterForm() {
           <Label htmlFor="confirm-password">Confirm password</Label>
           <Input
             id="confirm-password"
+            name="confirmPassword"
             type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
         </div>
