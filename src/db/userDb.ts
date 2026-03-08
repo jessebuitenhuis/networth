@@ -3,11 +3,11 @@ import { SQLiteTable } from "drizzle-orm/sqlite-core";
 
 import { getCurrentUserId } from "@/auth/getCurrentUserId";
 
-import { db } from "./connection";
+import { globalDb } from "./connection";
 
 type UserTable = SQLiteTable & { userId: Column };
 
-export async function getUserDb() {
+export async function getDb() {
   const userId = await getCurrentUserId();
 
   function userWhere(table: UserTable, extra?: SQL): SQL {
@@ -19,21 +19,21 @@ export async function getUserDb() {
     userId,
 
     select<T extends UserTable>(table: T, where?: SQL) {
-      return db.select().from(table).where(userWhere(table, where));
+      return globalDb.select().from(table).where(userWhere(table, where));
     },
 
     insert<T extends UserTable>(table: T, data: Record<string, unknown>) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return db.insert(table).values({ ...data, userId } as any);
+      return globalDb.insert(table).values({ ...data, userId } as any);
     },
 
     update<T extends UserTable>(table: T, data: Record<string, unknown>, where: SQL) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return db.update(table).set(data as any).where(userWhere(table, where));
+      return globalDb.update(table).set(data as any).where(userWhere(table, where));
     },
 
     delete<T extends UserTable>(table: T, where: SQL) {
-      return db.delete(table).where(userWhere(table, where));
+      return globalDb.delete(table).where(userWhere(table, where));
     },
   };
 }

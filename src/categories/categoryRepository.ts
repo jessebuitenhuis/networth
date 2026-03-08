@@ -1,23 +1,23 @@
 import { eq, isNull } from "drizzle-orm";
 
 import { categories } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
 export async function getAllCategories() {
-  return (await getUserDb()).select(categories).all();
+  return (await getDb()).select(categories).all();
 }
 
 export async function getCategoryById(id: string) {
-  const [row] = (await getUserDb()).select(categories, eq(categories.id, id)).all();
+  const [row] = (await getDb()).select(categories, eq(categories.id, id)).all();
   return row;
 }
 
 export async function getRootCategories() {
-  return (await getUserDb()).select(categories, isNull(categories.parentCategoryId)).all();
+  return (await getDb()).select(categories, isNull(categories.parentCategoryId)).all();
 }
 
 export async function getCategoriesByParentId(parentId: string) {
-  return (await getUserDb()).select(categories, eq(categories.parentCategoryId, parentId)).all();
+  return (await getDb()).select(categories, eq(categories.parentCategoryId, parentId)).all();
 }
 
 export async function createCategory({
@@ -29,7 +29,7 @@ export async function createCategory({
   name: string;
   parentCategoryId?: string | null;
 }) {
-  (await getUserDb()).insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null }).run();
+  (await getDb()).insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null }).run();
   return (await getCategoryById(id))!;
 }
 
@@ -37,14 +37,14 @@ export async function updateCategory(
   id: string,
   { name, parentCategoryId }: { name: string; parentCategoryId?: string | null },
 ) {
-  (await getUserDb())
+  (await getDb())
     .update(categories, { name, parentCategoryId: parentCategoryId ?? null }, eq(categories.id, id))
     .run();
   return (await getCategoryById(id))!;
 }
 
 export async function deleteCategory(id: string) {
-  const userDb = await getUserDb();
+  const userDb = await getDb();
   const category = await getCategoryById(id);
   if (category) {
     userDb

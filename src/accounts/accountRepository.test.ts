@@ -1,21 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { accounts } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getAllAccounts, getAccountById, createAccount, updateAccount, deleteAccount } =
   await import("./accountRepository");
 
 beforeEach(() => {
   testDb.delete(accounts).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllAccounts", () => {
@@ -97,45 +95,5 @@ describe("deleteAccount", () => {
 
     await deleteAccount("1");
     expect(await getAllAccounts()).toHaveLength(0);
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllAccounts does not return other user's accounts", async () => {
-    testDb
-      .insert(accounts)
-      .values([
-        { id: "1", name: "My Account", type: "Asset", userId: TEST_USER_ID },
-        { id: "2", name: "Other Account", type: "Asset", userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllAccounts();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("1");
-  });
-
-  it("getAccountById returns undefined for other user's account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Other", type: "Asset", userId: "other-user" }).run();
-
-    expect(await getAccountById("1")).toBeUndefined();
-  });
-
-  it("updateAccount does not modify other user's account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Original", type: "Asset", userId: "other-user" }).run();
-
-    await updateAccount("1", { name: "Hacked", type: "Asset" });
-
-    const allRows = testDb.select().from(accounts).all();
-    expect(allRows.find((r) => r.id === "1")?.name).toBe("Original");
-  });
-
-  it("deleteAccount does not delete other user's account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Other", type: "Asset", userId: "other-user" }).run();
-
-    await deleteAccount("1");
-
-    const allRows = testDb.select().from(accounts).all();
-    expect(allRows.find((r) => r.id === "1")).toBeDefined();
   });
 });

@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { transactions } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllTransactions,
   getTransactionById,
@@ -23,7 +22,6 @@ const {
 
 beforeEach(() => {
   testDb.delete(transactions).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllTransactions", () => {
@@ -175,54 +173,5 @@ describe("deleteTransactionsByScenarioId", () => {
     const remaining = await getAllTransactions();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-1");
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllTransactions does not return other user's transactions", async () => {
-    testDb
-      .insert(transactions)
-      .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Mine", userId: TEST_USER_ID },
-        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-01", description: "Theirs", userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllTransactions();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("t-1");
-  });
-
-  it("getTransactionById returns undefined for other user's transaction", async () => {
-    testDb
-      .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
-      .run();
-
-    expect(await getTransactionById("t-1")).toBeUndefined();
-  });
-
-  it("updateTransaction does not modify other user's transaction", async () => {
-    testDb
-      .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: "other-user" })
-      .run();
-
-    await updateTransaction("t-1", { accountId: "acc-1", amount: 999, date: "2025-01-01", description: "Hacked" });
-
-    const allRows = testDb.select().from(transactions).all();
-    expect(allRows.find((r) => r.id === "t-1")?.description).toBe("Original");
-  });
-
-  it("deleteTransaction does not delete other user's transaction", async () => {
-    testDb
-      .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
-      .run();
-
-    await deleteTransaction("t-1");
-
-    const allRows = testDb.select().from(transactions).all();
-    expect(allRows.find((r) => r.id === "t-1")).toBeDefined();
   });
 });

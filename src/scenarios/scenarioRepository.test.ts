@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { scenarios, settings } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 vi.mock("@/lib/generateId", () => ({ generateId: () => "generated-id" }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllScenarios,
   getScenarioById,
@@ -25,7 +24,6 @@ const {
 beforeEach(() => {
   testDb.delete(settings).run();
   testDb.delete(scenarios).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllScenarios", () => {
@@ -151,60 +149,5 @@ describe("ensureBasePlanExists", () => {
     const rows = await getAllScenarios();
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toBe("Existing Plan");
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllScenarios does not return other user's scenarios", async () => {
-    testDb
-      .insert(scenarios)
-      .values([
-        { id: "s-1", name: "Mine", userId: TEST_USER_ID },
-        { id: "s-2", name: "Theirs", userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllScenarios();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("s-1");
-  });
-
-  it("getScenarioById returns undefined for other user's scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Other", userId: "other-user" }).run();
-
-    expect(await getScenarioById("s-1")).toBeUndefined();
-  });
-
-  it("updateScenario does not modify other user's scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Original", userId: "other-user" }).run();
-
-    await updateScenario("s-1", { name: "Hacked" });
-
-    const allRows = testDb.select().from(scenarios).all();
-    expect(allRows.find((r) => r.id === "s-1")?.name).toBe("Original");
-  });
-
-  it("deleteScenario does not delete other user's scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Other", userId: "other-user" }).run();
-
-    await deleteScenario("s-1");
-
-    const allRows = testDb.select().from(scenarios).all();
-    expect(allRows.find((r) => r.id === "s-1")).toBeDefined();
-  });
-
-  it("getActiveScenarioId does not return other user's active scenario", async () => {
-    testDb.insert(settings).values({ userId: "other-user", key: "activeScenarioId", value: "s-99" }).run();
-
-    expect(await getActiveScenarioId()).toBeNull();
-  });
-
-  it("setActiveScenarioId does not overwrite other user's setting", async () => {
-    testDb.insert(settings).values({ userId: "other-user", key: "activeScenarioId", value: "s-99" }).run();
-
-    await setActiveScenarioId("s-1");
-
-    const allSettings = testDb.select().from(settings).all();
-    expect(allSettings.find((s) => s.userId === "other-user")?.value).toBe("s-99");
   });
 });

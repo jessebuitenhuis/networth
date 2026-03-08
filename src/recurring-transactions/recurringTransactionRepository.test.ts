@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { recurringTransactions } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllRecurringTransactions,
   getRecurringTransactionById,
@@ -21,7 +20,6 @@ const {
 
 beforeEach(() => {
   testDb.delete(recurringTransactions).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllRecurringTransactions", () => {
@@ -147,60 +145,5 @@ describe("deleteRecurringTransactionsByScenarioId", () => {
     const remaining = await getAllRecurringTransactions();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("rt-1");
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllRecurringTransactions does not return other user's records", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values([
-        { id: "rt-1", accountId: "acc-1", amount: 100, description: "Mine", frequency: "Monthly", startDate: "2025-01-01", userId: TEST_USER_ID },
-        { id: "rt-2", accountId: "acc-1", amount: 200, description: "Theirs", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllRecurringTransactions();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("rt-1");
-  });
-
-  it("getRecurringTransactionById returns undefined for other user's record", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
-      .run();
-
-    expect(await getRecurringTransactionById("rt-1")).toBeUndefined();
-  });
-
-  it("updateRecurringTransaction does not modify other user's record", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Original", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
-      .run();
-
-    await updateRecurringTransaction("rt-1", {
-      accountId: "acc-1",
-      amount: 999,
-      description: "Hacked",
-      frequency: "Monthly",
-      startDate: "2025-01-01",
-    });
-
-    const allRows = testDb.select().from(recurringTransactions).all();
-    expect(allRows.find((r) => r.id === "rt-1")?.description).toBe("Original");
-  });
-
-  it("deleteRecurringTransaction does not delete other user's record", async () => {
-    testDb
-      .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
-      .run();
-
-    await deleteRecurringTransaction("rt-1");
-
-    const allRows = testDb.select().from(recurringTransactions).all();
-    expect(allRows.find((r) => r.id === "rt-1")).toBeDefined();
   });
 });

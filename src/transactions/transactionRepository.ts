@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 
 import { transactions } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
 export async function getAllTransactions() {
-  return (await getUserDb()).select(transactions).all();
+  return (await getDb()).select(transactions).all();
 }
 
 export async function getTransactionById(id: string) {
-  const [row] = (await getUserDb()).select(transactions, eq(transactions.id, id)).all();
+  const [row] = (await getDb()).select(transactions, eq(transactions.id, id)).all();
   return row;
 }
 
@@ -22,7 +22,7 @@ export async function createTransaction(data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  (await getUserDb()).insert(transactions, {
+  (await getDb()).insert(transactions, {
     id: data.id,
     accountId: data.accountId,
     amount: data.amount,
@@ -45,7 +45,7 @@ export async function createTransactions(items: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }[]) {
-  const userDb = await getUserDb();
+  const userDb = await getDb();
   for (const item of items) {
     userDb.insert(transactions, {
       id: item.id,
@@ -71,7 +71,7 @@ export async function updateTransaction(id: string, data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  (await getUserDb()).update(transactions, {
+  (await getDb()).update(transactions, {
     accountId: data.accountId,
     amount: data.amount,
     date: data.date,
@@ -84,13 +84,13 @@ export async function updateTransaction(id: string, data: {
 }
 
 export async function deleteTransaction(id: string) {
-  (await getUserDb()).delete(transactions, eq(transactions.id, id)).run();
+  (await getDb()).delete(transactions, eq(transactions.id, id)).run();
 }
 
 export async function deleteTransactionsByAccountId(accountId: string) {
-  (await getUserDb()).delete(transactions, eq(transactions.accountId, accountId)).run();
+  (await getDb()).delete(transactions, eq(transactions.accountId, accountId)).run();
 }
 
 export async function deleteTransactionsByScenarioId(scenarioId: string) {
-  (await getUserDb()).delete(transactions, eq(transactions.scenarioId, scenarioId)).run();
+  (await getDb()).delete(transactions, eq(transactions.scenarioId, scenarioId)).run();
 }

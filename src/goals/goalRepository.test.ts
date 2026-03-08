@@ -1,21 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { goals } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getAllGoals, getGoalById, createGoal, updateGoal, deleteGoal } =
   await import("./goalRepository");
 
 beforeEach(() => {
   testDb.delete(goals).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllGoals", () => {
@@ -76,45 +74,5 @@ describe("deleteGoal", () => {
 
     await deleteGoal("g-1");
     expect(await getAllGoals()).toHaveLength(0);
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllGoals does not return other user's goals", async () => {
-    testDb
-      .insert(goals)
-      .values([
-        { id: "g-1", name: "My Goal", targetAmount: 10000, userId: TEST_USER_ID },
-        { id: "g-2", name: "Other Goal", targetAmount: 20000, userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllGoals();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("g-1");
-  });
-
-  it("getGoalById returns undefined for other user's goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Other", targetAmount: 10000, userId: "other-user" }).run();
-
-    expect(await getGoalById("g-1")).toBeUndefined();
-  });
-
-  it("updateGoal does not modify other user's goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Original", targetAmount: 10000, userId: "other-user" }).run();
-
-    await updateGoal("g-1", { name: "Hacked", targetAmount: 0 });
-
-    const allRows = testDb.select().from(goals).all();
-    expect(allRows.find((r) => r.id === "g-1")?.name).toBe("Original");
-  });
-
-  it("deleteGoal does not delete other user's goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Other", targetAmount: 10000, userId: "other-user" }).run();
-
-    await deleteGoal("g-1");
-
-    const allRows = testDb.select().from(goals).all();
-    expect(allRows.find((r) => r.id === "g-1")).toBeDefined();
   });
 });

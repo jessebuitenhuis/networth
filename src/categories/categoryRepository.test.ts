@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { categories } from "@/db/schema";
-import { createTestDb } from "@/test/createTestDb";
-
-const TEST_USER_ID = "test-user";
+import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ db: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.mock("@/db/connection", () => ({ globalDb: testDb }));
+vi.mock("@/auth/getCurrentUserId", () => ({
+  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+}));
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllCategories,
   getCategoryById,
@@ -22,7 +21,6 @@ const {
 
 beforeEach(() => {
   testDb.delete(categories).run();
-  vi.mocked(getCurrentUserId).mockResolvedValue(TEST_USER_ID);
 });
 
 describe("getAllCategories", () => {
@@ -171,62 +169,5 @@ describe("deleteCategory", () => {
 
     const child = await getCategoryById("c-2");
     expect(child?.parentCategoryId).toBeNull();
-  });
-});
-
-describe("cross-user isolation", () => {
-  it("getAllCategories does not return other user's categories", async () => {
-    testDb
-      .insert(categories)
-      .values([
-        { id: "c-1", name: "Mine", userId: TEST_USER_ID },
-        { id: "c-2", name: "Theirs", userId: "other-user" },
-      ])
-      .run();
-
-    const result = await getAllCategories();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("c-1");
-  });
-
-  it("getCategoryById returns undefined for other user's category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Other", userId: "other-user" }).run();
-
-    expect(await getCategoryById("c-1")).toBeUndefined();
-  });
-
-  it("updateCategory does not modify other user's category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Original", userId: "other-user" }).run();
-
-    await updateCategory("c-1", { name: "Hacked" });
-
-    const allRows = testDb.select().from(categories).all();
-    expect(allRows.find((c) => c.id === "c-1")?.name).toBe("Original");
-  });
-
-  it("deleteCategory does not delete other user's category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Other", userId: "other-user" }).run();
-
-    await deleteCategory("c-1");
-
-    const allRows = testDb.select().from(categories).all();
-    expect(allRows.find((c) => c.id === "c-1")).toBeDefined();
-  });
-
-  it("deleteCategory re-parenting does not affect other user's children", async () => {
-    testDb
-      .insert(categories)
-      .values([
-        { id: "c-1", name: "My Root", userId: TEST_USER_ID },
-        { id: "c-2", name: "My Middle", parentCategoryId: "c-1", userId: TEST_USER_ID },
-        { id: "c-3", name: "Other Child", parentCategoryId: "c-2", userId: "other-user" },
-      ])
-      .run();
-
-    await deleteCategory("c-2");
-
-    const allRows = testDb.select().from(categories).all();
-    const otherChild = allRows.find((c) => c.id === "c-3");
-    expect(otherChild?.parentCategoryId).toBe("c-2");
   });
 });

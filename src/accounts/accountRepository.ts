@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 
 import { accounts } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
 export async function getAllAccounts() {
-  return (await getUserDb()).select(accounts).all();
+  return (await getDb()).select(accounts).all();
 }
 
 export async function getAccountById(id: string) {
-  const [row] = (await getUserDb()).select(accounts, eq(accounts.id, id)).all();
+  const [row] = (await getDb()).select(accounts, eq(accounts.id, id)).all();
   return row;
 }
 
@@ -23,7 +23,7 @@ export async function createAccount({
   type: string;
   expectedReturnRate?: number | null;
 }) {
-  (await getUserDb()).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
+  (await getDb()).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
   return (await getAccountById(id))!;
 }
 
@@ -39,12 +39,12 @@ export async function updateAccount(
     expectedReturnRate?: number | null;
   },
 ) {
-  (await getUserDb())
+  (await getDb())
     .update(accounts, { name, type, expectedReturnRate: expectedReturnRate ?? null }, eq(accounts.id, id))
     .run();
   return (await getAccountById(id))!;
 }
 
 export async function deleteAccount(id: string) {
-  (await getUserDb()).delete(accounts, eq(accounts.id, id)).run();
+  (await getDb()).delete(accounts, eq(accounts.id, id)).run();
 }

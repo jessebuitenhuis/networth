@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 
 import { recurringTransactions } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
 export async function getAllRecurringTransactions() {
-  return (await getUserDb()).select(recurringTransactions).all();
+  return (await getDb()).select(recurringTransactions).all();
 }
 
 export async function getRecurringTransactionById(id: string) {
-  const [row] = (await getUserDb()).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
+  const [row] = (await getDb()).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
   return row;
 }
 
@@ -33,7 +33,7 @@ export async function createRecurringTransaction({
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  (await getUserDb()).insert(recurringTransactions, {
+  (await getDb()).insert(recurringTransactions, {
     id,
     accountId,
     amount,
@@ -69,7 +69,7 @@ export async function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
-  (await getUserDb()).update(recurringTransactions, {
+  (await getDb()).update(recurringTransactions, {
     accountId,
     amount,
     description,
@@ -83,9 +83,9 @@ export async function updateRecurringTransaction(
 }
 
 export async function deleteRecurringTransaction(id: string) {
-  (await getUserDb()).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
+  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
 }
 
 export async function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
-  (await getUserDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
+  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
 }
