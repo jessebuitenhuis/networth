@@ -9,7 +9,7 @@ import {
 } from "@/transactions/transactionRepository";
 
 export async function GET() {
-  const rows = getAllTransactions();
+  const rows = await getAllTransactions();
   return NextResponse.json(rows);
 }
 
@@ -28,11 +28,11 @@ export async function POST(request: Request) {
     }
 
     if (Array.isArray(body)) {
-      const created = createTransactions(items);
+      const created = await createTransactions(items);
       return NextResponse.json(created, { status: 201 });
     }
 
-    const created = createTransaction(items[0]);
+    const created = await createTransaction(items[0]);
     return NextResponse.json(created, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -52,11 +52,11 @@ export async function DELETE(request: Request) {
   }
 
   if (accountId) {
-    deleteTransactionsByAccountId(accountId);
+    await deleteTransactionsByAccountId(accountId);
   }
 
   if (scenarioId) {
-    deleteTransactionsByScenarioId(scenarioId);
+    await deleteTransactionsByScenarioId(scenarioId);
   }
 
   return new NextResponse(null, { status: 204 });

@@ -14,13 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getScenarioById(id);
+    const existing = await getScenarioById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateScenario(id, { name: body.name, inflationRate: body.inflationRate });
+    const updated = await updateScenario(id, { name: body.name, inflationRate: body.inflationRate });
 
     return NextResponse.json(updated);
   } catch {
@@ -34,13 +34,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getScenarioById(id);
+  const existing = await getScenarioById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteScenario(id);
+  await deleteScenario(id);
 
   return new NextResponse(null, { status: 204 });
 }

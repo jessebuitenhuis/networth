@@ -1,18 +1,18 @@
 import { eq } from "drizzle-orm";
 
 import { recurringTransactions } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
-export function getAllRecurringTransactions() {
-  return getUserDb().select(recurringTransactions).all();
+export async function getAllRecurringTransactions() {
+  return (await getDb()).select(recurringTransactions).all();
 }
 
-export function getRecurringTransactionById(id: string) {
-  const [row] = getUserDb().select(recurringTransactions, eq(recurringTransactions.id, id)).all();
+export async function getRecurringTransactionById(id: string) {
+  const [row] = (await getDb()).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
   return row;
 }
 
-export function createRecurringTransaction({
+export async function createRecurringTransaction({
   id,
   accountId,
   amount,
@@ -33,7 +33,7 @@ export function createRecurringTransaction({
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  getUserDb().insert(recurringTransactions, {
+  (await getDb()).insert(recurringTransactions, {
     id,
     accountId,
     amount,
@@ -44,10 +44,10 @@ export function createRecurringTransaction({
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
   }).run();
-  return getRecurringTransactionById(id)!;
+  return (await getRecurringTransactionById(id))!;
 }
 
-export function updateRecurringTransaction(
+export async function updateRecurringTransaction(
   id: string,
   {
     accountId,
@@ -69,7 +69,7 @@ export function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
-  getUserDb().update(recurringTransactions, {
+  (await getDb()).update(recurringTransactions, {
     accountId,
     amount,
     description,
@@ -79,13 +79,13 @@ export function updateRecurringTransaction(
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
   }, eq(recurringTransactions.id, id)).run();
-  return getRecurringTransactionById(id)!;
+  return (await getRecurringTransactionById(id))!;
 }
 
-export function deleteRecurringTransaction(id: string) {
-  getUserDb().delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
+export async function deleteRecurringTransaction(id: string) {
+  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
 }
 
-export function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
-  getUserDb().delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
+export async function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
+  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
 }

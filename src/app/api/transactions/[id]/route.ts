@@ -14,13 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getTransactionById(id);
+    const existing = await getTransactionById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateTransaction(id, {
+    const updated = await updateTransaction(id, {
       accountId: body.accountId,
       amount: body.amount,
       date: body.date,
@@ -42,13 +42,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getTransactionById(id);
+  const existing = await getTransactionById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteTransaction(id);
+  await deleteTransaction(id);
 
   return new NextResponse(null, { status: 204 });
 }

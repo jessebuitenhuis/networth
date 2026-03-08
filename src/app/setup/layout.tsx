@@ -2,16 +2,18 @@
 
 import { usePathname, useRouter } from "next/navigation";
 
-import { useAccounts } from "@/accounts/AccountContext";
+import { AccountProvider, useAccounts } from "@/accounts/AccountContext";
+import { CategoryProvider } from "@/categories/CategoryContext";
 import { Button } from "@/components/ui/button";
-import { useGoals } from "@/goals/GoalContext";
+import { GoalProvider, useGoals } from "@/goals/GoalContext";
 import { generateId } from "@/lib/generateId";
 import { StepProgressBar } from "@/onboarding/components/StepProgressBar";
 import { setupSteps } from "@/onboarding/setupSteps";
 import { submitWizardData } from "@/onboarding/submitWizardData";
 import { useWizard, WizardProvider } from "@/onboarding/WizardContext";
-import { useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
-import { useTransactions } from "@/transactions/TransactionContext";
+import { RecurringTransactionProvider, useRecurringTransactions } from "@/recurring-transactions/RecurringTransactionContext";
+import { ScenarioProvider } from "@/scenarios/ScenarioContext";
+import { TransactionProvider, useTransactions } from "@/transactions/TransactionContext";
 
 function stepIndexFromPathname(pathname: string) {
   const segment = pathname.split("/").pop() ?? "";
@@ -87,8 +89,20 @@ export default function SetupLayout({
   children: React.ReactNode;
 }) {
   return (
-    <WizardProvider>
-      <SetupShell>{children}</SetupShell>
-    </WizardProvider>
+    <AccountProvider>
+      <TransactionProvider>
+        <ScenarioProvider>
+          <RecurringTransactionProvider>
+            <GoalProvider>
+              <CategoryProvider>
+                <WizardProvider>
+                  <SetupShell>{children}</SetupShell>
+                </WizardProvider>
+              </CategoryProvider>
+            </GoalProvider>
+          </RecurringTransactionProvider>
+        </ScenarioProvider>
+      </TransactionProvider>
+    </AccountProvider>
   );
 }

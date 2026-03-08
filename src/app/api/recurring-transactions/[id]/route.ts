@@ -14,13 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getRecurringTransactionById(id);
+    const existing = await getRecurringTransactionById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateRecurringTransaction(id, {
+    const updated = await updateRecurringTransaction(id, {
       accountId: body.accountId,
       amount: body.amount,
       description: body.description,
@@ -43,13 +43,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getRecurringTransactionById(id);
+  const existing = await getRecurringTransactionById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteRecurringTransaction(id);
+  await deleteRecurringTransaction(id);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -7,7 +7,7 @@ import {
 } from "@/recurring-transactions/recurringTransactionRepository";
 
 export async function GET() {
-  const rows = getAllRecurringTransactions();
+  const rows = await getAllRecurringTransactions();
   return NextResponse.json(rows);
 }
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createRecurringTransaction({
+    const created = await createRecurringTransaction({
       id: body.id,
       accountId: body.accountId,
       amount: body.amount,
@@ -58,7 +58,7 @@ export async function DELETE(request: Request) {
     );
   }
 
-  deleteRecurringTransactionsByScenarioId(scenarioId);
+  await deleteRecurringTransactionsByScenarioId(scenarioId);
 
   return new NextResponse(null, { status: 204 });
 }

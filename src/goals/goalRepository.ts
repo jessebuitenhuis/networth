@@ -1,18 +1,18 @@
 import { eq } from "drizzle-orm";
 
 import { goals } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
-export function getAllGoals() {
-  return getUserDb().select(goals).all();
+export async function getAllGoals() {
+  return (await getDb()).select(goals).all();
 }
 
-export function getGoalById(id: string) {
-  const [row] = getUserDb().select(goals, eq(goals.id, id)).all();
+export async function getGoalById(id: string) {
+  const [row] = (await getDb()).select(goals, eq(goals.id, id)).all();
   return row;
 }
 
-export function createGoal({
+export async function createGoal({
   id,
   name,
   targetAmount,
@@ -21,18 +21,18 @@ export function createGoal({
   name: string;
   targetAmount: number;
 }) {
-  getUserDb().insert(goals, { id, name, targetAmount }).run();
-  return getGoalById(id)!;
+  (await getDb()).insert(goals, { id, name, targetAmount }).run();
+  return (await getGoalById(id))!;
 }
 
-export function updateGoal(
+export async function updateGoal(
   id: string,
   { name, targetAmount }: { name: string; targetAmount: number },
 ) {
-  getUserDb().update(goals, { name, targetAmount }, eq(goals.id, id)).run();
-  return getGoalById(id)!;
+  (await getDb()).update(goals, { name, targetAmount }, eq(goals.id, id)).run();
+  return (await getGoalById(id))!;
 }
 
-export function deleteGoal(id: string) {
-  getUserDb().delete(goals, eq(goals.id, id)).run();
+export async function deleteGoal(id: string) {
+  (await getDb()).delete(goals, eq(goals.id, id)).run();
 }

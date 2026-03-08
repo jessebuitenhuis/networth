@@ -1,9 +1,21 @@
 import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { type BetterSQLite3Database, drizzle } from "drizzle-orm/better-sqlite3";
+import { type SQLiteTable } from "drizzle-orm/sqlite-core";
+import { vi } from "vitest";
 
 import * as schema from "@/db/schema";
 
-export function createTestDb() {
+export const TEST_USER_ID = "test-user";
+
+export interface TestDb {
+  insert(table: SQLiteTable): {
+    values(data: Record<string, unknown> | Record<string, unknown>[]): { run(): void };
+  };
+  delete(table: SQLiteTable): { run(): void };
+  raw: BetterSQLite3Database<typeof schema>;
+}
+
+export function createTestDb(): TestDb {
   const sqlite = new Database(":memory:");
 
   sqlite.exec(`
@@ -69,5 +81,27 @@ export function createTestDb() {
     );
   `);
 
-  return drizzle(sqlite, { schema });
+  const db = drizzle(sqlite, { schema });
+
+  vi.doMock("@/db/connection", () => ({ globalDb: db }));
+  vi.doMock("@/auth/getCurrentUserId", () => ({
+    getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+  }));
+
+  return {
+    insert(table: SQLiteTable) {
+      return {
+        values(data: Record<string, unknown> | Record<string, unknown>[]) {
+          const addUserId = (row: Record<string, unknown>) => ({ ...row, userId: TEST_USER_ID });
+          const withUserId = Array.isArray(data) ? data.map(addUserId) : addUserId(data);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return db.insert(table).values(withUserId as any);
+        },
+      };
+    },
+    delete(table: SQLiteTable) {
+      return db.delete(table);
+    },
+    raw: db,
+  };
 }

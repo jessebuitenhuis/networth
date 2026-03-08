@@ -6,7 +6,7 @@ import {
 } from "@/categories/categoryRepository";
 
 export async function GET() {
-  const rows = getAllCategories();
+  const rows = await getAllCategories();
   return NextResponse.json(rows);
 }
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createCategory({
+    const created = await createCategory({
       id: body.id,
       name: body.name,
       parentCategoryId: body.parentCategoryId,

@@ -14,13 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getGoalById(id);
+    const existing = await getGoalById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateGoal(id, {
+    const updated = await updateGoal(id, {
       name: body.name,
       targetAmount: body.targetAmount,
     });
@@ -37,13 +37,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getGoalById(id);
+  const existing = await getGoalById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteGoal(id);
+  await deleteGoal(id);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -1,18 +1,18 @@
 import { eq } from "drizzle-orm";
 
 import { accounts } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
-export function getAllAccounts() {
-  return getUserDb().select(accounts).all();
+export async function getAllAccounts() {
+  return (await getDb()).select(accounts).all();
 }
 
-export function getAccountById(id: string) {
-  const [row] = getUserDb().select(accounts, eq(accounts.id, id)).all();
+export async function getAccountById(id: string) {
+  const [row] = (await getDb()).select(accounts, eq(accounts.id, id)).all();
   return row;
 }
 
-export function createAccount({
+export async function createAccount({
   id,
   name,
   type,
@@ -23,11 +23,11 @@ export function createAccount({
   type: string;
   expectedReturnRate?: number | null;
 }) {
-  getUserDb().insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
-  return getAccountById(id)!;
+  (await getDb()).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
+  return (await getAccountById(id))!;
 }
 
-export function updateAccount(
+export async function updateAccount(
   id: string,
   {
     name,
@@ -39,12 +39,12 @@ export function updateAccount(
     expectedReturnRate?: number | null;
   },
 ) {
-  getUserDb()
+  (await getDb())
     .update(accounts, { name, type, expectedReturnRate: expectedReturnRate ?? null }, eq(accounts.id, id))
     .run();
-  return getAccountById(id)!;
+  return (await getAccountById(id))!;
 }
 
-export function deleteAccount(id: string) {
-  getUserDb().delete(accounts, eq(accounts.id, id)).run();
+export async function deleteAccount(id: string) {
+  (await getDb()).delete(accounts, eq(accounts.id, id)).run();
 }

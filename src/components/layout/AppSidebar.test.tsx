@@ -1,5 +1,9 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/auth/actions", () => ({
+  logout: vi.fn(),
+}));
 
 import { AppSidebarPage } from "./AppSidebar.page";
 import type { NavGroup } from "./NavGroup.type";

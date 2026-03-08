@@ -4,9 +4,11 @@ import { DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { LogoutButton } from "@/auth/components/LogoutButton";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -100,6 +102,13 @@ export function AppSidebar({ navGroups, netWorth }: AppSidebarProps) {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <LogoutButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

@@ -1,26 +1,26 @@
 import { eq, isNull } from "drizzle-orm";
 
 import { categories } from "@/db/schema";
-import { getUserDb } from "@/db/userDb";
+import { getDb } from "@/db/userDb";
 
-export function getAllCategories() {
-  return getUserDb().select(categories).all();
+export async function getAllCategories() {
+  return (await getDb()).select(categories).all();
 }
 
-export function getCategoryById(id: string) {
-  const [row] = getUserDb().select(categories, eq(categories.id, id)).all();
+export async function getCategoryById(id: string) {
+  const [row] = (await getDb()).select(categories, eq(categories.id, id)).all();
   return row;
 }
 
-export function getRootCategories() {
-  return getUserDb().select(categories, isNull(categories.parentCategoryId)).all();
+export async function getRootCategories() {
+  return (await getDb()).select(categories, isNull(categories.parentCategoryId)).all();
 }
 
-export function getCategoriesByParentId(parentId: string) {
-  return getUserDb().select(categories, eq(categories.parentCategoryId, parentId)).all();
+export async function getCategoriesByParentId(parentId: string) {
+  return (await getDb()).select(categories, eq(categories.parentCategoryId, parentId)).all();
 }
 
-export function createCategory({
+export async function createCategory({
   id,
   name,
   parentCategoryId,
@@ -29,23 +29,23 @@ export function createCategory({
   name: string;
   parentCategoryId?: string | null;
 }) {
-  getUserDb().insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null }).run();
-  return getCategoryById(id)!;
+  (await getDb()).insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null }).run();
+  return (await getCategoryById(id))!;
 }
 
-export function updateCategory(
+export async function updateCategory(
   id: string,
   { name, parentCategoryId }: { name: string; parentCategoryId?: string | null },
 ) {
-  getUserDb()
+  (await getDb())
     .update(categories, { name, parentCategoryId: parentCategoryId ?? null }, eq(categories.id, id))
     .run();
-  return getCategoryById(id)!;
+  return (await getCategoryById(id))!;
 }
 
-export function deleteCategory(id: string) {
-  const userDb = getUserDb();
-  const category = getCategoryById(id);
+export async function deleteCategory(id: string) {
+  const userDb = await getDb();
+  const category = await getCategoryById(id);
   if (category) {
     userDb
       .update(categories, { parentCategoryId: category.parentCategoryId }, eq(categories.parentCategoryId, id))

@@ -14,13 +14,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getCategoryById(id);
+    const existing = await getCategoryById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateCategory(id, {
+    const updated = await updateCategory(id, {
       name: body.name,
       parentCategoryId: body.parentCategoryId,
     });
@@ -37,13 +37,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = getCategoryById(id);
+  const existing = await getCategoryById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteCategory(id);
+  await deleteCategory(id);
 
   return new NextResponse(null, { status: 204 });
 }

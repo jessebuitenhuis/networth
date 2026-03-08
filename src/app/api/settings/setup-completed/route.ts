@@ -6,11 +6,11 @@ import {
 } from "@/onboarding/onboardingRepository";
 
 export async function GET() {
-  const completed = getSetupCompleted();
+  const completed = await getSetupCompleted();
   return NextResponse.json({ completed });
 }
 
 export async function POST() {
-  setSetupCompleted(true);
+  await setSetupCompleted(true);
   return NextResponse.json({ completed: true }, { status: 200 });
 }

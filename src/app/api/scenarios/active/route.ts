@@ -13,7 +13,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    setActiveScenarioId(body.scenarioId);
+    await setActiveScenarioId(body.scenarioId);
 
     return NextResponse.json({ activeScenarioId: body.scenarioId });
   } catch {

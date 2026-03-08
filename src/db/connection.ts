@@ -145,7 +145,7 @@ function initDb(): BetterSQLite3Database<typeof schema> {
   return _db;
 }
 
-export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
+export const globalDb = new Proxy({} as BetterSQLite3Database<typeof schema>, {
   get(_target, prop, receiver) {
     const instance = initDb();
     const value = Reflect.get(instance, prop, receiver);
