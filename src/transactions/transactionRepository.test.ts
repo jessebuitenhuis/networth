@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { transactions } from "@/db/schema";
-import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
+import { createTestDb } from "@/test/createTestDb";
 
 const testDb = createTestDb();
 
@@ -29,8 +29,8 @@ describe("getAllTransactions", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", userId: TEST_USER_ID },
-        { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal", userId: TEST_USER_ID },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"},
+        { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal"},
       ])
       .run();
 
@@ -42,7 +42,7 @@ describe("getTransactionById", () => {
   it("returns the matching transaction", async () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", userId: TEST_USER_ID })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"})
       .run();
 
     const result = await getTransactionById("t-1");
@@ -109,7 +109,7 @@ describe("updateTransaction", () => {
   it("modifies and returns the updated transaction", async () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: TEST_USER_ID })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original"})
       .run();
 
     const result = await updateTransaction("t-1", {
@@ -128,7 +128,7 @@ describe("deleteTransaction", () => {
   it("removes the transaction", async () => {
     testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete", userId: TEST_USER_ID })
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete"})
       .run();
 
     await deleteTransaction("t-1");
@@ -141,8 +141,8 @@ describe("deleteTransactionsByAccountId", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A", userId: TEST_USER_ID },
-        { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B", userId: TEST_USER_ID },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A"},
+        { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B"},
       ])
       .run();
 
@@ -159,8 +159,8 @@ describe("deleteTransactionsByScenarioId", () => {
     testDb
       .insert(transactions)
       .values([
-        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Base", userId: TEST_USER_ID },
-        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1", userId: TEST_USER_ID },
+        { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Base"},
+        { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1"},
       ])
       .run();
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { scenarios, settings } from "@/db/schema";
-import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
+import { createTestDb } from "@/test/createTestDb";
 
 const testDb = createTestDb();
 vi.mock("@/lib/generateId", () => ({ generateId: () => "generated-id" }));
@@ -31,8 +31,8 @@ describe("getAllScenarios", () => {
     testDb
       .insert(scenarios)
       .values([
-        { id: "s-1", name: "Base Plan", userId: TEST_USER_ID },
-        { id: "s-2", name: "Optimistic", userId: TEST_USER_ID },
+        { id: "s-1", name: "Base Plan"},
+        { id: "s-2", name: "Optimistic"},
       ])
       .run();
 
@@ -42,7 +42,7 @@ describe("getAllScenarios", () => {
 
 describe("getScenarioById", () => {
   it("returns the matching scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"}).run();
 
     const result = await getScenarioById("s-1");
     expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Base Plan" }));
@@ -67,21 +67,21 @@ describe("createScenario", () => {
 
 describe("updateScenario", () => {
   it("modifies and returns the updated scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"}).run();
 
     const result = await updateScenario("s-1", { name: "Updated Plan" });
     expect(result.name).toBe("Updated Plan");
   });
 
   it("updates inflation rate", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"}).run();
 
     const result = await updateScenario("s-1", { name: "Base Plan", inflationRate: 2.5 });
     expect(result.inflationRate).toBe(2.5);
   });
 
   it("clears inflation rate when undefined", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", inflationRate: 3, userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", inflationRate: 3}).run();
 
     const result = await updateScenario("s-1", { name: "Base Plan" });
     expect(result.inflationRate).toBeNull();
@@ -90,7 +90,7 @@ describe("updateScenario", () => {
 
 describe("deleteScenario", () => {
   it("removes the scenario", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"}).run();
 
     await deleteScenario("s-1");
     expect(await getAllScenarios()).toHaveLength(0);
@@ -103,7 +103,7 @@ describe("getActiveScenarioId", () => {
   });
 
   it("returns the active scenario id when set", async () => {
-    testDb.insert(settings).values({ userId: TEST_USER_ID, key: "activeScenarioId", value: "s-1" }).run();
+    testDb.insert(settings).values({ key: "activeScenarioId", value: "s-1" }).run();
 
     expect(await getActiveScenarioId()).toBe("s-1");
   });
@@ -138,7 +138,7 @@ describe("ensureBasePlanExists", () => {
   });
 
   it("does nothing when scenarios already exist", async () => {
-    testDb.insert(scenarios).values({ id: "s-1", name: "Existing Plan", userId: TEST_USER_ID }).run();
+    testDb.insert(scenarios).values({ id: "s-1", name: "Existing Plan"}).run();
 
     await ensureBasePlanExists();
 

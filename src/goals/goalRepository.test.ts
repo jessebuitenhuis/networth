@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { goals } from "@/db/schema";
-import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
+import { createTestDb } from "@/test/createTestDb";
 
 const testDb = createTestDb();
 
@@ -21,8 +21,8 @@ describe("getAllGoals", () => {
     testDb
       .insert(goals)
       .values([
-        { id: "g-1", name: "Emergency Fund", targetAmount: 10000, userId: TEST_USER_ID },
-        { id: "g-2", name: "House Down Payment", targetAmount: 50000, userId: TEST_USER_ID },
+        { id: "g-1", name: "Emergency Fund", targetAmount: 10000},
+        { id: "g-2", name: "House Down Payment", targetAmount: 50000},
       ])
       .run();
 
@@ -32,7 +32,7 @@ describe("getAllGoals", () => {
 
 describe("getGoalById", () => {
   it("returns the matching goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000, userId: TEST_USER_ID }).run();
+    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
 
     const result = await getGoalById("g-1");
     expect(result).toEqual(
@@ -56,7 +56,7 @@ describe("createGoal", () => {
 
 describe("updateGoal", () => {
   it("modifies and returns the updated goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000, userId: TEST_USER_ID }).run();
+    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
 
     const result = await updateGoal("g-1", { name: "Updated Fund", targetAmount: 15000 });
     expect(result.name).toBe("Updated Fund");
@@ -66,7 +66,7 @@ describe("updateGoal", () => {
 
 describe("deleteGoal", () => {
   it("removes the goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000, userId: TEST_USER_ID }).run();
+    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
 
     await deleteGoal("g-1");
     expect(await getAllGoals()).toHaveLength(0);
