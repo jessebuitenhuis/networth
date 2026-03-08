@@ -1,13 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { recurringTransactions } from "@/db/schema";
 import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ globalDb: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({
-  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
-}));
 
 const {
   getAllRecurringTransactions,

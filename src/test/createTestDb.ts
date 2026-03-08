@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { vi } from "vitest";
 
 import * as schema from "@/db/schema";
 
@@ -71,5 +72,12 @@ export function createTestDb() {
     );
   `);
 
-  return drizzle(sqlite, { schema });
+  const testDb = drizzle(sqlite, { schema });
+
+  vi.doMock("@/db/connection", () => ({ globalDb: testDb }));
+  vi.doMock("@/auth/getCurrentUserId", () => ({
+    getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
+  }));
+
+  return testDb;
 }

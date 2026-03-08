@@ -4,8 +4,7 @@ import { accounts } from "@/db/schema";
 import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ globalDb: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
+vi.doMock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn() }));
 
 const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getDb } = await import("./userDb");

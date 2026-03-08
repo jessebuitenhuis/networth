@@ -4,10 +4,6 @@ import { scenarios, settings } from "@/db/schema";
 import { createTestDb, TEST_USER_ID } from "@/test/createTestDb";
 
 const testDb = createTestDb();
-vi.mock("@/db/connection", () => ({ globalDb: testDb }));
-vi.mock("@/auth/getCurrentUserId", () => ({
-  getCurrentUserId: () => Promise.resolve(TEST_USER_ID),
-}));
 vi.mock("@/lib/generateId", () => ({ generateId: () => "generated-id" }));
 
 const {
