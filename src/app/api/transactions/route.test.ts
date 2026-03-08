@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/transactions/transactionRepository");
 
+const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllTransactions,
   createTransaction,
@@ -13,6 +15,7 @@ const { GET, POST, DELETE } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("GET /api/transactions", () => {
@@ -121,7 +124,7 @@ describe("DELETE /api/transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteTransactionsByAccountId).toHaveBeenCalledWith("acc-1");
+    expect(deleteTransactionsByAccountId).toHaveBeenCalledWith("test-user", "acc-1");
   });
 
   it("deletes transactions by scenarioId", async () => {
@@ -131,7 +134,7 @@ describe("DELETE /api/transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteTransactionsByScenarioId).toHaveBeenCalledWith("s-1");
+    expect(deleteTransactionsByScenarioId).toHaveBeenCalledWith("test-user", "s-1");
   });
 
   it("returns 400 when no filter provided", async () => {

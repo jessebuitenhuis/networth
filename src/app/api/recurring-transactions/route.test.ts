@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
+const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   getAllRecurringTransactions,
   createRecurringTransaction,
@@ -11,6 +13,7 @@ const { GET, POST, DELETE } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("GET /api/recurring-transactions", () => {
@@ -98,7 +101,7 @@ describe("DELETE /api/recurring-transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteRecurringTransactionsByScenarioId).toHaveBeenCalledWith("s-1");
+    expect(deleteRecurringTransactionsByScenarioId).toHaveBeenCalledWith("test-user", "s-1");
   });
 
   it("returns 400 when no filter provided", async () => {

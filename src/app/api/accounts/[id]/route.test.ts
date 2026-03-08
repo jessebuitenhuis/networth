@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/accounts/accountRepository");
 
+const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getAccountById, updateAccount, deleteAccount } = await import("@/accounts/accountRepository");
 const { PUT, DELETE } = await import("./route");
 
@@ -11,6 +13,7 @@ function makeParams(id: string) {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/accounts/[id]", () => {
@@ -98,7 +101,7 @@ describe("DELETE /api/accounts/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteAccount).toHaveBeenCalledWith("acc-1");
+    expect(deleteAccount).toHaveBeenCalledWith("test-user", "acc-1");
   });
 
   it("returns 404 for non-existent account", async () => {

@@ -1,38 +1,14 @@
-"use client";
+import { cookies } from "next/headers";
 
-import {
-  ArrowLeftRight,
-  Landmark,
-  Settings,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { SidebarLayout } from "@/components/layout/SidebarLayout";
 
-import { AppLayout } from "@/components/layout/AppLayout";
-import type { NavGroup } from "@/components/layout/NavGroup.type";
-
-const navGroups: NavGroup[] = [
-  {
-    label: "Planning",
-    items: [
-      { title: "Projections", url: "/planning", icon: <TrendingUp /> },
-      { title: "Goals", url: "/goals", icon: <Target /> },
-      { title: "Update Plan", url: "/setup", icon: <Settings /> },
-    ],
-  },
-  {
-    label: "Tracking",
-    items: [
-      { title: "Transactions", url: "/transactions", icon: <ArrowLeftRight /> },
-      { title: "Accounts", url: "/accounts", icon: <Landmark /> },
-    ],
-  },
-];
-
-export default function SidebarLayout({
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AppLayout navGroups={navGroups}>{children}</AppLayout>;
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
+  return <SidebarLayout defaultOpen={defaultOpen}>{children}</SidebarLayout>;
 }

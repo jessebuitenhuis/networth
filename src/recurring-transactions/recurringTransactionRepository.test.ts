@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { recurringTransactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
-
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -23,7 +21,7 @@ beforeEach(() => {
 
 describe("getAllRecurringTransactions", () => {
   it("returns empty array when none exist", () => {
-    expect(getAllRecurringTransactions()).toEqual([]);
+    expect(getAllRecurringTransactions("test-user")).toEqual([]);
   });
 
   it("returns all recurring transactions when populated", () => {
@@ -35,7 +33,7 @@ describe("getAllRecurringTransactions", () => {
       ])
       .run();
 
-    expect(getAllRecurringTransactions()).toHaveLength(2);
+    expect(getAllRecurringTransactions("test-user")).toHaveLength(2);
   });
 });
 
@@ -46,18 +44,18 @@ describe("getRecurringTransactionById", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
-    const result = getRecurringTransactionById("rt-1");
+    const result = getRecurringTransactionById("test-user", "rt-1");
     expect(result).toEqual(expect.objectContaining({ id: "rt-1", description: "Salary" }));
   });
 
   it("returns undefined for non-existent id", () => {
-    expect(getRecurringTransactionById("non-existent")).toBeUndefined();
+    expect(getRecurringTransactionById("test-user", "non-existent")).toBeUndefined();
   });
 });
 
 describe("createRecurringTransaction", () => {
   it("inserts and returns the created recurring transaction with all fields", () => {
-    const result = createRecurringTransaction({
+    const result = createRecurringTransaction("test-user", {
       id: "rt-1",
       accountId: "acc-1",
       amount: 3000,
@@ -81,7 +79,7 @@ describe("createRecurringTransaction", () => {
   });
 
   it("stores optional endDate and scenarioId when provided", () => {
-    const result = createRecurringTransaction({
+    const result = createRecurringTransaction("test-user", {
       id: "rt-1",
       accountId: "acc-1",
       amount: 500,
@@ -104,7 +102,7 @@ describe("updateRecurringTransaction", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
-    const result = updateRecurringTransaction("rt-1", {
+    const result = updateRecurringTransaction("test-user", "rt-1", {
       accountId: "acc-1",
       amount: 3500,
       description: "Salary (raise)",
@@ -124,8 +122,8 @@ describe("deleteRecurringTransaction", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", userId: "test-user" })
       .run();
 
-    deleteRecurringTransaction("rt-1");
-    expect(getAllRecurringTransactions()).toHaveLength(0);
+    deleteRecurringTransaction("test-user", "rt-1");
+    expect(getAllRecurringTransactions("test-user")).toHaveLength(0);
   });
 });
 
@@ -139,9 +137,9 @@ describe("deleteRecurringTransactionsByScenarioId", () => {
       ])
       .run();
 
-    deleteRecurringTransactionsByScenarioId("s-1");
+    deleteRecurringTransactionsByScenarioId("test-user", "s-1");
 
-    const remaining = getAllRecurringTransactions();
+    const remaining = getAllRecurringTransactions("test-user");
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("rt-1");
   });
@@ -157,7 +155,7 @@ describe("cross-user isolation", () => {
       ])
       .run();
 
-    const result = getAllRecurringTransactions();
+    const result = getAllRecurringTransactions("test-user");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("rt-1");
   });
@@ -168,7 +166,7 @@ describe("cross-user isolation", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
       .run();
 
-    expect(getRecurringTransactionById("rt-1")).toBeUndefined();
+    expect(getRecurringTransactionById("test-user", "rt-1")).toBeUndefined();
   });
 
   it("updateRecurringTransaction does not modify other user's record", () => {
@@ -177,7 +175,7 @@ describe("cross-user isolation", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Original", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
       .run();
 
-    updateRecurringTransaction("rt-1", {
+    updateRecurringTransaction("test-user", "rt-1", {
       accountId: "acc-1",
       amount: 999,
       description: "Hacked",
@@ -195,7 +193,7 @@ describe("cross-user isolation", () => {
       .values({ id: "rt-1", accountId: "acc-1", amount: 100, description: "Other", frequency: "Monthly", startDate: "2025-01-01", userId: "other-user" })
       .run();
 
-    deleteRecurringTransaction("rt-1");
+    deleteRecurringTransaction("test-user", "rt-1");
 
     const allRows = testDb.select().from(recurringTransactions).all();
     expect(allRows.find((r) => r.id === "rt-1")).toBeDefined();

@@ -1,15 +1,11 @@
 import { and, Column, eq, SQL } from "drizzle-orm";
 import { SQLiteTable } from "drizzle-orm/sqlite-core";
 
-import { getCurrentUserId } from "@/lib/getCurrentUserId";
-
 import { db } from "./connection";
 
 type UserTable = SQLiteTable & { userId: Column };
 
-export function getUserDb() {
-  const userId = getCurrentUserId();
-
+export function getUserDb(userId: string) {
   function userWhere(table: UserTable, extra?: SQL): SQL {
     const userCond = eq(table.userId, userId);
     return extra ? (and(userCond, extra) as SQL) : userCond;

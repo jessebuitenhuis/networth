@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/scenarios/scenarioRepository");
 
+const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getScenarioById, updateScenario, deleteScenario } = await import("@/scenarios/scenarioRepository");
 const { PUT, DELETE } = await import("./route");
 
@@ -11,6 +13,7 @@ function makeParams(id: string) {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/scenarios/[id]", () => {
@@ -46,7 +49,7 @@ describe("PUT /api/scenarios/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(body.inflationRate).toBe(3);
-    expect(updateScenario).toHaveBeenCalledWith("s-1", { name: "Base Plan", inflationRate: 3 });
+    expect(updateScenario).toHaveBeenCalledWith("test-user", "s-1", { name: "Base Plan", inflationRate: 3 });
   });
 
   it("returns 404 for non-existent scenario", async () => {
@@ -74,7 +77,7 @@ describe("DELETE /api/scenarios/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteScenario).toHaveBeenCalledWith("s-1");
+    expect(deleteScenario).toHaveBeenCalledWith("test-user", "s-1");
   });
 
   it("returns 404 for non-existent scenario", async () => {

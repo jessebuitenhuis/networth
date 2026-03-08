@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { categories } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
-
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -24,7 +22,7 @@ beforeEach(() => {
 
 describe("getAllCategories", () => {
   it("returns empty array when no categories exist", () => {
-    expect(getAllCategories()).toEqual([]);
+    expect(getAllCategories("test-user")).toEqual([]);
   });
 
   it("returns all categories when populated", () => {
@@ -36,7 +34,7 @@ describe("getAllCategories", () => {
       ])
       .run();
 
-    expect(getAllCategories()).toHaveLength(2);
+    expect(getAllCategories("test-user")).toHaveLength(2);
   });
 });
 
@@ -44,12 +42,12 @@ describe("getCategoryById", () => {
   it("returns the matching category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Income", userId: "test-user" }).run();
 
-    const result = getCategoryById("c-1");
+    const result = getCategoryById("test-user", "c-1");
     expect(result).toEqual(expect.objectContaining({ id: "c-1", name: "Income" }));
   });
 
   it("returns undefined for non-existent id", () => {
-    expect(getCategoryById("non-existent")).toBeUndefined();
+    expect(getCategoryById("test-user", "non-existent")).toBeUndefined();
   });
 });
 
@@ -63,7 +61,7 @@ describe("getRootCategories", () => {
       ])
       .run();
 
-    const result = getRootCategories();
+    const result = getRootCategories("test-user");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("c-1");
   });
@@ -81,7 +79,7 @@ describe("getCategoriesByParentId", () => {
       ])
       .run();
 
-    const result = getCategoriesByParentId("c-1");
+    const result = getCategoriesByParentId("test-user", "c-1");
     expect(result).toHaveLength(2);
     expect(result.map((c) => c.id)).toEqual(expect.arrayContaining(["c-2", "c-3"]));
   });
@@ -89,13 +87,13 @@ describe("getCategoriesByParentId", () => {
   it("returns empty array when parent has no children", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Income", userId: "test-user" }).run();
 
-    expect(getCategoriesByParentId("c-1")).toHaveLength(0);
+    expect(getCategoriesByParentId("test-user", "c-1")).toHaveLength(0);
   });
 });
 
 describe("createCategory", () => {
   it("inserts and returns the created category with all fields", () => {
-    const result = createCategory({ id: "c-1", name: "Income" });
+    const result = createCategory("test-user", { id: "c-1", name: "Income" });
     expect(result).toEqual(
       expect.objectContaining({ id: "c-1", name: "Income", parentCategoryId: null }),
     );
@@ -104,7 +102,7 @@ describe("createCategory", () => {
   it("stores parentCategoryId when provided", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Income", userId: "test-user" }).run();
 
-    const result = createCategory({ id: "c-2", name: "Salary", parentCategoryId: "c-1" });
+    const result = createCategory("test-user", { id: "c-2", name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
   });
 });
@@ -113,7 +111,7 @@ describe("updateCategory", () => {
   it("modifies and returns the updated category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Income", userId: "test-user" }).run();
 
-    const result = updateCategory("c-1", { name: "Revenue" });
+    const result = updateCategory("test-user", "c-1", { name: "Revenue" });
     expect(result.name).toBe("Revenue");
   });
 
@@ -126,7 +124,7 @@ describe("updateCategory", () => {
       ])
       .run();
 
-    const result = updateCategory("c-2", { name: "Salary", parentCategoryId: "c-1" });
+    const result = updateCategory("test-user", "c-2", { name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
   });
 });
@@ -135,8 +133,8 @@ describe("deleteCategory", () => {
   it("removes the category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Income", userId: "test-user" }).run();
 
-    deleteCategory("c-1");
-    expect(getAllCategories()).toHaveLength(0);
+    deleteCategory("test-user", "c-1");
+    expect(getAllCategories("test-user")).toHaveLength(0);
   });
 
   it("re-parents children to the deleted category's parent", () => {
@@ -149,9 +147,9 @@ describe("deleteCategory", () => {
       ])
       .run();
 
-    deleteCategory("c-2");
+    deleteCategory("test-user", "c-2");
 
-    const leaf = getCategoryById("c-3");
+    const leaf = getCategoryById("test-user", "c-3");
     expect(leaf?.parentCategoryId).toBe("c-1");
   });
 
@@ -164,9 +162,9 @@ describe("deleteCategory", () => {
       ])
       .run();
 
-    deleteCategory("c-1");
+    deleteCategory("test-user", "c-1");
 
-    const child = getCategoryById("c-2");
+    const child = getCategoryById("test-user", "c-2");
     expect(child?.parentCategoryId).toBeNull();
   });
 });
@@ -181,7 +179,7 @@ describe("cross-user isolation", () => {
       ])
       .run();
 
-    const result = getAllCategories();
+    const result = getAllCategories("test-user");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("c-1");
   });
@@ -189,13 +187,13 @@ describe("cross-user isolation", () => {
   it("getCategoryById returns undefined for other user's category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Other", userId: "other-user" }).run();
 
-    expect(getCategoryById("c-1")).toBeUndefined();
+    expect(getCategoryById("test-user", "c-1")).toBeUndefined();
   });
 
   it("updateCategory does not modify other user's category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Original", userId: "other-user" }).run();
 
-    updateCategory("c-1", { name: "Hacked" });
+    updateCategory("test-user", "c-1", { name: "Hacked" });
 
     const allRows = testDb.select().from(categories).all();
     expect(allRows.find((c) => c.id === "c-1")?.name).toBe("Original");
@@ -204,7 +202,7 @@ describe("cross-user isolation", () => {
   it("deleteCategory does not delete other user's category", () => {
     testDb.insert(categories).values({ id: "c-1", name: "Other", userId: "other-user" }).run();
 
-    deleteCategory("c-1");
+    deleteCategory("test-user", "c-1");
 
     const allRows = testDb.select().from(categories).all();
     expect(allRows.find((c) => c.id === "c-1")).toBeDefined();
@@ -220,7 +218,7 @@ describe("cross-user isolation", () => {
       ])
       .run();
 
-    deleteCategory("c-2");
+    deleteCategory("test-user", "c-2");
 
     const allRows = testDb.select().from(categories).all();
     const otherChild = allRows.find((c) => c.id === "c-3");

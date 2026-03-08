@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
+const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getRecurringTransactionById, updateRecurringTransaction, deleteRecurringTransaction } =
   await import("@/recurring-transactions/recurringTransactionRepository");
 const { PUT, DELETE } = await import("./route");
@@ -12,6 +14,7 @@ function makeParams(id: string) {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/recurring-transactions/[id]", () => {
@@ -88,7 +91,7 @@ describe("DELETE /api/recurring-transactions/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteRecurringTransaction).toHaveBeenCalledWith("rt-1");
+    expect(deleteRecurringTransaction).toHaveBeenCalledWith("test-user", "rt-1");
   });
 
   it("returns 404 for non-existent recurring transaction", async () => {

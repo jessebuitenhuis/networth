@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { transactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-vi.mock("@/lib/getCurrentUserId", () => ({ getCurrentUserId: () => "test-user" }));
-
 const testDb = createTestDb();
 vi.mock("@/db/connection", () => ({ db: testDb }));
 
@@ -25,7 +23,7 @@ beforeEach(() => {
 
 describe("getAllTransactions", () => {
   it("returns empty array when no transactions exist", () => {
-    expect(getAllTransactions()).toEqual([]);
+    expect(getAllTransactions("test-user")).toEqual([]);
   });
 
   it("returns all transactions when populated", () => {
@@ -37,7 +35,7 @@ describe("getAllTransactions", () => {
       ])
       .run();
 
-    expect(getAllTransactions()).toHaveLength(2);
+    expect(getAllTransactions("test-user")).toHaveLength(2);
   });
 });
 
@@ -48,18 +46,18 @@ describe("getTransactionById", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", userId: "test-user" })
       .run();
 
-    const result = getTransactionById("t-1");
+    const result = getTransactionById("test-user", "t-1");
     expect(result).toEqual(expect.objectContaining({ id: "t-1", amount: 100 }));
   });
 
   it("returns undefined for non-existent id", () => {
-    expect(getTransactionById("non-existent")).toBeUndefined();
+    expect(getTransactionById("test-user", "non-existent")).toBeUndefined();
   });
 });
 
 describe("createTransaction", () => {
   it("inserts and returns the created transaction with all fields normalized", () => {
-    const result = createTransaction({
+    const result = createTransaction("test-user", {
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -81,7 +79,7 @@ describe("createTransaction", () => {
   });
 
   it("stores isProjected and scenarioId when provided", () => {
-    const result = createTransaction({
+    const result = createTransaction("test-user", {
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -98,7 +96,7 @@ describe("createTransaction", () => {
 
 describe("createTransactions", () => {
   it("inserts multiple transactions and returns them", () => {
-    const result = createTransactions([
+    const result = createTransactions("test-user", [
       { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A" },
       { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "B" },
     ]);
@@ -115,7 +113,7 @@ describe("updateTransaction", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: "test-user" })
       .run();
 
-    const result = updateTransaction("t-1", {
+    const result = updateTransaction("test-user", "t-1", {
       accountId: "acc-1",
       amount: 250,
       date: "2025-01-01",
@@ -134,8 +132,8 @@ describe("deleteTransaction", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete", userId: "test-user" })
       .run();
 
-    deleteTransaction("t-1");
-    expect(getAllTransactions()).toHaveLength(0);
+    deleteTransaction("test-user", "t-1");
+    expect(getAllTransactions("test-user")).toHaveLength(0);
   });
 });
 
@@ -149,9 +147,9 @@ describe("deleteTransactionsByAccountId", () => {
       ])
       .run();
 
-    deleteTransactionsByAccountId("acc-1");
+    deleteTransactionsByAccountId("test-user", "acc-1");
 
-    const remaining = getAllTransactions();
+    const remaining = getAllTransactions("test-user");
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-2");
   });
@@ -167,9 +165,9 @@ describe("deleteTransactionsByScenarioId", () => {
       ])
       .run();
 
-    deleteTransactionsByScenarioId("s-1");
+    deleteTransactionsByScenarioId("test-user", "s-1");
 
-    const remaining = getAllTransactions();
+    const remaining = getAllTransactions("test-user");
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-1");
   });
@@ -185,7 +183,7 @@ describe("cross-user isolation", () => {
       ])
       .run();
 
-    const result = getAllTransactions();
+    const result = getAllTransactions("test-user");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("t-1");
   });
@@ -196,7 +194,7 @@ describe("cross-user isolation", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
       .run();
 
-    expect(getTransactionById("t-1")).toBeUndefined();
+    expect(getTransactionById("test-user", "t-1")).toBeUndefined();
   });
 
   it("updateTransaction does not modify other user's transaction", () => {
@@ -205,7 +203,7 @@ describe("cross-user isolation", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original", userId: "other-user" })
       .run();
 
-    updateTransaction("t-1", { accountId: "acc-1", amount: 999, date: "2025-01-01", description: "Hacked" });
+    updateTransaction("test-user", "t-1", { accountId: "acc-1", amount: 999, date: "2025-01-01", description: "Hacked" });
 
     const allRows = testDb.select().from(transactions).all();
     expect(allRows.find((r) => r.id === "t-1")?.description).toBe("Original");
@@ -217,7 +215,7 @@ describe("cross-user isolation", () => {
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Other", userId: "other-user" })
       .run();
 
-    deleteTransaction("t-1");
+    deleteTransaction("test-user", "t-1");
 
     const allRows = testDb.select().from(transactions).all();
     expect(allRows.find((r) => r.id === "t-1")).toBeDefined();

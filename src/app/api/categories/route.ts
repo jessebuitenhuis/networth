@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 
+import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   createCategory,
   getAllCategories,
 } from "@/categories/categoryRepository";
 
 export async function GET() {
-  const rows = getAllCategories();
+  const userId = await getCurrentUserId();
+  const rows = getAllCategories(userId);
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
     const body = await request.json();
 
     if (!body.id || !body.name) {
@@ -21,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createCategory({
+    const created = createCategory(userId, {
       id: body.id,
       name: body.name,
       parentCategoryId: body.parentCategoryId,
