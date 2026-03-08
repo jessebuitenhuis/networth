@@ -5,24 +5,22 @@ import {
   getAccountById,
   updateAccount,
 } from "@/accounts/accountRepository";
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const userId = await getCurrentUserId();
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getAccountById(userId, id);
+    const existing = await getAccountById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateAccount(userId, id, {
+    const updated = await updateAccount(id, {
       name: body.name,
       type: body.type,
       expectedReturnRate: body.expectedReturnRate,
@@ -38,16 +36,15 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const userId = await getCurrentUserId();
   const { id } = await params;
 
-  const existing = getAccountById(userId, id);
+  const existing = await getAccountById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteAccount(userId, id);
+  await deleteAccount(id);
 
   return new NextResponse(null, { status: 204 });
 }

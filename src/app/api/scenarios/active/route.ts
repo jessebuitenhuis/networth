@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import { setActiveScenarioId } from "@/scenarios/scenarioRepository";
 
 export async function PUT(request: Request) {
   try {
-    const userId = await getCurrentUserId();
     const body = await request.json();
 
     if (!body.scenarioId) {
@@ -15,7 +13,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    setActiveScenarioId(userId, body.scenarioId);
+    await setActiveScenarioId(body.scenarioId);
 
     return NextResponse.json({ activeScenarioId: body.scenarioId });
   } catch {

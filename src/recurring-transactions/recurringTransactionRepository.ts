@@ -3,40 +3,37 @@ import { eq } from "drizzle-orm";
 import { recurringTransactions } from "@/db/schema";
 import { getUserDb } from "@/db/userDb";
 
-export function getAllRecurringTransactions(userId: string) {
-  return getUserDb(userId).select(recurringTransactions).all();
+export async function getAllRecurringTransactions() {
+  return (await getUserDb()).select(recurringTransactions).all();
 }
 
-export function getRecurringTransactionById(userId: string, id: string) {
-  const [row] = getUserDb(userId).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
+export async function getRecurringTransactionById(id: string) {
+  const [row] = (await getUserDb()).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
   return row;
 }
 
-export function createRecurringTransaction(
-  userId: string,
-  {
-    id,
-    accountId,
-    amount,
-    description,
-    frequency,
-    startDate,
-    endDate,
-    scenarioId,
-    categoryId,
-  }: {
-    id: string;
-    accountId: string;
-    amount: number;
-    description: string;
-    frequency: string;
-    startDate: string;
-    endDate?: string | null;
-    scenarioId?: string | null;
-    categoryId?: string | null;
-  },
-) {
-  getUserDb(userId).insert(recurringTransactions, {
+export async function createRecurringTransaction({
+  id,
+  accountId,
+  amount,
+  description,
+  frequency,
+  startDate,
+  endDate,
+  scenarioId,
+  categoryId,
+}: {
+  id: string;
+  accountId: string;
+  amount: number;
+  description: string;
+  frequency: string;
+  startDate: string;
+  endDate?: string | null;
+  scenarioId?: string | null;
+  categoryId?: string | null;
+}) {
+  (await getUserDb()).insert(recurringTransactions, {
     id,
     accountId,
     amount,
@@ -47,11 +44,10 @@ export function createRecurringTransaction(
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
   }).run();
-  return getRecurringTransactionById(userId, id)!;
+  return (await getRecurringTransactionById(id))!;
 }
 
-export function updateRecurringTransaction(
-  userId: string,
+export async function updateRecurringTransaction(
   id: string,
   {
     accountId,
@@ -73,7 +69,7 @@ export function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
-  getUserDb(userId).update(recurringTransactions, {
+  (await getUserDb()).update(recurringTransactions, {
     accountId,
     amount,
     description,
@@ -83,13 +79,13 @@ export function updateRecurringTransaction(
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
   }, eq(recurringTransactions.id, id)).run();
-  return getRecurringTransactionById(userId, id)!;
+  return (await getRecurringTransactionById(id))!;
 }
 
-export function deleteRecurringTransaction(userId: string, id: string) {
-  getUserDb(userId).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
+export async function deleteRecurringTransaction(id: string) {
+  (await getUserDb()).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
 }
 
-export function deleteRecurringTransactionsByScenarioId(userId: string, scenarioId: string) {
-  getUserDb(userId).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
+export async function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
+  (await getUserDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
 }

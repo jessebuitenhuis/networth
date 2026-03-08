@@ -4,36 +4,36 @@ import { scenarios, settings } from "@/db/schema";
 import { getUserDb } from "@/db/userDb";
 import { generateId } from "@/lib/generateId";
 
-export function getAllScenarios(userId: string) {
-  return getUserDb(userId).select(scenarios).all();
+export async function getAllScenarios() {
+  return (await getUserDb()).select(scenarios).all();
 }
 
-export function getScenarioById(userId: string, id: string) {
-  const [row] = getUserDb(userId).select(scenarios, eq(scenarios.id, id)).all();
+export async function getScenarioById(id: string) {
+  const [row] = (await getUserDb()).select(scenarios, eq(scenarios.id, id)).all();
   return row;
 }
 
-export function createScenario(userId: string, { id, name, inflationRate }: { id: string; name: string; inflationRate?: number }) {
-  getUserDb(userId).insert(scenarios, { id, name, inflationRate: inflationRate ?? null }).run();
-  return getScenarioById(userId, id)!;
+export async function createScenario({ id, name, inflationRate }: { id: string; name: string; inflationRate?: number }) {
+  (await getUserDb()).insert(scenarios, { id, name, inflationRate: inflationRate ?? null }).run();
+  return (await getScenarioById(id))!;
 }
 
-export function updateScenario(userId: string, id: string, { name, inflationRate }: { name: string; inflationRate?: number }) {
-  getUserDb(userId).update(scenarios, { name, inflationRate: inflationRate ?? null }, eq(scenarios.id, id)).run();
-  return getScenarioById(userId, id)!;
+export async function updateScenario(id: string, { name, inflationRate }: { name: string; inflationRate?: number }) {
+  (await getUserDb()).update(scenarios, { name, inflationRate: inflationRate ?? null }, eq(scenarios.id, id)).run();
+  return (await getScenarioById(id))!;
 }
 
-export function deleteScenario(userId: string, id: string) {
-  getUserDb(userId).delete(scenarios, eq(scenarios.id, id)).run();
+export async function deleteScenario(id: string) {
+  (await getUserDb()).delete(scenarios, eq(scenarios.id, id)).run();
 }
 
-export function getActiveScenarioId(userId: string) {
-  const [row] = getUserDb(userId).select(settings, eq(settings.key, "activeScenarioId")).all();
+export async function getActiveScenarioId() {
+  const [row] = (await getUserDb()).select(settings, eq(settings.key, "activeScenarioId")).all();
   return row?.value ?? null;
 }
 
-export function setActiveScenarioId(userId: string, scenarioId: string) {
-  getUserDb(userId)
+export async function setActiveScenarioId(scenarioId: string) {
+  (await getUserDb())
     .insert(settings, { key: "activeScenarioId", value: scenarioId })
     .onConflictDoUpdate({
       target: [settings.userId, settings.key],
@@ -42,11 +42,11 @@ export function setActiveScenarioId(userId: string, scenarioId: string) {
     .run();
 }
 
-export function ensureBasePlanExists(userId: string) {
-  const rows = getAllScenarios(userId);
+export async function ensureBasePlanExists() {
+  const rows = await getAllScenarios();
   if (rows.length === 0) {
     const id = generateId();
-    getUserDb(userId).insert(scenarios, { id, name: "Base Plan" }).run();
-    setActiveScenarioId(userId, id);
+    (await getUserDb()).insert(scenarios, { id, name: "Base Plan" }).run();
+    await setActiveScenarioId(id);
   }
 }

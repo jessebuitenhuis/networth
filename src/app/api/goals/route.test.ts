@@ -1,15 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/goals/goalRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getAllGoals, createGoal } = await import("@/goals/goalRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("GET /api/goals", () => {
@@ -64,7 +61,7 @@ describe("POST /api/goals", () => {
     expect(body).toEqual(
       expect.objectContaining({ id: "g-new", name: "Retirement", targetAmount: 1000000 }),
     );
-    expect(createGoal).toHaveBeenCalledWith("test-user", { id: "g-new", name: "Retirement", targetAmount: 1000000 });
+    expect(createGoal).toHaveBeenCalledWith({ id: "g-new", name: "Retirement", targetAmount: 1000000 });
   });
 
   it("returns 400 for missing required fields", async () => {

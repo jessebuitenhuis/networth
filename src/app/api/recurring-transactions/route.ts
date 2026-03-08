@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   createRecurringTransaction,
   deleteRecurringTransactionsByScenarioId,
@@ -8,14 +7,12 @@ import {
 } from "@/recurring-transactions/recurringTransactionRepository";
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const rows = getAllRecurringTransactions(userId);
+  const rows = await getAllRecurringTransactions();
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
   try {
-    const userId = await getCurrentUserId();
     const body = await request.json();
 
     if (
@@ -32,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createRecurringTransaction(userId, {
+    const created = await createRecurringTransaction({
       id: body.id,
       accountId: body.accountId,
       amount: body.amount,
@@ -51,7 +48,6 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const userId = await getCurrentUserId();
   const url = new URL(request.url);
   const scenarioId = url.searchParams.get("scenarioId");
 
@@ -62,7 +58,7 @@ export async function DELETE(request: Request) {
     );
   }
 
-  deleteRecurringTransactionsByScenarioId(userId, scenarioId);
+  await deleteRecurringTransactionsByScenarioId(scenarioId);
 
   return new NextResponse(null, { status: 204 });
 }

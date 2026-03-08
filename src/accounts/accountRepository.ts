@@ -3,35 +3,31 @@ import { eq } from "drizzle-orm";
 import { accounts } from "@/db/schema";
 import { getUserDb } from "@/db/userDb";
 
-export function getAllAccounts(userId: string) {
-  return getUserDb(userId).select(accounts).all();
+export async function getAllAccounts() {
+  return (await getUserDb()).select(accounts).all();
 }
 
-export function getAccountById(userId: string, id: string) {
-  const [row] = getUserDb(userId).select(accounts, eq(accounts.id, id)).all();
+export async function getAccountById(id: string) {
+  const [row] = (await getUserDb()).select(accounts, eq(accounts.id, id)).all();
   return row;
 }
 
-export function createAccount(
-  userId: string,
-  {
-    id,
-    name,
-    type,
-    expectedReturnRate,
-  }: {
-    id: string;
-    name: string;
-    type: string;
-    expectedReturnRate?: number | null;
-  },
-) {
-  getUserDb(userId).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
-  return getAccountById(userId, id)!;
+export async function createAccount({
+  id,
+  name,
+  type,
+  expectedReturnRate,
+}: {
+  id: string;
+  name: string;
+  type: string;
+  expectedReturnRate?: number | null;
+}) {
+  (await getUserDb()).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null }).run();
+  return (await getAccountById(id))!;
 }
 
-export function updateAccount(
-  userId: string,
+export async function updateAccount(
   id: string,
   {
     name,
@@ -43,12 +39,12 @@ export function updateAccount(
     expectedReturnRate?: number | null;
   },
 ) {
-  getUserDb(userId)
+  (await getUserDb())
     .update(accounts, { name, type, expectedReturnRate: expectedReturnRate ?? null }, eq(accounts.id, id))
     .run();
-  return getAccountById(userId, id)!;
+  return (await getAccountById(id))!;
 }
 
-export function deleteAccount(userId: string, id: string) {
-  getUserDb(userId).delete(accounts, eq(accounts.id, id)).run();
+export async function deleteAccount(id: string) {
+  (await getUserDb()).delete(accounts, eq(accounts.id, id)).run();
 }

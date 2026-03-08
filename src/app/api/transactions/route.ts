@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   createTransaction,
   createTransactions,
@@ -10,14 +9,12 @@ import {
 } from "@/transactions/transactionRepository";
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const rows = getAllTransactions(userId);
+  const rows = await getAllTransactions();
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
   try {
-    const userId = await getCurrentUserId();
     const body = await request.json();
     const items = Array.isArray(body) ? body : [body];
 
@@ -31,11 +28,11 @@ export async function POST(request: Request) {
     }
 
     if (Array.isArray(body)) {
-      const created = createTransactions(userId, items);
+      const created = await createTransactions(items);
       return NextResponse.json(created, { status: 201 });
     }
 
-    const created = createTransaction(userId, items[0]);
+    const created = await createTransaction(items[0]);
     return NextResponse.json(created, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -43,7 +40,6 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const userId = await getCurrentUserId();
   const url = new URL(request.url);
   const accountId = url.searchParams.get("accountId");
   const scenarioId = url.searchParams.get("scenarioId");
@@ -56,11 +52,11 @@ export async function DELETE(request: Request) {
   }
 
   if (accountId) {
-    deleteTransactionsByAccountId(userId, accountId);
+    await deleteTransactionsByAccountId(accountId);
   }
 
   if (scenarioId) {
-    deleteTransactionsByScenarioId(userId, scenarioId);
+    await deleteTransactionsByScenarioId(scenarioId);
   }
 
   return new NextResponse(null, { status: 204 });

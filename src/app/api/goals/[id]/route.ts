@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   deleteGoal,
   getGoalById,
@@ -12,17 +11,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const userId = await getCurrentUserId();
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getGoalById(userId, id);
+    const existing = await getGoalById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateGoal(userId, id, {
+    const updated = await updateGoal(id, {
       name: body.name,
       targetAmount: body.targetAmount,
     });
@@ -37,16 +35,15 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const userId = await getCurrentUserId();
   const { id } = await params;
 
-  const existing = getGoalById(userId, id);
+  const existing = await getGoalById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteGoal(userId, id);
+  await deleteGoal(id);
 
   return new NextResponse(null, { status: 204 });
 }

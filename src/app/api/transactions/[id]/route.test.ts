@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/transactions/transactionRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getTransactionById, updateTransaction, deleteTransaction } =
   await import("@/transactions/transactionRepository");
 const { PUT, DELETE } = await import("./route");
@@ -14,7 +12,6 @@ function makeParams(id: string) {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/transactions/[id]", () => {
@@ -88,7 +85,7 @@ describe("DELETE /api/transactions/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteTransaction).toHaveBeenCalledWith("test-user", "t-1");
+    expect(deleteTransaction).toHaveBeenCalledWith("t-1");
   });
 
   it("returns 404 for non-existent transaction", async () => {

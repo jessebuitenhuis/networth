@@ -5,13 +5,13 @@ import { getUserDb } from "@/db/userDb";
 
 const SETUP_COMPLETED_KEY = "setupCompleted";
 
-export function getSetupCompleted(userId: string): boolean {
-  const [row] = getUserDb(userId).select(settings, eq(settings.key, SETUP_COMPLETED_KEY)).all();
+export async function getSetupCompleted(): Promise<boolean> {
+  const [row] = (await getUserDb()).select(settings, eq(settings.key, SETUP_COMPLETED_KEY)).all();
   return row?.value === "true";
 }
 
-export function setSetupCompleted(userId: string, completed: boolean) {
-  getUserDb(userId)
+export async function setSetupCompleted(completed: boolean) {
+  (await getUserDb())
     .insert(settings, { key: SETUP_COMPLETED_KEY, value: String(completed) })
     .onConflictDoUpdate({
       target: [settings.userId, settings.key],

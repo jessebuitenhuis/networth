@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   deleteScenario,
   getScenarioById,
@@ -12,17 +11,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const userId = await getCurrentUserId();
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getScenarioById(userId, id);
+    const existing = await getScenarioById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateScenario(userId, id, { name: body.name, inflationRate: body.inflationRate });
+    const updated = await updateScenario(id, { name: body.name, inflationRate: body.inflationRate });
 
     return NextResponse.json(updated);
   } catch {
@@ -34,16 +32,15 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const userId = await getCurrentUserId();
   const { id } = await params;
 
-  const existing = getScenarioById(userId, id);
+  const existing = await getScenarioById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteScenario(userId, id);
+  await deleteScenario(id);
 
   return new NextResponse(null, { status: 204 });
 }

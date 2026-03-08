@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   deleteRecurringTransaction,
   getRecurringTransactionById,
@@ -12,17 +11,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const userId = await getCurrentUserId();
     const { id } = await params;
     const body = await request.json();
 
-    const existing = getRecurringTransactionById(userId, id);
+    const existing = await getRecurringTransactionById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = updateRecurringTransaction(userId, id, {
+    const updated = await updateRecurringTransaction(id, {
       accountId: body.accountId,
       amount: body.amount,
       description: body.description,
@@ -43,16 +41,15 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const userId = await getCurrentUserId();
   const { id } = await params;
 
-  const existing = getRecurringTransactionById(userId, id);
+  const existing = await getRecurringTransactionById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  deleteRecurringTransaction(userId, id);
+  await deleteRecurringTransaction(id);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -3,16 +3,16 @@ import { eq } from "drizzle-orm";
 import { transactions } from "@/db/schema";
 import { getUserDb } from "@/db/userDb";
 
-export function getAllTransactions(userId: string) {
-  return getUserDb(userId).select(transactions).all();
+export async function getAllTransactions() {
+  return (await getUserDb()).select(transactions).all();
 }
 
-export function getTransactionById(userId: string, id: string) {
-  const [row] = getUserDb(userId).select(transactions, eq(transactions.id, id)).all();
+export async function getTransactionById(id: string) {
+  const [row] = (await getUserDb()).select(transactions, eq(transactions.id, id)).all();
   return row;
 }
 
-export function createTransaction(userId: string, data: {
+export async function createTransaction(data: {
   id: string;
   accountId: string;
   amount: number;
@@ -22,7 +22,7 @@ export function createTransaction(userId: string, data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  getUserDb(userId).insert(transactions, {
+  (await getUserDb()).insert(transactions, {
     id: data.id,
     accountId: data.accountId,
     amount: data.amount,
@@ -32,10 +32,10 @@ export function createTransaction(userId: string, data: {
     scenarioId: data.scenarioId ?? null,
     categoryId: data.categoryId ?? null,
   }).run();
-  return getTransactionById(userId, data.id)!;
+  return (await getTransactionById(data.id))!;
 }
 
-export function createTransactions(userId: string, items: {
+export async function createTransactions(items: {
   id: string;
   accountId: string;
   amount: number;
@@ -45,7 +45,7 @@ export function createTransactions(userId: string, items: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }[]) {
-  const userDb = getUserDb(userId);
+  const userDb = await getUserDb();
   for (const item of items) {
     userDb.insert(transactions, {
       id: item.id,
@@ -62,7 +62,7 @@ export function createTransactions(userId: string, items: {
   return userDb.select(transactions).all().filter((row) => ids.includes(row.id));
 }
 
-export function updateTransaction(userId: string, id: string, data: {
+export async function updateTransaction(id: string, data: {
   accountId: string;
   amount: number;
   date: string;
@@ -71,7 +71,7 @@ export function updateTransaction(userId: string, id: string, data: {
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  getUserDb(userId).update(transactions, {
+  (await getUserDb()).update(transactions, {
     accountId: data.accountId,
     amount: data.amount,
     date: data.date,
@@ -80,17 +80,17 @@ export function updateTransaction(userId: string, id: string, data: {
     scenarioId: data.scenarioId ?? null,
     categoryId: data.categoryId ?? null,
   }, eq(transactions.id, id)).run();
-  return getTransactionById(userId, id)!;
+  return (await getTransactionById(id))!;
 }
 
-export function deleteTransaction(userId: string, id: string) {
-  getUserDb(userId).delete(transactions, eq(transactions.id, id)).run();
+export async function deleteTransaction(id: string) {
+  (await getUserDb()).delete(transactions, eq(transactions.id, id)).run();
 }
 
-export function deleteTransactionsByAccountId(userId: string, accountId: string) {
-  getUserDb(userId).delete(transactions, eq(transactions.accountId, accountId)).run();
+export async function deleteTransactionsByAccountId(accountId: string) {
+  (await getUserDb()).delete(transactions, eq(transactions.accountId, accountId)).run();
 }
 
-export function deleteTransactionsByScenarioId(userId: string, scenarioId: string) {
-  getUserDb(userId).delete(transactions, eq(transactions.scenarioId, scenarioId)).run();
+export async function deleteTransactionsByScenarioId(scenarioId: string) {
+  (await getUserDb()).delete(transactions, eq(transactions.scenarioId, scenarioId)).run();
 }

@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { createAccount, getAllAccounts } from "@/accounts/accountRepository";
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const rows = getAllAccounts(userId);
+  const rows = await getAllAccounts();
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
   try {
-    const userId = await getCurrentUserId();
     const body = await request.json();
 
     if (!body.id || !body.name || !body.type) {
@@ -21,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createAccount(userId, {
+    const created = await createAccount({
       id: body.id,
       name: body.name,
       type: body.type,

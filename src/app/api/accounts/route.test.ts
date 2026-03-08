@@ -1,15 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/accounts/accountRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getAllAccounts, createAccount } = await import("@/accounts/accountRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("GET /api/accounts", () => {
@@ -76,7 +73,7 @@ describe("POST /api/accounts", () => {
     expect(body).toEqual(
       expect.objectContaining({ id: "new-1", name: "Savings", type: "Asset" }),
     );
-    expect(createAccount).toHaveBeenCalledWith("test-user", {
+    expect(createAccount).toHaveBeenCalledWith({
       id: "new-1",
       name: "Savings",
       type: "Asset",

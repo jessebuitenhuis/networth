@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import {
   getSetupCompleted,
   setSetupCompleted,
 } from "@/onboarding/onboardingRepository";
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const completed = getSetupCompleted(userId);
+  const completed = await getSetupCompleted();
   return NextResponse.json({ completed });
 }
 
 export async function POST() {
-  const userId = await getCurrentUserId();
-  setSetupCompleted(userId, true);
+  await setSetupCompleted(true);
   return NextResponse.json({ completed: true }, { status: 200 });
 }

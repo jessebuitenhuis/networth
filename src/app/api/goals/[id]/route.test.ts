@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/goals/goalRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { getGoalById, updateGoal, deleteGoal } = await import("@/goals/goalRepository");
 const { PUT, DELETE } = await import("./route");
 
@@ -13,7 +11,6 @@ function makeParams(id: string) {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/goals/[id]", () => {
@@ -60,7 +57,7 @@ describe("DELETE /api/goals/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteGoal).toHaveBeenCalledWith("test-user", "g-1");
+    expect(deleteGoal).toHaveBeenCalledWith("g-1");
   });
 
   it("returns 404 for non-existent goal", async () => {

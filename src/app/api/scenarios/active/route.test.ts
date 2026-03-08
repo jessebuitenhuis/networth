@@ -1,15 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/scenarios/scenarioRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const { setActiveScenarioId } = await import("@/scenarios/scenarioRepository");
 const { PUT } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("PUT /api/scenarios/active", () => {
@@ -23,7 +20,7 @@ describe("PUT /api/scenarios/active", () => {
     const response = await PUT(request);
 
     expect(response.status).toBe(200);
-    expect(setActiveScenarioId).toHaveBeenCalledWith("test-user", "s-1");
+    expect(setActiveScenarioId).toHaveBeenCalledWith("s-1");
   });
 
   it("updates existing active scenario id", async () => {
@@ -36,7 +33,7 @@ describe("PUT /api/scenarios/active", () => {
     const response = await PUT(request);
 
     expect(response.status).toBe(200);
-    expect(setActiveScenarioId).toHaveBeenCalledWith("test-user", "s-2");
+    expect(setActiveScenarioId).toHaveBeenCalledWith("s-2");
   });
 
   it("returns 400 when scenarioId is missing", async () => {

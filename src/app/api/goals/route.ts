@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUserId } from "@/auth/getCurrentUserId";
 import { createGoal, getAllGoals } from "@/goals/goalRepository";
 
 export async function GET() {
-  const userId = await getCurrentUserId();
-  const rows = getAllGoals(userId);
+  const rows = await getAllGoals();
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
   try {
-    const userId = await getCurrentUserId();
     const body = await request.json();
 
     if (!body.id || !body.name || body.targetAmount == null) {
@@ -21,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = createGoal(userId, {
+    const created = await createGoal({
       id: body.id,
       name: body.name,
       targetAmount: body.targetAmount,

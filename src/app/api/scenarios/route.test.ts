@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth/getCurrentUserId", () => ({ getCurrentUserId: vi.fn().mockResolvedValue("test-user") }));
 vi.mock("@/scenarios/scenarioRepository");
 
-const { getCurrentUserId } = await import("@/auth/getCurrentUserId");
 const {
   ensureBasePlanExists,
   getAllScenarios,
@@ -14,7 +12,6 @@ const { GET, POST } = await import("./route");
 
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.mocked(getCurrentUserId).mockResolvedValue("test-user");
 });
 
 describe("GET /api/scenarios", () => {
@@ -65,7 +62,7 @@ describe("POST /api/scenarios", () => {
 
     expect(response.status).toBe(201);
     expect(body).toEqual(expect.objectContaining({ id: "s-new", name: "Pessimistic" }));
-    expect(createScenario).toHaveBeenCalledWith("test-user", { id: "s-new", name: "Pessimistic", inflationRate: undefined });
+    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic", inflationRate: undefined });
   });
 
   it("creates a scenario with inflation rate", async () => {
@@ -82,7 +79,7 @@ describe("POST /api/scenarios", () => {
 
     expect(response.status).toBe(201);
     expect(body.inflationRate).toBe(5);
-    expect(createScenario).toHaveBeenCalledWith("test-user", { id: "s-new", name: "High Inflation", inflationRate: 5 });
+    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "High Inflation", inflationRate: 5 });
   });
 
   it("returns 400 for missing required fields", async () => {
