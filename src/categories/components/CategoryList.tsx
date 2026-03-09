@@ -4,8 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useTreeDrag } from "@/hooks/useTreeDrag";
 import { buildFlatTree } from "@/lib/buildFlatTree";
+import { findLastDescendantIndex } from "@/lib/findLastDescendantIndex";
 import { generateId } from "@/lib/generateId";
-import { getDescendantIds } from "@/lib/getDescendantIds";
 
 import type { Category } from "../Category.type";
 import { useCategories } from "../CategoryContext";
@@ -47,9 +47,8 @@ export function CategoryList({ categories }: CategoryListProps) {
     );
   }
 
-  // Find where to insert inline form: after all descendants of addingFor
   const insertAfterIndex = addingFor
-    ? findInsertIndex(flatTree, addingFor, categories)
+    ? findLastDescendantIndex(flatTree, addingFor, categories)
     : -1;
 
   return (
@@ -79,24 +78,4 @@ export function CategoryList({ categories }: CategoryListProps) {
       ))}
     </ul>
   );
-}
-
-function findInsertIndex<T extends { id: string; parentCategoryId?: string }>(
-  flatTree: T[],
-  parentId: string,
-  categories: { id: string; parentCategoryId?: string }[],
-): number {
-  const descendants = getDescendantIds(parentId, categories);
-  const parentIndex = flatTree.findIndex((n) => n.id === parentId);
-  if (parentIndex === -1) return -1;
-
-  let lastIndex = parentIndex;
-  for (let i = parentIndex + 1; i < flatTree.length; i++) {
-    if (descendants.has(flatTree[i].id)) {
-      lastIndex = i;
-    } else {
-      break;
-    }
-  }
-  return lastIndex;
 }
