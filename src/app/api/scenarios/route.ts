@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 
 import {
-  createScenario,
   ensureBasePlanExists,
   getActiveScenarioId,
-  getAllScenarios,
+  scenarioRepo,
 } from "@/scenarios/scenarioRepository";
 
 export async function GET() {
   await ensureBasePlanExists();
 
-  const rows = await getAllScenarios();
+  const rows = await scenarioRepo.getAll();
   const activeScenarioId = await getActiveScenarioId();
 
   return NextResponse.json({ scenarios: rows, activeScenarioId });
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await createScenario({ id: body.id, name: body.name, inflationRate: body.inflationRate });
+    const created = await scenarioRepo.createScenario({ id: body.id, name: body.name, inflationRate: body.inflationRate });
 
     return NextResponse.json(created, { status: 201 });
   } catch {

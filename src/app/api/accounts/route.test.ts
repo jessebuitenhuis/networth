@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/accounts/accountRepository");
 
-const { getAllAccounts, createAccount } = await import("@/accounts/accountRepository");
+const { accountRepo } = await import("@/accounts/accountRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 
 describe("GET /api/accounts", () => {
   it("returns empty array when no accounts exist", async () => {
-    vi.mocked(getAllAccounts).mockReturnValue([]);
+    vi.mocked(accountRepo.getAll).mockReturnValue([]);
 
     const response = await GET();
     const body = await response.json();
@@ -21,7 +21,7 @@ describe("GET /api/accounts", () => {
   });
 
   it("returns all accounts", async () => {
-    vi.mocked(getAllAccounts).mockReturnValue([
+    vi.mocked(accountRepo.getAll).mockReturnValue([
       { id: "1", name: "Checking", type: "Asset", expectedReturnRate: null },
       { id: "2", name: "Mortgage", type: "Liability", expectedReturnRate: null },
     ]);
@@ -40,7 +40,7 @@ describe("GET /api/accounts", () => {
   });
 
   it("returns accounts with expectedReturnRate", async () => {
-    vi.mocked(getAllAccounts).mockReturnValue([
+    vi.mocked(accountRepo.getAll).mockReturnValue([
       { id: "1", name: "Stocks", type: "Asset", expectedReturnRate: 0.07 },
     ]);
 
@@ -53,7 +53,7 @@ describe("GET /api/accounts", () => {
 
 describe("POST /api/accounts", () => {
   it("creates an account and returns it", async () => {
-    vi.mocked(createAccount).mockReturnValue({
+    vi.mocked(accountRepo.createAccount).mockReturnValue({
       id: "new-1",
       name: "Savings",
       type: "Asset",
@@ -73,7 +73,7 @@ describe("POST /api/accounts", () => {
     expect(body).toEqual(
       expect.objectContaining({ id: "new-1", name: "Savings", type: "Asset" }),
     );
-    expect(createAccount).toHaveBeenCalledWith({
+    expect(accountRepo.createAccount).toHaveBeenCalledWith({
       id: "new-1",
       name: "Savings",
       type: "Asset",
@@ -82,7 +82,7 @@ describe("POST /api/accounts", () => {
   });
 
   it("creates an account with expectedReturnRate", async () => {
-    vi.mocked(createAccount).mockReturnValue({
+    vi.mocked(accountRepo.createAccount).mockReturnValue({
       id: "new-2",
       name: "Index Fund",
       type: "Asset",

@@ -5,16 +5,7 @@ import { createTestDb } from "@/test/createTestDb";
 
 const testDb = await createTestDb();
 
-const {
-  getAllTransactions,
-  getTransactionById,
-  createTransaction,
-  createTransactions,
-  updateTransaction,
-  deleteTransaction,
-  deleteTransactionsByAccountId,
-  deleteTransactionsByScenarioId,
-} = await import("./transactionRepository");
+const { transactionRepo } = await import("./transactionRepository");
 
 beforeEach(async () => {
   await testDb.delete(transactions);
@@ -22,7 +13,7 @@ beforeEach(async () => {
 
 describe("getAllTransactions", () => {
   it("returns empty array when no transactions exist", async () => {
-    expect(await getAllTransactions()).toEqual([]);
+    expect(await transactionRepo.getAll()).toEqual([]);
   });
 
   it("returns all transactions when populated", async () => {
@@ -33,7 +24,7 @@ describe("getAllTransactions", () => {
         { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal"},
       ]);
 
-    expect(await getAllTransactions()).toHaveLength(2);
+    expect(await transactionRepo.getAll()).toHaveLength(2);
   });
 });
 
@@ -43,18 +34,18 @@ describe("getTransactionById", () => {
       .insert(transactions)
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"});
 
-    const result = await getTransactionById("t-1");
+    const result = await transactionRepo.getById("t-1");
     expect(result).toEqual(expect.objectContaining({ id: "t-1", amount: 100 }));
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getTransactionById("non-existent")).toBeUndefined();
+    expect(await transactionRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
 describe("createTransaction", () => {
   it("inserts and returns the created transaction with all fields normalized", async () => {
-    const result = await createTransaction({
+    const result = await transactionRepo.createTransaction({
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -76,7 +67,7 @@ describe("createTransaction", () => {
   });
 
   it("stores isProjected and scenarioId when provided", async () => {
-    const result = await createTransaction({
+    const result = await transactionRepo.createTransaction({
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -93,7 +84,7 @@ describe("createTransaction", () => {
 
 describe("createTransactions", () => {
   it("inserts multiple transactions and returns them", async () => {
-    const result = await createTransactions([
+    const result = await transactionRepo.createTransactions([
       { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A" },
       { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "B" },
     ]);
@@ -109,7 +100,7 @@ describe("updateTransaction", () => {
       .insert(transactions)
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original"});
 
-    const result = await updateTransaction("t-1", {
+    const result = await transactionRepo.updateTransaction("t-1", {
       accountId: "acc-1",
       amount: 250,
       date: "2025-01-01",
@@ -127,8 +118,8 @@ describe("deleteTransaction", () => {
       .insert(transactions)
       .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete"});
 
-    await deleteTransaction("t-1");
-    expect(await getAllTransactions()).toHaveLength(0);
+    await transactionRepo.delete("t-1");
+    expect(await transactionRepo.getAll()).toHaveLength(0);
   });
 });
 
@@ -141,9 +132,9 @@ describe("deleteTransactionsByAccountId", () => {
         { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B"},
       ]);
 
-    await deleteTransactionsByAccountId("acc-1");
+    await transactionRepo.deleteByAccountId("acc-1");
 
-    const remaining = await getAllTransactions();
+    const remaining = await transactionRepo.getAll();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-2");
   });
@@ -158,9 +149,9 @@ describe("deleteTransactionsByScenarioId", () => {
         { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1"},
       ]);
 
-    await deleteTransactionsByScenarioId("s-1");
+    await transactionRepo.deleteByScenarioId("s-1");
 
-    const remaining = await getAllTransactions();
+    const remaining = await transactionRepo.getAll();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("t-1");
   });

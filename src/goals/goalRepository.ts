@@ -1,38 +1,29 @@
-import { eq } from "drizzle-orm";
-
+import { BaseRepository } from "@/db/BaseRepository";
 import { goals } from "@/db/schema";
-import { getDb } from "@/db/userDb";
 
-export async function getAllGoals() {
-  return (await getDb()).select(goals);
+class GoalRepository extends BaseRepository<typeof goals> {
+  constructor() {
+    super(goals, goals.id);
+  }
+
+  async createGoal({
+    id,
+    name,
+    targetAmount,
+  }: {
+    id: string;
+    name: string;
+    targetAmount: number;
+  }) {
+    return this.create({ id, name, targetAmount });
+  }
+
+  async updateGoal(
+    id: string,
+    { name, targetAmount }: { name: string; targetAmount: number },
+  ) {
+    return this.update(id, { name, targetAmount });
+  }
 }
 
-export async function getGoalById(id: string) {
-  const [row] = await (await getDb()).select(goals, eq(goals.id, id));
-  return row;
-}
-
-export async function createGoal({
-  id,
-  name,
-  targetAmount,
-}: {
-  id: string;
-  name: string;
-  targetAmount: number;
-}) {
-  await (await getDb()).insert(goals, { id, name, targetAmount });
-  return (await getGoalById(id))!;
-}
-
-export async function updateGoal(
-  id: string,
-  { name, targetAmount }: { name: string; targetAmount: number },
-) {
-  await (await getDb()).update(goals, { name, targetAmount }, eq(goals.id, id));
-  return (await getGoalById(id))!;
-}
-
-export async function deleteGoal(id: string) {
-  await (await getDb()).delete(goals, eq(goals.id, id));
-}
+export const goalRepo = new GoalRepository();

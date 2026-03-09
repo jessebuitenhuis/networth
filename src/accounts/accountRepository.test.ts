@@ -5,8 +5,7 @@ import { createTestDb } from "@/test/createTestDb";
 
 const testDb = await createTestDb();
 
-const { getAllAccounts, getAccountById, createAccount, updateAccount, deleteAccount } =
-  await import("./accountRepository");
+const { accountRepo } = await import("./accountRepository");
 
 beforeEach(async () => {
   await testDb.delete(accounts);
@@ -14,7 +13,7 @@ beforeEach(async () => {
 
 describe("getAllAccounts", () => {
   it("returns empty array when no accounts exist", async () => {
-    expect(await getAllAccounts()).toEqual([]);
+    expect(await accountRepo.getAll()).toEqual([]);
   });
 
   it("returns all accounts when populated", async () => {
@@ -25,7 +24,7 @@ describe("getAllAccounts", () => {
         { id: "2", name: "Mortgage", type: "Liability"},
       ]);
 
-    const result = await getAllAccounts();
+    const result = await accountRepo.getAll();
     expect(result).toHaveLength(2);
     expect(result).toEqual(
       expect.arrayContaining([
@@ -40,18 +39,18 @@ describe("getAccountById", () => {
   it("returns the matching account", async () => {
     await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
-    const result = await getAccountById("1");
+    const result = await accountRepo.getById("1");
     expect(result).toEqual(expect.objectContaining({ id: "1", name: "Checking" }));
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getAccountById("non-existent")).toBeUndefined();
+    expect(await accountRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
 describe("createAccount", () => {
   it("inserts and returns the created account with all fields", async () => {
-    const result = await createAccount({ id: "1", name: "Savings", type: "Asset" });
+    const result = await accountRepo.createAccount({ id: "1", name: "Savings", type: "Asset" });
     expect(result).toEqual(
       expect.objectContaining({
         id: "1",
@@ -63,7 +62,7 @@ describe("createAccount", () => {
   });
 
   it("stores expectedReturnRate when provided", async () => {
-    const result = await createAccount({ id: "1", name: "Stocks", type: "Asset", expectedReturnRate: 0.07 });
+    const result = await accountRepo.createAccount({ id: "1", name: "Stocks", type: "Asset", expectedReturnRate: 0.07 });
     expect(result.expectedReturnRate).toBe(0.07);
   });
 });
@@ -72,14 +71,14 @@ describe("updateAccount", () => {
   it("modifies and returns the updated account", async () => {
     await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
-    const result = await updateAccount("1", { name: "Updated Checking", type: "Asset" });
+    const result = await accountRepo.updateAccount("1", { name: "Updated Checking", type: "Asset" });
     expect(result.name).toBe("Updated Checking");
   });
 
   it("updates expectedReturnRate", async () => {
     await testDb.insert(accounts).values({ id: "1", name: "Stocks", type: "Asset"});
 
-    const result = await updateAccount("1", { name: "Stocks", type: "Asset", expectedReturnRate: 0.1 });
+    const result = await accountRepo.updateAccount("1", { name: "Stocks", type: "Asset", expectedReturnRate: 0.1 });
     expect(result.expectedReturnRate).toBe(0.1);
   });
 });
@@ -88,7 +87,7 @@ describe("deleteAccount", () => {
   it("removes the account", async () => {
     await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
-    await deleteAccount("1");
-    expect(await getAllAccounts()).toHaveLength(0);
+    await accountRepo.delete("1");
+    expect(await accountRepo.getAll()).toHaveLength(0);
   });
 });
