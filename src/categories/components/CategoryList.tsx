@@ -52,9 +52,16 @@ export function CategoryList({ categories }: CategoryListProps) {
     : -1;
 
   return (
-    <ul className="space-y-0.5">
+    <ul className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
       {flatTree.map((node, index) => (
-        <li key={node.id} className="list-none">
+        <li
+          key={node.id}
+          className={
+            index < flatTree.length - 1
+              ? "list-none border-b border-slate-200 dark:border-slate-700"
+              : "list-none"
+          }
+        >
           <CategoryRow
             category={node}
             depth={node.depth}

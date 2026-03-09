@@ -42,7 +42,7 @@ export function InlineCreateSubcategory({
 
   return (
     <div
-      className="flex items-center gap-2 py-1.5"
+      className="flex items-center gap-2 border-t border-slate-200 bg-slate-50/50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/30"
       style={{ paddingLeft: (depth + 1) * 24 }}
     >
       <Input
