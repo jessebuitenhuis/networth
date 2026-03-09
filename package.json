@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "npm@11.6.2",
   "scripts": {
-    "dev": "npm run db:push && next dev",
-    "dev:random-port": "npm run db:push && next dev -p 0",
+    "dev": "if [ -n \"$DATABASE_URL\" ]; then npm run db:push; fi && next dev",
+    "dev:random-port": "if [ -n \"$DATABASE_URL\" ]; then npm run db:push; fi && next dev -p 0",
     "dev:check": "bash scripts/dev-check.sh",
     "build": "TURBO_NO_UPDATE_NOTIFIER=true turbo run _build --output-logs errors-only",
     "_build": "next build",
