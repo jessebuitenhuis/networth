@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 
-import {
-  createRecurringTransaction,
-  deleteRecurringTransactionsByScenarioId,
-  getAllRecurringTransactions,
-} from "@/recurring-transactions/recurringTransactionRepository";
+import { recurringTransactionRepo } from "@/recurring-transactions/recurringTransactionRepository";
 
 export async function GET() {
-  const rows = await getAllRecurringTransactions();
+  const rows = await recurringTransactionRepo.getAll();
   return NextResponse.json(rows);
 }
 
@@ -29,7 +25,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await createRecurringTransaction({
+    const created = await recurringTransactionRepo.createRecurringTransaction({
       id: body.id,
       accountId: body.accountId,
       amount: body.amount,
@@ -58,7 +54,7 @@ export async function DELETE(request: Request) {
     );
   }
 
-  await deleteRecurringTransactionsByScenarioId(scenarioId);
+  await recurringTransactionRepo.deleteByScenarioId(scenarioId);
 
   return new NextResponse(null, { status: 204 });
 }

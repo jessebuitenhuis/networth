@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 
-import {
-  createCategory,
-  getAllCategories,
-} from "@/categories/categoryRepository";
+import { categoryRepo } from "@/categories/categoryRepository";
 
 export async function GET() {
-  const rows = await getAllCategories();
+  const rows = await categoryRepo.getAll();
   return NextResponse.json(rows);
 }
 
@@ -21,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await createCategory({
+    const created = await categoryRepo.createCategory({
       id: body.id,
       name: body.name,
       parentCategoryId: body.parentCategoryId,

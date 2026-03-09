@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  deleteTransaction,
-  getTransactionById,
-  updateTransaction,
-} from "@/transactions/transactionRepository";
+import { transactionRepo } from "@/transactions/transactionRepository";
 
 export async function PUT(
   request: Request,
@@ -14,13 +10,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = await getTransactionById(id);
+    const existing = await transactionRepo.getById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await updateTransaction(id, {
+    const updated = await transactionRepo.updateTransaction(id, {
       accountId: body.accountId,
       amount: body.amount,
       date: body.date,
@@ -42,13 +38,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = await getTransactionById(id);
+  const existing = await transactionRepo.getById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await deleteTransaction(id);
+  await transactionRepo.delete(id);
 
   return new NextResponse(null, { status: 204 });
 }

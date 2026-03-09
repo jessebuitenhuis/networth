@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  deleteGoal,
-  getGoalById,
-  updateGoal,
-} from "@/goals/goalRepository";
+import { goalRepo } from "@/goals/goalRepository";
 
 export async function PUT(
   request: Request,
@@ -14,13 +10,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = await getGoalById(id);
+    const existing = await goalRepo.getById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await updateGoal(id, {
+    const updated = await goalRepo.updateGoal(id, {
       name: body.name,
       targetAmount: body.targetAmount,
     });
@@ -37,13 +33,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = await getGoalById(id);
+  const existing = await goalRepo.getById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await deleteGoal(id);
+  await goalRepo.delete(id);
 
   return new NextResponse(null, { status: 204 });
 }

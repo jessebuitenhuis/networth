@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  deleteCategory,
-  getCategoryById,
-  updateCategory,
-} from "@/categories/categoryRepository";
+import { categoryRepo } from "@/categories/categoryRepository";
 
 export async function PUT(
   request: Request,
@@ -14,13 +10,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = await getCategoryById(id);
+    const existing = await categoryRepo.getById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await updateCategory(id, {
+    const updated = await categoryRepo.updateCategory(id, {
       name: body.name,
       parentCategoryId: body.parentCategoryId,
     });
@@ -37,13 +33,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = await getCategoryById(id);
+  const existing = await categoryRepo.getById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await deleteCategory(id);
+  await categoryRepo.deleteCategory(id);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -7,11 +7,7 @@ const testDb = await createTestDb();
 vi.mock("@/lib/generateId", () => ({ generateId: () => "generated-id" }));
 
 const {
-  getAllScenarios,
-  getScenarioById,
-  createScenario,
-  updateScenario,
-  deleteScenario,
+  scenarioRepo,
   getActiveScenarioId,
   setActiveScenarioId,
   ensureBasePlanExists,
@@ -24,7 +20,7 @@ beforeEach(async () => {
 
 describe("getAllScenarios", () => {
   it("returns empty array when none exist", async () => {
-    expect(await getAllScenarios()).toEqual([]);
+    expect(await scenarioRepo.getAll()).toEqual([]);
   });
 
   it("returns all scenarios when populated", async () => {
@@ -35,7 +31,7 @@ describe("getAllScenarios", () => {
         { id: "s-2", name: "Optimistic"},
       ]);
 
-    expect(await getAllScenarios()).toHaveLength(2);
+    expect(await scenarioRepo.getAll()).toHaveLength(2);
   });
 });
 
@@ -43,23 +39,23 @@ describe("getScenarioById", () => {
   it("returns the matching scenario", async () => {
     await testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"});
 
-    const result = await getScenarioById("s-1");
+    const result = await scenarioRepo.getById("s-1");
     expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Base Plan" }));
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getScenarioById("non-existent")).toBeUndefined();
+    expect(await scenarioRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
 describe("createScenario", () => {
   it("inserts and returns the created scenario", async () => {
-    const result = await createScenario({ id: "s-1", name: "Pessimistic" });
+    const result = await scenarioRepo.createScenario({ id: "s-1", name: "Pessimistic" });
     expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Pessimistic" }));
   });
 
   it("inserts and returns a scenario with inflation rate", async () => {
-    const result = await createScenario({ id: "s-1", name: "Inflation", inflationRate: 3.5 });
+    const result = await scenarioRepo.createScenario({ id: "s-1", name: "Inflation", inflationRate: 3.5 });
     expect(result).toEqual(expect.objectContaining({ id: "s-1", name: "Inflation", inflationRate: 3.5 }));
   });
 });
@@ -68,21 +64,21 @@ describe("updateScenario", () => {
   it("modifies and returns the updated scenario", async () => {
     await testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"});
 
-    const result = await updateScenario("s-1", { name: "Updated Plan" });
+    const result = await scenarioRepo.updateScenario("s-1", { name: "Updated Plan" });
     expect(result.name).toBe("Updated Plan");
   });
 
   it("updates inflation rate", async () => {
     await testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"});
 
-    const result = await updateScenario("s-1", { name: "Base Plan", inflationRate: 2.5 });
+    const result = await scenarioRepo.updateScenario("s-1", { name: "Base Plan", inflationRate: 2.5 });
     expect(result.inflationRate).toBe(2.5);
   });
 
   it("clears inflation rate when undefined", async () => {
     await testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan", inflationRate: 3});
 
-    const result = await updateScenario("s-1", { name: "Base Plan" });
+    const result = await scenarioRepo.updateScenario("s-1", { name: "Base Plan" });
     expect(result.inflationRate).toBeNull();
   });
 });
@@ -91,8 +87,8 @@ describe("deleteScenario", () => {
   it("removes the scenario", async () => {
     await testDb.insert(scenarios).values({ id: "s-1", name: "Base Plan"});
 
-    await deleteScenario("s-1");
-    expect(await getAllScenarios()).toHaveLength(0);
+    await scenarioRepo.delete("s-1");
+    expect(await scenarioRepo.getAll()).toHaveLength(0);
   });
 });
 
@@ -125,7 +121,7 @@ describe("ensureBasePlanExists", () => {
   it("creates Base Plan when no scenarios exist", async () => {
     await ensureBasePlanExists();
 
-    const rows = await getAllScenarios();
+    const rows = await scenarioRepo.getAll();
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toBe("Base Plan");
     expect(rows[0].id).toBe("generated-id");
@@ -141,7 +137,7 @@ describe("ensureBasePlanExists", () => {
 
     await ensureBasePlanExists();
 
-    const rows = await getAllScenarios();
+    const rows = await scenarioRepo.getAll();
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toBe("Existing Plan");
   });
