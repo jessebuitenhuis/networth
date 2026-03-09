@@ -2,11 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
-const {
-  getAllRecurringTransactions,
-  createRecurringTransaction,
-  deleteRecurringTransactionsByScenarioId,
-} = await import("@/recurring-transactions/recurringTransactionRepository");
+const { recurringTransactionRepo } = await import("@/recurring-transactions/recurringTransactionRepository");
 const { GET, POST, DELETE } = await import("./route");
 
 beforeEach(() => {
@@ -15,7 +11,7 @@ beforeEach(() => {
 
 describe("GET /api/recurring-transactions", () => {
   it("returns empty array when none exist", async () => {
-    vi.mocked(getAllRecurringTransactions).mockReturnValue([]);
+    vi.mocked(recurringTransactionRepo.getAll).mockReturnValue([]);
 
     const response = await GET();
     const body = await response.json();
@@ -25,7 +21,7 @@ describe("GET /api/recurring-transactions", () => {
   });
 
   it("returns all recurring transactions", async () => {
-    vi.mocked(getAllRecurringTransactions).mockReturnValue([
+    vi.mocked(recurringTransactionRepo.getAll).mockReturnValue([
       { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null, categoryId: null },
       { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01", endDate: null, scenarioId: null, categoryId: null },
     ]);
@@ -38,7 +34,7 @@ describe("GET /api/recurring-transactions", () => {
   });
 
   it("returns recurring transactions with optional fields", async () => {
-    vi.mocked(getAllRecurringTransactions).mockReturnValue([
+    vi.mocked(recurringTransactionRepo.getAll).mockReturnValue([
       { id: "rt-1", accountId: "acc-1", amount: 500, description: "Bonus", frequency: "Yearly", startDate: "2025-01-01", endDate: "2027-01-01", scenarioId: "s-1", categoryId: null },
     ]);
 
@@ -52,7 +48,7 @@ describe("GET /api/recurring-transactions", () => {
 
 describe("POST /api/recurring-transactions", () => {
   it("creates a recurring transaction", async () => {
-    vi.mocked(createRecurringTransaction).mockReturnValue({
+    vi.mocked(recurringTransactionRepo.createRecurringTransaction).mockReturnValue({
       id: "rt-new",
       accountId: "acc-1",
       amount: 2000,
@@ -98,7 +94,7 @@ describe("DELETE /api/recurring-transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteRecurringTransactionsByScenarioId).toHaveBeenCalledWith("s-1");
+    expect(recurringTransactionRepo.deleteByScenarioId).toHaveBeenCalledWith("s-1");
   });
 
   it("returns 400 when no filter provided", async () => {

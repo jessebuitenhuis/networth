@@ -5,15 +5,7 @@ import { createTestDb } from "@/test/createTestDb";
 
 const testDb = await createTestDb();
 
-const {
-  getAllCategories,
-  getCategoryById,
-  getRootCategories,
-  getCategoriesByParentId,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} = await import("./categoryRepository");
+const { categoryRepo } = await import("./categoryRepository");
 
 beforeEach(async () => {
   await testDb.delete(categories);
@@ -21,7 +13,7 @@ beforeEach(async () => {
 
 describe("getAllCategories", () => {
   it("returns empty array when no categories exist", async () => {
-    expect(await getAllCategories()).toEqual([]);
+    expect(await categoryRepo.getAll()).toEqual([]);
   });
 
   it("returns all categories when populated", async () => {
@@ -32,7 +24,7 @@ describe("getAllCategories", () => {
         { id: "c-2", name: "Expenses"},
       ]);
 
-    expect(await getAllCategories()).toHaveLength(2);
+    expect(await categoryRepo.getAll()).toHaveLength(2);
   });
 });
 
@@ -40,12 +32,12 @@ describe("getCategoryById", () => {
   it("returns the matching category", async () => {
     await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
-    const result = await getCategoryById("c-1");
+    const result = await categoryRepo.getById("c-1");
     expect(result).toEqual(expect.objectContaining({ id: "c-1", name: "Income" }));
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getCategoryById("non-existent")).toBeUndefined();
+    expect(await categoryRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
@@ -58,7 +50,7 @@ describe("getRootCategories", () => {
         { id: "c-2", name: "Salary", parentCategoryId: "c-1"},
       ]);
 
-    const result = await getRootCategories();
+    const result = await categoryRepo.getRootCategories();
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("c-1");
   });
@@ -75,7 +67,7 @@ describe("getCategoriesByParentId", () => {
         { id: "c-4", name: "Expenses"},
       ]);
 
-    const result = await getCategoriesByParentId("c-1");
+    const result = await categoryRepo.getCategoriesByParentId("c-1");
     expect(result).toHaveLength(2);
     expect(result.map((c) => c.id)).toEqual(expect.arrayContaining(["c-2", "c-3"]));
   });
@@ -83,13 +75,13 @@ describe("getCategoriesByParentId", () => {
   it("returns empty array when parent has no children", async () => {
     await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
-    expect(await getCategoriesByParentId("c-1")).toHaveLength(0);
+    expect(await categoryRepo.getCategoriesByParentId("c-1")).toHaveLength(0);
   });
 });
 
 describe("createCategory", () => {
   it("inserts and returns the created category with all fields", async () => {
-    const result = await createCategory({ id: "c-1", name: "Income" });
+    const result = await categoryRepo.createCategory({ id: "c-1", name: "Income" });
     expect(result).toEqual(
       expect.objectContaining({ id: "c-1", name: "Income", parentCategoryId: null }),
     );
@@ -98,7 +90,7 @@ describe("createCategory", () => {
   it("stores parentCategoryId when provided", async () => {
     await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
-    const result = await createCategory({ id: "c-2", name: "Salary", parentCategoryId: "c-1" });
+    const result = await categoryRepo.createCategory({ id: "c-2", name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
   });
 });
@@ -107,7 +99,7 @@ describe("updateCategory", () => {
   it("modifies and returns the updated category", async () => {
     await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
-    const result = await updateCategory("c-1", { name: "Revenue" });
+    const result = await categoryRepo.updateCategory("c-1", { name: "Revenue" });
     expect(result.name).toBe("Revenue");
   });
 
@@ -119,7 +111,7 @@ describe("updateCategory", () => {
         { id: "c-2", name: "Salary"},
       ]);
 
-    const result = await updateCategory("c-2", { name: "Salary", parentCategoryId: "c-1" });
+    const result = await categoryRepo.updateCategory("c-2", { name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
   });
 });
@@ -128,8 +120,8 @@ describe("deleteCategory", () => {
   it("removes the category", async () => {
     await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
-    await deleteCategory("c-1");
-    expect(await getAllCategories()).toHaveLength(0);
+    await categoryRepo.deleteCategory("c-1");
+    expect(await categoryRepo.getAll()).toHaveLength(0);
   });
 
   it("re-parents children to the deleted category's parent", async () => {
@@ -141,9 +133,9 @@ describe("deleteCategory", () => {
         { id: "c-3", name: "Leaf", parentCategoryId: "c-2"},
       ]);
 
-    await deleteCategory("c-2");
+    await categoryRepo.deleteCategory("c-2");
 
-    const leaf = await getCategoryById("c-3");
+    const leaf = await categoryRepo.getById("c-3");
     expect(leaf?.parentCategoryId).toBe("c-1");
   });
 
@@ -155,9 +147,9 @@ describe("deleteCategory", () => {
         { id: "c-2", name: "Child", parentCategoryId: "c-1"},
       ]);
 
-    await deleteCategory("c-1");
+    await categoryRepo.deleteCategory("c-1");
 
-    const child = await getCategoryById("c-2");
+    const child = await categoryRepo.getById("c-2");
     expect(child?.parentCategoryId).toBeNull();
   });
 });

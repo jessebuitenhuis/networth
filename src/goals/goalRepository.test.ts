@@ -5,8 +5,7 @@ import { createTestDb } from "@/test/createTestDb";
 
 const testDb = await createTestDb();
 
-const { getAllGoals, getGoalById, createGoal, updateGoal, deleteGoal } =
-  await import("./goalRepository");
+const { goalRepo } = await import("./goalRepository");
 
 beforeEach(async () => {
   await testDb.delete(goals);
@@ -14,7 +13,7 @@ beforeEach(async () => {
 
 describe("getAllGoals", () => {
   it("returns empty array when no goals exist", async () => {
-    expect(await getAllGoals()).toEqual([]);
+    expect(await goalRepo.getAll()).toEqual([]);
   });
 
   it("returns all goals when populated", async () => {
@@ -25,7 +24,7 @@ describe("getAllGoals", () => {
         { id: "g-2", name: "House Down Payment", targetAmount: 50000},
       ]);
 
-    expect(await getAllGoals()).toHaveLength(2);
+    expect(await goalRepo.getAll()).toHaveLength(2);
   });
 });
 
@@ -33,20 +32,20 @@ describe("getGoalById", () => {
   it("returns the matching goal", async () => {
     await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
-    const result = await getGoalById("g-1");
+    const result = await goalRepo.getById("g-1");
     expect(result).toEqual(
       expect.objectContaining({ id: "g-1", name: "Emergency Fund", targetAmount: 10000 }),
     );
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getGoalById("non-existent")).toBeUndefined();
+    expect(await goalRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
 describe("createGoal", () => {
   it("inserts and returns the created goal", async () => {
-    const result = await createGoal({ id: "g-1", name: "Retirement", targetAmount: 1000000 });
+    const result = await goalRepo.createGoal({ id: "g-1", name: "Retirement", targetAmount: 1000000 });
     expect(result).toEqual(
       expect.objectContaining({ id: "g-1", name: "Retirement", targetAmount: 1000000 }),
     );
@@ -57,7 +56,7 @@ describe("updateGoal", () => {
   it("modifies and returns the updated goal", async () => {
     await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
-    const result = await updateGoal("g-1", { name: "Updated Fund", targetAmount: 15000 });
+    const result = await goalRepo.updateGoal("g-1", { name: "Updated Fund", targetAmount: 15000 });
     expect(result.name).toBe("Updated Fund");
     expect(result.targetAmount).toBe(15000);
   });
@@ -67,7 +66,7 @@ describe("deleteGoal", () => {
   it("removes the goal", async () => {
     await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
-    await deleteGoal("g-1");
-    expect(await getAllGoals()).toHaveLength(0);
+    await goalRepo.delete("g-1");
+    expect(await goalRepo.getAll()).toHaveLength(0);
   });
 });

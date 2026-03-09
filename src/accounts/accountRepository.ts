@@ -1,49 +1,39 @@
-import { eq } from "drizzle-orm";
-
+import { BaseRepository } from "@/db/BaseRepository";
 import { accounts } from "@/db/schema";
-import { getDb } from "@/db/userDb";
 
-export async function getAllAccounts() {
-  return (await getDb()).select(accounts);
-}
+class AccountRepository extends BaseRepository<typeof accounts> {
+  constructor() {
+    super(accounts, accounts.id);
+  }
 
-export async function getAccountById(id: string) {
-  const [row] = await (await getDb()).select(accounts, eq(accounts.id, id));
-  return row;
-}
-
-export async function createAccount({
-  id,
-  name,
-  type,
-  expectedReturnRate,
-}: {
-  id: string;
-  name: string;
-  type: string;
-  expectedReturnRate?: number | null;
-}) {
-  await (await getDb()).insert(accounts, { id, name, type, expectedReturnRate: expectedReturnRate ?? null });
-  return (await getAccountById(id))!;
-}
-
-export async function updateAccount(
-  id: string,
-  {
+  async createAccount({
+    id,
     name,
     type,
     expectedReturnRate,
   }: {
+    id: string;
     name: string;
     type: string;
     expectedReturnRate?: number | null;
-  },
-) {
-  await (await getDb())
-    .update(accounts, { name, type, expectedReturnRate: expectedReturnRate ?? null }, eq(accounts.id, id));
-  return (await getAccountById(id))!;
+  }) {
+    return this.create({ id, name, type, expectedReturnRate: expectedReturnRate ?? null });
+  }
+
+  async updateAccount(
+    id: string,
+    {
+      name,
+      type,
+      expectedReturnRate,
+    }: {
+      name: string;
+      type: string;
+      expectedReturnRate?: number | null;
+    },
+  ) {
+    return this.update(id, { name, type, expectedReturnRate: expectedReturnRate ?? null });
+  }
 }
 
-export async function deleteAccount(id: string) {
-  await (await getDb()).delete(accounts, eq(accounts.id, id));
-}
+export const accountRepo = new AccountRepository();

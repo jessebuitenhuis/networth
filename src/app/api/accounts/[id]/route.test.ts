@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/accounts/accountRepository");
 
-const { getAccountById, updateAccount, deleteAccount } = await import("@/accounts/accountRepository");
+const { accountRepo } = await import("@/accounts/accountRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -15,13 +15,13 @@ beforeEach(() => {
 
 describe("PUT /api/accounts/[id]", () => {
   it("updates an existing account", async () => {
-    vi.mocked(getAccountById).mockReturnValue({
+    vi.mocked(accountRepo.getById).mockReturnValue({
       id: "acc-1",
       name: "Checking",
       type: "Asset",
       expectedReturnRate: null,
     });
-    vi.mocked(updateAccount).mockReturnValue({
+    vi.mocked(accountRepo.updateAccount).mockReturnValue({
       id: "acc-1",
       name: "Updated Checking",
       type: "Asset",
@@ -42,13 +42,13 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("updates expectedReturnRate", async () => {
-    vi.mocked(getAccountById).mockReturnValue({
+    vi.mocked(accountRepo.getById).mockReturnValue({
       id: "acc-1",
       name: "Checking",
       type: "Asset",
       expectedReturnRate: null,
     });
-    vi.mocked(updateAccount).mockReturnValue({
+    vi.mocked(accountRepo.updateAccount).mockReturnValue({
       id: "acc-1",
       name: "Checking",
       type: "Asset",
@@ -69,7 +69,7 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("returns 404 for non-existent account", async () => {
-    vi.mocked(getAccountById).mockReturnValue(undefined);
+    vi.mocked(accountRepo.getById).mockReturnValue(undefined);
 
     const request = new Request("http://localhost/api/accounts/non-existent", {
       method: "PUT",
@@ -85,7 +85,7 @@ describe("PUT /api/accounts/[id]", () => {
 
 describe("DELETE /api/accounts/[id]", () => {
   it("deletes an existing account", async () => {
-    vi.mocked(getAccountById).mockReturnValue({
+    vi.mocked(accountRepo.getById).mockReturnValue({
       id: "acc-1",
       name: "Checking",
       type: "Asset",
@@ -98,11 +98,11 @@ describe("DELETE /api/accounts/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteAccount).toHaveBeenCalledWith("acc-1");
+    expect(accountRepo.delete).toHaveBeenCalledWith("acc-1");
   });
 
   it("returns 404 for non-existent account", async () => {
-    vi.mocked(getAccountById).mockReturnValue(undefined);
+    vi.mocked(accountRepo.getById).mockReturnValue(undefined);
 
     const response = await DELETE(
       new Request("http://localhost/api/accounts/non-existent", { method: "DELETE" }),

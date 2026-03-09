@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { createAccount, getAllAccounts } from "@/accounts/accountRepository";
+import { accountRepo } from "@/accounts/accountRepository";
 
 export async function GET() {
-  const rows = await getAllAccounts();
+  const rows = await accountRepo.getAll();
   return NextResponse.json(rows);
 }
 
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await createAccount({
+    const created = await accountRepo.createAccount({
       id: body.id,
       name: body.name,
       type: body.type,

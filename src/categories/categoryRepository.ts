@@ -1,53 +1,49 @@
 import { eq, isNull } from "drizzle-orm";
 
+import { BaseRepository } from "@/db/BaseRepository";
 import { categories } from "@/db/schema";
 import { getDb } from "@/db/userDb";
 
-export async function getAllCategories() {
-  return (await getDb()).select(categories);
-}
-
-export async function getCategoryById(id: string) {
-  const [row] = await (await getDb()).select(categories, eq(categories.id, id));
-  return row;
-}
-
-export async function getRootCategories() {
-  return (await getDb()).select(categories, isNull(categories.parentCategoryId));
-}
-
-export async function getCategoriesByParentId(parentId: string) {
-  return (await getDb()).select(categories, eq(categories.parentCategoryId, parentId));
-}
-
-export async function createCategory({
-  id,
-  name,
-  parentCategoryId,
-}: {
-  id: string;
-  name: string;
-  parentCategoryId?: string | null;
-}) {
-  await (await getDb()).insert(categories, { id, name, parentCategoryId: parentCategoryId ?? null });
-  return (await getCategoryById(id))!;
-}
-
-export async function updateCategory(
-  id: string,
-  { name, parentCategoryId }: { name: string; parentCategoryId?: string | null },
-) {
-  await (await getDb())
-    .update(categories, { name, parentCategoryId: parentCategoryId ?? null }, eq(categories.id, id));
-  return (await getCategoryById(id))!;
-}
-
-export async function deleteCategory(id: string) {
-  const userDb = await getDb();
-  const category = await getCategoryById(id);
-  if (category) {
-    await userDb
-      .update(categories, { parentCategoryId: category.parentCategoryId }, eq(categories.parentCategoryId, id));
+class CategoryRepository extends BaseRepository<typeof categories> {
+  constructor() {
+    super(categories, categories.id);
   }
-  await userDb.delete(categories, eq(categories.id, id));
+
+  async createCategory({
+    id,
+    name,
+    parentCategoryId,
+  }: {
+    id: string;
+    name: string;
+    parentCategoryId?: string | null;
+  }) {
+    return this.create({ id, name, parentCategoryId: parentCategoryId ?? null });
+  }
+
+  async updateCategory(
+    id: string,
+    { name, parentCategoryId }: { name: string; parentCategoryId?: string | null },
+  ) {
+    return this.update(id, { name, parentCategoryId: parentCategoryId ?? null });
+  }
+
+  async getRootCategories() {
+    return (await getDb()).select(categories, isNull(categories.parentCategoryId));
+  }
+
+  async getCategoriesByParentId(parentId: string) {
+    return (await getDb()).select(categories, eq(categories.parentCategoryId, parentId));
+  }
+
+  async deleteCategory(id: string) {
+    const userDb = await getDb();
+    const category = await this.getById(id);
+    if (category) {
+      await userDb.update(categories, { parentCategoryId: category.parentCategoryId }, eq(categories.parentCategoryId, id));
+    }
+    await userDb.delete(categories, eq(categories.id, id));
+  }
 }
+
+export const categoryRepo = new CategoryRepository();

@@ -4,9 +4,8 @@ vi.mock("@/scenarios/scenarioRepository");
 
 const {
   ensureBasePlanExists,
-  getAllScenarios,
+  scenarioRepo,
   getActiveScenarioId,
-  createScenario,
 } = await import("@/scenarios/scenarioRepository");
 const { GET, POST } = await import("./route");
 
@@ -17,7 +16,7 @@ beforeEach(() => {
 describe("GET /api/scenarios", () => {
   it("auto-creates Base Plan when no scenarios exist", async () => {
     vi.mocked(ensureBasePlanExists).mockReturnValue(undefined);
-    vi.mocked(getAllScenarios).mockReturnValue([{ id: "auto-1", name: "Base Plan" }]);
+    vi.mocked(scenarioRepo.getAll).mockReturnValue([{ id: "auto-1", name: "Base Plan" }]);
     vi.mocked(getActiveScenarioId).mockReturnValue("auto-1");
 
     const response = await GET();
@@ -32,7 +31,7 @@ describe("GET /api/scenarios", () => {
 
   it("returns existing scenarios with active id", async () => {
     vi.mocked(ensureBasePlanExists).mockReturnValue(undefined);
-    vi.mocked(getAllScenarios).mockReturnValue([
+    vi.mocked(scenarioRepo.getAll).mockReturnValue([
       { id: "s-1", name: "Base Plan" },
       { id: "s-2", name: "Optimistic" },
     ]);
@@ -49,7 +48,7 @@ describe("GET /api/scenarios", () => {
 
 describe("POST /api/scenarios", () => {
   it("creates a scenario", async () => {
-    vi.mocked(createScenario).mockReturnValue({ id: "s-new", name: "Pessimistic" });
+    vi.mocked(scenarioRepo.createScenario).mockReturnValue({ id: "s-new", name: "Pessimistic" });
 
     const request = new Request("http://localhost/api/scenarios", {
       method: "POST",
@@ -62,11 +61,11 @@ describe("POST /api/scenarios", () => {
 
     expect(response.status).toBe(201);
     expect(body).toEqual(expect.objectContaining({ id: "s-new", name: "Pessimistic" }));
-    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic", inflationRate: undefined });
+    expect(scenarioRepo.createScenario).toHaveBeenCalledWith({ id: "s-new", name: "Pessimistic", inflationRate: undefined });
   });
 
   it("creates a scenario with inflation rate", async () => {
-    vi.mocked(createScenario).mockReturnValue({ id: "s-new", name: "High Inflation", inflationRate: 5 });
+    vi.mocked(scenarioRepo.createScenario).mockReturnValue({ id: "s-new", name: "High Inflation", inflationRate: 5 });
 
     const request = new Request("http://localhost/api/scenarios", {
       method: "POST",
@@ -79,7 +78,7 @@ describe("POST /api/scenarios", () => {
 
     expect(response.status).toBe(201);
     expect(body.inflationRate).toBe(5);
-    expect(createScenario).toHaveBeenCalledWith({ id: "s-new", name: "High Inflation", inflationRate: 5 });
+    expect(scenarioRepo.createScenario).toHaveBeenCalledWith({ id: "s-new", name: "High Inflation", inflationRate: 5 });
   });
 
   it("returns 400 for missing required fields", async () => {

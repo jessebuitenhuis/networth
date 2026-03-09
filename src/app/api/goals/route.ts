@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { createGoal, getAllGoals } from "@/goals/goalRepository";
+import { goalRepo } from "@/goals/goalRepository";
 
 export async function GET() {
-  const rows = await getAllGoals();
+  const rows = await goalRepo.getAll();
   return NextResponse.json(rows);
 }
 
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await createGoal({
+    const created = await goalRepo.createGoal({
       id: body.id,
       name: body.name,
       targetAmount: body.targetAmount,
