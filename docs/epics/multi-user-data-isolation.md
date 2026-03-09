@@ -8,7 +8,7 @@ Every user's financial data is completely private. Isolation is enforced at the 
 
 - None — ships independently of auth and database migration epics.
 - **Auth epic** replaces the placeholder `getCurrentUserId()` with real identity resolution.
-- **Database epic** (Supabase migration) adds Postgres RLS policies as a second layer of enforcement.
+- **Database epic** (Supabase migration) adds Postgres RLS policies as a second layer of enforcement. — done
 
 ## Design Decisions
 
