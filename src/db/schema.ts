@@ -1,30 +1,30 @@
-import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { boolean, doublePrecision, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 
-export const accounts = sqliteTable("accounts", {
+export const accounts = pgTable("accounts", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(),
-  expectedReturnRate: real("expected_return_rate"),
+  expectedReturnRate: doublePrecision("expected_return_rate"),
 });
 
-export const transactions = sqliteTable("transactions", {
+export const transactions = pgTable("transactions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   accountId: text("account_id").notNull(),
-  amount: real("amount").notNull(),
+  amount: doublePrecision("amount").notNull(),
   date: text("date").notNull(),
   description: text("description").notNull(),
-  isProjected: integer("is_projected", { mode: "boolean" }),
+  isProjected: boolean("is_projected"),
   scenarioId: text("scenario_id"),
   categoryId: text("category_id"),
 });
 
-export const recurringTransactions = sqliteTable("recurring_transactions", {
+export const recurringTransactions = pgTable("recurring_transactions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   accountId: text("account_id").notNull(),
-  amount: real("amount").notNull(),
+  amount: doublePrecision("amount").notNull(),
   description: text("description").notNull(),
   frequency: text("frequency").notNull(),
   startDate: text("start_date").notNull(),
@@ -33,28 +33,28 @@ export const recurringTransactions = sqliteTable("recurring_transactions", {
   categoryId: text("category_id"),
 });
 
-export const categories = sqliteTable("categories", {
+export const categories = pgTable("categories", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   parentCategoryId: text("parent_category_id"),
 });
 
-export const scenarios = sqliteTable("scenarios", {
+export const scenarios = pgTable("scenarios", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
-  inflationRate: real("inflation_rate"),
+  inflationRate: doublePrecision("inflation_rate"),
 });
 
-export const goals = sqliteTable("goals", {
+export const goals = pgTable("goals", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
-  targetAmount: real("target_amount").notNull(),
+  targetAmount: doublePrecision("target_amount").notNull(),
 });
 
-export const settings = sqliteTable(
+export const settings = pgTable(
   "settings",
   {
     userId: text("user_id").notNull(),

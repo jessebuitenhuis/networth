@@ -1,11 +1,11 @@
 import { and, Column, eq, SQL } from "drizzle-orm";
-import { SQLiteTable } from "drizzle-orm/sqlite-core";
+import { PgTable } from "drizzle-orm/pg-core";
 
 import { getCurrentUserId } from "@/auth/getCurrentUserId";
 
 import { globalDb } from "./connection";
 
-type UserTable = SQLiteTable & { userId: Column };
+type UserTable = PgTable & { userId: Column };
 
 export async function getDb() {
   const userId = await getCurrentUserId();
@@ -19,7 +19,8 @@ export async function getDb() {
     userId,
 
     select<T extends UserTable>(table: T, where?: SQL) {
-      return globalDb.select().from(table).where(userWhere(table, where));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return globalDb.select().from(table as any).where(userWhere(table, where));
     },
 
     insert<T extends UserTable>(table: T, data: Record<string, unknown>) {

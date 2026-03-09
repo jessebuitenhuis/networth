@@ -4,11 +4,11 @@ import { goals } from "@/db/schema";
 import { getDb } from "@/db/userDb";
 
 export async function getAllGoals() {
-  return (await getDb()).select(goals).all();
+  return (await getDb()).select(goals);
 }
 
 export async function getGoalById(id: string) {
-  const [row] = (await getDb()).select(goals, eq(goals.id, id)).all();
+  const [row] = await (await getDb()).select(goals, eq(goals.id, id));
   return row;
 }
 
@@ -21,7 +21,7 @@ export async function createGoal({
   name: string;
   targetAmount: number;
 }) {
-  (await getDb()).insert(goals, { id, name, targetAmount }).run();
+  await (await getDb()).insert(goals, { id, name, targetAmount });
   return (await getGoalById(id))!;
 }
 
@@ -29,10 +29,10 @@ export async function updateGoal(
   id: string,
   { name, targetAmount }: { name: string; targetAmount: number },
 ) {
-  (await getDb()).update(goals, { name, targetAmount }, eq(goals.id, id)).run();
+  await (await getDb()).update(goals, { name, targetAmount }, eq(goals.id, id));
   return (await getGoalById(id))!;
 }
 
 export async function deleteGoal(id: string) {
-  (await getDb()).delete(goals, eq(goals.id, id)).run();
+  await (await getDb()).delete(goals, eq(goals.id, id));
 }

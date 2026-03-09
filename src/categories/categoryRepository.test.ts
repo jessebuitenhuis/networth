@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { categories } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-const testDb = createTestDb();
+const testDb = await createTestDb();
 
 const {
   getAllCategories,
@@ -15,8 +15,8 @@ const {
   deleteCategory,
 } = await import("./categoryRepository");
 
-beforeEach(() => {
-  testDb.delete(categories).run();
+beforeEach(async () => {
+  await testDb.delete(categories);
 });
 
 describe("getAllCategories", () => {
@@ -25,13 +25,12 @@ describe("getAllCategories", () => {
   });
 
   it("returns all categories when populated", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Income"},
         { id: "c-2", name: "Expenses"},
-      ])
-      .run();
+      ]);
 
     expect(await getAllCategories()).toHaveLength(2);
   });
@@ -39,7 +38,7 @@ describe("getAllCategories", () => {
 
 describe("getCategoryById", () => {
   it("returns the matching category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Income"}).run();
+    await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
     const result = await getCategoryById("c-1");
     expect(result).toEqual(expect.objectContaining({ id: "c-1", name: "Income" }));
@@ -52,13 +51,12 @@ describe("getCategoryById", () => {
 
 describe("getRootCategories", () => {
   it("returns only categories with no parent", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Income"},
         { id: "c-2", name: "Salary", parentCategoryId: "c-1"},
-      ])
-      .run();
+      ]);
 
     const result = await getRootCategories();
     expect(result).toHaveLength(1);
@@ -68,15 +66,14 @@ describe("getRootCategories", () => {
 
 describe("getCategoriesByParentId", () => {
   it("returns children of the given parent", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Income"},
         { id: "c-2", name: "Salary", parentCategoryId: "c-1"},
         { id: "c-3", name: "Bonus", parentCategoryId: "c-1"},
         { id: "c-4", name: "Expenses"},
-      ])
-      .run();
+      ]);
 
     const result = await getCategoriesByParentId("c-1");
     expect(result).toHaveLength(2);
@@ -84,7 +81,7 @@ describe("getCategoriesByParentId", () => {
   });
 
   it("returns empty array when parent has no children", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Income"}).run();
+    await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
     expect(await getCategoriesByParentId("c-1")).toHaveLength(0);
   });
@@ -99,7 +96,7 @@ describe("createCategory", () => {
   });
 
   it("stores parentCategoryId when provided", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Income"}).run();
+    await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
     const result = await createCategory({ id: "c-2", name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
@@ -108,20 +105,19 @@ describe("createCategory", () => {
 
 describe("updateCategory", () => {
   it("modifies and returns the updated category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Income"}).run();
+    await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
     const result = await updateCategory("c-1", { name: "Revenue" });
     expect(result.name).toBe("Revenue");
   });
 
   it("updates parentCategoryId", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Income"},
         { id: "c-2", name: "Salary"},
-      ])
-      .run();
+      ]);
 
     const result = await updateCategory("c-2", { name: "Salary", parentCategoryId: "c-1" });
     expect(result.parentCategoryId).toBe("c-1");
@@ -130,21 +126,20 @@ describe("updateCategory", () => {
 
 describe("deleteCategory", () => {
   it("removes the category", async () => {
-    testDb.insert(categories).values({ id: "c-1", name: "Income"}).run();
+    await testDb.insert(categories).values({ id: "c-1", name: "Income"});
 
     await deleteCategory("c-1");
     expect(await getAllCategories()).toHaveLength(0);
   });
 
   it("re-parents children to the deleted category's parent", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Root"},
         { id: "c-2", name: "Middle", parentCategoryId: "c-1"},
         { id: "c-3", name: "Leaf", parentCategoryId: "c-2"},
-      ])
-      .run();
+      ]);
 
     await deleteCategory("c-2");
 
@@ -153,13 +148,12 @@ describe("deleteCategory", () => {
   });
 
   it("re-parents children to null when deleted category has no parent", async () => {
-    testDb
+    await testDb
       .insert(categories)
       .values([
         { id: "c-1", name: "Root"},
         { id: "c-2", name: "Child", parentCategoryId: "c-1"},
-      ])
-      .run();
+      ]);
 
     await deleteCategory("c-1");
 

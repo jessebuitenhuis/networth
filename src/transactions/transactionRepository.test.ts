@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { transactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-const testDb = createTestDb();
+const testDb = await createTestDb();
 
 const {
   getAllTransactions,
@@ -16,8 +16,8 @@ const {
   deleteTransactionsByScenarioId,
 } = await import("./transactionRepository");
 
-beforeEach(() => {
-  testDb.delete(transactions).run();
+beforeEach(async () => {
+  await testDb.delete(transactions);
 });
 
 describe("getAllTransactions", () => {
@@ -26,13 +26,12 @@ describe("getAllTransactions", () => {
   });
 
   it("returns all transactions when populated", async () => {
-    testDb
+    await testDb
       .insert(transactions)
       .values([
         { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"},
         { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal"},
-      ])
-      .run();
+      ]);
 
     expect(await getAllTransactions()).toHaveLength(2);
   });
@@ -40,10 +39,9 @@ describe("getAllTransactions", () => {
 
 describe("getTransactionById", () => {
   it("returns the matching transaction", async () => {
-    testDb
+    await testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"})
-      .run();
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit"});
 
     const result = await getTransactionById("t-1");
     expect(result).toEqual(expect.objectContaining({ id: "t-1", amount: 100 }));
@@ -107,10 +105,9 @@ describe("createTransactions", () => {
 
 describe("updateTransaction", () => {
   it("modifies and returns the updated transaction", async () => {
-    testDb
+    await testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original"})
-      .run();
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Original"});
 
     const result = await updateTransaction("t-1", {
       accountId: "acc-1",
@@ -126,10 +123,9 @@ describe("updateTransaction", () => {
 
 describe("deleteTransaction", () => {
   it("removes the transaction", async () => {
-    testDb
+    await testDb
       .insert(transactions)
-      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete"})
-      .run();
+      .values({ id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "To delete"});
 
     await deleteTransaction("t-1");
     expect(await getAllTransactions()).toHaveLength(0);
@@ -138,13 +134,12 @@ describe("deleteTransaction", () => {
 
 describe("deleteTransactionsByAccountId", () => {
   it("deletes only matching transactions, leaves others", async () => {
-    testDb
+    await testDb
       .insert(transactions)
       .values([
         { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "A"},
         { id: "t-2", accountId: "acc-2", amount: 200, date: "2025-01-02", description: "B"},
-      ])
-      .run();
+      ]);
 
     await deleteTransactionsByAccountId("acc-1");
 
@@ -156,13 +151,12 @@ describe("deleteTransactionsByAccountId", () => {
 
 describe("deleteTransactionsByScenarioId", () => {
   it("deletes only matching transactions, leaves others", async () => {
-    testDb
+    await testDb
       .insert(transactions)
       .values([
         { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Base"},
         { id: "t-2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Scenario", scenarioId: "s-1"},
-      ])
-      .run();
+      ]);
 
     await deleteTransactionsByScenarioId("s-1");
 
