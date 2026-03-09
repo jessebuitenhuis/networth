@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 
-import {
-  createTransaction,
-  createTransactions,
-  deleteTransactionsByAccountId,
-  deleteTransactionsByScenarioId,
-  getAllTransactions,
-} from "@/transactions/transactionRepository";
+import { transactionRepo } from "@/transactions/transactionRepository";
 
 export async function GET() {
-  const rows = await getAllTransactions();
+  const rows = await transactionRepo.getAll();
   return NextResponse.json(rows);
 }
 
@@ -28,11 +22,11 @@ export async function POST(request: Request) {
     }
 
     if (Array.isArray(body)) {
-      const created = await createTransactions(items);
+      const created = await transactionRepo.createTransactions(items);
       return NextResponse.json(created, { status: 201 });
     }
 
-    const created = await createTransaction(items[0]);
+    const created = await transactionRepo.createTransaction(items[0]);
     return NextResponse.json(created, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -52,11 +46,11 @@ export async function DELETE(request: Request) {
   }
 
   if (accountId) {
-    await deleteTransactionsByAccountId(accountId);
+    await transactionRepo.deleteByAccountId(accountId);
   }
 
   if (scenarioId) {
-    await deleteTransactionsByScenarioId(scenarioId);
+    await transactionRepo.deleteByScenarioId(scenarioId);
   }
 
   return new NextResponse(null, { status: 204 });

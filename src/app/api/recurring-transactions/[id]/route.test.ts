@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/recurring-transactions/recurringTransactionRepository");
 
-const { getRecurringTransactionById, updateRecurringTransaction, deleteRecurringTransaction } =
+const { recurringTransactionRepo } =
   await import("@/recurring-transactions/recurringTransactionRepository");
 const { PUT, DELETE } = await import("./route");
 
@@ -16,7 +16,7 @@ beforeEach(() => {
 
 describe("PUT /api/recurring-transactions/[id]", () => {
   it("updates an existing recurring transaction", async () => {
-    vi.mocked(getRecurringTransactionById).mockReturnValue({
+    vi.mocked(recurringTransactionRepo.getById).mockReturnValue({
       id: "rt-1",
       accountId: "acc-1",
       amount: 3000,
@@ -27,7 +27,7 @@ describe("PUT /api/recurring-transactions/[id]", () => {
       scenarioId: null,
       categoryId: null,
     });
-    vi.mocked(updateRecurringTransaction).mockReturnValue({
+    vi.mocked(recurringTransactionRepo.updateRecurringTransaction).mockReturnValue({
       id: "rt-1",
       accountId: "acc-1",
       amount: 3500,
@@ -54,7 +54,7 @@ describe("PUT /api/recurring-transactions/[id]", () => {
   });
 
   it("returns 404 for non-existent recurring transaction", async () => {
-    vi.mocked(getRecurringTransactionById).mockReturnValue(undefined);
+    vi.mocked(recurringTransactionRepo.getById).mockReturnValue(undefined);
 
     const request = new Request("http://localhost/api/recurring-transactions/missing", {
       method: "PUT",
@@ -70,7 +70,7 @@ describe("PUT /api/recurring-transactions/[id]", () => {
 
 describe("DELETE /api/recurring-transactions/[id]", () => {
   it("deletes an existing recurring transaction", async () => {
-    vi.mocked(getRecurringTransactionById).mockReturnValue({
+    vi.mocked(recurringTransactionRepo.getById).mockReturnValue({
       id: "rt-1",
       accountId: "acc-1",
       amount: 3000,
@@ -88,11 +88,11 @@ describe("DELETE /api/recurring-transactions/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteRecurringTransaction).toHaveBeenCalledWith("rt-1");
+    expect(recurringTransactionRepo.delete).toHaveBeenCalledWith("rt-1");
   });
 
   it("returns 404 for non-existent recurring transaction", async () => {
-    vi.mocked(getRecurringTransactionById).mockReturnValue(undefined);
+    vi.mocked(recurringTransactionRepo.getById).mockReturnValue(undefined);
 
     const response = await DELETE(
       new Request("http://localhost/api/recurring-transactions/missing", { method: "DELETE" }),

@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  deleteAccount,
-  getAccountById,
-  updateAccount,
-} from "@/accounts/accountRepository";
+import { accountRepo } from "@/accounts/accountRepository";
 
 export async function PUT(
   request: Request,
@@ -14,13 +10,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = await getAccountById(id);
+    const existing = await accountRepo.getById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await updateAccount(id, {
+    const updated = await accountRepo.updateAccount(id, {
       name: body.name,
       type: body.type,
       expectedReturnRate: body.expectedReturnRate,
@@ -38,13 +34,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = await getAccountById(id);
+  const existing = await accountRepo.getById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await deleteAccount(id);
+  await accountRepo.delete(id);
 
   return new NextResponse(null, { status: 204 });
 }

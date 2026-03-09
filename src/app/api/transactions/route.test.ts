@@ -2,13 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/transactions/transactionRepository");
 
-const {
-  getAllTransactions,
-  createTransaction,
-  createTransactions,
-  deleteTransactionsByAccountId,
-  deleteTransactionsByScenarioId,
-} = await import("@/transactions/transactionRepository");
+const { transactionRepo } = await import("@/transactions/transactionRepository");
 const { GET, POST, DELETE } = await import("./route");
 
 beforeEach(() => {
@@ -17,7 +11,7 @@ beforeEach(() => {
 
 describe("GET /api/transactions", () => {
   it("returns empty array when no transactions exist", async () => {
-    vi.mocked(getAllTransactions).mockReturnValue([]);
+    vi.mocked(transactionRepo.getAll).mockReturnValue([]);
 
     const response = await GET();
     const body = await response.json();
@@ -27,7 +21,7 @@ describe("GET /api/transactions", () => {
   });
 
   it("returns all transactions", async () => {
-    vi.mocked(getAllTransactions).mockReturnValue([
+    vi.mocked(transactionRepo.getAll).mockReturnValue([
       { id: "t-1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Deposit", isProjected: null, scenarioId: null, categoryId: null },
       { id: "t-2", accountId: "acc-1", amount: -50, date: "2025-01-15", description: "Withdrawal", isProjected: null, scenarioId: null, categoryId: null },
     ]);
@@ -40,7 +34,7 @@ describe("GET /api/transactions", () => {
   });
 
   it("returns transactions with optional fields", async () => {
-    vi.mocked(getAllTransactions).mockReturnValue([
+    vi.mocked(transactionRepo.getAll).mockReturnValue([
       { id: "t-1", accountId: "acc-1", amount: 200, date: "2025-06-01", description: "Projected", isProjected: true, scenarioId: "scenario-1", categoryId: null },
     ]);
 
@@ -54,7 +48,7 @@ describe("GET /api/transactions", () => {
 
 describe("POST /api/transactions", () => {
   it("creates a single transaction", async () => {
-    vi.mocked(createTransaction).mockReturnValue({
+    vi.mocked(transactionRepo.createTransaction).mockReturnValue({
       id: "t-new",
       accountId: "acc-1",
       amount: 500,
@@ -79,7 +73,7 @@ describe("POST /api/transactions", () => {
   });
 
   it("creates a batch of transactions", async () => {
-    vi.mocked(createTransactions).mockReturnValue([
+    vi.mocked(transactionRepo.createTransactions).mockReturnValue([
       { id: "t-b1", accountId: "acc-1", amount: 100, date: "2025-01-01", description: "Batch 1", isProjected: null, scenarioId: null, categoryId: null },
       { id: "t-b2", accountId: "acc-1", amount: 200, date: "2025-01-02", description: "Batch 2", isProjected: null, scenarioId: null, categoryId: null },
     ]);
@@ -121,7 +115,7 @@ describe("DELETE /api/transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteTransactionsByAccountId).toHaveBeenCalledWith("acc-1");
+    expect(transactionRepo.deleteByAccountId).toHaveBeenCalledWith("acc-1");
   });
 
   it("deletes transactions by scenarioId", async () => {
@@ -131,7 +125,7 @@ describe("DELETE /api/transactions (bulk)", () => {
     const response = await DELETE(request);
 
     expect(response.status).toBe(204);
-    expect(deleteTransactionsByScenarioId).toHaveBeenCalledWith("s-1");
+    expect(transactionRepo.deleteByScenarioId).toHaveBeenCalledWith("s-1");
   });
 
   it("returns 400 when no filter provided", async () => {

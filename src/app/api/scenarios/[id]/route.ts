@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  deleteScenario,
-  getScenarioById,
-  updateScenario,
-} from "@/scenarios/scenarioRepository";
+import { scenarioRepo } from "@/scenarios/scenarioRepository";
 
 export async function PUT(
   request: Request,
@@ -14,13 +10,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const existing = await getScenarioById(id);
+    const existing = await scenarioRepo.getById(id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await updateScenario(id, { name: body.name, inflationRate: body.inflationRate });
+    const updated = await scenarioRepo.updateScenario(id, { name: body.name, inflationRate: body.inflationRate });
 
     return NextResponse.json(updated);
   } catch {
@@ -34,13 +30,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const existing = await getScenarioById(id);
+  const existing = await scenarioRepo.getById(id);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await deleteScenario(id);
+  await scenarioRepo.delete(id);
 
   return new NextResponse(null, { status: 204 });
 }

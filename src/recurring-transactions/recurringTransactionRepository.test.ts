@@ -5,14 +5,7 @@ import { createTestDb } from "@/test/createTestDb";
 
 const testDb = await createTestDb();
 
-const {
-  getAllRecurringTransactions,
-  getRecurringTransactionById,
-  createRecurringTransaction,
-  updateRecurringTransaction,
-  deleteRecurringTransaction,
-  deleteRecurringTransactionsByScenarioId,
-} = await import("./recurringTransactionRepository");
+const { recurringTransactionRepo } = await import("./recurringTransactionRepository");
 
 beforeEach(async () => {
   await testDb.delete(recurringTransactions);
@@ -20,7 +13,7 @@ beforeEach(async () => {
 
 describe("getAllRecurringTransactions", () => {
   it("returns empty array when none exist", async () => {
-    expect(await getAllRecurringTransactions()).toEqual([]);
+    expect(await recurringTransactionRepo.getAll()).toEqual([]);
   });
 
   it("returns all recurring transactions when populated", async () => {
@@ -31,7 +24,7 @@ describe("getAllRecurringTransactions", () => {
         { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01"},
       ]);
 
-    expect(await getAllRecurringTransactions()).toHaveLength(2);
+    expect(await recurringTransactionRepo.getAll()).toHaveLength(2);
   });
 });
 
@@ -41,18 +34,18 @@ describe("getRecurringTransactionById", () => {
       .insert(recurringTransactions)
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
-    const result = await getRecurringTransactionById("rt-1");
+    const result = await recurringTransactionRepo.getById("rt-1");
     expect(result).toEqual(expect.objectContaining({ id: "rt-1", description: "Salary" }));
   });
 
   it("returns undefined for non-existent id", async () => {
-    expect(await getRecurringTransactionById("non-existent")).toBeUndefined();
+    expect(await recurringTransactionRepo.getById("non-existent")).toBeUndefined();
   });
 });
 
 describe("createRecurringTransaction", () => {
   it("inserts and returns the created recurring transaction with all fields", async () => {
-    const result = await createRecurringTransaction({
+    const result = await recurringTransactionRepo.createRecurringTransaction({
       id: "rt-1",
       accountId: "acc-1",
       amount: 3000,
@@ -76,7 +69,7 @@ describe("createRecurringTransaction", () => {
   });
 
   it("stores optional endDate and scenarioId when provided", async () => {
-    const result = await createRecurringTransaction({
+    const result = await recurringTransactionRepo.createRecurringTransaction({
       id: "rt-1",
       accountId: "acc-1",
       amount: 500,
@@ -98,7 +91,7 @@ describe("updateRecurringTransaction", () => {
       .insert(recurringTransactions)
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
-    const result = await updateRecurringTransaction("rt-1", {
+    const result = await recurringTransactionRepo.updateRecurringTransaction("rt-1", {
       accountId: "acc-1",
       amount: 3500,
       description: "Salary (raise)",
@@ -117,8 +110,8 @@ describe("deleteRecurringTransaction", () => {
       .insert(recurringTransactions)
       .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
-    await deleteRecurringTransaction("rt-1");
-    expect(await getAllRecurringTransactions()).toHaveLength(0);
+    await recurringTransactionRepo.delete("rt-1");
+    expect(await recurringTransactionRepo.getAll()).toHaveLength(0);
   });
 });
 
@@ -131,9 +124,9 @@ describe("deleteRecurringTransactionsByScenarioId", () => {
         { id: "rt-2", accountId: "acc-1", amount: 200, description: "Scenario", frequency: "Monthly", startDate: "2025-01-01", scenarioId: "s-1"},
       ]);
 
-    await deleteRecurringTransactionsByScenarioId("s-1");
+    await recurringTransactionRepo.deleteByScenarioId("s-1");
 
-    const remaining = await getAllRecurringTransactions();
+    const remaining = await recurringTransactionRepo.getAll();
     expect(remaining).toHaveLength(1);
     expect(remaining[0].id).toBe("rt-1");
   });

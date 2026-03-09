@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/goals/goalRepository");
 
-const { getAllGoals, createGoal } = await import("@/goals/goalRepository");
+const { goalRepo } = await import("@/goals/goalRepository");
 const { GET, POST } = await import("./route");
 
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 
 describe("GET /api/goals", () => {
   it("returns empty array when no goals exist", async () => {
-    vi.mocked(getAllGoals).mockReturnValue([]);
+    vi.mocked(goalRepo.getAll).mockReturnValue([]);
 
     const response = await GET();
     const body = await response.json();
@@ -21,7 +21,7 @@ describe("GET /api/goals", () => {
   });
 
   it("returns all goals", async () => {
-    vi.mocked(getAllGoals).mockReturnValue([
+    vi.mocked(goalRepo.getAll).mockReturnValue([
       { id: "g-1", name: "Emergency Fund", targetAmount: 10000 },
       { id: "g-2", name: "House Down Payment", targetAmount: 50000 },
     ]);
@@ -42,7 +42,7 @@ describe("GET /api/goals", () => {
 
 describe("POST /api/goals", () => {
   it("creates a goal", async () => {
-    vi.mocked(createGoal).mockReturnValue({
+    vi.mocked(goalRepo.createGoal).mockReturnValue({
       id: "g-new",
       name: "Retirement",
       targetAmount: 1000000,
@@ -61,7 +61,7 @@ describe("POST /api/goals", () => {
     expect(body).toEqual(
       expect.objectContaining({ id: "g-new", name: "Retirement", targetAmount: 1000000 }),
     );
-    expect(createGoal).toHaveBeenCalledWith({ id: "g-new", name: "Retirement", targetAmount: 1000000 });
+    expect(goalRepo.createGoal).toHaveBeenCalledWith({ id: "g-new", name: "Retirement", targetAmount: 1000000 });
   });
 
   it("returns 400 for missing required fields", async () => {

@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/transactions/transactionRepository");
 
-const { getTransactionById, updateTransaction, deleteTransaction } =
-  await import("@/transactions/transactionRepository");
+const { transactionRepo } = await import("@/transactions/transactionRepository");
 const { PUT, DELETE } = await import("./route");
 
 function makeParams(id: string) {
@@ -16,7 +15,7 @@ beforeEach(() => {
 
 describe("PUT /api/transactions/[id]", () => {
   it("updates an existing transaction", async () => {
-    vi.mocked(getTransactionById).mockReturnValue({
+    vi.mocked(transactionRepo.getById).mockReturnValue({
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -26,7 +25,7 @@ describe("PUT /api/transactions/[id]", () => {
       scenarioId: null,
       categoryId: null,
     });
-    vi.mocked(updateTransaction).mockReturnValue({
+    vi.mocked(transactionRepo.updateTransaction).mockReturnValue({
       id: "t-1",
       accountId: "acc-1",
       amount: 250,
@@ -52,7 +51,7 @@ describe("PUT /api/transactions/[id]", () => {
   });
 
   it("returns 404 for non-existent transaction", async () => {
-    vi.mocked(getTransactionById).mockReturnValue(undefined);
+    vi.mocked(transactionRepo.getById).mockReturnValue(undefined);
 
     const request = new Request("http://localhost/api/transactions/missing", {
       method: "PUT",
@@ -68,7 +67,7 @@ describe("PUT /api/transactions/[id]", () => {
 
 describe("DELETE /api/transactions/[id]", () => {
   it("deletes an existing transaction", async () => {
-    vi.mocked(getTransactionById).mockReturnValue({
+    vi.mocked(transactionRepo.getById).mockReturnValue({
       id: "t-1",
       accountId: "acc-1",
       amount: 100,
@@ -85,11 +84,11 @@ describe("DELETE /api/transactions/[id]", () => {
     );
 
     expect(response.status).toBe(204);
-    expect(deleteTransaction).toHaveBeenCalledWith("t-1");
+    expect(transactionRepo.delete).toHaveBeenCalledWith("t-1");
   });
 
   it("returns 404 for non-existent transaction", async () => {
-    vi.mocked(getTransactionById).mockReturnValue(undefined);
+    vi.mocked(transactionRepo.getById).mockReturnValue(undefined);
 
     const response = await DELETE(
       new Request("http://localhost/api/transactions/missing", { method: "DELETE" }),
