@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { recurringTransactions } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-const testDb = createTestDb();
+const testDb = await createTestDb();
 
 const {
   getAllRecurringTransactions,
@@ -14,8 +14,8 @@ const {
   deleteRecurringTransactionsByScenarioId,
 } = await import("./recurringTransactionRepository");
 
-beforeEach(() => {
-  testDb.delete(recurringTransactions).run();
+beforeEach(async () => {
+  await testDb.delete(recurringTransactions);
 });
 
 describe("getAllRecurringTransactions", () => {
@@ -24,13 +24,12 @@ describe("getAllRecurringTransactions", () => {
   });
 
   it("returns all recurring transactions when populated", async () => {
-    testDb
+    await testDb
       .insert(recurringTransactions)
       .values([
         { id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"},
         { id: "rt-2", accountId: "acc-1", amount: -1200, description: "Rent", frequency: "Monthly", startDate: "2025-01-01"},
-      ])
-      .run();
+      ]);
 
     expect(await getAllRecurringTransactions()).toHaveLength(2);
   });
@@ -38,10 +37,9 @@ describe("getAllRecurringTransactions", () => {
 
 describe("getRecurringTransactionById", () => {
   it("returns the matching recurring transaction", async () => {
-    testDb
+    await testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"})
-      .run();
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
     const result = await getRecurringTransactionById("rt-1");
     expect(result).toEqual(expect.objectContaining({ id: "rt-1", description: "Salary" }));
@@ -96,10 +94,9 @@ describe("createRecurringTransaction", () => {
 
 describe("updateRecurringTransaction", () => {
   it("modifies and returns the updated recurring transaction", async () => {
-    testDb
+    await testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"})
-      .run();
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
     const result = await updateRecurringTransaction("rt-1", {
       accountId: "acc-1",
@@ -116,10 +113,9 @@ describe("updateRecurringTransaction", () => {
 
 describe("deleteRecurringTransaction", () => {
   it("removes the recurring transaction", async () => {
-    testDb
+    await testDb
       .insert(recurringTransactions)
-      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"})
-      .run();
+      .values({ id: "rt-1", accountId: "acc-1", amount: 3000, description: "Salary", frequency: "Monthly", startDate: "2025-01-01"});
 
     await deleteRecurringTransaction("rt-1");
     expect(await getAllRecurringTransactions()).toHaveLength(0);
@@ -128,13 +124,12 @@ describe("deleteRecurringTransaction", () => {
 
 describe("deleteRecurringTransactionsByScenarioId", () => {
   it("deletes only matching recurring transactions, leaves others", async () => {
-    testDb
+    await testDb
       .insert(recurringTransactions)
       .values([
         { id: "rt-1", accountId: "acc-1", amount: 100, description: "Base", frequency: "Monthly", startDate: "2025-01-01"},
         { id: "rt-2", accountId: "acc-1", amount: 200, description: "Scenario", frequency: "Monthly", startDate: "2025-01-01", scenarioId: "s-1"},
-      ])
-      .run();
+      ]);
 
     await deleteRecurringTransactionsByScenarioId("s-1");
 

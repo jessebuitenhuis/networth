@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { accounts } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-const testDb = createTestDb();
+const testDb = await createTestDb();
 
 const { getAllAccounts, getAccountById, createAccount, updateAccount, deleteAccount } =
   await import("./accountRepository");
 
-beforeEach(() => {
-  testDb.delete(accounts).run();
+beforeEach(async () => {
+  await testDb.delete(accounts);
 });
 
 describe("getAllAccounts", () => {
@@ -18,13 +18,12 @@ describe("getAllAccounts", () => {
   });
 
   it("returns all accounts when populated", async () => {
-    testDb
+    await testDb
       .insert(accounts)
       .values([
         { id: "1", name: "Checking", type: "Asset"},
         { id: "2", name: "Mortgage", type: "Liability"},
-      ])
-      .run();
+      ]);
 
     const result = await getAllAccounts();
     expect(result).toHaveLength(2);
@@ -39,7 +38,7 @@ describe("getAllAccounts", () => {
 
 describe("getAccountById", () => {
   it("returns the matching account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"}).run();
+    await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
     const result = await getAccountById("1");
     expect(result).toEqual(expect.objectContaining({ id: "1", name: "Checking" }));
@@ -71,14 +70,14 @@ describe("createAccount", () => {
 
 describe("updateAccount", () => {
   it("modifies and returns the updated account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"}).run();
+    await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
     const result = await updateAccount("1", { name: "Updated Checking", type: "Asset" });
     expect(result.name).toBe("Updated Checking");
   });
 
   it("updates expectedReturnRate", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Stocks", type: "Asset"}).run();
+    await testDb.insert(accounts).values({ id: "1", name: "Stocks", type: "Asset"});
 
     const result = await updateAccount("1", { name: "Stocks", type: "Asset", expectedReturnRate: 0.1 });
     expect(result.expectedReturnRate).toBe(0.1);
@@ -87,7 +86,7 @@ describe("updateAccount", () => {
 
 describe("deleteAccount", () => {
   it("removes the account", async () => {
-    testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"}).run();
+    await testDb.insert(accounts).values({ id: "1", name: "Checking", type: "Asset"});
 
     await deleteAccount("1");
     expect(await getAllAccounts()).toHaveLength(0);

@@ -4,11 +4,11 @@ import { recurringTransactions } from "@/db/schema";
 import { getDb } from "@/db/userDb";
 
 export async function getAllRecurringTransactions() {
-  return (await getDb()).select(recurringTransactions).all();
+  return (await getDb()).select(recurringTransactions);
 }
 
 export async function getRecurringTransactionById(id: string) {
-  const [row] = (await getDb()).select(recurringTransactions, eq(recurringTransactions.id, id)).all();
+  const [row] = await (await getDb()).select(recurringTransactions, eq(recurringTransactions.id, id));
   return row;
 }
 
@@ -33,7 +33,7 @@ export async function createRecurringTransaction({
   scenarioId?: string | null;
   categoryId?: string | null;
 }) {
-  (await getDb()).insert(recurringTransactions, {
+  await (await getDb()).insert(recurringTransactions, {
     id,
     accountId,
     amount,
@@ -43,7 +43,7 @@ export async function createRecurringTransaction({
     endDate: endDate ?? null,
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
-  }).run();
+  });
   return (await getRecurringTransactionById(id))!;
 }
 
@@ -69,7 +69,7 @@ export async function updateRecurringTransaction(
     categoryId?: string | null;
   },
 ) {
-  (await getDb()).update(recurringTransactions, {
+  await (await getDb()).update(recurringTransactions, {
     accountId,
     amount,
     description,
@@ -78,14 +78,14 @@ export async function updateRecurringTransaction(
     endDate: endDate ?? null,
     scenarioId: scenarioId ?? null,
     categoryId: categoryId ?? null,
-  }, eq(recurringTransactions.id, id)).run();
+  }, eq(recurringTransactions.id, id));
   return (await getRecurringTransactionById(id))!;
 }
 
 export async function deleteRecurringTransaction(id: string) {
-  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.id, id)).run();
+  await (await getDb()).delete(recurringTransactions, eq(recurringTransactions.id, id));
 }
 
 export async function deleteRecurringTransactionsByScenarioId(scenarioId: string) {
-  (await getDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId)).run();
+  await (await getDb()).delete(recurringTransactions, eq(recurringTransactions.scenarioId, scenarioId));
 }

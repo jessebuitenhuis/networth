@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { goals } from "@/db/schema";
 import { createTestDb } from "@/test/createTestDb";
 
-const testDb = createTestDb();
+const testDb = await createTestDb();
 
 const { getAllGoals, getGoalById, createGoal, updateGoal, deleteGoal } =
   await import("./goalRepository");
 
-beforeEach(() => {
-  testDb.delete(goals).run();
+beforeEach(async () => {
+  await testDb.delete(goals);
 });
 
 describe("getAllGoals", () => {
@@ -18,13 +18,12 @@ describe("getAllGoals", () => {
   });
 
   it("returns all goals when populated", async () => {
-    testDb
+    await testDb
       .insert(goals)
       .values([
         { id: "g-1", name: "Emergency Fund", targetAmount: 10000},
         { id: "g-2", name: "House Down Payment", targetAmount: 50000},
-      ])
-      .run();
+      ]);
 
     expect(await getAllGoals()).toHaveLength(2);
   });
@@ -32,7 +31,7 @@ describe("getAllGoals", () => {
 
 describe("getGoalById", () => {
   it("returns the matching goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
+    await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
     const result = await getGoalById("g-1");
     expect(result).toEqual(
@@ -56,7 +55,7 @@ describe("createGoal", () => {
 
 describe("updateGoal", () => {
   it("modifies and returns the updated goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
+    await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
     const result = await updateGoal("g-1", { name: "Updated Fund", targetAmount: 15000 });
     expect(result.name).toBe("Updated Fund");
@@ -66,7 +65,7 @@ describe("updateGoal", () => {
 
 describe("deleteGoal", () => {
   it("removes the goal", async () => {
-    testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000}).run();
+    await testDb.insert(goals).values({ id: "g-1", name: "Emergency Fund", targetAmount: 10000});
 
     await deleteGoal("g-1");
     expect(await getAllGoals()).toHaveLength(0);
