@@ -12,11 +12,12 @@ describe("CategoryRow", () => {
   const defaultProps = () => ({
     category: createCategory({ id: "1", name: "Food" }),
     depth: 0,
+    dropTargetId: null as string | null,
     onAddSubcategory: vi.fn(),
     onDragStart: vi.fn(),
+    onDragEnd: vi.fn(),
     onDrop: vi.fn(),
-    isDragOver: false,
-    onDragOver: vi.fn(),
+    onDragOver: vi.fn() as unknown as (e: React.DragEvent, targetId: string) => void,
     onDragLeave: vi.fn(),
   });
 
@@ -71,7 +72,7 @@ describe("CategoryRow", () => {
     const props = defaultProps();
     const page = CategoryRowPage.render(props);
     page.dragOver();
-    expect(props.onDragOver).toHaveBeenCalledWith("1");
+    expect(props.onDragOver).toHaveBeenCalledWith(expect.anything(), "1");
   });
 
   it("calls onDragLeave on drag leave", () => {
@@ -81,13 +82,13 @@ describe("CategoryRow", () => {
     expect(props.onDragLeave).toHaveBeenCalled();
   });
 
-  it("shows visual highlight when isDragOver is true", () => {
-    const page = CategoryRowPage.render({ ...defaultProps(), isDragOver: true });
+  it("shows visual highlight when dropTargetId matches category", () => {
+    const page = CategoryRowPage.render({ ...defaultProps(), dropTargetId: "1" });
     expect(page.row.className).toMatch(/bg-accent/);
   });
 
-  it("does not show highlight when isDragOver is false", () => {
-    const page = CategoryRowPage.render({ ...defaultProps(), isDragOver: false });
+  it("does not show highlight when dropTargetId does not match", () => {
+    const page = CategoryRowPage.render({ ...defaultProps(), dropTargetId: "other" });
     expect(page.row.className).not.toMatch(/bg-accent/);
   });
 });

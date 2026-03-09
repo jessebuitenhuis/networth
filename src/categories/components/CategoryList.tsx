@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { useTreeDrag } from "@/hooks/useTreeDrag";
 import { buildFlatTree } from "@/lib/buildFlatTree";
 import { generateId } from "@/lib/generateId";
 import { getDescendantIds } from "@/lib/getDescendantIds";
@@ -17,37 +18,18 @@ type CategoryListProps = {
 
 export function CategoryList({ categories }: CategoryListProps) {
   const { addCategory, updateCategory } = useCategories();
-  const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [addingFor, setAddingFor] = useState<string | null>(null);
 
-  const flatTree = useMemo(() => buildFlatTree(categories), [categories]);
-
-  const handleDrop = useCallback(
-    (targetId: string) => {
-      if (!draggedId || draggedId === targetId) {
-        setDraggedId(null);
-        setDragOverId(null);
-        return;
-      }
-
-      const descendants = getDescendantIds(draggedId, categories);
-      if (descendants.has(targetId)) {
-        setDraggedId(null);
-        setDragOverId(null);
-        return;
-      }
-
-      const dragged = categories.find((c) => c.id === draggedId);
-      if (dragged) {
-        updateCategory({ ...dragged, parentCategoryId: targetId });
-      }
-
-      setDraggedId(null);
-      setDragOverId(null);
+  const handleReparent = useCallback(
+    (item: Category, newParentId: string) => {
+      updateCategory({ ...item, parentCategoryId: newParentId });
     },
-    [draggedId, categories, updateCategory],
+    [updateCategory],
   );
+
+  const drag = useTreeDrag(categories, handleReparent);
+
+  const flatTree = useMemo(() => buildFlatTree(categories), [categories]);
 
   const handleCreate = useCallback(
     (name: string, parentCategoryId: string) => {
@@ -77,12 +59,13 @@ export function CategoryList({ categories }: CategoryListProps) {
           <CategoryRow
             category={node}
             depth={node.depth}
+            dropTargetId={drag.dropTargetId}
             onAddSubcategory={setAddingFor}
-            onDragStart={setDraggedId}
-            onDrop={handleDrop}
-            isDragOver={dragOverId === node.id}
-            onDragOver={setDragOverId}
-            onDragLeave={() => setDragOverId(null)}
+            onDragStart={drag.onDragStart}
+            onDragOver={drag.onDragOver}
+            onDragLeave={drag.onDragLeave}
+            onDrop={drag.onDrop}
+            onDragEnd={drag.onDragEnd}
           />
           {index === insertAfterIndex && addingFor && (
             <InlineCreateSubcategory
