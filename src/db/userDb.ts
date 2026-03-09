@@ -3,11 +3,12 @@ import { PgTable } from "drizzle-orm/pg-core";
 
 import { getCurrentUserId } from "@/auth/getCurrentUserId";
 
-import { globalDb } from "./connection";
+import { globalDb, waitForDb } from "./connection";
 
 type UserTable = PgTable & { userId: Column };
 
 export async function getDb() {
+  await waitForDb();
   const userId = await getCurrentUserId();
 
   function userWhere(table: UserTable, extra?: SQL): SQL {
