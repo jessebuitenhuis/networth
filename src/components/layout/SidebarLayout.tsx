@@ -4,6 +4,7 @@ import {
   ArrowLeftRight,
   Landmark,
   Settings,
+  Tags,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -33,6 +34,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Transactions", url: "/transactions", icon: <ArrowLeftRight /> },
       { title: "Accounts", url: "/accounts", icon: <Landmark /> },
+      { title: "Categories", url: "/categories", icon: <Tags /> },
     ],
   },
 ];

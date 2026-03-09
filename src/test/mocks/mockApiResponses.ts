@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 
 import type { Account } from "@/accounts/Account.type";
+import type { Category } from "@/categories/Category.type";
 import type { Goal } from "@/goals/Goal.type";
 import type { RecurringTransaction } from "@/recurring-transactions/RecurringTransaction.type";
 import type { Scenario } from "@/scenarios/Scenario.type";
@@ -8,6 +9,7 @@ import type { Transaction } from "@/transactions/Transaction.type";
 
 type ApiData = {
   accounts?: Account[];
+  categories?: Category[];
   transactions?: Transaction[];
   recurringTransactions?: RecurringTransaction[];
   scenarios?: Scenario[];
@@ -19,6 +21,7 @@ type ApiData = {
 export function mockApiResponses(data: ApiData = {}) {
   const {
     accounts = [],
+    categories = [],
     transactions = [],
     recurringTransactions = [],
     scenarios = [],
@@ -38,6 +41,9 @@ export function mockApiResponses(data: ApiData = {}) {
 
       if (url === "/api/accounts") {
         return { ok: true, json: async () => accounts };
+      }
+      if (url === "/api/categories") {
+        return { ok: true, json: async () => categories };
       }
       if (url === "/api/transactions") {
         return { ok: true, json: async () => transactions };
