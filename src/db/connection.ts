@@ -3,7 +3,6 @@ import { type PgDatabase } from "drizzle-orm/pg-core";
 import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
 import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
 import { mkdirSync } from "fs";
-import { dirname } from "path";
 import postgres from "postgres";
 
 import { CREATE_TABLES_SQL } from "./createTables";
@@ -23,9 +22,13 @@ function initDb(): AnyPgDb {
   if (databaseUrl) {
     const client = postgres(databaseUrl);
     _db = drizzlePostgres(client, { schema });
+  } else if (process.env.VERCEL) {
+    throw new Error(
+      "DATABASE_URL is required on Vercel. PGlite cannot persist data in a serverless environment.",
+    );
   } else {
     const dataDir = `${process.cwd()}/data/pglite`;
-    mkdirSync(dirname(dataDir), { recursive: true });
+    mkdirSync(`${process.cwd()}/data`, { recursive: true });
     const pglite = new PGlite(dataDir);
     _db = drizzlePglite(pglite, { schema });
     _ready = pglite.exec(CREATE_TABLES_SQL).then(() => {});
