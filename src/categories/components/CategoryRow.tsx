@@ -42,8 +42,8 @@ export function CategoryRow({
       onDrop={onDrop}
       onDragEnd={onDragEnd}
       data-testid={`category-row-${category.id}`}
-      style={{ paddingLeft: depth * 24 }}
-      className="group flex items-center gap-2 px-3 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+      style={{ paddingLeft: 12 + depth * 24 }}
+      className="group flex items-center gap-2 pr-3 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
     >
       <span className="flex-1 truncate text-sm">{category.name}</span>
       <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">

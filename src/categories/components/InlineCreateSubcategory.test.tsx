@@ -67,6 +67,6 @@ describe("InlineCreateSubcategory", () => {
   it("renders at correct indentation", () => {
     const page = InlineCreateSubcategoryPage.render({ ...defaultProps(), depth: 2 });
     const container = page.nameInput.closest("[style]");
-    expect(container).toHaveStyle({ paddingLeft: "72px" });
+    expect(container).toHaveStyle({ paddingLeft: "84px" });
   });
 });

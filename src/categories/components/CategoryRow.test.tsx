@@ -27,9 +27,9 @@ describe("CategoryRow", () => {
   });
 
   it.each([
-    { depth: 0, expectedPadding: "0px" },
-    { depth: 1, expectedPadding: "24px" },
-    { depth: 2, expectedPadding: "48px" },
+    { depth: 0, expectedPadding: "12px" },
+    { depth: 1, expectedPadding: "36px" },
+    { depth: 2, expectedPadding: "60px" },
   ])("renders with padding-left $expectedPadding at depth $depth", ({ depth, expectedPadding }) => {
     const page = CategoryRowPage.render({ ...defaultProps(), depth });
     expect(page.row.style.paddingLeft).toBe(expectedPadding);
